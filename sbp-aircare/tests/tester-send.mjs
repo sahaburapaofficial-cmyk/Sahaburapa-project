@@ -3,11 +3,13 @@ import { launch, BASE } from './_lib.mjs';
 import { readFileSync } from 'node:fs';
 const FAKE = 'https://script.google.com/macros/s/TEST/exec';
 const SRC = readFileSync(new URL('../preview.html', import.meta.url), 'utf8');
+const FS = 'https://formsubmit.co/ajax/TEST';
 const b = await launch(); const out = [];
-for (const mode of ['ok', 'fail', 'off']) {
+for (const mode of ['ok', 'fail', 'off', 'fs']) {
   const ctx = await b.newContext({ viewport: { width: 1366, height: 900 }, permissions: ['clipboard-read', 'clipboard-write'] });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); const posts = [];
-  await p.route('**/preview.html', r => r.fulfill({ contentType: 'text/html', body: mode === 'off' ? SRC : SRC.replaceAll('__SBP_ENDPOINT__', FAKE) }));
+  await p.route('**/preview.html', r => r.fulfill({ contentType: 'text/html', body: mode === 'off' ? SRC : SRC.replaceAll('__SBP_ENDPOINT__', mode === 'fs' ? FS : FAKE) }));
+  await p.route(FS, async r => { posts.push({ kind: 'fs', fields: JSON.parse(r.request().postData() || '{}') }); return r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"success":"true"}' }); });
   await p.route(FAKE, async r => { posts.push(JSON.parse(r.request().postData() || '{}')); return mode === 'fail' ? r.fulfill({ status: 500, body: 'x' }) : r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"ok":true,"ref":"T1"}' }); });
   await p.goto(`${BASE}/preview.html`); await p.waitForTimeout(1500);
   await p.click('#send'); const empty = await p.textContent('#sendmsg');
@@ -17,5 +19,5 @@ for (const mode of ['ok', 'fail', 'off']) {
   await ctx.close();
 }
 console.log(JSON.stringify(out, null, 1)); await b.close();
-const bad = out.some(r => r.errors) || !out[0].msg.includes('ส่งถึงทีมแล้ว') || out[0].posts.length !== 1 || !out[1].msg.includes('ส่งไม่สำเร็จ') || out[2].posts.length || !out[2].msg.includes('ยังไม่เปิด');
+const bad = out.some(r => r.errors) || !out[0].msg.includes('ส่งถึงทีมแล้ว') || out[0].posts.length !== 1 || !out[1].msg.includes('ส่งไม่สำเร็จ') || out[2].posts.length || !out[2].msg.includes('ยังไม่เปิด') || !out[3].msg.includes('ส่งถึงทีมแล้ว') || out[3].posts.length !== 1;
 process.exit(bad ? 1 : 0);

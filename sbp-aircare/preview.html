@@ -259,9 +259,13 @@ $('#send').addEventListener('click', async () => {
   btn.disabled = true; msg.textContent = 'กำลังส่ง…';
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 15000);
   try {
-    const r = await fetch(EP, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctl.signal, body: JSON.stringify({ kind: 'feedback', ref, variant: 'ABC', page: 'หน้าทดสอบ A/B/C', fields, text: report().join('\n'), hp: '', ts: new Date().toISOString() }) });
+    // same body rules as assets/submit.js requestBody(): FormSubmit = flat JSON e-mail table · Apps Script = one text/plain JSON blob
+    const fs = /formsubmit\.co\//.test(EP), text = report().join('\n');
+    const init = fs ? { headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ _subject: `[SBP AirCare] ผลทดสอบ A/B/C · ${ref}`, _template: 'table', _captcha: 'false', 'เลขอ้างอิง': ref, ...Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== '').map(([k, v]) => [k, String(v)])), 'สรุป': text }) }
+      : { headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ kind: 'feedback', ref, variant: 'ABC', page: 'หน้าทดสอบ A/B/C', fields, text, hp: '', ts: new Date().toISOString() }) };
+    const r = await fetch(EP, { method: 'POST', signal: ctl.signal, ...init });
     const j = await r.json().catch(() => null);
-    msg.textContent = j && j.ok ? `ส่งถึงทีมแล้ว ขอบคุณครับ · เลขอ้างอิง ${j.ref || ref}` : 'ส่งไม่สำเร็จ กรุณากด "คัดลอกผลไปส่ง LINE"';
+    msg.textContent = j && (j.ok || j.success === true || j.success === 'true') ? `ส่งถึงทีมแล้ว ขอบคุณครับ · เลขอ้างอิง ${j.ref || ref}` : 'ส่งไม่สำเร็จ กรุณากด "คัดลอกผลไปส่ง LINE"';
   } catch (e) { msg.textContent = 'ส่งไม่สำเร็จ (การเชื่อมต่อขัดข้อง) กรุณากด "คัดลอกผลไปส่ง LINE"'; } finally { clearTimeout(t); btn.disabled = false; }
 });
 $('#copy').addEventListener('click', async () => {
