@@ -420,10 +420,22 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
     catch (e) { console.warn('job scene 3D unavailable', e); fb.hidden = false; host.hidden = true; }
   }, { rootMargin: '300px 0px' });
   io.observe(host);
+  /* ----- Rev.13 · auto preview: when the scene is well in view and the visitor has not touched the section yet, the crew
+     plays the job by itself (pauses off screen, resumes on return); any click / key / drag in the section hands control
+     back for good. Not with reduced motion or in the 4D scroll mode (the scroll drives it there). */
+  let touched = false, autoOn = false;
+  const own = () => { touched = true; autoOn = false; };
+  ['click', 'keydown', 'change'].forEach(ev => root.addEventListener(ev, e => { if (e.isTrusted) own(); }, { passive: true }));   // not pointerdown / wheel: scrolling past must not count
+  const io2 = new IntersectionObserver(es => {
+    const e = es[es.length - 1], inView = e.isIntersecting && e.intersectionRatio >= 0.55;
+    if (inView && !touched && !st.d4 && !RM() && !st.playing) { autoOn = true; if (st.i >= TL.length - 1) go(0); togglePlay(); }
+    else if (!inView && autoOn && st.playing) stop();
+  }, { threshold: [0, 0.55] });
+  io2.observe(host);
   return {
-    setJob: j => { st.job = j; st.level = j === 'install' ? 'STANDARD' : 'C1'; $$('button', jobSeg).forEach(b => b.setAttribute('aria-pressed', String(b.textContent.startsWith(j === 'install' ? 'งานติดตั้ง' : 'งานล้าง')))); refresh(false); },
-    setLevel: lv => { st.level = lv; refresh(true); }, setType: t => { st.type = t; $$('button', typeSeg).forEach((b, i) => b.setAttribute('aria-pressed', String(JOB_TYPES[i].id === t))); refresh(false); },
-    go: i => go(i), set4D: on => set4D(!!on), steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
+    setJob: j => { own(); st.job = j; st.level = j === 'install' ? 'STANDARD' : 'C1'; $$('button', jobSeg).forEach(b => b.setAttribute('aria-pressed', String(b.textContent.startsWith(j === 'install' ? 'งานติดตั้ง' : 'งานล้าง')))); refresh(false); },
+    setLevel: lv => { own(); st.level = lv; refresh(true); }, setType: t => { own(); st.type = t; $$('button', typeSeg).forEach((b, i) => b.setAttribute('aria-pressed', String(JOB_TYPES[i].id === t))); refresh(false); },
+    go: i => { own(); stop(); go(i); }, set4D: on => { own(); set4D(!!on); }, steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
   };
 }
 // the pages call it by its round-3 name too

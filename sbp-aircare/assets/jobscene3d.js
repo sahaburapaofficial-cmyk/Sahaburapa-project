@@ -611,7 +611,8 @@ export function createJobScene(container, o = {}) {
     // which eases back to the step's framing — applied to the drawn camera only, the step presets stay as they are
     if (!look.down) { look.idle += dt; if (look.idle > 2.5) { const r = 1 - Math.pow(0.25, dt); look.yaw -= look.yaw * r; look.pitch -= look.pitch * r; } }
     const sw = DRIFT ? Math.sin(clock * 0.21) * 0.07 : 0, swp = DRIFT ? Math.sin(clock * 0.13 + 1.1) * 0.025 : 0;
-    off.copy(camP).sub(camT); const yaw = look.yaw + sw, pitch = look.pitch + swp;
+    off.copy(camP).sub(camT); const near = Math.min(1, Math.max(0.25, (off.length() - 0.8) / 3.2));   // close-ups turn less (no swinging into the crew)
+    const yaw = (look.yaw + sw) * near, pitch = (look.pitch + swp) * near;
     if (yaw || pitch) { off.applyAxisAngle(UP, yaw); const side = V(0, 0, 0).crossVectors(off, UP).normalize(); off.applyAxisAngle(side, pitch); }
     cam.position.copy(camT).add(off); cam.lookAt(camT);
   }
