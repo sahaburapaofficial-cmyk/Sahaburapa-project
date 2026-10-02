@@ -212,3 +212,24 @@
 @media (max-width:600px){.st-in-art{min-height:640px}.st-groups{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.st-groups button{flex:0 0 auto}}
 .st-cycle .st-cyc-info{display:none}
 .st-hud[hidden],.st-inside[hidden],.st-cycle[hidden]{display:none}
+/* ---- Rev.13 · environment card (pets · location · PM2.5 → clogging risk) and the per-type electricity table ---- */
+.st-air{border:1px solid var(--s-line);border-radius:var(--s-r);background:var(--s-card);padding:14px 16px;display:grid;gap:12px}
+.st-air-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start}
+.st-air-head h3{margin:0;font-size:16px}.st-air-head .s-note{margin:4px 0 0;max-width:62ch}
+.st-air-risk{display:grid;justify-items:end;gap:2px;padding:8px 14px;border-radius:calc(var(--s-r) * .8);border:1px solid var(--s-line);background:var(--s-card-2);min-width:160px}
+.st-air-risk small{font-size:11.5px;color:var(--s-ink-3)}.st-air-risk b{font-size:20px;line-height:1.2}
+.st-air-risk.r-low b{color:var(--s-ok)}.st-air-risk.r-mid b{color:var(--s-ink)}.st-air-risk.r-high b{color:var(--s-warn)}.st-air-risk.r-vhigh b{color:var(--s-bad)}
+.st-air-risk.r-high{border-color:color-mix(in oklab,var(--s-warn) 45%,var(--s-line))}.st-air-risk.r-vhigh{border-color:color-mix(in oklab,var(--s-bad) 45%,var(--s-line))}
+.st-air-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+.st-air-box{border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .8);padding:10px 12px;display:grid;gap:8px;align-content:start;background:var(--s-card-2)}
+.st-air-box h4{margin:0;font-size:13.5px}.st-air-box .s-note{margin:0;font-size:12.5px}
+.st-air-pet{display:grid;grid-template-columns:1fr 34px 34px 34px;align-items:center;gap:6px;font-size:14px}
+.st-air-pet button{min-height:34px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);font:600 16px/1 inherit;cursor:pointer}
+.st-air-pet button:disabled{color:var(--s-ink-3);cursor:not-allowed}
+.st-air-pet output{text-align:center;font:600 15px var(--s-mono)}
+.st-air-loc button{flex:1 1 auto}
+.st-air-out{margin:0;padding:10px 12px;border-radius:10px;background:var(--s-accent-soft);font-size:14px}
+.st-en-types{display:grid;gap:6px}.st-en-types h4{margin:6px 0 0;font-size:15px}.st-en-types .s-note{margin:0}
+.st-en-t td.ok{color:var(--s-ok);font-weight:600}.st-en-nf{color:var(--s-ink-3);font-weight:400}
+.st-src{font-size:12px}
+@media (pointer:coarse){.st-air-pet{grid-template-columns:1fr 44px 40px 44px}.st-air-pet button{min-height:44px}}

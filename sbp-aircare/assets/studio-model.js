@@ -206,12 +206,37 @@ export const EFF = { inverter: { wall: 18, other: 14 }, fixed: { wall: 12.5, oth
 // Thai tariff Sep–Dec 2569: residential tier 201–400 kWh 4.1584 + Ft 0.1623 + VAT ≈ 4.62 THB/kWh; small business ≈ 4.9 THB/kWh.
 export const RATE = { home: 4.62, biz: 4.9 };
 export const LOAD_F = 0.65;   // average compressor loading over the running hours (part load)
-export function energy(btu, type, inverter, hrs, dirt, rate) {
+// Rev.13 (owner: "เจาะลึกค่าไฟแอร์ทุกประเภท … เปิดกี่องศาเฉลี่ย"): set-point effect — published Thai guidance puts it at ~3–5 % less
+// electricity per +1 °C (and 5–10 % more per −1 °C); EGAT recommends 26–28 °C with a fan. The model uses 5 % per °C around the
+// 25 °C the room model is designed for, clamped to 20–30 °C. Sources: กฟผ. / scair.co.th / origin.co.th (searched 2 ต.ค. 2569).
+export const SET_REF = 25, SET_PER_DEG = 0.05, SET_RANGE = [20, 30];
+export const setPointF = t => Math.max(0.6, Math.min(1.5, 1 - SET_PER_DEG * ((t ?? SET_REF) - SET_REF)));
+export function energy(btu, type, inverter, hrs, dirt, rate, setT = SET_REF) {
   const eff = (inverter ? EFF.inverter : EFF.fixed)[type === 'wall' ? 'wall' : 'other'];
-  const kwhDayClean = btu / eff / 1000 * hrs * LOAD_F;
+  const kwhDayClean = btu / eff / 1000 * hrs * LOAD_F * setPointF(setT);
   const kwhDay = kwhDayClean * effects(dirt).power;
   return { eff, kwhMonthClean: kwhDayClean * 30, kwhMonth: kwhDay * 30, bahtMonthClean: kwhDayClean * 30 * rate, bahtMonth: kwhDay * 30 * rate, extraYear: (kwhDay - kwhDayClean) * 365 * rate };
 }
+// ---------- Rev.13 · environment around the room: pets, location, PM2.5 → how fast filter and coil clog ----------
+// Starting values to explain the effect (to be tuned from the company's before/after cleaning records, like `dust` per scene):
+// pet fur and dander load the filter on top of room dust; the outdoor air the unit's room draws in carries road / site / city
+// dust; a measured PM2.5 reading (Air4Thai · กรมควบคุมมลพิษ or GISTDA "เช็คฝุ่น") scales it, 25 µg/m³ ≈ a typical city day = 1.
+export const PETS = { cat: { th: 'แมว', add: 0.12 }, dog: { th: 'สุนัข', add: 0.18 } }, PETS_MAX = 0.8;
+export const LOCS = [
+  { id: 'green', th: 'ชานเมือง / มีต้นไม้ล้อม', f: 0.85 },
+  { id: 'city', th: 'ในเมืองทั่วไป', f: 1 },
+  { id: 'road', th: 'ติดถนนใหญ่ / ทางด่วน', f: 1.3 },
+  { id: 'site', th: 'ใกล้ไซต์ก่อสร้าง / โรงงาน', f: 1.5 },
+];
+export const LOC_BY_ID = Object.fromEntries(LOCS.map(l => [l.id, l]));
+export const PM_REF = 25, PM_STD_24H = 37.5;   // Thai 24-hour PM2.5 standard 37.5 µg/m³ (กรมควบคุมมลพิษ, ใช้ตั้งแต่ 1 มิ.ย. 2566)
+export const pmF = pm => pm > 0 ? Math.max(0.6, Math.min(2.5, Math.pow(pm / PM_REF, 0.6))) : 1;
+export function envF(env = {}) {
+  const pets = Math.min(PETS_MAX, (env.cats || 0) * PETS.cat.add + (env.dogs || 0) * PETS.dog.add);
+  const loc = (LOC_BY_ID[env.loc] || LOC_BY_ID.city).f, pm = pmF(env.pm);
+  return { pets: 1 + pets, loc, pm, total: (1 + pets) * loc * pm };
+}
+export const clogRisk = f => f < 0.95 ? { k: 'low', th: 'ต่ำ' } : f < 1.25 ? { k: 'mid', th: 'ปานกลาง' } : f < 1.7 ? { k: 'high', th: 'สูง' } : { k: 'vhigh', th: 'สูงมาก' };
 export function cleanInterval(rate) {
   const m = 6 * -Math.log(1 - 0.4) / rate;          // months until dirt reaches 0.4
   const opts = [1, 2, 3, 4, 6];
