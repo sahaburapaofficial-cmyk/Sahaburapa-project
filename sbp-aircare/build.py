@@ -133,6 +133,9 @@ for v in 'abc':
 
 # ---- tester (preview.html) with embedded variants ----
 pv = read(os.path.join(ROOT, 'preview.html'))
+# Rev.10: the tester's "ส่งผลให้ทีม" posts to the same Apps Script endpoint as the site forms (single source: assets/submit.js)
+EP = re.search(r"export const ENDPOINT = '([^']*)'", read(os.path.join(A, 'submit.js'))).group(1)
+if EP: pv = pv.replace('__SBP_ENDPOINT__', EP)
 pv = re.sub(r'<link rel="stylesheet" href="assets/([\w.-]+\.css)">', lambda m: f'<style>{css_inline(m.group(1))}</style>', pv)
 packs = ''.join(
     f'<script type="application/octet-stream" id="pack-{v}">' + base64.b64encode(gzip.compress(links(built[v], 'embed').encode(), 9)).decode() + '</script>'

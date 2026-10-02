@@ -1,20 +1,22 @@
 // Rev.10 — request sending (assets/submit.js) for the contact form, the quotation cart and beta feedback.
 // Serves a patched submit.js with a fake endpoint and answers it from the test, so no real sheet is touched.
-// usage: node tests/submit.mjs [page=a.html]   (dev server on :8765)   modes: ok · fail · off (ENDPOINT empty = hand-off box)
+// usage: node tests/submit.mjs [page=a.html]   (dev server on :8765)   modes: ok (Apps Script) · fail · off (ENDPOINT empty = hand-off box) · fs (FormSubmit e-mail)
 import { launch, BASE } from './_lib.mjs';
 import { readFileSync } from 'node:fs';
 const page = process.argv[2] || 'a.html';
-const FAKE = 'https://script.google.com/macros/s/TEST/exec';
+const FAKES = { ok: 'https://script.google.com/macros/s/TEST/exec', fail: 'https://script.google.com/macros/s/TEST/exec', fs: 'https://formsubmit.co/ajax/TEST' };
 const SRC = readFileSync(new URL('../assets/submit.js', import.meta.url), 'utf8');
 const b = await launch();
 const results = [];
-for (const mode of ['ok', 'fail', 'off']) {
+for (const mode of ['ok', 'fail', 'off', 'fs']) {
+  const FAKE = FAKES[mode] || FAKES.ok;
   const p = await b.newPage({ viewport: { width: 390, height: 844 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   const posts = [];
-  await p.route('**/assets/submit.js', r => r.fulfill({ contentType: 'text/javascript', body: mode === 'off' ? SRC : SRC.replace("export const ENDPOINT = '';", `export const ENDPOINT = '${FAKE}';`) }));
+  await p.route('**/assets/submit.js', r => r.fulfill({ contentType: 'text/javascript', body: SRC.replace(/export const ENDPOINT = '[^']*';/, `export const ENDPOINT = '${mode === 'off' ? '' : FAKE}';`) }));
   await p.route(FAKE, async r => {
-    const d = JSON.parse(r.request().postData() || '{}'); posts.push(d);
+    const d = JSON.parse(r.request().postData() || '{}'); posts.push(mode === 'fs' ? { kind: d['ประเภท'], ref: d['เลขอ้างอิง'], fields: d, ct: r.request().headers()['content-type'] } : d);
+    if (mode === 'fs') return r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"success":"true","message":"The form was submitted successfully."}' });
     if (mode === 'fail') return r.fulfill({ status: 500, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"ok":false,"error":"server"}' });
     return r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true, ref: d.ref }) });
   });
@@ -56,5 +58,6 @@ await b.close();
 const bad = results.some(r => r.errors) ||
   !results[0].contact.includes('ส่งถึงทีมแล้ว') || !results[0].quote.includes('ส่งถึงทีมแล้ว') || !results[0].feedback.includes('ส่งถึงทีมแล้ว') || results[0].posts.length !== 3 ||
   !results[1].contact.includes('ช่วงทดลองใช้') || results[1].posts.length !== 3 ||
-  results[2].posts.length !== 0 || results[2].contact.includes('ส่งถึงทีมแล้ว');
+  results[2].posts.length !== 0 || results[2].contact.includes('ส่งถึงทีมแล้ว') ||
+  !results[3].contact.includes('ส่งถึงทีมแล้ว') || !results[3].quote.includes('ส่งถึงทีมแล้ว') || !results[3].feedback.includes('ส่งถึงทีมแล้ว') || results[3].posts.length !== 3;
 process.exit(bad ? 1 : 0);

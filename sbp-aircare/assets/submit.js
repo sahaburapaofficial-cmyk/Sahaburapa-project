@@ -1,13 +1,14 @@
-// SBP AirCare — send requests to the team — Rev.10 (owner 2 ต.ค. 2569: "ทำเป็นเว็บพร้อมใช้งาน")
-// Quote requests, contact-form requests and beta feedback POST to a Google Apps Script web app that appends a row to the
-// company's Google Sheet and e-mails the sales team (backend/apps-script/Code.gs, set-up steps in backend/README.md).
-// ENDPOINT is empty until the owner deploys that script → every form keeps the honest hand-off box (copy / LINE / e-mail).
+// SBP AirCare — send requests to the team — Rev.10 (owner 2 ต.ค. 2569: "ทำเป็นเว็บพร้อมใช้งาน" → "ส่งเข้าอีเมล")
+// Quote requests, contact-form requests and beta feedback POST to ENDPOINT, which can be either
+//   · FormSubmit (https://formsubmit.co/ajax/<email or alias>) — each request arrives as an e-mail to the team (in use now), or
+//   · a Google Apps Script web app — a row in the company's Google Sheet + e-mail (backend/apps-script/Code.gs, backend/README.md).
+// Empty ENDPOINT → every form keeps the honest hand-off box (copy / LINE / e-mail).
 // Inside Claude Artifacts the page cannot reach other domains (CSP), so sending is skipped there and the hand-off box is used.
 // The browser never decides prices: totals travel as "ยอดประมาณการ" and the team confirms them in the formal quotation.
 import { h } from './sbp-core.js';
 import { handoffBox } from './contact.js';
 
-export const ENDPOINT = '';   // https://script.google.com/macros/s/<deployment id>/exec
+export const ENDPOINT = 'https://formsubmit.co/ajax/Sahaburapa.official@gmail.com';   // or https://script.google.com/macros/s/<deployment id>/exec
 const TIMEOUT = 15000;
 const inArtifact = () => { try { return /(^|\.)claude(usercontent)?\.(ai|com)$/.test(location.hostname); } catch (e) { return false; } };
 export const canSend = () => !!ENDPOINT && !inArtifact() && navigator.onLine !== false;
@@ -17,12 +18,23 @@ export async function sendRequest(kind, { ref, variant, fields = {}, text, hp = 
   if (!canSend()) return { ok: false, reason: 'off' };
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), TIMEOUT);
   try {
-    // text/plain keeps this a "simple" request (no CORS preflight, which Apps Script cannot answer)
-    const r = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctl.signal,
-      body: JSON.stringify({ kind, ref, variant, page: location.pathname + location.hash, fields, text, hp, ts: new Date().toISOString() }) });
+    const r = await fetch(ENDPOINT, { method: 'POST', signal: ctl.signal, ...requestBody(ENDPOINT, { kind, ref, variant, page: location.pathname + location.hash, fields, text, hp }) });
     const j = await r.json().catch(() => null);
-    return j && j.ok ? { ok: true, ref: j.ref || ref } : { ok: false, reason: (j && j.error) || 'http ' + r.status };
+    return j && (j.ok || j.success === true || j.success === 'true') ? { ok: true, ref: j.ref || ref } : { ok: false, reason: (j && (j.error || j.message)) || 'http ' + r.status };
   } catch (e) { return { ok: false, reason: e.name === 'AbortError' ? 'timeout' : 'network' }; } finally { clearTimeout(t); }
+}
+
+const KIND_TH = { quote: 'ใบเสนอราคา', contact: 'ติดต่อ', feedback: 'ความเห็นทดลองใช้' };
+// FormSubmit wants flat JSON (fields become rows of the e-mail table; `_honey` is its bot trap); Apps Script reads one JSON blob
+// sent as text/plain so the request stays "simple" (no CORS preflight, which Apps Script cannot answer).
+export function requestBody(url, { kind, ref, variant, page, fields = {}, text = '', hp = '' }) {
+  if (/formsubmit\.co\//.test(url)) {
+    const flat = {}; for (const [k, v] of Object.entries(fields)) if (v !== '' && v != null) flat[k] = String(v);
+    return { headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({
+      _subject: `[SBP AirCare] ${KIND_TH[kind] || kind} · ${ref}${variant ? ' · แบบ ' + variant : ''}`, _template: 'table', _captcha: 'false', _honey: hp,
+      'เลขอ้างอิง': ref, 'ประเภท': KIND_TH[kind] || kind, 'แบบเว็บไซต์': variant || '-', 'หน้า': page, ...flat, 'สรุป': text }) };
+  }
+  return { headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ kind, ref, variant, page, fields, text, hp, ts: new Date().toISOString() }) };
 }
 
 // Fills `box` with the outcome: sending → received (ref + what happens next) or, when sending is off / failed, the hand-off box

@@ -61,6 +61,7 @@ aside p.n{margin:0;color:var(--ink3);font-size:13px;line-height:1.55}
 .bar .t span{display:block;height:100%;width:0;transition:width .3s}
 .bar b{text-align:right;font-variant-numeric:tabular-nums}
 .verdict{padding:10px 12px;border-radius:10px;background:var(--card2);border:1px solid var(--line);font-size:14px;line-height:1.6}
+#who{width:100%;min-height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:6px 10px;font:inherit;color:inherit}
 textarea{width:100%;min-height:84px;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:8px 10px;resize:vertical}
 .btn{min-height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:0 14px;cursor:pointer;font-weight:600}
 .btn.p{background:var(--acc);border-color:var(--acc);color:#fff}
@@ -95,13 +96,16 @@ textarea{width:100%;min-height:84px;border-radius:10px;border:1px solid var(--li
     <ul class="tasks" id="tasks"></ul>
     <div>
       <h2>ให้คะแนน</h2>
-      <p class="n">1 = ไม่ชอบ · 5 = ชอบมาก คะแนนเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น</p>
+      <p class="n">1 = ไม่ชอบ · 5 = ชอบมาก คะแนนเก็บในเครื่องนี้จนกว่าจะกด "ส่งผลให้ทีม"</p>
     </div>
     <table class="score" id="score"></table>
     <div class="bars" id="bars"></div>
     <div class="verdict" id="verdict">ยังไม่มีคะแนน</div>
     <label><span class="cap">บันทึกความเห็น</span><textarea id="note" placeholder="เช่น ชอบห้องจำลองของ C แต่ชอบความเร็วของ A"></textarea></label>
-    <div class="row"><button type="button" class="btn p" id="copy">คัดลอกผลไปส่ง LINE</button><button type="button" class="btn" id="reset">ล้างคะแนน</button></div>
+    <label><span class="cap">ชื่อ / เบอร์ หรือ LINE (ไม่บังคับ — ถ้าต้องการให้ทีมติดต่อกลับ)</span><input id="who" autocomplete="name"></label>
+    <div class="row"><button type="button" class="btn p" id="send">ส่งผลให้ทีม</button><button type="button" class="btn" id="copy">คัดลอกผลไปส่ง LINE</button><button type="button" class="btn" id="reset">ล้างคะแนน</button></div>
+    <p class="n" id="sendmsg" role="status" aria-live="polite"></p>
+    <p class="n">ข้อมูลที่กรอกใช้เพื่อปรับปรุงเว็บไซต์และติดต่อกลับเรื่องนี้เท่านั้น</p>
     <p class="n">ข้อควรรู้: ภาพ 3 มิติทำงานหนักกว่าบนมือถือรุ่นประหยัด โหมด "เทียบ 3 แบบ" เปิดทั้ง 3 หน้าพร้อมกัน ถ้าเครื่องช้าให้ใช้โหมดทีละแบบ</p>
   </aside>
 </main>
@@ -242,6 +246,28 @@ function totals() {
 }
 $('#note').value = S.note || ''; $('#note').addEventListener('input', e => { S.note = e.target.value; save(); });
 $('#reset').addEventListener('click', () => { S.score = { a: {}, b: {}, c: {} }; S.done = {}; S.note = ''; $('#note').value = ''; save(); renderScore(); renderTasks(); toast('ล้างคะแนนแล้ว'); });
+// Rev.10 — testers send their scores straight to the team's Google Sheet (same Apps Script as the site forms).
+// build.py replaces the placeholder with ENDPOINT from assets/submit.js; while it is empty (or unbuilt) "ส่งผลให้ทีม" falls back to copy.
+const EP = '__SBP_ENDPOINT__'.startsWith('__') ? '' : '__SBP_ENDPOINT__';
+const report = () => ['ผลทดสอบต้นแบบเว็บ SBP AirCare', ...['a', 'b', 'c'].map(v => `${V[v].th}: ${sum(v)}/30 — ` + CRIT.map(c => `${c.th} ${S.score[v][c.id] || '-'}`).join(', ')), `ทำรายการทดลองแล้ว: ${['a', 'b', 'c', 'all'].filter(v => S.done[v]).map(v => `${v === 'all' ? 'เทียบ' : v.toUpperCase()} ${Object.values(S.done[v]).filter(Boolean).length}/${TASKS.length}`).join(' · ') || '-'}`, S.note ? `ความเห็น: ${S.note}` : '', $('#who').value.trim() ? `ผู้ทดสอบ: ${$('#who').value.trim()}` : ''].filter(Boolean);
+$('#send').addEventListener('click', async () => {
+  const msg = $('#sendmsg'), btn = $('#send');
+  if (!['a', 'b', 'c'].some(v => sum(v)) && !S.note) { msg.textContent = 'ให้คะแนนอย่างน้อย 1 แบบ หรือเขียนความเห็นก่อนส่ง'; return; }
+  if (!EP) { try { await navigator.clipboard.writeText(report().join('\n')); msg.textContent = 'ระบบส่งอัตโนมัติยังไม่เปิด — คัดลอกผลให้แล้ว กรุณาวางส่งทาง LINE @sahaservices'; } catch (e) { msg.textContent = 'ระบบส่งอัตโนมัติยังไม่เปิด กรุณากด "คัดลอกผลไปส่ง LINE"'; } return; }
+  const ref = 'T' + Date.now().toString().slice(-7), fields = { 'ผู้ทดสอบ': $('#who').value.trim(), 'อุปกรณ์': `${DEV[S.d].th} · ${innerWidth}px`, 'ความเห็น': S.note };
+  ['a', 'b', 'c'].forEach(v => { fields[`${v.toUpperCase()} รวม/30`] = sum(v); CRIT.forEach(c => { fields[`${v.toUpperCase()} ${c.th}`] = S.score[v][c.id] || ''; }); });
+  btn.disabled = true; msg.textContent = 'กำลังส่ง…';
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 15000);
+  try {
+    // same body rules as assets/submit.js requestBody(): FormSubmit = flat JSON e-mail table · Apps Script = one text/plain JSON blob
+    const fs = /formsubmit\.co\//.test(EP), text = report().join('\n');
+    const init = fs ? { headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ _subject: `[SBP AirCare] ผลทดสอบ A/B/C · ${ref}`, _template: 'table', _captcha: 'false', 'เลขอ้างอิง': ref, ...Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== '').map(([k, v]) => [k, String(v)])), 'สรุป': text }) }
+      : { headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ kind: 'feedback', ref, variant: 'ABC', page: 'หน้าทดสอบ A/B/C', fields, text, hp: '', ts: new Date().toISOString() }) };
+    const r = await fetch(EP, { method: 'POST', signal: ctl.signal, ...init });
+    const j = await r.json().catch(() => null);
+    msg.textContent = j && (j.ok || j.success === true || j.success === 'true') ? `ส่งถึงทีมแล้ว ขอบคุณครับ · เลขอ้างอิง ${j.ref || ref}` : 'ส่งไม่สำเร็จ กรุณากด "คัดลอกผลไปส่ง LINE"';
+  } catch (e) { msg.textContent = 'ส่งไม่สำเร็จ (การเชื่อมต่อขัดข้อง) กรุณากด "คัดลอกผลไปส่ง LINE"'; } finally { clearTimeout(t); btn.disabled = false; }
+});
 $('#copy').addEventListener('click', async () => {
   const lines = ['ผลทดสอบต้นแบบเว็บ SBP AirCare', ...['a', 'b', 'c'].map(v => `${V[v].th}: ${sum(v)}/30 — ` + CRIT.map(c => `${c.th} ${S.score[v][c.id] || '-'}`).join(', ')), S.note ? `ความเห็น: ${S.note}` : ''].filter(Boolean);
   try { await navigator.clipboard.writeText(lines.join('\n')); toast('คัดลอกแล้ว วางใน LINE ได้เลย'); } catch (e) { toast('คัดลอกไม่ได้ในหน้านี้'); }
