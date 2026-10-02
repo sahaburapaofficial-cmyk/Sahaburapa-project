@@ -6,6 +6,7 @@
 // Hysteresis keeps scenes from flapping at the edge; reduced-motion users get the same budget.
 import * as THREE from './three.module.min.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
+import { enhance } from './quality3d.js';
 
 const MAX = (navigator.deviceMemory && navigator.deviceMemory <= 2) ? 2 : 3;
 const NEAR = 0.9;                  // "near" = within 0.9 viewport heights above/below the screen
@@ -57,7 +58,9 @@ export function track(renderer, el, opts = {}) {
   // loseContext() makes the context unusable at once but three.js only learns of it from the async event — until then a
   // render would compile programs on a dead context (getProgramInfoLog → null). So render only while the slot is live.
   const render0 = renderer.render.bind(renderer);
-  renderer.render = (s, c) => { if (e.state === 'live') render0(s, c); };
+  // Rev.12: on capable computers the scene gets sharper shadows and texture filtering (quality3d.js); otherwise as before
+  const fx = enhance(renderer);
+  renderer.render = (s, c) => { if (e.state !== 'live') return; fx && fx.prepare(s); render0(s, c); };
   cv.addEventListener('webglcontextlost', () => { e.state = 'lost'; schedule(); });
   cv.addEventListener('webglcontextrestored', () => {
     e.state = 'live'; e.t = performance.now();

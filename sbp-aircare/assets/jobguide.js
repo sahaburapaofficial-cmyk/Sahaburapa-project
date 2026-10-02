@@ -19,6 +19,19 @@ export const JOB_TYPES = [
 ];
 // Rev.11: plain Thai first, the company's package name second (internal P1/P2 · T1/T2 codes stay in the step references)
 const PKGS = [{ id: 'Basic Clean', th: 'ล้างมาตรฐาน', sub: 'Basic Clean · ทดสอบการทำงานหลังล้าง' }, { id: 'Standard Care', th: 'ล้างพร้อมรายงานภาพ', sub: 'Standard Care · วัดค่าก่อน–หลัง + ภาพ + เกรด' }];
+// Rev.12 (owner 2 ต.ค. 2569: "เวลาหาข้อมูลออนไลน์ได้ แต่แล้วแต่หน้างานและสภาพเครื่อง จึงใช้เป็นเกณฑ์ไม่ได้") — typical time per unit
+// as published by Thai AC service shops (search 2 ต.ค. 2569: midea.com/th, nbcgroup.co.th, airyenservice.com, ofair.co, q-chang.com,
+// scair.co.th): wall C1 30–60 min · big clean 1.5–2.5 h · cassette 40–90 min (C1) / up to ~2 h · wall install 2–4 h · cassette
+// install ~3 h to a full day. Ceiling / floor-standing follow the cassette ranges (no separate published figure). Always shown
+// with TIME_NOTE — never as a promise, a pass/fail line or a price basis; the crew confirms on site.
+export const JOB_TIME = {
+  C1: { wall: [30, 60], ceiling: [40, 90], cassette: [40, 90], floor: [40, 90] },
+  C2: { wall: [90, 150], ceiling: [90, 120], cassette: [90, 120], floor: [90, 120] },
+  install: { wall: [120, 240], ceiling: [180, 360], cassette: [180, 480], floor: [180, 360] },
+};
+export const TIME_NOTE = 'เวลาโดยประมาณจากข้อมูลร้านแอร์ทั่วไป ขึ้นกับหน้างานและสภาพเครื่อง ไม่ใช่เกณฑ์หรือคำรับรอง';
+const minTh = m => m < 60 ? `${m} นาที` : `${+(m / 60).toFixed(1)} ชม.`.replace('.0 ', ' ');
+export const timeTh = ([a, b]) => (a < 60 && b <= 60) ? `${a}–${b} นาที` : `${minTh(a)}–${minTh(b)}`.replace(/ ชม\.–/, '–');
 // which part groups come off at each teardown step, per unit type (ids of the ac3d / units3d part groups)
 export const TEAR = {
   wall: { parts: ['front', 'filter', 'louver'], lower: [], fan: ['blower'], pan: ['pan'], fanW: 'blower', panW: 'pan' },
@@ -204,10 +217,16 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
   const trayH = h('h3', {}), tray = h('ul', { class: 'cg-tray' }), trayNote = h('p', { class: 'cg-note' });
   const strip = h('ol', { class: 'cg-strip', 'aria-label': 'ทุกขั้นตอน' });
   const cap = h('p', { class: 'cg-cap' });
-  root.append(h('div', { class: 'cg-main' },
-    h('div', { class: 'cg-stage' }, lvlSeg, host, fb, cap),
-    h('div', { class: 'cg-side' }, card, h('div', { class: 'cg-nav' }, prev, play, next), h('section', { class: 'cg-trayw' }, trayH, tray, trayNote))),
-    h('div', { class: 'cg-stripw' }, strip));
+  /* Rev.12 · "4 มิติ" = the 3D crew scene + time: in scroll mode the player stays pinned while the page scrolls, and the
+     scroll position walks the job step by step (scroll back to go back), with a time ruler of the job's phases. */
+  const ruler = h('div', { class: 'cg-time', hidden: true, 'aria-hidden': 'true' });
+  const mode4 = h('button', { type: 'button', class: 's-btn cg-4dbtn', 'aria-pressed': 'false', onclick: () => set4D(!st.d4) }, h('span', { class: 'cg-4di', 'aria-hidden': 'true' }, '4D'), 'ดูทั้งงานแบบเลื่อนจอ');
+  const hint4 = h('span', { class: 'cg-4dhint' }, 'เลื่อนจอแล้วทีมช่างทำงานไปตามลำดับเวลา ตั้งแต่เริ่มงานจนส่งมอบ · เลื่อนขึ้นเพื่อย้อนดู');
+  const main = h('div', { class: 'cg-main' },
+    h('div', { class: 'cg-stage' }, h('div', { class: 'cg-4dbar' }, mode4, hint4), lvlSeg, ruler, host, fb, cap),
+    h('div', { class: 'cg-side' }, card, h('div', { class: 'cg-nav' }, prev, play, next), h('section', { class: 'cg-trayw' }, trayH, tray, trayNote)));
+  const w4 = h('div', { class: 'cg-4dw' }, main);
+  root.append(w4, h('div', { class: 'cg-stripw' }, strip));
 
   function renderLvl() {
     lvlSeg.innerHTML = '';
@@ -226,7 +245,8 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
           h('p', { class: 'cg-tag' }, o.key === 'PREMIUM' ? 'พรีเมียม' : 'มาตรฐาน'), h('h3', {}, `ติดตั้ง${o.th}`), h('p', { class: 'cg-d' }, o.note),
           h('dl', {}, h('dt', {}, 'รวมในงาน'), h('dd', {}, (it.inc || '').split(';').map(x => x.trim()).filter(Boolean).slice(0, 6).join(' · ')),
             h('dt', {}, 'ทดสอบรั่ว'), h('dd', {}, leak ? leak.d : '—'), h('dt', {}, 'สุญญากาศ'), h('dd', {}, vac ? vac.d : '—'), h('dt', {}, 'ส่งมอบ'), h('dd', {}, hand ? hand.d : '—'),
-            h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, (it.exc || '').split(',').slice(0, 4).join(', '))),
+            h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, (it.exc || '').split(',').slice(0, 4).join(', ')),
+            h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME.install[st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
           h('div', { class: 'cg-pr' }, it.ex != null ? [h('b', {}, baht(incVat(it.ex))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(it.ex)} · ${it.name}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
           h('div', { class: 'cg-act' },
             h('button', { type: 'button', class: 's-btn ' + (on ? 'primary' : 'ghost'), onclick: () => { st.level = o.key; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${steps.length} ขั้นตอน`),
@@ -249,7 +269,8 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
         h('p', { class: 'cg-tag' }, c2 ? 'ล้างใหญ่' : 'ล้างปกติ'),
         h('h3', {}, info.th), h('p', { class: 'cg-d' }, info.d),
         h('dl', {}, h('dt', {}, 'ถอดออกมาล้าง'), h('dd', {}, out.join(' · ')), h('dt', {}, 'ล้างในเครื่อง'), h('dd', {}, inPlace.join(' · ')), h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, notInc.join(' · ')),
-          c2 ? [h('dt', {}, 'เพิ่มจาก C1'), h('dd', {}, 'ทะเบียนชิ้นส่วนที่ถอด + ภาพ (บังคับ) · ชิ้นที่ไม่ได้ถอดต้องระบุเหตุผล')] : null),
+          c2 ? [h('dt', {}, 'เพิ่มจาก C1'), h('dd', {}, 'ทะเบียนชิ้นส่วนที่ถอด + ภาพ (บังคับ) · ชิ้นที่ไม่ได้ถอดต้องระบุเหตุผล')] : null,
+          h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME[lv][st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
         h('div', { class: 'cg-pr' }, r ? [h('b', {}, baht(incVat(r.rate.s))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(r.rate.s)} · ${st.pkg}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
         h('div', { class: 'cg-act' },
           h('button', { type: 'button', class: 's-btn ' + (st.level === lv ? 'primary' : 'ghost'), onclick: () => { st.level = lv; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${n} ขั้นตอน`),
@@ -326,10 +347,39 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
       : `แบบจำลองเพื่ออธิบาย · สถานที่ตัวอย่าง: ${v.venue} · ความสกปรกเป็นภาพประกอบ ไม่ใช่ผลตรวจเครื่องจริง · ขั้นตอนตามแบบฟอร์มงานล้างของบริษัท SBP-SR-ACCL-UNI-001 Rev.07`;
   }
 
+  /* ----- Rev.12 · 4D scroll mode ----- */
+  let q4 = 0, rulerP = 0;
+  const stepPx = () => Math.round(innerHeight * (innerWidth < 700 ? 0.42 : 0.55));
+  function size4() { w4.style.height = st.d4 ? `${main.offsetHeight + TL.length * stepPx()}px` : ''; }
+  function renderRuler() {
+    ruler.innerHTML = '';
+    const groups = []; TL.forEach((t, i) => { const g = groups[groups.length - 1]; if (g && g.ph === t.step.ph) g.n++; else groups.push({ ph: t.step.ph, n: 1, at: i }); });
+    const cur = TL[st.i] ? TL[st.i].step.ph : '';
+    ruler.append(
+      h('div', { class: 'cg-tr' }, groups.map(g => h('i', { class: 'ph-' + g.ph + (g.ph === cur ? ' on' : ''), style: `--n:${g.n}` })), h('b', { class: 'cg-mk', style: `--p:${rulerP}` })),
+      h('div', { class: 'cg-tl' }, groups.map(g => h('span', { class: g.ph === cur ? 'on' : '', style: `--n:${g.n}` }, phName(g.ph)))),
+      h('p', { class: 'cg-tnow' }, h('b', {}, `ขั้นที่ ${st.i + 1} จาก ${TL.length}`), ` · ${phName(cur)} · ${Math.round(rulerP * 100)}% ของงาน`,
+        h('span', { class: 'cg-ttot' }, ` · ทั้งงานประมาณ ${timeTh(JOB_TIME[st.job === 'install' ? 'install' : st.level][st.type])}/เครื่อง (ขึ้นกับหน้างาน)`)));
+  }
+  function onScroll4() {
+    if (!st.d4) return;
+    const r = w4.getBoundingClientRect(), top = parseFloat(getComputedStyle(main).top) || 0, span = Math.max(1, w4.offsetHeight - main.offsetHeight);
+    rulerP = Math.max(0, Math.min(1, (top - r.top) / span));
+    const i = Math.min(TL.length - 1, Math.floor(rulerP * TL.length));
+    if (i !== st.i) go(i); else renderRuler();
+  }
+  function set4D(on) {
+    st.d4 = on; stop(); root.classList.toggle('cg-scroll', on); mode4.setAttribute('aria-pressed', String(on)); ruler.hidden = !on;
+    size4();
+    if (on) { rulerP = 0; go(0); w4.scrollIntoView({ block: 'start', behavior: RM() ? 'auto' : 'smooth' }); }
+  }
+  addEventListener('scroll', () => { if (st.d4 && !q4) q4 = requestAnimationFrame(() => { q4 = 0; onScroll4(); }); }, { passive: true });
+  addEventListener('resize', () => { if (st.d4) { size4(); onScroll4(); } });
+
   let lastI = -1;
   function go(i) {
     st.i = Math.max(0, Math.min(TL.length - 1, i));
-    renderCard(); renderTray(); renderSheet(); renderTags();
+    renderCard(); renderTray(); renderSheet(); renderTags(); if (st.d4) renderRuler();
     const s = TL[st.i].state;
     if (V3) V3.show(clone(s), { jump: Math.abs(st.i - lastI) !== 1 });
     lastI = st.i;
@@ -343,6 +393,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
     const j = keepStep && cur ? TL.findIndex(t => t.step.id === cur) : -1;
     if (V3 && j < 0) V3.reset();
     lastI = -9; go(j >= 0 ? j : 0);
+    if (st.d4) { size4(); onScroll4(); }
   }
   function stop() { st.playing = false; clearTimeout(timer); play.textContent = 'เล่นทีละขั้น'; }
   function togglePlay() {
@@ -372,7 +423,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
   return {
     setJob: j => { st.job = j; st.level = j === 'install' ? 'STANDARD' : 'C1'; $$('button', jobSeg).forEach(b => b.setAttribute('aria-pressed', String(b.textContent.startsWith(j === 'install' ? 'งานติดตั้ง' : 'งานล้าง')))); refresh(false); },
     setLevel: lv => { st.level = lv; refresh(true); }, setType: t => { st.type = t; $$('button', typeSeg).forEach((b, i) => b.setAttribute('aria-pressed', String(JOB_TYPES[i].id === t))); refresh(false); },
-    go: i => go(i), steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
+    go: i => go(i), set4D: on => set4D(!!on), steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
   };
 }
 // the pages call it by its round-3 name too

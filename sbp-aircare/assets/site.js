@@ -12,6 +12,10 @@ import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
 
+// Rev.12: official logo files — inlined by the build (globalThis.__SBP_LOGOS), read from assets/logos/ on the dev server
+const logoSrc = k => (globalThis.__SBP_LOGOS && globalThis.__SBP_LOGOS[k]) || `assets/logos/${k}.png`;
+const logoImg = (k, alt) => h('img', { class: 'sx-logo sx-logo-' + k, src: logoSrc(k), alt, decoding: 'async' });
+
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const store = {
   get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch (e) { return d; } },
@@ -236,6 +240,8 @@ export function mountSite(cfg) {
   }
 
   /* ---- 7 · about + contact ---- */
+  // Rev.12: company marks supplied by the owner (assets/logos/sbp.png = SP · บริษัท สหบูรพากรุ๊ป จำกัด, fujiva.png = the AC brand)
+  $$('img[data-logo]').forEach(im => { im.src = logoSrc(im.dataset.logo); });
   // company facts written into page markup from one place (data-co="tel|email|addr|web|th")
   $$('[data-co]').forEach(el => { const k = el.dataset.co; if (!COMPANY[k]) return; el.textContent = COMPANY[k]; if (el.tagName === 'A' && k === 'tel') el.setAttribute('href', COMPANY.telHref); });
   const aboutRoot = $('#aboutRoot');
@@ -244,6 +250,7 @@ export function mountSite(cfg) {
     const copyBtn = (txt, ok) => h('button', { type: 'button', class: 'sx-copy', onclick: async () => { try { await navigator.clipboard.writeText(txt); copyMsg.textContent = ok; } catch (e) { copyMsg.textContent = 'เลือกข้อความแล้วคัดลอกจากเครื่องของคุณ'; } } }, 'คัดลอก');
     aboutRoot.append(h('div', { class: 'sx-about' },
       h('div', { class: 'sx-co' },
+        h('div', { class: 'sx-co-logos' }, logoImg('sbp', `ตราบริษัท ${COMPANY.th}`), logoImg('fujiva', 'FUJIVA แบรนด์เครื่องปรับอากาศของบริษัท')),
         h('p', { class: 'sx-co-b' }, `${COMPANY.brand} · บริการโดย ${COMPANY.service}`),
         h('h3', {}, COMPANY.th), h('p', { class: 'sx-co-en' }, COMPANY.en),
         h('p', {}, `ประสบการณ์ด้านอะไหล่ น้ำยา และอุปกรณ์เครื่องปรับอากาศ ${COMPANY.years} — ${COMPANY.trade} · ทีมบริการของบริษัทรับงานล้าง ติดตั้ง ซ่อม และย้ายแอร์ ทั้งบ้านและองค์กร และจำหน่ายแอร์ FUJIVA แบรนด์ของบริษัท`),
@@ -254,7 +261,7 @@ export function mountSite(cfg) {
           h('dt', {}, 'LINE'), h('dd', {}, h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line)),
           h('dt', {}, 'เว็บไซต์บริษัท'), h('dd', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web), ' · ', h('a', { href: COMPANY.fbUrl, target: '_blank', rel: 'noopener' }, 'Facebook')),
           h('dt', {}, 'เลขประจำตัวผู้เสียภาษี'), h('dd', {}, COMPANY.taxId),
-          COMPANY.hours ? [h('dt', {}, 'เวลาทำการ'), h('dd', {}, COMPANY.hours)] : []),
+          COMPANY.hours ? [h('dt', {}, 'เวลาทำการ'), h('dd', {}, COMPANY.hours, COMPANY.hoursNote ? h('small', { class: 'sx-co-note' }, COMPANY.hoursNote) : null)] : []),
         h('div', { class: 'sx-co-act' }, h('a', { class: 's-btn primary', href: '#quote' }, 'ให้ทีมติดต่อกลับ'), h('a', { class: 's-btn ghost', href: '#area' }, 'ตรวจพื้นที่ให้บริการ'))),
       h('div', { class: 'sx-how' },
         h('h3', {}, 'ทำงานกับเราอย่างไร'),
@@ -296,7 +303,7 @@ export function mountSite(cfg) {
   if (foot) {
     foot.innerHTML = '';
     foot.append(h('div', { class: 'wrap sx-foot' },
-      h('div', {}, h('b', { class: 'sx-fb-brand' }, COMPANY.brand), h('p', {}, COMPANY.th), h('p', {}, COMPANY.addr), h('p', {}, 'โทร ', h('a', { href: COMPANY.telHref }, COMPANY.tel), ' · ', h('span', { class: 'sx-sel' }, COMPANY.email)), h('p', {}, 'LINE ', h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line), ' · เลขผู้เสียภาษี ', COMPANY.taxId)),
+      h('div', {}, h('b', { class: 'sx-fb-brand' }, logoImg('sbp', ''), COMPANY.brand), h('p', {}, COMPANY.th), h('p', {}, COMPANY.addr), COMPANY.hours ? h('p', {}, 'เวลาทำการ ', COMPANY.hours) : null, h('p', {}, 'โทร ', h('a', { href: COMPANY.telHref }, COMPANY.tel), ' · ', h('span', { class: 'sx-sel' }, COMPANY.email)), h('p', {}, 'LINE ', h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line), ' · เลขผู้เสียภาษี ', COMPANY.taxId)),
       h('div', {}, h('h4', {}, 'บริการและสินค้า'), h('ul', {}, live.filter(v => v !== 'home').map(v => h('li', {}, h('a', { href: '#' + v }, VIEWS[v].th))))),
       h('div', {}, h('h4', {}, 'ช่วงทดลองใช้'), h('p', {}, 'เว็บไซต์เวอร์ชันทดลองสำหรับลูกค้ากลุ่มแรก ราคาตาม Pricebook 2569 ยืนยันอีกครั้งในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
       h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))))));
@@ -308,7 +315,8 @@ export function mountSite(cfg) {
       url: location.origin + location.pathname, telephone: COMPANY.tel, email: COMPANY.email, taxID: COMPANY.taxId,
       address: { '@type': 'PostalAddress', streetAddress: '593 ถนนพระราม 2 แขวงบางมด', addressLocality: 'เขตจอมทอง', addressRegion: 'กรุงเทพมหานคร', postalCode: '10150', addressCountry: 'TH' },
       areaServed: ['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'สมุทรสาคร'].map(n => ({ '@type': 'AdministrativeArea', name: n })),
-      sameAs: [COMPANY.webUrl, COMPANY.fbUrl, COMPANY.lineUrl], currenciesAccepted: 'THB' };
+      sameAs: [COMPANY.webUrl, COMPANY.fbUrl, COMPANY.lineUrl], currenciesAccepted: 'THB',
+      openingHoursSpecification: COMPANY.open ? [{ '@type': 'OpeningHoursSpecification', dayOfWeek: COMPANY.open.days.map(d => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d]), opens: COMPANY.open.from, closes: COMPANY.open.to }] : undefined };
     document.head.append(h('script', { type: 'application/ld+json' }, JSON.stringify(ld)));
   } catch (e) { /* optional */ }
   // Rev.11: a "แชท LINE" button on computers and tablets (phones have LINE in the bottom bar) — opens the LINE OA chat

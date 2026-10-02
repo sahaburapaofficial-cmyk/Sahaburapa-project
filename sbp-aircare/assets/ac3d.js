@@ -7,6 +7,7 @@ import * as THREE from './three.module.min.js';
 import { createWisps, airTint } from './wisp3d.js';
 import { track as glTrack } from './gl-pool.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
+import { fujivaBadge } from './brand3d.js';
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const easeIO = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -273,7 +274,7 @@ export const FINISHES = {
   graphite: { th: 'เทากราไฟต์', shell: 0x2d3137, cap: 0x1f2226, metal: 0.35, rough: 0.28 },
   champagne: { th: 'ทองแชมเปญ', shell: 0xd9c6a4, cap: 0xc7b28e, metal: 0.55, rough: 0.26 },
 };
-const logoTex = () => canvasTex(256, 64, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(120,128,138,0.9)'; g.font = '600 34px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('F U J I V A', w / 2, h / 2 + 2); });
+const logoTex = () => fujivaBadge();   // Rev.12: the official FUJIVA logo (owner-supplied) — text wordmark until it has loaded
 // Rev.09: also the default wall body everywhere except the blueprint style; o.logo = false drops the FUJIVA wordmark (generic product shots)
 function buildPremiumIndoor(M, o = {}) {
   const U = buildIndoor(M);
@@ -326,7 +327,7 @@ function buildPremiumIndoor(M, o = {}) {
   return U;
 }
 
-function buildOutdoor(M, o = {}) {   // o.logo === false → no brand mark (Rev.09 r4 job scene: the customer's unit carries no brand)
+function buildOutdoor(M, o = {}) {   // Rev.12: brand mark only with o.logo === true (the company's own FUJIVA units) — generic units stand for every brand
   // Rev.08 — condensing unit with rounded casing, bell-mouth + wire fan guard, swept propeller, louvred side vents,
   // wire-guarded rear/left coil, valve cover + brass service valves with flare nuts, rails with rubber feet.
   const root = new THREE.Group(); root.name = 'outdoor';
@@ -354,7 +355,7 @@ function buildOutdoor(M, o = {}) {   // o.logo === false → no brand mark (Rev.
   const shroud = new THREE.Mesh(new THREE.CylinderGeometry(0.205, 0.205, 0.08, 56, 1, true), flat ? M.chassis : new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.7, side: THREE.DoubleSide })); shroud.rotation.x = Math.PI / 2; shroud.position.set(fc.x, fc.y, D / 2 - 0.05); f.add(shroud);
   // louvred side vents on the front right (embossed slots)
   for (let i = 0; i < 11; i++) f.add(rbx(0.15, 0.007, 0.006, 0.0025, greyM, 0.27, -0.2 + i * 0.03, D / 2 + 0.002));
-  if (!flat && o.logo !== false) { const lg = canvasTex(256, 64, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(96,104,114,.95)'; g.font = '600 34px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('F U J I V A', w / 2, h / 2 + 2); }); const lp = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.03), new THREE.MeshBasicMaterial({ map: lg, transparent: true, depthWrite: false })); lp.position.set(0.27, 0.22, D / 2 + 0.0055); f.add(lp); }
+  if (!flat && o.logo === true) { const lg = fujivaBadge(); const lp = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.03), new THREE.MeshBasicMaterial({ map: lg, transparent: true, depthWrite: false })); lp.position.set(0.27, 0.22, D / 2 + 0.0055); f.add(lp); }
   // top cover (rounded)
   const t = grp('o-top'); t.add(rbx(W + 0.014, 0.018, D + 0.014, 0.006, shellM, 0, H / 2 + 0.008, 0));
   // right side panel + valve cover
@@ -542,7 +543,7 @@ export function createACViewer(container, opts = {}) {
   const M = materialSet(o.style);
   // Rev.09: the rounded premium body is the default (sharper, more realistic); premium: true keeps the FUJIVA wordmark, blueprint stays technical
   const prem = o.premium ?? (o.style !== 'blueprint');
-  const units = { indoor: prem ? buildPremiumIndoor(M, { logo: o.premium === true }) : buildIndoor(M), outdoor: buildOutdoor(M) };
+  const units = { indoor: prem ? buildPremiumIndoor(M, { logo: o.premium === true }) : buildIndoor(M), outdoor: buildOutdoor(M, { logo: prem && o.premium === true }) };
   const holder = new THREE.Group(); scene.add(holder);
   for (const k in units) {
     // clone materials per mesh so highlight / x-ray / dirt can be per-part

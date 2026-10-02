@@ -370,7 +370,8 @@ export function buildHome(scene, o = {}) {
   const mini = new THREE.Mesh(new THREE.BoxGeometry(0.032, miniTop - (rcboPos.y + 0.115), 0.02), MK.trunk); mini.position.set(RX, (miniTop + rcboPos.y + 0.115) / 2, -1.99); mini.castShadow = true; sys.add(mini);
 
   /* ---------- condensing unit on its stand ---------- */
-  const OU = buildOutdoor(M); const cdu = V(3.55, 0.42, -1.72); const outG = new THREE.Group(); outG.position.copy(cdu); outG.add(OU.root); sys.add(outG);
+  // same FUJIVA set as the indoor unit and the cartons
+  const OU = buildOutdoor(M, { logo: true }); const cdu = V(3.55, 0.42, -1.72); const outG = new THREE.Group(); outG.position.copy(cdu); outG.add(OU.root); sys.add(outG);
   OU.root.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
   const stand = new THREE.Group(); sys.add(stand);
   const galv = MK.steel, conc = S(0xa9a9a4, { roughness: 0.95 });

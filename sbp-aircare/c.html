@@ -61,7 +61,6 @@ button{font:inherit;color:inherit;cursor:pointer}a{color:inherit}
 .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:color-mix(in oklab,var(--bg) 78%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .hdr .wrap{display:flex;align-items:center;gap:20px;height:60px}
 .logo{font:500 19px var(--display);text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:0 0 auto}
-.logo i{width:10px;height:10px;border-radius:50%;background:var(--cool);box-shadow:0 0 14px var(--cool)}
 .nav{display:flex;gap:0;margin-inline:auto;min-width:0;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
 .nav a{padding:7px 9px;border-radius:10px;text-decoration:none;color:var(--ink-2);font-size:14.5px;white-space:nowrap}
 .nav a:hover{color:var(--ink);background:var(--panel)}
@@ -71,6 +70,7 @@ button{font:inherit;color:inherit;cursor:pointer}a{color:inherit}
 .hdr .btn-primary{min-height:38px;padding:0 14px;font-size:14.5px}
 @media (max-width:1080px){.nav{display:none}.vsw{margin-left:auto}}
 @media (max-width:379px){.vsw{display:none}}
+@media (max-width:480px){.hdr .wrap{gap:10px}.logo{font-size:17px;gap:6px}}   /* Rev.12: room for the SP mark beside the A·B·C switch and the quote button */
 @media (max-width:640px){.hdr .btn-primary{display:none}}
 
 /* stage */
@@ -323,7 +323,7 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
 <body>
 <aside class="proto" aria-label="สถานะต้นแบบ">ต้นแบบแบบ C · ราคาสินค้าและค่าบริการจาก Pricebook 2569 ของบริษัท · ฉาก 3 มิติและห้องจำลองเป็นแบบจำลองเพื่ออธิบาย · ฟอร์มยังไม่ส่งข้อมูลจริง · <a href="./">กลับหน้ารวม</a></aside>
 <header class="hdr"><div class="wrap">
-  <a class="logo" href="#top"><i></i>SBP AirCare</a>
+  <a class="logo" href="#top"><img class="logo-mk" data-logo="sbp" alt="" width="44" height="32">SBP AirCare</a>
   <nav class="nav" aria-label="เมนูหลัก"><a href="#learn">ความรู้</a><a href="#journey">แอร์ทำงาน</a><a href="#room">ห้องจำลอง</a><a href="#fit">ลองวางในห้อง</a><a href="#cleanflow">ล้าง·ติดตั้ง</a><a href="#howto">งานช่าง</a><a href="#catalog">สินค้า</a><a href="#prices">ค่าบริการ</a><a href="#quality">วัสดุ</a><a href="#b2b">สัญญารายปี</a><a href="#area">พื้นที่</a></nav>
   <div class="vsw" aria-label="สลับต้นแบบ"><a href="./a.html">A</a><a href="./b.html">B</a><a href="./c.html" aria-current="page">C</a></div>
   <button type="button" data-cart-btn>ใบเสนอราคา <span data-cart-n>0</span></button>

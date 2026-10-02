@@ -184,12 +184,15 @@ export const HQ = { th: 'สำนักงานใหญ่ 593 ถ.พระ�
 // Rev.10 (2 ต.ค. 2569) — company facts for the about / contact blocks. Email from the owner; address, phone, LINE OA and Facebook
 // from the official site sahaburapagroup.com (home + contact pages); tax id = juristic person registration no. 0105553009307
 // (DBD public listing, registered 20 Jan 2010). www.sahaburapa.com no longer belongs to the company (it now serves an unrelated
-// gambling site) → never link to it. Opening hours: not published anywhere → not shown until the owner supplies them.
+// gambling site) → never link to it. Opening hours (owner, 2 ต.ค. 2569): Mon–Sat 08:30–17:30, closed Sunday; work outside those hours
+// is possible at an extra charge (amount not published → the team states it in the quotation; never invent a figure).
 export const COMPANY = {
   th: 'บริษัท สหบูรพากรุ๊ป จำกัด', en: 'Saha Burapa Group Co., Ltd.', brand: 'SBP AirCare', service: 'Sahaburapa Service',
   addr: '593 ถนนพระราม 2 แขวงบางมด เขตจอมทอง กรุงเทพฯ 10150', tel: '02-459-3291-9', telHref: 'tel:024593291', email: 'Sahaburapa.official@gmail.com',
   web: 'www.sahaburapagroup.com', webUrl: 'https://www.sahaburapagroup.com', years: 'กว่า 30 ปี', taxId: '0105553009307',
-  line: '@sahaservices', lineUrl: 'https://line.me/R/ti/p/@sahaservices', fbUrl: 'https://www.facebook.com/profile.php?id=61560113712375', hours: '',
+  line: '@sahaservices', lineUrl: 'https://line.me/R/ti/p/@sahaservices', fbUrl: 'https://www.facebook.com/profile.php?id=61560113712375',
+  hours: 'จันทร์–เสาร์ 08:30–17:30 น. (หยุดวันอาทิตย์)', hoursNote: 'นอกเวลาทำการและวันอาทิตย์ให้บริการได้ มีค่าใช้จ่ายเพิ่มเติม ทีมแจ้งในใบเสนอราคา',
+  open: { days: [1, 2, 3, 4, 5, 6], from: '08:30', to: '17:30' },   // 0 = Sunday (Date#getDay)
   trade: 'จำหน่ายและนำเข้าน้ำยาแอร์ อุปกรณ์ เครื่องมือ และอะไหล่แอร์ ทั้งปลีกและส่ง',
   mapUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('สหบูรพากรุ๊ป 593 ถนนพระราม 2 บางมด จอมทอง กรุงเทพฯ'),
 };

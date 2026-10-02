@@ -274,7 +274,7 @@ export function createRoomFit3D(container, o = {}) {
     const hole = f.o.clone().addScaledVector(f.t, exitAlong).setY(holeY);
     const outAlong = clamp(exitAlong + (s.outdoor.side === 'left' ? -1 : 1) * s.outdoor.run, 0.4, f.len - 0.4);
     const ouY = clamp(holeY - s.outdoor.drop, 0.05, H + 6);
-    const O = buildOutdoor(M); const sc = 0.8; O.root.scale.setScalar(sc);
+    const O = buildOutdoor(M, { logo: !!s.unit.logo }); const sc = 0.8; O.root.scale.setScalar(sc);
     const ou = f.o.clone().addScaledVector(f.t, outAlong).addScaledVector(outN, 0.1 + 0.15 + 0.3 * sc / 2).setY(ouY + 0.55 * sc / 2);
     O.root.position.copy(ou); O.root.rotation.y = f.rotY + Math.PI; O.root.traverse(m => { if (m.isMesh) m.castShadow = true; });
     outG.add(O.root);
