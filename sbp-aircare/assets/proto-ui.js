@@ -410,14 +410,53 @@ export function wireDrawers() {
 export function priceRange(m, skus) { const ps = skus.map(s => s.price); return [Math.min(...ps), Math.max(...ps)]; }
 
 /* ---------------- line art per unit type (placeholder until approved product photos) ---------------- */
+// Rev.13 (owner: "icon แอร์แขวนใต้ฝ้าให้สมจริงกว่านี้ ไม่เหมือนติดผนัง … ทุกประเภท represent accurate · ดูเป็นองค์กร"):
+// technical line drawings in one stroke weight — the mounting context (wall, ceiling slab, false ceiling, floor) and the real
+// air path of each type tell them apart: wall = blows down/forward · ceiling-suspended = slim wide body tight under the slab,
+// long horizontal throw, return from underneath · cassette = hidden body above the false ceiling, four-way panel from below ·
+// floor-standing = tall cabinet, top discharge · ducted = hidden unit, linear supply diffuser + return grille.
+const arr = (x1, y1, x2, y2, dash = false) => {   // line with an open chevron head at (x2, y2)
+  const a = Math.atan2(y2 - y1, x2 - x1), k = 5.2, w = 0.5;
+  const h1 = `${(x2 - k * Math.cos(a - w)).toFixed(1)} ${(y2 - k * Math.sin(a - w)).toFixed(1)}`, h2 = `${(x2 - k * Math.cos(a + w)).toFixed(1)} ${(y2 - k * Math.sin(a + w)).toFixed(1)}`;
+  return `<path class="ta-air"${dash ? ' stroke-dasharray="2.5 3"' : ''} d="M${x1} ${y1}L${x2} ${y2}"/><path class="ta-air" d="M${h1}L${x2} ${y2}L${h2}"/>`;
+};
+const slab = (y, x0 = 6, x1 = 154) => { let d = `<path d="M${x0} ${y}H${x1}"/>`; for (let x = x0 + 6; x < x1; x += 10) d += `<path class="ta-hatch" d="M${x} ${y}l-6 -6"/>`; return d; };
 export function typeArt(type, cls = 'art') {
-  const S = (d) => `<svg class="${cls}" viewBox="0 0 160 110" role="img" aria-label="ภาพประกอบ ${TYPE_BY_ID[type].th}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const S = (d) => `<svg class="${cls}" viewBox="0 0 160 110" role="img" aria-label="ภาพประกอบ ${TYPE_BY_ID[type].th}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><style>.ta-hatch{stroke-width:.9;opacity:.45}.ta-air{stroke-width:1.3;opacity:.75}.ta-body{fill:currentColor;fill-opacity:.07}.ta-thin{stroke-width:1}</style>${d}</svg>`;
   switch (type) {
-    case 'wall': return S('<rect x="14" y="30" width="132" height="40" rx="10"/><path d="M22 62h116"/><path d="M30 70c10 10 90 10 100 0"/><rect x="116" y="40" width="14" height="6" rx="2"/><path d="M40 84l-4 12M60 86l-2 12M80 86v12M100 86l2 12M120 84l4 12" stroke-dasharray="2 4"/>');
-    case 'cassette': return S('<path d="M8 28h144"/><rect x="36" y="30" width="88" height="14" rx="3"/><rect x="46" y="44" width="68" height="28" rx="4"/><rect x="62" y="52" width="36" height="12" rx="2"/><path d="M46 58l-14 12M114 58l14 12M80 72v14" stroke-dasharray="2 4"/>');
-    case 'ceiling': return S('<path d="M8 22h144"/><path d="M28 22v6M132 22v6"/><rect x="20" y="28" width="120" height="30" rx="8"/><path d="M26 58c16 8 92 8 108 0"/><path d="M40 70l-6 16M80 72v16M120 70l6 16" stroke-dasharray="2 4"/>');
-    case 'floor': return S('<rect x="56" y="10" width="48" height="90" rx="6"/><path d="M62 20h36M62 26h36M62 32h36"/><rect x="66" y="48" width="28" height="8" rx="2"/><path d="M104 22l22-6M104 30l24 0" stroke-dasharray="2 4"/><path d="M50 100h60"/>');
-    default: return S('<path d="M8 20h144"/><rect x="30" y="24" width="100" height="26" rx="4"/><path d="M130 30h18v14h-18M12 30h18v14H12"/><path d="M8 50h144" stroke-dasharray="3 3"/><rect x="56" y="54" width="48" height="8" rx="2"/><path d="M68 66v16M92 66v16" stroke-dasharray="2 4"/>');
+    case 'wall': return S(
+      // wall face on the left, body with top intake slots, front seam, display, open louver, air down & forward
+      `<path d="M10 8V98"/>${[16, 28, 40, 52, 64, 76, 88].map(y => `<path class="ta-hatch" d="M10 ${y}l-6 6"/>`).join('')}` +
+      `<rect class="ta-body" x="20" y="24" width="124" height="40" rx="10"/><path class="ta-thin" d="M30 30h104" stroke-dasharray="1.5 3"/><path d="M26 52h112"/>` +
+      `<rect class="ta-thin" x="112" y="36" width="16" height="6" rx="1.5"/><path d="M30 64c16 9 88 9 104 0"/>` +
+      arr(50, 76, 42, 98) + arr(80, 78, 78, 101) + arr(110, 76, 118, 98));
+    case 'ceiling': return S(
+      // ceiling slab, short hanger brackets, slim wide body with an end cap (depth), front outlet + louver, long horizontal
+      // throw, return air drawn up into the underside
+      slab(16) + `<path d="M30 16v6M128 16v6"/>` +
+      `<path class="ta-body" d="M18 22H140V44H18Z"/><path class="ta-body" d="M140 22l12 -4v22l-12 4"/><path class="ta-thin" d="M26 30H132"/>` +
+      `<path d="M24 44h110"/><path d="M26 44l-4 8h106l-2 -8"/>` +
+      arr(40, 56, 74, 70) + arr(70, 58, 112, 70) + arr(100, 56, 146, 66) + arr(60, 98, 60, 80, true) + arr(96, 98, 96, 80, true));
+    case 'cassette': return S(
+      // slab + hidden body (dashed) above the false ceiling line, square panel seen from below: four louver slots, central
+      // return grille, air out four ways, return up through the middle
+      slab(10) + `<rect class="ta-thin" x="44" y="16" width="72" height="20" rx="3" stroke-dasharray="3 3"/><path d="M4 40H40M120 40H156"/>` +
+      `<path class="ta-body" d="M40 40H120L144 58H16Z"/><path class="ta-thin" d="M48 43.5H112M24 55H136M44 42L30 56M116 42L130 56"/>` +
+      `<path d="M60 46H100L106 52H54Z"/><path class="ta-thin" d="M62 48H98M58 50H102"/>` +
+      arr(30, 62, 18, 80) + arr(130, 62, 142, 80) + arr(62, 64, 52, 88) + arr(98, 64, 108, 88) + arr(80, 100, 80, 62, true));
+    case 'floor': return S(
+      // floor line, tall cabinet with depth, top discharge louvers, display, lower return grille, air out of the top
+      `<path d="M28 100H136"/>${[34, 46, 58, 70, 82, 94, 106, 118, 130].map(x => `<path class="ta-hatch" d="M${x} 100l-6 6"/>`).join('')}` +
+      `<rect class="ta-body" x="56" y="12" width="44" height="88" rx="5"/><path class="ta-body" d="M100 14l10 -5v86l-10 5"/>` +
+      `<path class="ta-thin" d="M62 20h32M62 25h32M62 30h32"/><rect class="ta-thin" x="70" y="40" width="16" height="6" rx="1.5"/>` +
+      `<path class="ta-thin" d="M62 68h32M62 73h32M62 78h32M62 83h32M62 88h32"/>` +
+      arr(54, 22, 26, 14) + arr(54, 28, 24, 32) + arr(30, 80, 52, 80, true));
+    default: return S(
+      // ducted: slab, hidden unit + supply duct (dashed) above the false ceiling, linear diffuser and return grille in it
+      slab(10) + `<path d="M4 58H156"/><rect class="ta-thin" x="22" y="20" width="56" height="24" rx="3" stroke-dasharray="3 3"/>` +
+      `<path class="ta-thin" d="M78 26H116V54M78 38H104V54" stroke-dasharray="3 3"/>` +
+      `<rect class="ta-body" x="96" y="56" width="44" height="5" rx="1.5"/><rect class="ta-body" x="24" y="56" width="30" height="5" rx="1.5"/><path class="ta-thin" d="M30 56v5M36 56v5M42 56v5M48 56v5"/>` +
+      arr(106, 66, 100, 92) + arr(118, 66, 118, 94) + arr(130, 66, 136, 92) + arr(39, 92, 39, 66, true));
   }
 }
 

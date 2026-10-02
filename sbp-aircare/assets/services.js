@@ -509,11 +509,13 @@ export function mountServices(root, cfg = {}) {
 }
 
 export function typeIcon(t) {
+  // Rev.13: same drawing language as proto-ui typeArt (mounting context + real air path), small enough for the tabs
   const d = {
-    wall: '<rect x="3" y="7" width="26" height="11" rx="3"/><path d="M8 18l2 4M16 18v5M24 18l-2 4"/>',
-    ceiling: '<path d="M2 4h28M9 4v4M23 4v4"/><rect x="4" y="8" width="24" height="9" rx="2"/><path d="M28 13h2M22 20h8"/>',
-    cassette: '<path d="M2 12h28"/><rect x="7" y="6" width="18" height="6"/><rect x="5" y="12" width="22" height="3"/><path d="M5 17l-3 4M27 17l3 4M13 19v4M19 19v4"/>',
-  }[t];
+    wall: '<path d="M2 2v22"/><rect x="5" y="6" width="25" height="10" rx="3"/><path d="M8 13h19"/><path d="M11 19l-1.5 4M17.5 19.5v4M24 19l1.5 4" stroke-dasharray="1.5 2"/>',
+    ceiling: '<path d="M1 3h30"/><path d="M3 4h24v7H3z"/><path d="M27 4l3-1.2v7L27 11"/><path d="M6 11l-1 2h20l-.6-2"/><path d="M9 17l7 3M17 16l9 3" stroke-dasharray="1.5 2"/>',
+    cassette: '<path d="M1 2h30"/><rect x="9" y="4" width="14" height="5" stroke-dasharray="1.5 1.5"/><path d="M1 11h7M24 11h7"/><path d="M8 11h16l5 4H3z"/><path d="M13 12.5h6"/><path d="M5 18l-3 5M27 18l3 5M12 19l-2 5M20 19l2 5" stroke-dasharray="1.5 2"/>',
+    floor: '<path d="M4 25h24"/><rect x="11" y="2" width="11" height="23" rx="1.5"/><path d="M13.5 5h6M13.5 7h6M13.5 18h6M13.5 20h6M13.5 22h6"/><path d="M10 5l-7-2M10 7l-7 1" stroke-dasharray="1.5 2"/>',
+  }[t] || '';
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   s.setAttribute('viewBox', '0 0 32 26'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('class', 'sv-ico');
   s.innerHTML = d; return s;

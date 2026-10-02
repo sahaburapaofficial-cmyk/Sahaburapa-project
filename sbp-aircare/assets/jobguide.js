@@ -381,19 +381,29 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
     st.i = Math.max(0, Math.min(TL.length - 1, i));
     renderCard(); renderTray(); renderSheet(); renderTags(); if (st.d4) renderRuler();
     const s = TL[st.i].state;
-    if (V3) V3.show(clone(s), { jump: Math.abs(st.i - lastI) !== 1 });
+    if (V3 && !swapping) V3.show(clone(s), { jump: Math.abs(st.i - lastI) !== 1 });
     lastI = st.i;
     if (s.flash && !RM()) { flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); }
   }
+  // Rev.13: a new unit type / job rebuilds the 3D site (venue, unit, crew) — the buttons, card and steps update at once, the
+  // rebuild runs a frame later behind a short fade, and quick repeated clicks collapse into one rebuild (the last choice)
+  let swapping = false, swapTok = 0, v3Type = st.type, v3Job = st.job;
   function refresh(keepStep) {
     const cur = TL[st.i] && TL[st.i].step.id;
     TL = timeline();
     renderLvl(); renderCmp(); renderStrip(); renderCap();
-    if (V3) { V3.setJob(st.job); V3.setType(st.type); }
     const j = keepStep && cur ? TL.findIndex(t => t.step.id === cur) : -1;
-    if (V3 && j < 0) V3.reset();
+    const heavy = !!V3 && (v3Type !== st.type || v3Job !== st.job);
+    if (heavy) { swapping = true; host.classList.add('cg-swap'); }
     lastI = -9; go(j >= 0 ? j : 0);
     if (st.d4) { size4(); onScroll4(); }
+    if (!heavy) { if (V3 && j < 0) V3.reset(); return; }
+    const tok = ++swapTok;
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+      if (tok !== swapTok || !V3) return;
+      try { V3.setJob(st.job); V3.setType(st.type); v3Type = st.type; v3Job = st.job; if (j < 0) V3.reset(); }
+      finally { swapping = false; lastI = -9; go(st.i); requestAnimationFrame(() => host.classList.remove('cg-swap')); }
+    }, 0)));
   }
   function stop() { st.playing = false; clearTimeout(timer); play.textContent = 'เล่นทีละขั้น'; }
   function togglePlay() {
@@ -416,7 +426,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
   let booting = false;
   const io = new IntersectionObserver(async es => {
     if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect();
-    try { const mod = await import('./jobscene3d.js'); V3 = mod.createJobScene(host, { theme, type: st.type, job: st.job, onFrame }); V3.show(clone(TL[st.i].state), { jump: true }); lastI = st.i; renderTags(); }
+    try { const mod = await import('./jobscene3d.js'); V3 = mod.createJobScene(host, { theme, type: st.type, job: st.job, onFrame }); v3Type = st.type; v3Job = st.job; V3.show(clone(TL[st.i].state), { jump: true }); lastI = st.i; renderTags(); }
     catch (e) { console.warn('job scene 3D unavailable', e); fb.hidden = false; host.hidden = true; }
   }, { rootMargin: '300px 0px' });
   io.observe(host);

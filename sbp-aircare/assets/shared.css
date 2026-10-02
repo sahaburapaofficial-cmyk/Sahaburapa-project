@@ -1159,3 +1159,6 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 /* Rev.13: aspect-ratio + min-height let a stage grow wider than its column on tablets (≈600–800 px: B/C service pages scrolled
    sideways) → every 3D stage takes its column's width; the height still honours min-height */
 .ts-stage,.sy3-stage,.tm-stage,.hw-stage,.mt3-stage,.rf-host,.cg-host,.st-stage{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.cg-host .cg-canvas{transition:opacity .22s ease}.cg-host.cg-swap .cg-canvas{opacity:.35}
+@media (prefers-reduced-motion:reduce){.cg-host .cg-canvas{transition:none}}
+.sx-ico-logo{display:inline-grid;place-items:center;width:auto!important;padding:4px 8px;background:#fff;border-radius:10px}.sx-ico-logo img{height:22px;width:auto;display:block}

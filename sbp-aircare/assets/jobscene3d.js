@@ -272,7 +272,7 @@ export function createJobScene(container, o = {}) {
     tbox.position.set(P.box[0], 0.009, P.box[1]); washer.position.set(P.washer[0], 0.009, P.washer[1]); washer.rotation.y = -0.4; bucket.position.set(P.bucket[0], 0.009, P.bucket[1]);
     signG.visible = !!P.sign; if (P.sign) { signG.position.set(P.sign[0], 0, P.sign[1]); signG.rotation.y = -0.5; }
     // ladders (lead: at the unit; second: two-man lifts on overhead units)
-    lad.forEach(l => { if (l) { world.remove(l); disposeTree(l); } }); lad = [null, null];
+    lad.forEach(l => { if (l && l.L) { world.remove(l.L); disposeTree(l.L); } }); lad = [null, null];   // Rev.13 fix: entries are { L, h, spec } — removing the entry itself threw and left the venue half built on every type switch
     const mkLad = (at, face, h) => { const L = buildLadder(h), sp = h * 0.36, ry = face + Math.PI; L.rotation.y = ry; // climber faces `face`; the tread face of the ladder points back at him
       const tread = at, back = V(Math.sin(face), 0, Math.cos(face));   // unit direction
       L.position.set(tread[0] - back.x * -L.userData.z, 0, tread[1] - back.z * -L.userData.z);   // tread under the feet
