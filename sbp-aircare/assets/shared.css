@@ -664,6 +664,10 @@ a.s-flow-c:hover{border-color:var(--s-accent);transform:translateY(-1px)}
 
 /* ---------- Rev.09 product visual: photo slot or studio render ---------- */
 .s-ph{position:relative;margin:0;display:grid;place-items:center;overflow:hidden;border-radius:calc(var(--s-r) - 2px);background:radial-gradient(120% 90% at 50% 35%,var(--s-card) 0%,var(--s-card-2) 100%)}
+/* Rev.13: rendered shots sit on a product-photo sweep (bright centre, soft floor fade) — always light, like a studio backdrop */
+.s-ph.render{background:radial-gradient(90% 70% at 50% 38%,#ffffff 0%,#f3f6f9 55%,#e4e9ef 100%);box-shadow:inset 0 -1px 0 rgba(15,30,50,.06)}
+.s-ph.render::after{content:"";position:absolute;left:12%;right:12%;bottom:9%;height:10%;background:radial-gradient(50% 50% at 50% 50%,rgba(15,30,50,.10),transparent 70%);pointer-events:none;z-index:0}
+.s-ph.render>img{position:relative;z-index:1}
 .s-ph-card{aspect-ratio:3/2}
 .s-ph-detail{aspect-ratio:16/10;margin-bottom:12px}
 .s-ph-thumb{aspect-ratio:3/2;width:96px;flex:none}
@@ -1162,3 +1166,7 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 .cg-host .cg-canvas{transition:opacity .22s ease}.cg-host.cg-swap .cg-canvas{opacity:.35}
 @media (prefers-reduced-motion:reduce){.cg-host .cg-canvas{transition:none}}
 .sx-ico-logo{display:inline-grid;place-items:center;width:auto!important;padding:4px 8px;background:#fff;border-radius:10px}.sx-ico-logo img{height:22px;width:auto;display:block}
+/* the studio backdrop stays light in dark themes too → keep its line art and caption dark enough to read on it */
+.s-ph.render .s-ph-art{color:#5d6b7c;position:relative;z-index:1}
+.s-ph.render figcaption{background:rgba(255,255,255,.88);color:#4f5d6d;z-index:2}
+.s-ph.render .s-ph-tag{z-index:2}

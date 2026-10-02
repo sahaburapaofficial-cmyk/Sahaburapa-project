@@ -38,8 +38,8 @@ export const hasPhoto = (m, sku) => photosFor(m, sku).length > 0;
 // shots are kept in localStorage per render version so returning visitors see them at once.
 const SHOTS = {};
 const KEYS = ['wall', 'wall:fujiva', 'ceiling', 'cassette', 'floor'];
-const CACHE = 'sbp-shots-r12';   // Rev.12: the FUJIVA unit carries the official logo → older cached shots are dropped
-try { localStorage.removeItem('sbp-shots-r11'); } catch (e) { /* storage blocked */ }
+const CACHE = 'sbp-shots-r13';   // Rev.13: studio-lit, higher-resolution shots → older cached shots are dropped
+try { ['sbp-shots-r11', 'sbp-shots-r12'].forEach(k => localStorage.removeItem(k)); } catch (e) { /* storage blocked */ }
 try { Object.assign(SHOTS, JSON.parse(localStorage.getItem(CACHE) || '{}')); } catch (e) { /* storage blocked */ }
 const saveShots = () => { try { localStorage.setItem(CACHE, JSON.stringify(SHOTS)); } catch (e) { /* full or blocked: render again next time */ } };
 let studioP = null, queue = Promise.resolve(), idle = null;
@@ -52,23 +52,26 @@ function studio() {
     const { buildCeilingUnit, buildCassetteUnit, buildFloorUnit } = await import('./units3d.js');
     const { RoomEnvironment } = await import('./RoomEnvironment.js');
     let r;
-    const W = 720, H = 480;
+    const W = 1080, H = 720;   // Rev.13: 1.5× the old size — crisp on retina cards and in the product drawer
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
     r.setPixelRatio(1); r.setSize(W, H, false);
-    r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.06;
+    r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.0;
     r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene = new THREE.Scene();
-    const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.85;
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe6ee, 0.55));
-    const key = new THREE.DirectionalLight(0xffffff, 1.6); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 6;
-    scene.add(key, key.target);
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.16 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 1.0;
+    // Rev.13 product-photo lighting: warm key (soft shadow), cool fill from the left, and a rim light from behind-above that
+    // draws a bright edge along the white body so it separates from the light backdrop
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe6ee, 0.4));
+    const key = new THREE.DirectionalLight(0xfff6ec, 1.45); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 9; key.shadow.bias = -0.0004;
+    const fill = new THREE.DirectionalLight(0xe6efff, 0.38), rim = new THREE.DirectionalLight(0xeaf2ff, 1.15);
+    scene.add(key, key.target, fill, fill.target, rim, rim.target);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.22 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
     const cam = new THREE.PerspectiveCamera(26, W / H, 0.05, 30);
     const M = materialSet('studio');
     const shadowAll = g => g.traverse(o => { if (o.isMesh) { o.castShadow = !o.userData.noShadow; o.receiveShadow = true; } });
     const floating = U => U.root.traverse(o => { o.userData.noShadow = true; });   // indoor units float in the shot: only the outdoor unit grounds it
-    const shot = (build, { yaw = -0.5, pitch = 0.16, pad = 1.06, floorAt = 'min', keyUp = 4 } = {}) => {
+    const shot = (build, { yaw = -0.5, pitch = 0.16, pad = 0.97, floorAt = 'min', keyUp = 4 } = {}) => {   // Rev.13: tighter framing — the unit fills the card
       const g = new THREE.Group(); build(g); shadowAll(g); scene.add(g);
       const bb = new THREE.Box3().setFromObject(g), c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
       ground.position.y = floorAt === 'min' ? bb.min.y - 0.002 : -50;
@@ -77,6 +80,7 @@ function studio() {
       const dist = Math.max(sz.y / 2 / tv, Math.max(sz.x, sz.z) / 2 / (tv * cam.aspect)) * pad + Math.max(sz.x, sz.z) * 0.3;
       cam.position.set(c.x + Math.sin(yaw) * Math.cos(pitch) * dist, c.y + Math.sin(pitch) * dist, c.z + Math.cos(yaw) * Math.cos(pitch) * dist); cam.lookAt(c);
       key.position.set(c.x + 2.2, c.y + keyUp, c.z + 3); key.target.position.copy(c);
+      fill.position.set(c.x - 3, c.y + 1, c.z + 2); fill.target.position.copy(c); rim.position.set(c.x - 1.5, c.y + 2.6, c.z - 3.2); rim.target.position.copy(c);
       const sc = key.shadow.camera; sc.left = sc.bottom = -rad * 1.6; sc.right = sc.top = rad * 1.6; sc.near = 0.1; sc.far = 12; sc.updateProjectionMatrix();
       r.render(scene, cam);
       let out = null; try { out = cv.toDataURL('image/webp', 0.9); if (!/^data:image\/webp/.test(out)) out = cv.toDataURL('image/png'); } catch (e) {}
