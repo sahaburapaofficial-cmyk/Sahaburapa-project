@@ -9,7 +9,7 @@ import * as THREE from './three.module.min.js';
 import { createCrowd, gait } from './people3d.js';
 import { V, clamp, ease, smoothPts } from './install3d.js';
 import { canvasTex } from './ac3d.js';
-import { chestTex, backTex } from './brand3d.js';
+import { chestTex, backTex, brandTex, drawFujiva } from './brand3d.js';
 
 const S = (c, x = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...x });
 const bx = (w, h, d, m, x = 0, y = 0, z = 0) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = true; o.receiveShadow = true; return o; };
@@ -55,7 +55,7 @@ export function buildTools(home) {
   // PCB cover (clear plastic over the right end of the unit) — follows the unit
   { const m = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.34, 0.28), new THREE.MeshPhysicalMaterial({ color: 0xd9ecff, roughness: 0.15, transparent: true, opacity: 0.4, depthWrite: false })); m.position.set(0.37, 0, 0.01); item('pcb', m); m.userData.attachTo = 'unit'; }
   // cartons
-  { const c = new THREE.Group(); const card = S(0xc49a64, { roughness: 0.9 }); const lab = (t, w, h) => new THREE.MeshBasicMaterial({ map: canvasTex(256, 96, (x, W, H) => { x.fillStyle = '#c49a64'; x.fillRect(0, 0, W, H); x.fillStyle = '#23303e'; x.font = '800 34px Arial'; x.textAlign = 'center'; x.fillText('F U J I V A', W / 2, 42); x.font = '600 22px Arial'; x.fillText(t, W / 2, 76); }) });
+  { const c = new THREE.Group(); const card = S(0xc49a64, { roughness: 0.9 }); const lab = (t, w, h) => new THREE.MeshBasicMaterial({ map: brandTex('carton-' + t, 256, 96, (x, W, H) => { x.fillStyle = '#c49a64'; x.fillRect(0, 0, W, H); drawFujiva(x, W / 2, 36, 34, '#23303e'); x.fillStyle = '#23303e'; x.font = '600 22px Arial'; x.textAlign = 'center'; x.fillText(t, W / 2, 80); }) });
     const a = bx(1.02, 0.34, 0.34, card, 0, 0.17, 0); c.add(a); const la = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.18), lab('INDOOR UNIT')); la.position.set(0, 0.18, 0.171); c.add(la);
     const b2 = bx(0.92, 0.66, 0.4, card, 0.02, 0.33, 0.62); c.add(b2); const lb = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.18), lab('OUTDOOR UNIT')); lb.position.set(0.02, 0.45, 0.821); c.add(lb);
     c.position.set(-1.45, 0, -0.95); c.rotation.y = 0.12; item('boxes', c); }

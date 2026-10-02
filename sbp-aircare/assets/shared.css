@@ -1133,3 +1133,16 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 .cg-tnow{margin:0;font-size:13px;color:var(--s-ink-2)}.cg-tnow b{color:var(--s-ink)}
 @media (max-width:1000px){.cg-scroll .cg-side{max-height:24vh;overflow:auto}.cg-scroll .cg-card .cg-who,.cg-scroll .cg-card .cg-chk,.cg-scroll .cg-card .cg-how,.cg-scroll .cg-card .cg-form{display:none}}
 @media (max-width:640px){:root{--cg-top:62px}.cg-tl span:not(.on){visibility:hidden}.cg-scroll .cg-lvl{display:none}.cg-4dhint{flex-basis:100%}}
+
+/* ---- Rev.12 · company marks (owner-supplied: assets/logos/sbp.png = SP · บริษัท สหบูรพากรุ๊ป จำกัด, fujiva.png) ---- */
+.hdr .logo .logo-mk{height:32px;width:auto;flex:none;display:block}
+.sx-co-logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:6px}
+.sx-co-logos .sx-logo{display:block;height:56px;width:auto;padding:8px 12px;background:#fff;border-radius:var(--s-r);border:1px solid var(--s-line)}
+.sx-co-logos .sx-logo-fujiva{height:48px}
+.sx-co-note{display:block;margin-top:2px;font-size:13px;color:var(--s-ink-3)}
+.sx-fb-brand{display:flex;align-items:center;gap:10px}
+.sx-fb-brand .sx-logo{height:30px;width:auto;flex:none}
+.qc-hours{grid-column:1/-1;margin:-4px 0 0;font-size:13px;color:var(--s-ink-3)}
+@media (max-width:420px){.hdr .logo .logo-mk{height:26px}}
+.cg-tnote{display:block;margin-top:2px;font-size:12px;line-height:1.45;color:var(--s-ink-3)}
+.cg-ttot{color:var(--s-ink-3)}

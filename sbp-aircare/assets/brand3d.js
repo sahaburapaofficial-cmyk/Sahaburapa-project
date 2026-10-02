@@ -3,37 +3,61 @@
 // FUJIVA = the company's AC brand · SBP AirCare / บริษัท สหบูรพากรุ๊ป จำกัด = the service company. Marks are small and
 // placed where a real crew would carry them (work mat, uniform, tool box, cleaning bag, tablet, remote) — never on the
 // customer's air conditioner (any brand). Official artwork, when supplied (assets/logos/fujiva.png, sbp.png → build →
-// globalThis.__SBP_LOGOS), replaces the text wordmarks automatically.
+// globalThis.__SBP_LOGOS), replaces the text wordmarks automatically. ★Rev.12: supplied — fujiva.png (+ fujiva-light.png,
+// white letters for dark surfaces) and sbp.png (the SP mark of บริษัท สหบูรพากรุ๊ป จำกัด, drawn beside the SBP AirCare wordmark).
 import * as THREE from './three.module.min.js';
 
 const cache = new Map();
-const logo = key => { const src = globalThis.__SBP_LOGOS && globalThis.__SBP_LOGOS[key]; if (!src) return null; const im = new Image(); im.src = src; return im; };
+// Rev.12 (owner 2 ต.ค. 2569 supplied both marks): builds inline them (__SBP_LOGOS); the multi-file dev server reads assets/logos/
+const imgs = new Map();
+const logo = key => {
+  if (imgs.has(key)) return imgs.get(key);
+  const L = globalThis.__SBP_LOGOS, src = L ? L[key] : new URL(`./logos/${key}.png`, import.meta.url).href;
+  const im = src ? new Image() : null; if (im) { im.onerror = () => imgs.set(key, null); im.src = src; } imgs.set(key, im); return im;
+};
+const ready = im => im && im.complete && im.naturalWidth;
+const KEYS = ['fujiva', 'fujiva-light', 'sbp'];
+KEYS.forEach(logo);   // start decoding now: scenes boot later (lazy) and draw with them ready
+/** resolves once every official logo has loaded (or failed) — for one-shot renders that cannot redraw later (product shots) */
+export const logosReady = () => Promise.all(KEYS.map(k => { const im = logo(k); return !im || im.complete ? 0 : new Promise(r => { im.addEventListener('load', r); im.addEventListener('error', r); setTimeout(r, 3000); }); }));
+const light = c => { const m = /^#([0-9a-f]{6})$/i.exec(c); if (!m) return false; const n = parseInt(m[1], 16); return ((n >> 16) * 0.3 + ((n >> 8) & 255) * 0.59 + (n & 255) * 0.11) > 160; };
 function tex(key, w, h, draw) {
   if (cache.has(key)) return cache.get(key);
   const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); draw(g, w, h);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; cache.set(key, t);
   // official artwork arrives asynchronously: redraw once it has loaded
-  ['fujiva', 'sbp'].forEach(k => { const im = logo(k); if (im && !im.complete) im.onload = () => { g.clearRect(0, 0, w, h); draw(g, w, h); t.needsUpdate = true; }; });
+  KEYS.forEach(k => { const im = logo(k); if (im && !im.complete) im.addEventListener('load', () => { g.clearRect(0, 0, w, h); draw(g, w, h); t.needsUpdate = true; }); });
   return t;
 }
+/** a cached canvas texture that redraws itself once the official logo images have loaded (for other modules' printed labels) */
+export const brandTex = (key, w, h, draw) => tex('x:' + key, w, h, draw);
+/** small FUJIVA badge for the company's own units / cartons (transparent background) */
+export const fujivaBadge = () => tex('fjbadge', 256, 64, (g, w, h) => { g.clearRect(0, 0, w, h); drawFujiva(g, w / 2, h / 2, 44, '#606872'); });
 const TH = '"Anuphan","IBM Plex Sans Thai","Kanit",system-ui,sans-serif';
-// FUJIVA wordmark (letter-spaced caps) — or the official logo image
+// FUJIVA wordmark (letter-spaced caps) — or the official logo image (white-lettered version on dark surfaces)
 export function drawFujiva(g, cx, cy, size, color = '#fff') {
-  const im = logo('fujiva');
-  if (im && im.complete && im.naturalWidth) { const w = size * 4.2, hh = w * im.naturalHeight / im.naturalWidth; g.drawImage(im, cx - w / 2, cy - hh / 2, w, hh); return; }
+  const im = (light(color) && ready(logo('fujiva-light'))) ? logo('fujiva-light') : logo('fujiva');
+  if (ready(im)) { const w = size * 4.2, hh = w * im.naturalHeight / im.naturalWidth; g.drawImage(im, cx - w / 2, cy - hh / 2, w, hh); return; }
   g.save(); g.fillStyle = color; g.font = `600 ${size}px "Kanit",system-ui,sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
   if ('letterSpacing' in g) { g.letterSpacing = `${size * 0.32}px`; g.fillText('FUJIVA', cx + size * 0.16, cy); } else g.fillText('F U J I V A', cx, cy);
   g.restore();
 }
 export function drawSbp(g, cx, cy, size, color = '#fff', accent = '#e2711d', withCo = true) {
-  const im = logo('sbp');
-  if (im && im.complete && im.naturalWidth) { const w = size * 5, hh = w * im.naturalHeight / im.naturalWidth; g.drawImage(im, cx - w / 2, cy - hh / 2, w, hh); return; }
+  // official company mark (SP · บริษัท สหบูรพากรุ๊ป จำกัด) sits left of the service wordmark when supplied
+  const im = logo('sbp'), mk = ready(im) ? { h: size * 1.15, w: size * 1.15 * im.naturalWidth / im.naturalHeight } : null;
   g.save(); g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = `700 ${size}px ${TH}`; const w1 = g.measureText('SBP').width; g.font = `500 ${size}px ${TH}`; const w2 = g.measureText(' AirCare').width;
-  const x0 = cx - (w1 + w2) / 2; g.textAlign = 'left';
+  const gap = mk ? size * 0.3 : 0, tot = w1 + w2 + (mk ? mk.w + gap : 0);
+  const k = Math.min(1, g.canvas.width * 0.92 / tot); if (k < 1) { g.translate(cx, cy); g.scale(k, k); g.translate(-cx, -cy); }   // keep the mark + wordmark inside the texture
+  const x0 = cx - tot / 2 + (mk ? mk.w + gap : 0); g.textAlign = 'left';
+  if (mk) {   // on a small white plate, like the printed sticker it would be (the orange mark stays legible on orange / blue / dark)
+    const mx = x0 - gap - mk.w, my = cy - mk.h / 2, pd = size * 0.1;
+    g.fillStyle = '#ffffff'; g.beginPath(); if (g.roundRect) g.roundRect(mx - pd, my - pd, mk.w + pd * 2, mk.h + pd * 2, size * 0.18); else g.rect(mx - pd, my - pd, mk.w + pd * 2, mk.h + pd * 2); g.fill();
+    g.drawImage(im, mx, my, mk.w, mk.h);
+  }
   g.fillStyle = accent; g.font = `700 ${size}px ${TH}`; g.fillText('SBP', x0, cy);
   g.fillStyle = color; g.font = `500 ${size}px ${TH}`; g.fillText(' AirCare', x0 + w1, cy);
-  if (withCo) { g.textAlign = 'center'; g.globalAlpha = 0.85; g.font = `400 ${size * 0.42}px ${TH}`; g.fillText('บริษัท สหบูรพากรุ๊ป จำกัด', cx, cy + size * 0.78); }
+  if (withCo) { g.textAlign = 'center'; g.globalAlpha *= 0.85; g.font = `400 ${size * 0.42}px ${TH}`; g.fillText('บริษัท สหบูรพากรุ๊ป จำกัด', mk ? x0 + (w1 + w2) / 2 : cx, cy + size * (mk ? 0.92 : 0.78)); }
   g.restore();
 }
 

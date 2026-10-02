@@ -4,7 +4,7 @@
 // VAT, cleaning minimum per visit, travel by zone). The request goes through the normal quotation (cart → name/phone → send)
 // or straight to LINE OA with the summary typed in. Rates come from the Pricebook (cleanRate, standard rate only); nothing
 // here invents a price. Package names are shown in plain Thai first, the company's package name second.
-import { SIZE_BANDS, cleanRate, checkZone, TIER_TH, travelNote, incVat, baht, h, $, $$, VOLUME_HINT, DATA } from './sbp-core.js';
+import { SIZE_BANDS, cleanRate, checkZone, TIER_TH, travelNote, incVat, baht, h, $, $$, VOLUME_HINT, DATA, COMPANY } from './sbp-core.js';
 import { cart, quoteTotals } from './commerce.js';
 import { lineLink } from './contact.js';
 import { typeArt } from './proto-ui.js';
@@ -71,7 +71,7 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
   const dIn = h('input', { id: 'qc-date', type: 'date', min: today });
   let zt; zIn.addEventListener('input', () => { clearTimeout(zt); zt = setTimeout(() => { st.zone = zIn.value.trim(); drawSum(); }, 250); });
   dIn.addEventListener('change', () => { st.date = dIn.value; drawSum(); });
-  const s3 = h('div', { class: 'qc-where' }, h('label', { class: 's-field' }, 'พื้นที่หน้างาน', zIn), zOut, h('label', { class: 's-field' }, 'วันที่สะดวก (ทีมยืนยันคิวอีกครั้ง)', dIn));
+  const s3 = h('div', { class: 'qc-where' }, h('label', { class: 's-field' }, 'พื้นที่หน้างาน', zIn), zOut, h('label', { class: 's-field' }, 'วันที่สะดวก (ทีมยืนยันคิวอีกครั้ง)', dIn), h('p', { class: 'qc-hours' }, `เวลาทำการ ${COMPANY.hours}`));
 
   /* ---------- summary ---------- */
   const sum = h('aside', { class: 'qc-sum', 'aria-label': 'สรุปราคา' });
@@ -95,6 +95,7 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
     if (zone && zone.tier === 'out') notes.push('พื้นที่นี้เกินระยะรับงานรายเครื่อง ส่งข้อมูลได้ ทีมจะประเมินเป็นงานโครงการ');
     if (t.travelShort) notes.push(`พื้นที่นี้รับงานขั้นต่ำ ${t.travelShort + units} เครื่องต่อเที่ยว`);
     if (units >= VOLUME_HINT) notes.push('ตั้งแต่ 10 เครื่องขึ้นไป อาจได้อัตราพิเศษตามเงื่อนไขบริษัท ทีมขายยืนยันในใบเสนอราคา');
+    if (st.date && !COMPANY.open.days.includes(new Date(st.date + 'T12:00:00').getDay())) notes.push(`วันที่เลือกเป็นวันหยุดของบริษัท · ${COMPANY.hoursNote}`);
     notes.push('ราคามาตรฐานจาก Pricebook 2569 · ทีมยืนยันราคาและคิวก่อนเข้างานทุกครั้ง');
     sum.append(h('ul', { class: 'qc-notes' }, notes.map(n => h('li', {}, n))));
     const send = h('button', { type: 'button', class: 's-btn primary qc-go', onclick: () => {

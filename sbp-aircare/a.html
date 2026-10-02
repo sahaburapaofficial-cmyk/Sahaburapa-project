@@ -71,8 +71,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:color-mix(in oklab,var(--bg) 82%,transparent);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
 .hdr .wrap{display:flex;align-items:center;gap:22px;height:64px}
 .logo{display:flex;flex:none;align-items:center;gap:10px;text-decoration:none;font-weight:700}
-.logo i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--blue);color:#fff;font-style:normal;font-size:13px;letter-spacing:.04em}
-:root[data-theme="dark"] .logo i{color:#0C1117}
 .logo small{display:block;font-weight:400;font-size:11px;color:var(--ink-3);line-height:1.1;white-space:nowrap}
 .nav{display:flex;gap:2px;margin-inline:auto;min-width:0;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
 .nav a{padding:8px 10px;border-radius:999px;text-decoration:none;color:var(--ink-2);font-size:14.5px;white-space:nowrap}
@@ -380,7 +378,7 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
 <aside class="proto" aria-label="สถานะต้นแบบ">ต้นแบบแบบ A · ราคาสินค้าและค่าบริการจาก Pricebook 2569 ของบริษัท · สถานะคิวและรายงานเป็นตัวอย่าง · ฟอร์มยังไม่ส่งข้อมูลจริง · <a href="./">กลับหน้ารวม</a></aside>
 <header class="hdr">
   <div class="wrap">
-    <a class="logo" href="#top"><i>SBP</i><span>AirCare<small>สหบูรพากรุ๊ป</small></span></a>
+    <a class="logo" href="#top"><img class="logo-mk" data-logo="sbp" alt="" width="44" height="32"><span>SBP AirCare<small>สหบูรพากรุ๊ป</small></span></a>
     <nav class="nav" aria-label="เมนูหลัก">
       <a href="#learn">ความรู้</a><a href="#catalog">สินค้า</a><a href="#cleanflow">ขั้นตอนช่าง</a><a href="#howto">งานบริการ</a><a href="#prices">ค่าบริการ</a><a href="#studio">ห้องจำลอง</a><a href="#fit">ลองวางในห้อง</a><a href="#b2b">สัญญารายปี</a><a href="#quality">วัสดุ</a><a href="#area">พื้นที่</a>
     </nav>

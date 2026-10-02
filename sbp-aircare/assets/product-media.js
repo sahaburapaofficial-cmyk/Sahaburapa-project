@@ -38,7 +38,8 @@ export const hasPhoto = (m, sku) => photosFor(m, sku).length > 0;
 // shots are kept in localStorage per render version so returning visitors see them at once.
 const SHOTS = {};
 const KEYS = ['wall', 'wall:fujiva', 'ceiling', 'cassette', 'floor'];
-const CACHE = 'sbp-shots-r11';
+const CACHE = 'sbp-shots-r12';   // Rev.12: the FUJIVA unit carries the official logo → older cached shots are dropped
+try { localStorage.removeItem('sbp-shots-r11'); } catch (e) { /* storage blocked */ }
 try { Object.assign(SHOTS, JSON.parse(localStorage.getItem(CACHE) || '{}')); } catch (e) { /* storage blocked */ }
 const saveShots = () => { try { localStorage.setItem(CACHE, JSON.stringify(SHOTS)); } catch (e) { /* full or blocked: render again next time */ } };
 let studioP = null, queue = Promise.resolve(), idle = null;
@@ -46,6 +47,7 @@ function studio() {
   if (studioP) return studioP;
   studioP = (async () => {
     const THREE = await import('./three.module.min.js');
+    await (await import('./brand3d.js')).logosReady();   // Rev.12: the FUJIVA shot is rendered once, with the official logo
     const { buildPremiumIndoor, buildOutdoor, materialSet } = await import('./ac3d.js');
     const { buildCeilingUnit, buildCassetteUnit, buildFloorUnit } = await import('./units3d.js');
     const { RoomEnvironment } = await import('./RoomEnvironment.js');
@@ -81,10 +83,10 @@ function studio() {
       scene.remove(g); g.traverse(o => { if (o.isMesh) { o.geometry.dispose(); } });
       return out;
     };
-    const outdoor = (g, x, z, s = 0.62) => { const O = buildOutdoor(M); O.root.scale.setScalar(s); O.root.position.set(x, 0.55 * s / 2, z); O.root.rotation.y = -0.18; g.add(O.root); };
+    const outdoor = (g, x, z, s = 0.62, logo = false) => { const O = buildOutdoor(M, { logo }); O.root.scale.setScalar(s); O.root.position.set(x, 0.55 * s / 2, z); O.root.rotation.y = -0.18; g.add(O.root); };
     const BUILD = {
       wall: () => shot(g => { const U = buildPremiumIndoor(M, { logo: false }); floating(U); U.root.position.set(0, 0.62, 0); U.root.rotation.y = 0.04; g.add(U.root); outdoor(g, 0.72, -0.62); }, { yaw: -0.42, pitch: 0.12 }),
-      'wall:fujiva': () => shot(g => { const U = buildPremiumIndoor(M, { logo: true }); floating(U); U.root.position.set(0, 0.62, 0); U.root.rotation.y = 0.04; g.add(U.root); outdoor(g, 0.72, -0.62); }, { yaw: -0.42, pitch: 0.12 }),   // company brand: wordmark allowed
+      'wall:fujiva': () => shot(g => { const U = buildPremiumIndoor(M, { logo: true }); floating(U); U.root.position.set(0, 0.62, 0); U.root.rotation.y = 0.04; g.add(U.root); outdoor(g, 0.72, -0.62, 0.62, true); }, { yaw: -0.42, pitch: 0.12 }),   // company brand: logo allowed
       ceiling: () => shot(g => { const U = buildCeilingUnit(M, { interior: false, rod: 0 }); floating(U); U.parts.hangers && (U.parts.hangers.visible = false); U.root.position.set(0, 0.7, 0); g.add(U.root); outdoor(g, 1.0, -0.9, 0.7); }, { yaw: -0.5, pitch: 0.05 }),
       cassette: () => shot(g => { const U = buildCassetteUnit(M, { interior: false, rod: 0 }); floating(U); U.root.position.set(0, 0.75, 0); U.root.rotation.x = -0.95; U.parts.hangers && (U.parts.hangers.visible = false); g.add(U.root); outdoor(g, 0.95, -0.8, 0.7); }, { yaw: -0.5, pitch: 0.1 }),   // panel tilted toward the camera, as product shots show it
       floor: () => shot(g => { const U = buildFloorUnit(M); g.add(U.root); outdoor(g, 0.92, -0.3, 0.62); }, { yaw: -0.45, pitch: 0.14, keyUp: 9 }),   // high key light: short shadow under a tall unit

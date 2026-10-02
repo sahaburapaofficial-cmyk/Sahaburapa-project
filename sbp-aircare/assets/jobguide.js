@@ -19,6 +19,19 @@ export const JOB_TYPES = [
 ];
 // Rev.11: plain Thai first, the company's package name second (internal P1/P2 · T1/T2 codes stay in the step references)
 const PKGS = [{ id: 'Basic Clean', th: 'ล้างมาตรฐาน', sub: 'Basic Clean · ทดสอบการทำงานหลังล้าง' }, { id: 'Standard Care', th: 'ล้างพร้อมรายงานภาพ', sub: 'Standard Care · วัดค่าก่อน–หลัง + ภาพ + เกรด' }];
+// Rev.12 (owner 2 ต.ค. 2569: "เวลาหาข้อมูลออนไลน์ได้ แต่แล้วแต่หน้างานและสภาพเครื่อง จึงใช้เป็นเกณฑ์ไม่ได้") — typical time per unit
+// as published by Thai AC service shops (search 2 ต.ค. 2569: midea.com/th, nbcgroup.co.th, airyenservice.com, ofair.co, q-chang.com,
+// scair.co.th): wall C1 30–60 min · big clean 1.5–2.5 h · cassette 40–90 min (C1) / up to ~2 h · wall install 2–4 h · cassette
+// install ~3 h to a full day. Ceiling / floor-standing follow the cassette ranges (no separate published figure). Always shown
+// with TIME_NOTE — never as a promise, a pass/fail line or a price basis; the crew confirms on site.
+export const JOB_TIME = {
+  C1: { wall: [30, 60], ceiling: [40, 90], cassette: [40, 90], floor: [40, 90] },
+  C2: { wall: [90, 150], ceiling: [90, 120], cassette: [90, 120], floor: [90, 120] },
+  install: { wall: [120, 240], ceiling: [180, 360], cassette: [180, 480], floor: [180, 360] },
+};
+export const TIME_NOTE = 'เวลาโดยประมาณจากข้อมูลร้านแอร์ทั่วไป ขึ้นกับหน้างานและสภาพเครื่อง ไม่ใช่เกณฑ์หรือคำรับรอง';
+const minTh = m => m < 60 ? `${m} นาที` : `${+(m / 60).toFixed(1)} ชม.`.replace('.0 ', ' ');
+export const timeTh = ([a, b]) => (a < 60 && b <= 60) ? `${a}–${b} นาที` : `${minTh(a)}–${minTh(b)}`.replace(/ ชม\.–/, '–');
 // which part groups come off at each teardown step, per unit type (ids of the ac3d / units3d part groups)
 export const TEAR = {
   wall: { parts: ['front', 'filter', 'louver'], lower: [], fan: ['blower'], pan: ['pan'], fanW: 'blower', panW: 'pan' },
@@ -232,7 +245,8 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
           h('p', { class: 'cg-tag' }, o.key === 'PREMIUM' ? 'พรีเมียม' : 'มาตรฐาน'), h('h3', {}, `ติดตั้ง${o.th}`), h('p', { class: 'cg-d' }, o.note),
           h('dl', {}, h('dt', {}, 'รวมในงาน'), h('dd', {}, (it.inc || '').split(';').map(x => x.trim()).filter(Boolean).slice(0, 6).join(' · ')),
             h('dt', {}, 'ทดสอบรั่ว'), h('dd', {}, leak ? leak.d : '—'), h('dt', {}, 'สุญญากาศ'), h('dd', {}, vac ? vac.d : '—'), h('dt', {}, 'ส่งมอบ'), h('dd', {}, hand ? hand.d : '—'),
-            h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, (it.exc || '').split(',').slice(0, 4).join(', '))),
+            h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, (it.exc || '').split(',').slice(0, 4).join(', ')),
+            h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME.install[st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
           h('div', { class: 'cg-pr' }, it.ex != null ? [h('b', {}, baht(incVat(it.ex))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(it.ex)} · ${it.name}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
           h('div', { class: 'cg-act' },
             h('button', { type: 'button', class: 's-btn ' + (on ? 'primary' : 'ghost'), onclick: () => { st.level = o.key; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${steps.length} ขั้นตอน`),
@@ -255,7 +269,8 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
         h('p', { class: 'cg-tag' }, c2 ? 'ล้างใหญ่' : 'ล้างปกติ'),
         h('h3', {}, info.th), h('p', { class: 'cg-d' }, info.d),
         h('dl', {}, h('dt', {}, 'ถอดออกมาล้าง'), h('dd', {}, out.join(' · ')), h('dt', {}, 'ล้างในเครื่อง'), h('dd', {}, inPlace.join(' · ')), h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, notInc.join(' · ')),
-          c2 ? [h('dt', {}, 'เพิ่มจาก C1'), h('dd', {}, 'ทะเบียนชิ้นส่วนที่ถอด + ภาพ (บังคับ) · ชิ้นที่ไม่ได้ถอดต้องระบุเหตุผล')] : null),
+          c2 ? [h('dt', {}, 'เพิ่มจาก C1'), h('dd', {}, 'ทะเบียนชิ้นส่วนที่ถอด + ภาพ (บังคับ) · ชิ้นที่ไม่ได้ถอดต้องระบุเหตุผล')] : null,
+          h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME[lv][st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
         h('div', { class: 'cg-pr' }, r ? [h('b', {}, baht(incVat(r.rate.s))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(r.rate.s)} · ${st.pkg}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
         h('div', { class: 'cg-act' },
           h('button', { type: 'button', class: 's-btn ' + (st.level === lv ? 'primary' : 'ghost'), onclick: () => { st.level = lv; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${n} ขั้นตอน`),
@@ -343,7 +358,8 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
     ruler.append(
       h('div', { class: 'cg-tr' }, groups.map(g => h('i', { class: 'ph-' + g.ph + (g.ph === cur ? ' on' : ''), style: `--n:${g.n}` })), h('b', { class: 'cg-mk', style: `--p:${rulerP}` })),
       h('div', { class: 'cg-tl' }, groups.map(g => h('span', { class: g.ph === cur ? 'on' : '', style: `--n:${g.n}` }, phName(g.ph)))),
-      h('p', { class: 'cg-tnow' }, h('b', {}, `ขั้นที่ ${st.i + 1} จาก ${TL.length}`), ` · ${phName(cur)} · ${Math.round(rulerP * 100)}% ของงาน`));
+      h('p', { class: 'cg-tnow' }, h('b', {}, `ขั้นที่ ${st.i + 1} จาก ${TL.length}`), ` · ${phName(cur)} · ${Math.round(rulerP * 100)}% ของงาน`,
+        h('span', { class: 'cg-ttot' }, ` · ทั้งงานประมาณ ${timeTh(JOB_TIME[st.job === 'install' ? 'install' : st.level][st.type])}/เครื่อง (ขึ้นกับหน้างาน)`)));
   }
   function onScroll4() {
     if (!st.d4) return;
