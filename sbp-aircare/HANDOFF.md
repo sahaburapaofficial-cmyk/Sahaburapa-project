@@ -19,6 +19,8 @@
 
 ---
 
+> ★**ลิงก์ทดลองล่าสุด (อัปเดตทุกครั้งหลังพัฒนา — เจ้าของ 2 ต.ค. 2569: "หลังทำทุกครั้งอัพเดทส่งเว็บตัวอย่างมาให้เปิดใช้งาน"):** `npm run build:preview` (`urls.preview.json`) แล้ว publish `dist/art/{a,b,c,index}.html` ทับลิงก์เดิม · แบบ A https://claude.ai/artifact/65KfVJBy5imrW1DGbkyPpk · แบบ B https://claude.ai/artifact/Fz5UMEs9RBLW19sLufhALD · แบบ C https://claude.ai/artifact/PqG73huACDWwNrrN2h2bBz · เทียบ 3 แบบ https://claude.ai/artifact/JeZMw4SjpNFrU9SxfqsDtb (Artifacts ส่งฟอร์มออกนอกเว็บไม่ได้ → แสดงกล่องสรุปแทน · เว็บจริงที่ส่งอีเมลได้คือ GitHub Pages หลัง merge)
+
 > ★**Rev.14 (2 ต.ค. 2569 — เจ้าของ: "หยิบจากเว็บระดับโลกมาเติมให้เป็นเพชรเม็ดงาม ทำทั้ง A B C แล้วคัดเลือก")**
 > - **ค้นหาทั้งเว็บ Ctrl/⌘K** (แบบ Linear/Raycast): รุ่นแอร์ (ค้นตาม BTU ได้) บริการ หัวข้อ คำถาม และคำสั่งด่วน — หน้าตาต่างกันตามแบบ A / B / C
 > - เปลี่ยนหน้าแบบเฟดนุ่ม · เส้นความคืบหน้าการอ่านใต้ header

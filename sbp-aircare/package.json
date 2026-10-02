@@ -15,7 +15,8 @@
     "booking": "node tests/quickclean.mjs a.html && node tests/quickclean.mjs b.html && node tests/quickclean.mjs c.html && node tests/quickclean.mjs c.html 390",
     "smoke:site": "BASE=http://localhost:8767 node tests/smoke.mjs a.html && BASE=http://localhost:8767 node tests/smoke.mjs b.html 390 844 && BASE=http://localhost:8767 node tests/smoke.mjs c.html",
     "serve:site": "cd dist/site && python3 -m http.server 8767",
-    "og": "node tools/og-image.mjs"
+    "og": "node tools/og-image.mjs",
+    "build:preview": "python3 build.py --urls urls.preview.json"
   },
   "devDependencies": {
     "playwright": "1.56.0",
