@@ -1,4 +1,7 @@
 {
+  "enabledMcpjsonServers": [
+    "ui-ux-pro-max"
+  ],
   "hooks": {
     "SessionStart": [
       {

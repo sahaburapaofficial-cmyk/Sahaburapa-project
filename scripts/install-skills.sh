@@ -3,6 +3,7 @@
 #   - UI UX Pro Max (ui-ux-pro-max-cli >= 2.15.0): ui-ux-pro-max, design-system,
 #     design, ui-styling, brand, slides, banner-design
 #   - From anthropics/skills: frontend-design, mcp-builder
+# and builds the ui-ux-pro-max MCP server in mcp-servers/ (registered in .mcp.json).
 # Safe to run repeatedly; skills already present are left alone.
 # Pass --force to reinstall everything.
 set -euo pipefail
@@ -40,4 +41,10 @@ if [ "${#missing[@]}" -gt 0 ]; then
 fi
 
 find "$SKILLS" -name __pycache__ -type d -prune -exec rm -rf {} +
-echo "Skills ready: $(ls "$SKILLS" | tr '\n' ' ')"
+
+if [ "$FORCE" = 1 ]; then
+  bash "$ROOT/mcp-servers/ui-ux-pro-max-mcp-server/build.sh" --force
+else
+  bash "$ROOT/mcp-servers/ui-ux-pro-max-mcp-server/build.sh"
+fi
+echo "Skills ready: $(ls "$SKILLS" | tr '\n' ' '); MCP server: mcp-servers/ui-ux-pro-max-mcp-server"
