@@ -1,0 +1,72 @@
+/**
+ * SBP AirCare — receive website requests (Rev.10)
+ * Google Apps Script web app: the website POSTs JSON (as text/plain) → one row in the sheet tab of that kind
+ * (ใบเสนอราคา / ติดต่อ / ความเห็น) → one notification e-mail to the sales team → reply {ok, ref}.
+ * Set-up: backend/README.md. Runs under the company Google account that owns the sheet.
+ */
+const NOTIFY_TO = 'Sahaburapa.official@gmail.com';   // comma-separated list allowed; consumer Gmail: 100 recipients / day
+const TABS = { quote: 'ใบเสนอราคา', contact: 'ติดต่อ', feedback: 'ความเห็น' };
+const MAX_TEXT = 8000;
+
+function doPost(e) {
+  try {
+    const raw = (e && e.postData && e.postData.contents) || '';
+    if (raw.length > 20000) return reply({ ok: false, error: 'too large' });
+    const d = JSON.parse(raw);
+    const kind = TABS[d.kind] ? d.kind : null;
+    if (!kind) return reply({ ok: false, error: 'bad kind' });
+    if (d.hp) return reply({ ok: true, ref: String(d.ref || '') });        // bot filled the hidden field: accept silently, store nothing
+    if (!rateOk()) return reply({ ok: false, error: 'busy' });
+    const ref = clean(d.ref, 20) || ('W' + Date.now());
+    const fields = d.fields && typeof d.fields === 'object' ? d.fields : {};
+    const text = clean(d.text, MAX_TEXT);
+    const sheet = tab(kind, Object.keys(fields));
+    const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const row = head.map(k => {
+      if (k === 'เวลา') return new Date();
+      if (k === 'เลขอ้างอิง') return ref;
+      if (k === 'แบบ') return clean(d.variant, 4);
+      if (k === 'หน้า') return clean(d.page, 200);
+      if (k === 'สรุป') return text;
+      if (k === 'สถานะ') return 'ใหม่';
+      return k in fields ? safeCell(clean(fields[k], 1000)) : '';
+    });
+    sheet.appendRow(row);
+    notify(kind, ref, d.variant, text);
+    return reply({ ok: true, ref });
+  } catch (err) {
+    console.error(err);
+    return reply({ ok: false, error: 'server' });
+  }
+}
+
+function doGet() { return reply({ ok: true, service: 'SBP AirCare requests' }); }
+
+function tab(kind, keys) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(TABS[kind]);
+  const base = ['เวลา', 'เลขอ้างอิง', 'สถานะ', 'แบบ', 'หน้า'];
+  if (!sh) { sh = ss.insertSheet(TABS[kind]); sh.appendRow(base.concat(keys, ['สรุป'])); sh.setFrozenRows(1); return sh; }
+  const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  const missing = keys.filter(k => head.indexOf(k) < 0);
+  if (missing.length) sh.getRange(1, head.length + 1, 1, missing.length).setValues([missing]);   // new form field → new column
+  return sh;
+}
+
+function notify(kind, ref, variant, text) {
+  const subject = `[SBP AirCare] ${TABS[kind]} ใหม่ · ${ref}`;
+  const url = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+  try { MailApp.sendEmail({ to: NOTIFY_TO, subject, body: `${text}\n\nแบบเว็บไซต์: ${variant || '-'}\nเปิดตาราง: ${url}\n\n(ยอดเงินในคำขอเป็นยอดประมาณการจากหน้าเว็บ ยืนยันราคาในใบเสนอราคาอย่างเป็นทางการทุกครั้ง)` }); }
+  catch (err) { console.error('mail quota or error', err); }   // the row is already saved, so the request is not lost
+}
+
+// at most 30 requests per minute for the whole site — slows down floods without blocking real customers
+function rateOk() {
+  const c = CacheService.getScriptCache(), k = 'n' + Math.floor(Date.now() / 60000), n = Number(c.get(k) || 0);
+  if (n >= 30) return false;
+  c.put(k, String(n + 1), 120);
+  return true;
+}
+function clean(v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, n); }
+function safeCell(v) { return /^[=+\-@]/.test(v) ? "'" + v : v; }   // never let customer text become a spreadsheet formula
+function reply(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
