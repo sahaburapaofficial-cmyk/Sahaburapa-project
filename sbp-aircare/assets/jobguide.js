@@ -24,14 +24,8 @@ const PKGS = [{ id: 'Basic Clean', th: 'ล้างมาตรฐาน', sub:
 // scair.co.th): wall C1 30–60 min · big clean 1.5–2.5 h · cassette 40–90 min (C1) / up to ~2 h · wall install 2–4 h · cassette
 // install ~3 h to a full day. Ceiling / floor-standing follow the cassette ranges (no separate published figure). Always shown
 // with TIME_NOTE — never as a promise, a pass/fail line or a price basis; the crew confirms on site.
-export const JOB_TIME = {
-  C1: { wall: [30, 60], ceiling: [40, 90], cassette: [40, 90], floor: [40, 90] },
-  C2: { wall: [90, 150], ceiling: [90, 120], cassette: [90, 120], floor: [90, 120] },
-  install: { wall: [120, 240], ceiling: [180, 360], cassette: [180, 480], floor: [180, 360] },
-};
-export const TIME_NOTE = 'เวลาโดยประมาณจากข้อมูลร้านแอร์ทั่วไป ขึ้นกับหน้างานและสภาพเครื่อง ไม่ใช่เกณฑ์หรือคำรับรอง';
-const minTh = m => m < 60 ? `${m} นาที` : `${+(m / 60).toFixed(1)} ชม.`.replace('.0 ', ' ');
-export const timeTh = ([a, b]) => (a < 60 && b <= 60) ? `${a}–${b} นาที` : `${minTh(a)}–${minTh(b)}`.replace(/ ชม\.–/, '–');
+import { JOB_TIME, TIME_NOTE, timeTh } from './sbp-core.js';   // Rev.15: moved to the domain core (queue.js uses them too)
+export { JOB_TIME, TIME_NOTE, timeTh };
 // which part groups come off at each teardown step, per unit type (ids of the ac3d / units3d part groups)
 export const TEAR = {
   wall: { parts: ['front', 'filter', 'louver'], lower: [], fan: ['blower'], pan: ['pan'], fanW: 'blower', panW: 'pan' },

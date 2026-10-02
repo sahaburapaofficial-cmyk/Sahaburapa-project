@@ -1081,7 +1081,7 @@ html.sx-on .mbar:has(.s-mmenu):has(>a~a){grid-template-columns:.85fr .9fr .85fr 
 .qc-size select{min-height:36px;width:100%;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card);color:var(--s-ink);font:inherit;font-size:13px;padding:0 6px}
 .qc-how{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .qc-seg{display:grid;gap:8px}
-.qc-seg button{display:grid;gap:2px;text-align:left;padding:10px 12px;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .7);background:var(--s-card-2);color:var(--s-ink);font:inherit;cursor:pointer;transition:border-color .2s,background .2s}
+.qc-seg button{display:grid;gap:2px;align-content:start;text-align:left;padding:10px 12px;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .7);background:var(--s-card-2);color:var(--s-ink);font:inherit;cursor:pointer;transition:border-color .2s,background .2s}
 .qc-seg button b{font-size:15px}.qc-seg button small{font-size:12.5px;line-height:1.45;color:var(--s-ink-2)}
 .qc-seg button.on{border-color:var(--s-accent);background:var(--s-card);box-shadow:0 0 0 1px var(--s-accent) inset}
 .qc-where{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px 12px;align-items:start}
@@ -1180,7 +1180,7 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 .sv2-tabs button[aria-checked=true]{background:var(--s-ink);border-color:var(--s-ink);color:var(--s-card)}
 .sv2-lead{margin:0;font-size:14px;color:var(--s-ink-2)}
 .sv2-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:8px;counter-reset:sv2}
-.sv2-list li{counter-increment:sv2;position:relative;display:grid;gap:3px;padding:12px 12px 12px 46px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .8);background:var(--s-card-2)}
+.sv2-list li{counter-increment:sv2;position:relative;display:grid;gap:3px;align-content:start;padding:12px 12px 12px 46px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .8);background:var(--s-card-2)}
 .sv2-list li::before{content:counter(sv2);position:absolute;left:12px;top:12px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--s-ink);color:var(--s-card);font:600 12px var(--s-mono)}
 .sv2-list b{font-size:14.5px;color:var(--s-ink)}.sv2-list small{font-size:13px;line-height:1.55;color:var(--s-ink-2)}
 .sv2-k{justify-self:start;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid var(--s-line);color:var(--s-ink-2);background:var(--s-card)}
@@ -1255,3 +1255,22 @@ html.fx-C .fx-spot::after{content:"";position:absolute;inset:0;border-radius:inh
 /* ---- Rev.14 · detail fixes from the audit ---- */
 .s-row-d summary{display:block;padding:6px 0}
 @media (pointer:coarse){.s-row-d summary,.s-det summary{min-height:44px;display:flex;align-items:center}}
+/* Rev.15 — booking queue: quick date chips · slot · what the date means (quickclean + queue.js) */
+.qc-when{grid-column:1/-1;display:grid;gap:10px}
+.qc-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.qc-chip{display:grid;gap:1px;align-content:start;text-align:left;padding:8px 10px;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .7);background:var(--s-card-2);color:var(--s-ink);font:inherit;cursor:pointer}
+.qc-chip b{font-size:14px}.qc-chip small{font-size:12px;color:var(--s-ink-2);line-height:1.35}
+.qc-chip.on{border-color:var(--s-accent);box-shadow:inset 0 0 0 1px var(--s-accent);background:var(--s-accent-soft)}
+.qc-slot{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+.qc-qmsg{display:grid;gap:6px;font-size:13.5px;line-height:1.55;color:var(--s-ink-2)}
+.qc-qmsg p{margin:0}
+.qc-tag{display:inline-block;margin-right:6px;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.qc-tag-ok{color:var(--s-ok)}.qc-tag-warn{color:var(--s-warn)}.qc-tag-bad{color:var(--s-bad)}.qc-tag-info{color:var(--s-ink-2)}
+.qc-time b{color:var(--s-ink);font-weight:600}.qc-time small{display:block;font-size:12px;color:var(--s-ink-3)}
+.qc-alt{font:inherit;font-weight:600;color:var(--s-accent);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
+@media (max-width:420px){.qc-chips{grid-template-columns:1fr 1fr}.qc-chips .qc-chip:last-child{grid-column:1/-1}}
+.sx-track{margin-top:20px;padding:16px;border:1px solid var(--s-line);border-radius:var(--s-r);background:var(--s-card)}
+.sx-track h3{margin:0 0 10px;font-size:17px}
+.sx-track-r{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:8px}
+.sx-track input{min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card-2);color:var(--s-ink);font:inherit;padding:0 12px;min-width:0}
+@media (max-width:560px){.sx-track-r{grid-template-columns:1fr 1fr}.sx-track-r .s-btn{grid-column:1/-1}}

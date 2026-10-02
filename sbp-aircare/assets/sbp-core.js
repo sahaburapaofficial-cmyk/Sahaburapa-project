@@ -364,7 +364,11 @@ export const PROCESS = [
   { th: 'ลงมือทำงาน', d: 'คลุมพื้นที่ ทำตามขั้นตอน ถ่ายภาพก่อน–หลัง' },
   { th: 'ส่งมอบ + รายงาน', d: 'ทดสอบการทำงาน ส่งเอกสารตามแพ็กเกจ และเงื่อนไขรับประกันต่อรายการ' },
 ];
+// ★Rev.15 owner rule (2 ต.ค. 2569): normal booking at least 3 days ahead · คิวด่วน (earlier, today included) +500 before VAT per
+// visit, only when a crew is free. queue.js works out everything else from these two numbers.
+export const QUEUE_RULES = { leadDays: 3, rushFeeEx: 500 };
 export const FAQ = [
+  { q: 'ต้องจองล่วงหน้ากี่วัน ถ้าต้องการด่วนได้ไหม', a: `จองปกติล่วงหน้า ${QUEUE_RULES.leadDays} วัน ถ้าต้องการเร็วกว่านั้น (รวมถึงวันนี้) เลือกคิวด่วน มีค่าบริการเพิ่ม ${(QUEUE_RULES.rushFeeEx).toLocaleString('en-US')} บาทต่อการเข้างาน (ก่อน VAT · ${incVat(QUEUE_RULES.rushFeeEx).toLocaleString('en-US')} บาทรวม VAT) รับเมื่อมีทีมว่างเท่านั้น ทีมยืนยันคิวก่อนทุกครั้ง ถ้าไม่มีคิวจะไม่เก็บค่าคิวด่วนและเสนอวันที่ใกล้ที่สุดให้ งานนอกเวลาทำการและวันอาทิตย์มีค่าใช้จ่ายเพิ่มเติม ทีมแจ้งในใบเสนอราคา` },
   { q: 'ราคาบนเว็บรวม VAT แล้วหรือยัง', a: 'ราคาตัวใหญ่รวม VAT 7% แล้ว ราคาก่อน VAT แสดงไว้ข้างกันทุกรายการ ใบเสนอราคาเบื้องต้นแยกยอดก่อน VAT และ VAT ให้' },
   { q: 'ราคาติดตั้งรวมอะไรบ้าง', a: 'รวมท่อน้ำยาและวัสดุ 4 เมตรแรก ท่อน้ำทิ้ง สายไฟตามระยะที่ระบุ เบรกเกอร์ ขาแขวน Vacuum และทดสอบ ส่วนที่เกินเลือกเพิ่มได้ในหน้าสินค้า' },
   { q: 'รายการที่ขึ้นว่า "ประเมินหน้างาน" คืออะไร', a: 'งานที่ราคาขึ้นกับสภาพจริง เช่น รื้อเครื่องเดิม งานสูง นั่งร้าน เปิดฝ้า ทีมจะแจ้งราคาให้ยืนยันก่อนเริ่มงานทุกครั้ง' },
@@ -398,3 +402,14 @@ export function countUp(el, to, dur = 900, fmt = n => Math.round(n).toLocaleStri
   const step = t => { const k = Math.min(1, (t - t0) / dur); const e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
+
+// Rev.12/15 estimated on-site time per unit for one crew of two (minutes) — from what Thai air-con shops publish online.
+// Owner: depends on the site and the unit, never a promise / pass-fail line / price basis → always shown with TIME_NOTE.
+export const JOB_TIME = {
+  C1: { wall: [30, 60], ceiling: [40, 90], cassette: [40, 90], floor: [40, 90] },
+  C2: { wall: [90, 150], ceiling: [90, 120], cassette: [90, 120], floor: [90, 120] },
+  install: { wall: [120, 240], ceiling: [180, 360], cassette: [180, 480], floor: [180, 360] },
+};
+export const TIME_NOTE = 'เวลาโดยประมาณจากข้อมูลร้านแอร์ทั่วไป ขึ้นกับหน้างานและสภาพเครื่อง ไม่ใช่เกณฑ์หรือคำรับรอง';
+const minTh = m => m < 60 ? `${m} นาที` : `${+(m / 60).toFixed(1)} ชม.`.replace('.0 ', ' ');
+export const timeTh = ([a, b]) => (a < 60 && b <= 60) ? `${a}–${b} นาที` : `${minTh(a)}–${minTh(b)}`.replace(/ ชม\.–/, '–');

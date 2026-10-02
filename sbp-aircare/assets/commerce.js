@@ -9,6 +9,17 @@ import { typeArt, toast } from './proto-ui.js';
 import { askTeam, copyText } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
 import { productVisual } from './product-media.js';
+import { judge, bkkNow, dateTh, LEAD_DAYS, RUSH_FEE_EX } from './queue.js';
+
+// Rev.15: one line under the quotation date field — what the chosen date means under the queue rules (queue.js)
+function dateHint(date, hasRush) {
+  const J = judge(date, [], 'C1'), fee = baht(incVat(RUSH_FEE_EX));
+  const txt = !date ? `จองปกติล่วงหน้า ${LEAD_DAYS} วัน (เร็วสุด ${dateTh(J.earliest)}) · เร็วกว่านั้นเป็นคิวด่วน +${fee} รวม VAT ต้องมีคิวว่าง`
+    : J.kind === 'past' ? 'วันที่ผ่านมาแล้ว เลือกวันนี้หรือวันถัดไป'
+    : J.rush ? (hasRush ? `คิวด่วน +${fee} อยู่ในรายการแล้ว · ทีมยืนยันคิวก่อน ถ้าไม่มีคิวไม่เก็บค่านี้` : `วันนี้อยู่ในช่วงคิวด่วน (+${fee} รวม VAT ต่อการเข้างาน ถ้ามีคิวว่าง) ทีมยืนยันกับคุณก่อน`)
+    : 'จองปกติ · ทีมยืนยันคิวและเวลาเข้างาน';
+  return h('p', { class: 's-note' + (J.rush || J.kind === 'past' ? ' warn' : ''), style: 'margin-top:-6px' }, txt + (J.closed ? ' · วันอาทิตย์เป็นงานนอกเวลา มีค่าใช้จ่ายเพิ่มเติม' : ''));
+}
 
 const exInc = ex => (ex == null ? null : { ex, inc: incVat(ex) });
 const priceNode = (ex, unit) => ex == null
@@ -40,6 +51,7 @@ export function quoteTotals(items, zone) {
 }
 export const cart = {
   items: [], zone: null, zoneInput: '', subs: new Set(),
+  prefSlot: '',   // Rev.15: slot chosen in the quick booking (ช่วงเช้า / ช่วงบ่าย / ทั้งวัน)
   prefDate: '',   // Rev.11: preferred date carried in from the quick booking (kept in memory; the form shows it whenever it renders)
   load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = j.items || []; this.zoneInput = j.zoneInput || ''; this.zone = this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {} },
   save() { try { localStorage.setItem(KEY, JSON.stringify({ items: this.items, zoneInput: this.zoneInput })); } catch (e) {} this.subs.forEach(f => f(this)); },
@@ -86,6 +98,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       list.append(h('li', { class: i.unitEx == null ? 'sv' : '' },
         h('div', { class: 's-l-t' }, h('b', {}, i.name), i.detail ? h('small', {}, i.detail) : null),
         i.unitEx == null ? h('span', { class: 's-price survey' }, 'ประเมินหน้างาน')
+          : i.fixed ? h('div', { class: 's-l-q' }, h('span', { class: 's-l-p' }, baht(incVat(i.unitEx * i.qty))))   // Rev.15: one per visit (คิวด่วน) — no quantity
           : h('div', { class: 's-l-q' },
             h('div', { class: 's-stp' }, h('button', { type: 'button', 'aria-label': 'ลด', onclick: () => { cart.setQty(i.id, i.qty - 1); render(); } }, '−'), h('span', {}, String(i.qty)), h('button', { type: 'button', 'aria-label': 'เพิ่ม', onclick: () => { cart.setQty(i.id, i.qty + 1); render(); } }, '+')),
             h('span', { class: 's-l-p' }, baht(incVat(i.unitEx * i.qty)))),
@@ -115,16 +128,18 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     }
     body.append(h('p', { class: 's-note' }, 'ราคาตาม Pricebook 2569 ของบริษัท ยืนยันอีกครั้งในใบเสนอราคาอย่างเป็นทางการ รายการเครื่องต้องยืนยันสต็อกก่อนสั่ง'));
     // contact
+    let dh = dateHint(cart.prefDate, cart.items.some(i => i.group === 'rush'));
     const f = h('form', { class: 's-form' },
       h('label', { class: 's-field' }, 'ชื่อ / บริษัท', h('input', { id: 's-q-name', required: true, autocomplete: 'name' })),
       h('label', { class: 's-field' }, 'เบอร์โทร', h('input', { id: 's-q-tel', required: true, inputmode: 'tel', pattern: '[0-9\\- ]{9,12}', autocomplete: 'tel' })),
-      h('label', { class: 's-field' }, 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; } })),
+      h('label', { class: 's-field' }, cart.prefSlot ? `วันที่สะดวก · ${cart.prefSlot}` : 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', min: bkkNow().date, value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; const n = dateHint(cart.prefDate, cart.items.some(i => i.group === 'rush')); dh.replaceWith(n); dh = n; } })),
+      dh,
       h('label', { class: 's-field' }, 'ต้องการใบกำกับภาษีในนาม', h('input', { id: 's-q-tax', placeholder: 'ชื่อบริษัท / เลขผู้เสียภาษี (ถ้ามี)' })),
       honeypot(), h('button', { class: 's-btn primary', type: 'submit' }, canSend() ? 'ส่งขอใบเสนอราคาอย่างเป็นทางการ' : 'ขอใบเสนอราคาอย่างเป็นทางการ'), privacyNote());
     f.addEventListener('submit', e => {
       e.preventDefault(); const v = id => (f.querySelector('#' + id)?.value || '').trim(), ref = 'Q' + Date.now().toString().slice(-7);
       const t = cart.totals();
-      sent = { ref, hp: f.querySelector('[name="website"]')?.value || '', fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': v('s-q-date'), 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc) }, text: [`ขอใบเสนอราคาอย่างเป็นทางการ · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, v('s-q-date') ? `วันที่สะดวก: ${v('s-q-date')}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText()].filter(x => x != null).join('\n') };
+      sent = { ref, hp: f.querySelector('[name="website"]')?.value || '', fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': v('s-q-date'), 'ช่วงเวลา': cart.prefSlot || '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc) }, text: [`ขอใบเสนอราคาอย่างเป็นทางการ · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, v('s-q-date') ? `วันที่สะดวก: ${v('s-q-date')}${cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText()].filter(x => x != null).join('\n') };
       render();
     });
     body.append(f);

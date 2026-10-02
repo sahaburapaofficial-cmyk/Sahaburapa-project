@@ -12,6 +12,7 @@ import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
 import { mountRemoteSurvey } from './survey.js';
+import { QUEUE_URL, fetchStatus } from './queue.js';
 import { mountPalette } from './palette.js';
 import { mountFx } from './fx.js';
 
@@ -298,6 +299,15 @@ export function mountSite(cfg) {
   /* ---- 8b · Rev.13: photo survey by LINE (fewer site visits) under the contact form ---- */
   const qsec = $('#quote');
   if (qsec && !qsec.querySelector('.sv2')) { const box = h('div', { class: 'sx-survey', id: 'photo-survey' }); qsec.append(box); mountRemoteSurvey(box); }
+  // Rev.15: request status by reference number — only when the team's sheet is connected (queue.js QUEUE_URL); never shown otherwise
+  if (qsec && QUEUE_URL && !qsec.querySelector('.sx-track')) {
+    const ref = h('input', { placeholder: 'เลขอ้างอิง เช่น Q1234567', 'aria-label': 'เลขอ้างอิง', autocomplete: 'off' }), tel = h('input', { placeholder: 'เบอร์โทร 4 ตัวท้าย', 'aria-label': 'เบอร์โทร 4 ตัวท้าย', inputmode: 'numeric', maxlength: 4 });
+    const out = h('p', { class: 's-note', 'aria-live': 'polite' });
+    const f = h('form', { class: 'sx-track' }, h('h3', {}, 'ตรวจสถานะคำขอ'), h('div', { class: 'sx-track-r' }, ref, tel, h('button', { class: 's-btn', type: 'submit' }, 'ตรวจสถานะ')), out);
+    f.addEventListener('submit', async e => { e.preventDefault(); out.textContent = 'กำลังตรวจ…'; const r = await fetchStatus(ref.value.trim(), tel.value.trim());
+      out.textContent = !r ? 'ตรวจไม่ได้ตอนนี้ โทรหรือแจ้งเลขอ้างอิงทาง LINE ได้' : r.ok ? `สถานะ: ${r.status}` : 'ไม่พบคำขอนี้ ตรวจเลขอ้างอิงและเบอร์ 4 ตัวท้ายอีกครั้ง'; });
+    qsec.append(f);
+  }
 
   /* ---- 9 · beta notice, feedback, footer, mobile bar ---- */
   const proto = $('aside.proto');

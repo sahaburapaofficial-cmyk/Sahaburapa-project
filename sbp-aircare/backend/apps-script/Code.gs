@@ -40,7 +40,47 @@ function doPost(e) {
   }
 }
 
-function doGet() { return reply({ ok: true, service: 'SBP AirCare requests' }); }
+// Rev.15 read-only lookups for the website (GET, no customer data returned):
+//   ?q=slots  → { ok, days: { 'YYYY-MM-DD': { am: bool, pm: bool } } } for the next 21 days, from the tab "คิว"
+//              (columns: วันที่ | เช้า | บ่าย — write "เต็ม" when a slot is taken; blank / anything else = free)
+//   ?q=status&ref=Q1234567&tel=5678 → { ok, status } — the "สถานะ" cell of that request, only when the last 4 digits of the phone match
+function doGet(e) {
+  const q = (e && e.parameter) || {};
+  try {
+    if (q.q === 'slots') return reply({ ok: true, days: slots() });
+    if (q.q === 'status') return reply(status(clean(q.ref, 20), clean(q.tel, 4)));
+  } catch (err) { console.error(err); return reply({ ok: false, error: 'server' }); }
+  return reply({ ok: true, service: 'SBP AirCare requests' });
+}
+
+function slots() {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('คิว');
+  if (!sh || sh.getLastRow() < 2) return {};
+  const tz = 'Asia/Bangkok', today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'), until = Utilities.formatDate(new Date(Date.now() + 21 * 864e5), tz, 'yyyy-MM-dd');
+  const out = {};
+  sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues().forEach(([d, am, pm]) => {
+    const k = d instanceof Date ? Utilities.formatDate(d, tz, 'yyyy-MM-dd') : String(d).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || k < today || k > until) return;
+    out[k] = { am: String(am).trim() !== 'เต็ม', pm: String(pm).trim() !== 'เต็ม' };
+  });
+  return out;
+}
+
+function status(ref, tel4) {
+  if (!ref || !/^\d{4}$/.test(tel4)) return { ok: false, error: 'missing' };
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  for (const name of [TABS.quote, TABS.contact]) {
+    const sh = ss.getSheetByName(name);
+    if (!sh || sh.getLastRow() < 2) continue;
+    const v = sh.getDataRange().getValues(), head = v[0], iRef = head.indexOf('เลขอ้างอิง'), iSt = head.indexOf('สถานะ'), iTel = head.findIndex(k => /^(โทร|เบอร์)/.test(String(k)));
+    for (let r = v.length - 1; r > 0; r--) {
+      if (String(v[r][iRef]) !== ref) continue;
+      if (iTel < 0 || String(v[r][iTel]).replace(/\D/g, '').slice(-4) !== tel4) return { ok: false, error: 'not found' };
+      return { ok: true, status: String(v[r][iSt] || 'ใหม่') };
+    }
+  }
+  return { ok: false, error: 'not found' };
+}
 
 function tab(kind, keys) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
