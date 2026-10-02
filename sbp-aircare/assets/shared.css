@@ -1146,3 +1146,6 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 @media (max-width:420px){.hdr .logo .logo-mk{height:26px}}
 .cg-tnote{display:block;margin-top:2px;font-size:12px;line-height:1.45;color:var(--s-ink-3)}
 .cg-ttot{color:var(--s-ink-3)}
+.qc-fill{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 6px;padding:8px 10px;border-radius:10px;background:color-mix(in oklab,var(--s-ok) 10%,transparent);font-size:13px;color:var(--s-ink-2)}
+.qc-fill-b{flex:none;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--s-ok);background:var(--s-card);color:var(--s-ok);font:600 13px/1 inherit;cursor:pointer}
+@media (pointer:coarse){.qc-fill-b{min-height:44px}}

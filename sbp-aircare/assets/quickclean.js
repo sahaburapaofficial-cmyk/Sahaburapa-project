@@ -89,6 +89,10 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
     sum.append(h('ul', { class: 'qc-lines' }, ls.map(l => h('li', {}, h('span', {}, `${l.th} × ${l.qty}`, h('small', {}, sizeTh(l.t, SIZE_BANDS[st.size[l.t]]))), h('b', {}, l.item ? baht(incVat(l.item.unitEx * l.qty)) : 'ประเมินหน้างาน')))));
     const row = (k, v, cls = '') => h('div', { class: 'qc-row ' + cls }, h('span', {}, k), h('b', {}, v));
     if (t.minGap) sum.append(row(`ปรับยอดขั้นต่ำงานล้างต่อการเข้าหน้างาน (${baht(incVat(DATA.minBill))})`, baht(incVat(t.minGap)), 'warn'));
+    // Rev.13: say what the minimum already covers — more units of the same kind at no extra cost (arithmetic on the shown prices)
+    if (t.minGap) { const l0 = ls.find(l => l.item && l.item.unitEx > 0), extra = l0 ? Math.floor(t.minGap / l0.item.unitEx) : 0;
+      if (extra > 0) sum.append(h('p', { class: 'qc-fill' }, h('span', {}, `เพิ่มแอร์${l0.th}ได้อีก ${extra} เครื่อง โดยยอดรวมยังเท่าเดิม`),
+        h('button', { type: 'button', class: 'qc-fill-b', 'aria-label': `เพิ่มแอร์${l0.th} 1 เครื่อง`, onclick: () => { st.n[l0.t] = Math.min(99, st.n[l0.t] + 1); drawTypes(); drawSum(); } }, '+1 เครื่อง'))); }
     if (zone && zone.tier === 'extended') sum.append(row(t.travelWaived ? 'ค่าเดินทาง (ยกเว้นตามจำนวนเครื่อง)' : 'ค่าเดินทาง', t.travelWaived ? baht(0) : baht(incVat(t.travel))));
     sum.append(h('div', { class: 'qc-total' }, h('span', {}, 'รวมทั้งสิ้น', h('small', {}, `ก่อน VAT ${baht(t.totalEx)} · VAT 7% ${baht(t.vat)}`)), h('b', {}, baht(t.inc))));
     const notes = [];
