@@ -4,3 +4,4 @@ internal/
 _entry_*.mjs
 *.png
 !assets/og/*.png
+!assets/logos/*.png
