@@ -2,7 +2,7 @@
 // product detail with install package + add-ons, full service price centre, quote basket, zone/travel fee.
 // Markup uses the "s-" classes styled in assets/shared.css through each variant's alias tokens.
 import {
-  DATA, TYPES, TYPE_BY_ID, BRAND_BY_ID, CLEAN_PKGS, VAT, incVat, timeTh, baht, btuFmt, installOptions, addonsFor,
+  DATA, DEMO, cleanRate, TYPES, TYPE_BY_ID, BRAND_BY_ID, CLEAN_PKGS, VAT, incVat, timeTh, TIME_NOTE, baht, btuFmt, installOptions, addonsFor,
   checkZone, TIER_TH, TRAVEL, h, $, $$, stockTh, travelCharge, travelNote, SIZE_BANDS, isVRF, VRF_NOTE, COMPANY,
 } from './sbp-core.js';
 import { typeArt, toast } from './proto-ui.js';
@@ -20,6 +20,7 @@ export function visitLines(items) {
   const J = jobsIn(items), out = [];
   items.forEach(i => { if (i.group === 'clean' && i.unitEx != null) { const m = QC_KEY.exec(i.key || ''); out.push({ t: m ? m[2] : 'wall', level: m ? m[1] : 'C1', qty: i.qty }); } });
   if (J.install) out.push({ t: J.type, level: 'install', qty: J.install });
+  if (J.repair) out.push({ t: 'wall', level: 'repair', qty: J.repair });   // no published time for repair — half-day slot, no time estimate
   return out;
 }
 const RUSH = () => ({ kind: 'service', group: 'rush', src: 'qc', fixed: true, key: 'QC-RUSH', name: 'คิวด่วน (ภายใน 3 วัน)', detail: 'ต่อการเข้างาน · รับเมื่อมีทีมว่าง ถ้าไม่มีคิวไม่เก็บค่านี้', unitEx: RUSH_FEE_EX, qty: 1 });
@@ -62,6 +63,20 @@ const priceNode = (ex, unit) => ex == null
 /* =========================================================
    Quote basket
    ========================================================= */
+// Rev.18: saved quotations keep the price they were added at — re-price every line we can identify from its key against the
+// current Pricebook (rounding / new rates) whenever a saved cart loads; lines that cannot be identified keep their price
+export const PRICE_V = 18;
+export function repriceLine(l) {
+  const k = l.key || '', m = (re) => re.exec(k);
+  let x;
+  if ((x = m(/^P-(.+)$/))) { for (const md of DEMO.models) { const s = md.skus.find(s => s.sku === x[1]); if (s) return { ...l, unitEx: s.px }; } return l; }
+  if ((x = m(/^(?:I|IN)-([A-Z0-9.-]+)$/)) && DATA.instByCode[x[1]]) return { ...l, unitEx: DATA.instByCode[x[1]].ex };
+  if ((x = m(/^(?:QC|CL)-(.+)-(C1|C2)-(wall|ceiling|cassette|floor)-(\d+)$/))) { const r = cleanRate(x[1], x[2], x[3], +x[4]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
+  if ((x = m(/^C-(.+)-(C1|C2)-(\w+)-(.+)$/))) { const r = DATA.clean.find(r => r.pkg === x[1] && r.level === x[2] && r.type === x[3] && r.range === x[4]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
+  if ((x = m(/^CX-(.+)$/))) { const r = DATA.clean.find(r => r.name === x[1]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
+  if ((x = m(/^(?:R|RP)-(.+)$/))) { const r = DATA.rep.find(r => r.name === x[1]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
+  return l;
+}
 const KEY = 'sbp-quote-v2', DKEY = 'sbp-booking-v1';   // Rev.16.1: booking draft (answers / contact / date) — never photos
 // Rev.11: the quotation maths as pure functions — the cart and the quick cleaning booking (quickclean.js) share them,
 // so every total on the site follows the same rules (VAT, cleaning minimum per visit, travel by zone and unit count).
@@ -87,11 +102,11 @@ export const cart = {
   draft: { name: '', tel: '', line: '', tax: '', ans: {}, photos: [], note: '', scope: [], addr: '', map: '', when: '' },   // Rev.16 booking form + ticket (memory only — photos never stored)
   prefSlot: '',   // Rev.15: slot chosen in the quick booking (ช่วงเช้า / ช่วงบ่าย / ทั้งวัน)
   prefDate: '',   // Rev.11: preferred date carried in from the quick booking (kept in memory; the form shows it whenever it renders)
-  load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = j.items || []; this.zoneInput = j.zoneInput || ''; this.zone = this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {}
+  load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = (j.items || []).map(l => (j.pv || 0) < PRICE_V ? repriceLine(l) : l); this.zoneInput = j.zoneInput || ''; this.zone = this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {}
     try { const d = JSON.parse(localStorage.getItem(DKEY) || 'null'); if (d) { Object.assign(this.draft, d.draft || {}, { photos: [] }); if (d.date && d.date >= bkkNow().date) { this.prefDate = d.date; this.prefSlot = d.slot || ''; } } } catch (e) {} },
   saveDraft() { try { const { photos, scope, ...rest } = this.draft; localStorage.setItem(DKEY, JSON.stringify({ draft: rest, date: this.prefDate, slot: this.prefSlot })); } catch (e) {} },
   clearDraft() { this.draft = { name: this.draft.name, tel: this.draft.tel, line: this.draft.line, tax: this.draft.tax, ans: {}, photos: [], note: '', scope: [], addr: '', map: '', when: this.draft.when }; this.prefDate = ''; this.prefSlot = ''; this.saveDraft(); },
-  save() { try { localStorage.setItem(KEY, JSON.stringify({ items: this.items, zoneInput: this.zoneInput })); } catch (e) {} this.subs.forEach(f => f(this)); },
+  save() { try { localStorage.setItem(KEY, JSON.stringify({ pv: PRICE_V, items: this.items, zoneInput: this.zoneInput })); } catch (e) {} this.subs.forEach(f => f(this)); },
   add(line) {
     const same = this.items.find(i => i.key && i.key === line.key);
     if (same && line.kind !== 'survey') same.qty += line.qty || 1; else if (!same) this.items.push({ id: Math.random().toString(36).slice(2, 9), qty: 1, ...line });
@@ -121,7 +136,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     if (!sent) syncRush(cart.prefDate);   // Rev.16.1: the rush line follows the date and disappears with the last visit line
     const t = cart.totals();
     panel.innerHTML = '';
-    panel.append(h('div', { class: 's-cart-h' }, h('div', {}, h('b', {}, (() => { const j = jobsIn(cart.items); return j.clean || j.install ? 'ใบจองงาน · ใบเสนอราคาเบื้องต้น' : 'ใบเสนอราคาเบื้องต้น'; })()), h('small', {}, `${cart.items.length} รายการ`)), h('button', { type: 'button', class: 's-x', 'aria-label': 'ปิด', onclick: close }, '×')));
+    panel.append(h('div', { class: 's-cart-h' }, h('div', {}, h('b', {}, (() => { const j = jobsIn(cart.items); return j.clean || j.install || j.repair ? 'ใบจองงาน · ใบเสนอราคาเบื้องต้น' : 'ใบเสนอราคาเบื้องต้น'; })()), h('small', {}, `${cart.items.length} รายการ`)), h('button', { type: 'button', class: 's-x', 'aria-label': 'ปิด', onclick: close }, '×')));
     const body = h('div', { class: 's-cart-b' }); panel.append(body);
     if (sent) {
       // Rev.10: send to the team once (submit.js); without an endpoint (or inside an artifact) this is the honest hand-off box
@@ -145,7 +160,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     }
     if (!cart.items.length) { body.append(h('div', { class: 's-empty' }, h('p', {}, 'ยังไม่มีรายการ'), h('p', { class: 's-note' }, 'เลือกรุ่นแอร์ในหน้าสินค้า หรือกด "เพิ่ม" ในตารางค่าบริการ'), h('button', { type: 'button', class: 's-btn', onclick: () => { close(); ($('#prices') || $('#catalog'))?.scrollIntoView({ behavior: 'smooth' }); } }, 'ไปที่ค่าบริการ'))); return; }
     const J0 = jobsIn(cart.items);
-    if (J0.clean || J0.install) body.append(h('p', { class: 's-step' }, h('span', {}, '1'), 'รายการและราคา', h('small', {}, 'ราคาต่อรายการก่อน VAT')));
+    if (J0.clean || J0.install || J0.repair) body.append(h('p', { class: 's-step' }, h('span', {}, '1'), 'รายการและราคา', h('small', {}, 'ราคาต่อรายการก่อน VAT')));
     const list = h('ul', { class: 's-lines' });
     cart.items.forEach(i => {
       list.append(h('li', { class: i.unitEx == null ? 'sv' : '' },
@@ -190,12 +205,12 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       onclick: () => { cart.prefSlot = SLOTS[id].th; cart.saveDraft(); render(); } }, h('b', {}, SLOTS[id].th), h('small', {}, SLOTS[id].sub)))) : null;
     const whenBox = h('div', { class: 's-when' }, step(visit.length ? 2 : 1, 'วันเข้างาน', visit.length ? `จองปกติล่วงหน้า ${LEAD_DAYS} วัน` : null),
       h('label', { class: 's-field' }, visit.length && cart.prefSlot ? `วันที่สะดวก · ${cart.prefSlot}` : 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', min: bkkNow().date, value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; syncRush(cart.prefDate); cart.saveDraft(); render(); } })),
-      dh, slotRow, visit.length && cart.prefDate && J.kind !== 'past' ? h('p', { class: 's-note' }, `เวลาหน้างานโดยประมาณ ${timeTh(J.time)} · ${J.fit.kind === 'half' ? 'ไม่เกินครึ่งวัน' : J.fit.kind === 'day' ? 'ประมาณ 1 วันทำการ' : `ประมาณ ${J.fit.days} วันทำการ (ช่าง 1 ทีม)`}`) : null);
+      dh, slotRow, visit.length && cart.prefDate && J.kind !== 'past' && J.time[1] > 0 ? h('p', { class: 's-note' }, `เวลาหน้างานโดยประมาณ ${timeTh(J.time)} · ${J.fit.kind === 'half' ? 'ไม่เกินครึ่งวัน' : J.fit.kind === 'day' ? 'ประมาณ 1 วันทำการ' : `ประมาณ ${J.fit.days} วันทำการ (ช่าง 1 ทีม)`}`, h('small', { class: 's-tnote' }, TIME_NOTE)) : null);   // rule 22: always with TIME_NOTE
     body.append(whenBox);
-    if (jobs.clean || jobs.install) body.append(step(3, 'สภาพหน้างาน + รูป', 'ให้ทีมประเมินงานนอกมาตรฐานก่อนนัด'), ticketPanel(D, jobs, { onChange: () => cart.saveDraft() }));
+    if (jobs.clean || jobs.install || jobs.repair) body.append(step(3, 'สภาพหน้างาน + รูป', 'ให้ทีมประเมินงานนอกมาตรฐานก่อนนัด'), ticketPanel(D, jobs, { onChange: () => cart.saveDraft() }));
     const keep = () => cart.saveDraft();
     const inp = (id, k, attrs) => h('input', { id, value: D[k] || '', oninput: e => { D[k] = e.target.value; keep(); }, ...attrs });
-    const isJob0 = !!(jobs.clean || jobs.install);
+    const isJob0 = !!(jobs.clean || jobs.install || jobs.repair);
     // Rev.16.1: where exactly — the team plans the route, parking and the travel band from this (map link optional)
     const geoOut = h('small', { class: 's-geo-o', 'aria-live': 'polite' });
     const mapIn = inp('s-q-map', 'map', { inputmode: 'url', placeholder: 'วางลิงก์ Google Maps หรือกด "ใช้ตำแหน่งปัจจุบัน"' });
@@ -207,7 +222,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
           () => { geoOut.textContent = 'ใช้ตำแหน่งไม่ได้ — วางลิงก์แผนที่แทนได้'; }, { enableHighAccuracy: true, timeout: 10000 }); } }, 'ใช้ตำแหน่งปัจจุบัน') : null, geoOut) : null;
     const err = h('p', { class: 's-note bad s-err', role: 'alert' });
     const f = h('form', { class: 's-form' },
-      step(jobs.clean || jobs.install ? 4 : 2, 'ผู้ติดต่อ'),
+      step(jobs.clean || jobs.install || jobs.repair ? 4 : 2, 'ผู้ติดต่อ'),
       h('label', { class: 's-field' }, 'ชื่อ / บริษัท', inp('s-q-name', 'name', { required: true, autocomplete: 'name' })),
       h('label', { class: 's-field' }, 'เบอร์โทร', inp('s-q-tel', 'tel', { required: true, inputmode: 'tel', pattern: '[0-9\\- ]{9,12}', autocomplete: 'tel' })),
       isJob0 ? h('div', { class: 's-row2' },
@@ -215,9 +230,9 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
         h('label', { class: 's-field' }, 'สะดวกให้ติดต่อ', h('select', { id: 's-q-when', onchange: e => { D.when = e.target.value; keep(); } }, ['ช่วงเวลาทำการ', 'ช่วงเช้า', 'ช่วงบ่าย', 'ทัก LINE ก่อน'].map(x => h('option', { selected: D.when === x }, x))))) : null,
       where,
       h('label', { class: 's-field' }, 'ต้องการใบกำกับภาษีในนาม', inp('s-q-tax', 'tax', { placeholder: 'ชื่อบริษัท / เลขผู้เสียภาษี (ถ้ามี)' })),
-      err, honeypot(), h('button', { class: 's-btn primary', type: 'submit' }, jobs.clean || jobs.install ? 'ส่งใบจองงาน' : canSend() ? 'ส่งขอใบเสนอราคาอย่างเป็นทางการ' : 'ขอใบเสนอราคาอย่างเป็นทางการ'), privacyNote());
+      err, honeypot(), h('button', { class: 's-btn primary', type: 'submit' }, jobs.clean || jobs.install || jobs.repair ? 'ส่งใบจองงาน' : canSend() ? 'ส่งขอใบเสนอราคาอย่างเป็นทางการ' : 'ขอใบเสนอราคาอย่างเป็นทางการ'), privacyNote());
     f.addEventListener('submit', e => {
-      e.preventDefault(); const v = id => (f.querySelector('#' + id)?.value || '').trim(), isJob = !!(jobs.clean || jobs.install), ref = (isJob ? 'B' : 'Q') + Date.now().toString().slice(-7);
+      e.preventDefault(); const v = id => (f.querySelector('#' + id)?.value || '').trim(), isJob = !!(jobs.clean || jobs.install || jobs.repair), ref = (isJob ? 'B' : 'Q') + Date.now().toString().slice(-7);
       if (isJob) {   // Rev.16.1: a job ticket needs a date and where it is (zone for travel, address for the crew)
         const miss = !cart.prefDate ? ['s-q-date', 'เลือกวันเข้างาน'] : judge(cart.prefDate, [], 'C1').kind === 'past' ? ['s-q-date', 'วันที่เลือกผ่านมาแล้ว'] : !cart.zoneInput ? ['s-cart-zone', 'กรอกพื้นที่ปฏิบัติงาน (เขต / อำเภอ) ด้านบน'] : !v('s-q-addr') ? ['s-q-addr', 'กรอกที่อยู่หน้างาน'] : null;
         if (miss) { err.textContent = miss[1]; const el = document.getElementById(miss[0]); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } return; }
@@ -226,7 +241,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       const tk = isJob ? ticketText(D) : '';
       sent = { ref, isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
         fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc),
-          ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'รูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
+          ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : '', jobs.repair ? `ซ่อม / ตรวจเช็ก ${jobs.repair} รายการ` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'รูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
         text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${visit.length && cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null].filter(x => x != null).join('\n') };
       render();
     });

@@ -26,6 +26,15 @@ export const QUESTIONS = {
     { id: 'sym', th: 'อาการ', multi: true, opts: [O('drip', 'น้ำหยด'), O('warm', 'เย็นน้อย / ไม่เย็น'), O('noise', 'เสียงดัง'), O('none', 'ปกติ')] },
     { id: 'site', th: 'สถานที่', opts: [O('home', 'บ้าน'), O('condo', 'คอนโด / อาคารต้องแจ้งนิติ'), O('shop', 'ร้านค้า / สำนักงาน'), O('ctrl', 'ห้อง Server / รพ. / พื้นที่ควบคุม')] },
   ],
+  // Rev.18: repair / check-up visits book the same way — symptoms and access decide what the technician brings
+  repair: [
+    { id: 'sym', th: 'อาการ', multi: true, opts: [O('warm', 'ไม่เย็น / เย็นน้อย'), O('drip', 'น้ำหยด'), O('noise', 'เสียงดัง / สั่น'), O('smell', 'มีกลิ่น'), O('code', 'ไฟกะพริบ / ขึ้นรหัส'), O('dead', 'เปิดไม่ติด / ตัดบ่อย')] },
+    { id: 'age', th: 'อายุเครื่อง', opts: [O('3', 'ไม่เกิน 3 ปี'), O('7', '3–7 ปี'), O('old', 'เกิน 7 ปี'), O('na', 'ไม่ทราบ')] },
+    { id: 'last', th: 'ล้างครั้งล่าสุด', opts: [O('6', 'ไม่เกิน 6 เดือน'), O('12', '6–12 เดือน'), O('24', 'เกิน 1 ปี'), O('na', 'ไม่ทราบ')] },
+    { id: 'height', th: 'ตัวเครื่องสูงจากพื้นประมาณ', opts: [O('lo', 'ไม่เกิน 3 ม.'), O('hi', 'เกิน 3 ม.'), O('lift', 'สูงมาก ต้องนั่งร้าน / รถกระเช้า')] },
+    { id: 'cdu', th: 'คอยล์ร้อนอยู่ที่', opts: [O('floor', 'พื้น / ระเบียง'), O('wall', 'แขวนผนังนอกอาคาร'), O('high', 'ดาดฟ้า / หลังคา / ที่สูง')] },
+    { id: 'site', th: 'สถานที่', opts: [O('home', 'บ้าน'), O('condo', 'คอนโด / อาคารต้องแจ้งนิติ'), O('shop', 'ร้านค้า / สำนักงาน'), O('ctrl', 'ห้อง Server / รพ. / พื้นที่ควบคุม')] },
+  ],
   install: [
     { id: 'job', th: 'ลักษณะงาน', opts: [O('new', 'ติดตั้งจุดใหม่'), O('move', 'ย้ายจากจุดเดิม'), O('replace', 'เปลี่ยนแทนเครื่องเดิม')] },
     { id: 'pipe', th: 'ระยะคอยล์เย็นถึงคอยล์ร้อนตามแนวท่อ (เมตร)', num: [1, 40, 4] },
@@ -40,6 +49,7 @@ export const QUESTIONS = {
   ],
 };
 export const DEFAULTS = { clean: { height: 'lo', access: 'ok', cdu: 'floor', last: 'na', dirt: ['none'], sym: ['none'], site: 'home' },
+  repair: { sym: ['warm'], age: 'na', last: 'na', height: 'lo', cdu: 'floor', site: 'home' },
   install: { job: 'new', pipe: 4, wall: 'brick', cdu: 'floor', power: 'ready', powerM: 10, drain: 'near', drainM: 6, hide: 'trunk', site: 'home' } };
 
 /* ---------- which jobs the quotation holds ---------- */
@@ -48,7 +58,7 @@ export function jobsIn(items) {
   const clean = items.filter(i => i.group === 'clean' && i.unitEx != null);
   const inst = items.filter(i => i.group === 'install');
   const m = inst.map(i => /^I[NV]?-INS-(W|C|K|FS)-(\d+)-(\d+)/.exec(i.key || '')).find(Boolean);
-  return { clean: clean.reduce((n, i) => n + i.qty, 0), install: inst.reduce((n, i) => n + (i.kind === 'survey' ? 1 : i.qty), 0),
+  return { clean: clean.reduce((n, i) => n + i.qty, 0), repair: items.filter(i => i.group === 'repair').reduce((n, i) => n + (i.unitEx == null ? 1 : i.qty), 0), install: inst.reduce((n, i) => n + (i.kind === 'survey' ? 1 : i.qty), 0),
     type: m ? INS_T[m[1]] : 'wall', btu: m ? +m[3] : 12000 };
 }
 
@@ -71,6 +81,11 @@ export function scope(kind, a, ctx = {}) {
     const s = a.sym || [];
     if (s.some(x => x !== 'none')) push(L('ตรวจอาการเพิ่มเติม (แจ้งราคาก่อนซ่อมทุกครั้ง)', diag() && { ex: diag().rate.s, unit: diag().unit }, 1, 'มีอาการ ' + s.filter(x => x !== 'none').map(x => ({ drip: 'น้ำหยด', warm: 'เย็นน้อย', noise: 'เสียงดัง' })[x]).join(' / ') + ' — ล้างอาจไม่หาย'));
   }
+  if (kind === 'repair') {
+    if (a.height === 'hi') push(L('งานสูงเกิน 3 เมตร', cleanAdd(/ความสูงเกิน 3/), 1, 'ต้องใช้บันไดสูงและอุปกรณ์กันตก'));
+    if (a.height === 'lift' || a.cdu === 'high') push(L('บันไดพิเศษ / นั่งร้าน / รถกระเช้า', cleanAdd(/นั่งร้าน|รถกระเช้า/), 1, a.height === 'lift' ? 'ตัวเครื่องสูงมาก' : 'คอยล์ร้อนอยู่ที่สูง'));
+    if (a.site === 'ctrl') push(L('พื้นที่ควบคุม (Server / รพ. / Cleanroom)', cleanAdd(/Server|พื้นที่ควบคุม/), 1, 'ต้องวางแผนวิธีทำงานและป้องกันพื้นที่'));
+  }
   if (kind === 'install') {
     const ad = addonsFor(ctx.type || 'wall', ctx.btu || 12000), pipeItem = ad[0].items[0].item;
     const extra = Math.max(0, Math.ceil((+a.pipe || 0) - 4));
@@ -89,6 +104,9 @@ export function scope(kind, a, ctx = {}) {
   const lines = out;
   const priced = lines.filter(l => l.ex != null), est = priced.reduce((s, l) => s + l.ex * l.qty, 0);
   const notes = [];
+  if (kind === 'repair') notes.push('ค่าตรวจตามรายการในใบ · ค่าอะไหล่ / น้ำยา / ค่าซ่อม ช่างตรวจแล้วแจ้งราคาให้อนุมัติก่อนซ่อมทุกครั้ง ไม่ซ่อมก่อนคุณอนุมัติ');
+  if (kind === 'repair' && (a.sym || []).includes('code')) notes.push('ถ่ายวิดีโอไฟกะพริบ / รหัสบนจอแนบมาด้วย ช่างเตรียมอะไหล่ได้ตรงขึ้น');
+  if (kind === 'repair' && (a.last === '24' || a.last === 'na') && (a.sym || []).some(x => x === 'warm' || x === 'drip' || x === 'smell')) notes.push('อาการนี้หลายครั้งหายด้วยการล้าง — ช่างตรวจแล้วแนะนำว่าควรล้างหรือซ่อม');
   if (a.site === 'condo') notes.push('คอนโด / อาคาร: แจ้งนิติและจองลิฟต์ขนของล่วงหน้า ทีมส่งรายชื่อช่างให้ได้');
   if (kind === 'clean' && (a.last === '24' || a.last === 'na')) notes.push('ไม่ได้ล้างเกิน 1 ปี หรือไม่ทราบ — ถ้ามีคราบดำที่ใบพัด ทีมอาจแนะนำล้างใหญ่ (C2) จากรูป');
   if (kind === 'install' && a.power === 'ready') notes.push('ใช้สายเดิมได้เมื่อขนาดสายและเบรกเกอร์พอกับรุ่นใหม่ — ช่างตรวจก่อนต่อไฟ');
@@ -111,14 +129,14 @@ export const MAX_PHOTOS = 8;
 /* ---------- the ticket panel inside the quotation drawer ---------- */
 // draft lives on the cart (memory only — photos are never written to localStorage); onChange re-renders the totals
 export function ticketPanel(draft, jobs, { onChange = () => {} } = {}) {
-  const kinds = ['clean', 'install'].filter(k => jobs[k] > 0);
+  const kinds = ['clean', 'repair', 'install'].filter(k => jobs[k] > 0);
   const box = h('div', { class: 'tk' });
   if (!kinds.length) return box;
   kinds.forEach(k => { draft.ans[k] = { ...DEFAULTS[k], ...(draft.ans[k] || {}) }; });
   const res = h('div', { class: 'tk-scope', 'aria-live': 'polite' });
   const drawScope = () => {
     res.innerHTML = '';
-    if (draft.ans.clean && draft.ans.install) draft.ans.install.site = draft.ans.clean.site;
+    kinds.slice(1).forEach(k => { draft.ans[k].site = draft.ans[kinds[0]].site; });
     const all = kinds.map(k => ({ k, r: scope(k, draft.ans[k], { units: jobs[k], type: jobs.type, btu: jobs.btu }) }));
     draft.scope = all;
     const lines = all.flatMap(x => x.r.lines), est = all.reduce((s, x) => s + x.r.est, 0), notes = all.flatMap(x => x.r.notes);
@@ -131,12 +149,12 @@ export function ticketPanel(draft, jobs, { onChange = () => {} } = {}) {
   };
   kinds.forEach(k => {
     const A = draft.ans[k];
-    const sec = h('fieldset', { class: 'tk-q' }, h('legend', {}, k === 'clean' ? `สภาพหน้างานล้าง (${jobs.clean} เครื่อง)` : `สภาพหน้างานติดตั้ง (${jobs.install} เครื่อง)`));
+    const sec = h('fieldset', { class: 'tk-q' }, h('legend', {}, k === 'clean' ? `สภาพหน้างานล้าง (${jobs.clean} เครื่อง)` : k === 'repair' ? `อาการและหน้างานซ่อม / ตรวจเช็ก (${jobs.repair} รายการ)` : `สภาพหน้างานติดตั้ง (${jobs.install} เครื่อง)`));
     const draw = () => {
       [...sec.querySelectorAll('.tk-row')].forEach(x => x.remove());
       QUESTIONS[k].forEach(q => {
         if (q.when && !q.when(A)) return;
-        if (q.id === 'site' && k === 'install' && kinds.includes('clean')) return;   // asked once (cleaning section) when both jobs are booked
+        if (q.id === 'site' && k !== kinds[0]) return;   // asked once (cleaning section) when both jobs are booked
         const row = h('div', { class: 'tk-row' }, h('p', { class: 'tk-l', id: `tk-${k}-${q.id}` }, q.th, q.multi ? h('small', {}, ' (เลือกได้หลายข้อ)') : null));
         if (q.num) {
           const [mn, mx] = q.num;
@@ -182,7 +200,7 @@ export function ticketText(draft) {
   const out = [];
   (draft.scope || []).forEach(({ k, r }) => {
     const A = draft.ans[k];
-    out.push(`— สภาพหน้างาน${k === 'clean' ? 'ล้าง' : 'ติดตั้ง'} —`);
+    out.push(`— สภาพหน้างาน${k === 'clean' ? 'ล้าง' : k === 'repair' ? 'ซ่อม / ตรวจเช็ก' : 'ติดตั้ง'} —`);
     QUESTIONS[k].forEach(q => { if (q.when && !q.when(A)) return; const v = A[q.id]; out.push(`${q.th}: ${q.num ? v : [].concat(v).map(x => (q.opts.find(o => o[0] === x) || [, x])[1]).join(', ')}`); });
     out.push(r.lines.length ? `เกินมาตรฐาน ${r.lines.length} จุด${r.est ? ` · ประมาณ ${baht(r.est)} ก่อน VAT` : ''}:` : 'อยู่ในขอบเขตงานมาตรฐาน');
     r.lines.forEach(l => out.push(`  • ${l.th} — ${l.ex == null ? 'ประเมินจากรูป' : baht(l.ex * l.qty)} (${l.why})`));

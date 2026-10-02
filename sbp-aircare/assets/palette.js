@@ -4,7 +4,8 @@
 // quotation, call, chat on LINE, send site photos). Keyboard first (↑ ↓ Enter Esc), ARIA combobox + listbox, works on touch
 // from the header button. Styling follows the variant: A clean card · B terminal sheet · C glass (shared.css .cp-*).
 import { QUEUE_URL } from './queue.js';
-import { h, $, DEMO, BRAND_BY_ID, TYPE_BY_ID, btuFmt, baht, FAQ, COMPANY, cleanRate, incVat } from './sbp-core.js';
+import { cart } from './commerce.js';
+import { h, $, DEMO, BRAND_BY_ID, TYPE_BY_ID, btuFmt, baht, FAQ, COMPANY, cleanRate, incVat, DATA } from './sbp-core.js';
 
 const norm = s => String(s || '').toLowerCase().replace(/[\s·\-\/,().]/g, '');
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -20,6 +21,7 @@ export function mountPalette(cfg) {
   const add = (grp, th, sub, run, keys = '', btu = null) => items.push({ grp, th, sub, run, btu, k: norm(th + ' ' + sub + ' ' + keys) });
   add('ทำทันที', 'จองล้างแอร์', 'เลือกแอร์ วิธีล้าง พื้นที่ เห็นราคารวม', () => go('book'), 'book clean ล้าง จอง');
   add('ทำทันที', 'จองติดตั้งแอร์', 'เลือกรุ่นพร้อมติดตั้ง หรือติดตั้งเครื่องที่มีอยู่ แล้วส่งใบจองงาน', () => go('prices'), 'install booking ติดตั้ง ย้ายแอร์ จองคิว');
+  add('ทำทันที', 'จองช่างตรวจเช็ก / ซ่อม', 'ใส่ค่าตรวจในใบ แล้วบอกอาการ แนบรูป เลือกวันนัด', () => { const d = DATA.rep.find(r => r.cat === 'ตรวจวินิจฉัย' && r.rate.s != null); if (d) cart.add({ kind: 'service', group: 'repair', key: `R-${d.name}`, name: d.name, unitEx: d.rate.s, qty: 1 }); openCart && openCart(); }, 'repair fix ซ่อม ตรวจเช็ก แอร์เสีย ไม่เย็น น้ำหยด');
   add('ทำทันที', 'ส่งใบจองงาน / นัดคิว', 'วันเข้างาน · สภาพหน้างาน · รูป · ผู้ติดต่อ', () => openCart && openCart(), 'booking ticket คิว นัด จอง');
   if (QUEUE_URL) add('ทำทันที', 'ตรวจสถานะคำขอ', 'ใช้เลขอ้างอิงและเบอร์ 4 ตัวท้าย', () => go('contact'), 'status track ติดตาม สถานะ');
   add('ทำทันที', 'ดูใบเสนอราคาของฉัน', 'รายการที่เพิ่มไว้ พร้อมยอดรวม', () => openCart && openCart(), 'cart quote ตะกร้า');

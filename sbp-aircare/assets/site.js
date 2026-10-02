@@ -7,7 +7,7 @@
 // "next step" cards at the bottom, an intent picker on the home view that starts a guided journey (a step strip that follows the
 // customer across views and remembers progress), the company / contact block, the beta notice + feedback form, and the footer.
 // Hidden views do not boot their 3D (scenes start on IntersectionObserver), so each view is lighter than the old page.
-import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS } from './sbp-core.js';
+import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS, DATA } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
@@ -48,9 +48,9 @@ export const JOURNEYS = {
   buy: { th: 'ซื้อแอร์ใหม่ + ติดตั้ง', sub: '', topic: 'ซื้อแอร์', ico: 'M3 7.5l9-4 9 4v9l-9 4-9-4zM3 7.5l9 4 9-4M12 11.5v9M7.5 5.5l9 4',
     steps: [['studio|room', 'หาขนาด BTU ที่เหมาะกับห้อง'], ['catalog', 'เลือกรุ่นและแพ็กเกจติดตั้ง'], ['fit', 'ลองวางในห้องของคุณ'], ['quote', 'ส่งใบเสนอราคา']] },
   install: { th: 'ติดตั้ง / ย้ายแอร์', sub: 'มีเครื่องแล้ว · ติดตั้งมาตรฐาน หรือพรีเมียม', topic: 'ติดตั้งแอร์', ico: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z',
-    steps: [['cleanflow', 'ดูขั้นตอนติดตั้งของทีม'], ['quality', 'วัสดุที่ใช้ในแต่ละแพ็กเกจ'], ['prices', 'ราคาติดตั้งตามขนาด'], ['quote', 'ขอสำรวจ / ใบเสนอราคา']] },
+    steps: [['cleanflow', 'ดูขั้นตอนติดตั้งของทีม'], ['quality', 'วัสดุที่ใช้ในแต่ละแพ็กเกจ'], ['prices', 'ราคาติดตั้งตามขนาด'], ['quote', 'จองคิวติดตั้ง / ขอสำรวจ']] },
   repair: { th: 'แอร์มีปัญหา / ซ่อม', sub: 'ไม่เย็น น้ำหยด มีเสียง มีกลิ่น', topic: 'ซ่อม / ตรวจเช็ก', ico: 'M4.5 16a7.5 7.5 0 1 1 15 0M12 16l3.5-3.5M12 16h.01M7 16h1M16 16h1M12 9.5v1M8.6 11l.7.7M15.4 11l-.7.7M9 20h6',
-    steps: [['howto', 'เช็กอาการเบื้องต้นและขั้นตอนตรวจซ่อม'], ['prices', 'ค่าตรวจเช็กและค่าซ่อม'], ['quote', 'แจ้งอาการให้ทีม']] },
+    steps: [['howto', 'เช็กอาการเบื้องต้นและขั้นตอนตรวจซ่อม'], ['prices', 'ค่าตรวจเช็กและค่าซ่อม'], ['quote', 'จองช่าง · แจ้งอาการ แนบรูป เลือกวัน']] },
   business: { th: 'องค์กร / สัญญารายปี', sub: 'สำนักงาน ร้านค้า โรงงาน อาคาร', topic: 'สัญญาล้างรายปี', ico: 'M4 20V8l8-4 8 4v12M9 20v-6h6v6',
     steps: [['b2b', 'ประเมินงบล้างทั้งปี'], ['cleanflow', 'ดูมาตรฐานงานล้าง (SOP)'], ['area', 'พื้นที่และค่าเดินทาง'], ['quote', 'ขอใบเสนอราคาสัญญา']] },
 };
@@ -177,7 +177,11 @@ export function mountSite(cfg) {
   const here = h('div', { class: 'sx-here', hidden: true });
   let hereStep = null;
   function goStep(s) {
-    if (s.id === 'quote') { if (cart.items.length) { openCart(); markDone(s.i); } else askTeam(JOURNEYS[J.k].topic); return; }
+    if (s.id === 'quote') {
+      // Rev.18: a repair journey with an empty quotation books a check-up visit (diagnosis fee line) through the job ticket
+      if (!cart.items.length && J.k === 'repair') { const d = DATA.rep.find(r => r.cat === 'ตรวจวินิจฉัย' && r.rate.s != null); if (d) cart.add({ kind: 'service', group: 'repair', key: `R-${d.name}`, name: d.name, unitEx: d.rate.s, qty: 1 }); }
+      if (cart.items.length) { openCart(); markDone(s.i); } else askTeam(JOURNEYS[J.k].topic); return;
+    }
     hereStep = s; const el = document.getElementById(s.id);
     if (el) { el.before(here); here.dataset.sx = el.dataset.sx; }
     go(s.id); paintHere();

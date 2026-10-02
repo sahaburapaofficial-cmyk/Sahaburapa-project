@@ -39,11 +39,11 @@ export const earliestNormal = (now = bkkNow()) => nextOpen(addDays(now.date, LEA
 
 /** on-site time of one crew for the cleaning lines [{t, qty}] at level C1/C2 → [min, max] minutes */
 export function visitTime(lines, level = 'C1') {
-  return lines.reduce(([a, b], l) => { const T = JOB_TIME[l.level || level] || JOB_TIME.C1, r = T[l.t] || T.wall; return [a + r[0] * l.qty, b + r[1] * l.qty]; }, [0, 0]);
+  return lines.reduce(([a, b], l) => { const T = JOB_TIME[l.level || level]; if (!T) return [a, b]; const r = T[l.t] || T.wall; return [a + r[0] * l.qty, b + r[1] * l.qty]; }, [0, 0]);
 }
 /** how the visit fits the working day: 'half' (a morning or an afternoon), 'day', or several working days */
 export function fitOf([, max]) {
-  if (max <= 0) return { kind: 'none', days: 0 };
+  if (max <= 0) return { kind: 'half', days: 0.5, unknown: true };   // e.g. repair: no published time → a morning or an afternoon
   if (max <= DAY_MIN / 2) return { kind: 'half', days: 0.5 };
   if (max <= DAY_MIN) return { kind: 'day', days: 1 };
   return { kind: 'days', days: Math.ceil(max / DAY_MIN) };
