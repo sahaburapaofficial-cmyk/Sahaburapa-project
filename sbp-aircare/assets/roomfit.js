@@ -116,8 +116,8 @@ export function fitCheck(S) {
   const len = r1(0.3 + run + Math.abs(drop) + (t === 'cassette' ? wallDist + 0.5 : 0) + 0.4);
   const extra = Math.max(0, Math.ceil(len - FIT_RULES.pipeIncluded));
   const pipeItem = addonsFor(t, btu)[0].items[0].item;
-  const costInc = pipeItem && pipeItem.ex != null ? incVat(pipeItem.ex * extra) : null;
-  add(extra ? 'info' : 'ok', extra ? `ท่อน้ำยาประมาณ ${len} ม. · เกินระยะที่รวม ${extra} ม.` : `ท่อน้ำยาประมาณ ${len} ม. อยู่ในระยะที่รวมในราคา (${FIT_RULES.pipeIncluded} ม.)`, extra && costInc != null ? `ส่วนเกินประมาณ ${baht(costInc)} รวม VAT (${pipeItem.name}) · ช่างวัดระยะจริงหน้างาน` : 'คอยล์ร้อนอยู่ใกล้ ท่อสั้น ระบบทำงานได้ดีและดูแลง่าย');
+  const costInc = pipeItem && pipeItem.ex != null ? (pipeItem.ex * extra) : null;
+  add(extra ? 'info' : 'ok', extra ? `ท่อน้ำยาประมาณ ${len} ม. · เกินระยะที่รวม ${extra} ม.` : `ท่อน้ำยาประมาณ ${len} ม. อยู่ในระยะที่รวมในราคา (${FIT_RULES.pipeIncluded} ม.)`, extra && costInc != null ? `ส่วนเกินประมาณ ${baht(costInc)} ก่อน VAT (${pipeItem.name}) · ช่างวัดระยะจริงหน้างาน` : 'คอยล์ร้อนอยู่ใกล้ ท่อสั้น ระบบทำงานได้ดีและดูแลง่าย');
   if (sku) {
     const mp = parseFloat(sku.d.maxPipe), ml = parseFloat(sku.d.maxLift);
     if (mp && len > mp) add('warn', `ยาวเกินที่ผู้ผลิตกำหนด (${mp} ม.)`, 'ต้องย้ายตำแหน่งคอยล์ร้อนให้ใกล้ขึ้น');
@@ -292,7 +292,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     if (!S.sel) { selBox.append(h('p', { class: 'rf-note' }, 'ยังไม่ได้เลือกรุ่น')); return; }
     const { m, si } = S.sel, s = m.skus[si], d = S.unit.dims;
     selBox.append(productVisual(m, s, { size: 'thumb' }),
-      h('div', {}, h('p', { class: 'rf-br' }, BRAND_BY_ID[m.brand].name, ' · ', TYPE_BY_ID[m.type].th, m.inverter ? ' · Inverter' : ''), h('b', { class: 'rf-sku' }, s.sku), h('p', { class: 'rf-meta' }, `${btuFmt(s.btu)} · ${s.price == null ? 'ราคากำลังนำเข้า' : baht(s.price) + ' รวม VAT'}`),
+      h('div', {}, h('p', { class: 'rf-br' }, BRAND_BY_ID[m.brand].name, ' · ', TYPE_BY_ID[m.type].th, m.inverter ? ' · Inverter' : ''), h('b', { class: 'rf-sku' }, s.sku), h('p', { class: 'rf-meta' }, `${btuFmt(s.btu)} · ${s.price == null ? 'ราคากำลังนำเข้า' : baht(s.price) + ' ก่อน VAT'}`),
         h('p', { class: 'rf-dims' + (d.src === 'est' ? ' est' : '') }, `กว้าง ${Math.round(d.w * 100)} · สูง ${Math.round(d.h * 100)} · ลึก ${Math.round(d.d * 100)} ซม.`, h('small', {}, d.src === 'spec' ? ' ตามสเปกผู้ผลิต' : ' ขนาดโดยประมาณ · รอสเปกรุ่น'))));
   }
   function setModel(m, si = 0, quiet = false) {
@@ -324,7 +324,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     else if (S.sel) {
       const s = S.sel.m.skus[S.sel.si], ins = installOptions(S.sel.m.type, s.btu).find(o => o.key === 'STANDARD');
       const ex = s.px + (ins ? ins.item.ex || 0 : 0) + (R.pipe.extra && R.pipe.item && R.pipe.item.ex != null ? R.pipe.item.ex * R.pipe.extra : 0);
-      price.append(h('span', {}, ins ? 'เครื่อง + ติดตั้งมาตรฐาน' + (R.pipe.extra ? ` + ท่อเกิน ~${R.pipe.extra} ม.` : '') : 'ราคาเครื่อง (ติดตั้ง: ประเมินหน้างาน)'), h('b', {}, baht(incVat(ex))), h('small', {}, `ก่อน VAT ${baht(ex)} · ประมาณการ ยืนยันหลังสำรวจ`));
+      price.append(h('span', {}, ins ? 'เครื่อง + ติดตั้งมาตรฐาน' + (R.pipe.extra ? ` + ท่อเกิน ~${R.pipe.extra} ม.` : '') : 'ราคาเครื่อง (ติดตั้ง: ประเมินหน้างาน)'), h('b', {}, baht(ex)), h('small', {}, `ก่อน VAT · ประมาณการ ยืนยันหลังสำรวจ`));
     }
   }
   function addQuote() {

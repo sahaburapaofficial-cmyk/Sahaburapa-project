@@ -16,9 +16,9 @@ const CORE = new Set(ZONES.filter(z => z.tier === 'core').map(z => z.province));
 const BANDS = TRAVEL.bands.map(b => ({ ...b, r: b.maxKm / TRAVEL.roadFactor / 10 }));   // straight-line radius in units
 const STATUS = {
   core: { th: 'ไม่มีค่าเดินทาง', h: 1.5 },
-  Z1: { th: `ค่าเดินทาง ${baht(incVat(BANDS[0].fee(0)))}`, h: 1.0 },
-  Z2: { th: `ค่าเดินทาง ${baht(incVat(BANDS[1].fee(0)))}`, h: 0.8 },
-  Z3: { th: `ค่าเดินทาง ${baht(incVat(BANDS[2].fee(0)))}`, h: 0.62 },
+  Z1: { th: `ค่าเดินทาง ${baht((BANDS[0].fee(0)))}`, h: 1.0 },
+  Z2: { th: `ค่าเดินทาง ${baht((BANDS[1].fee(0)))}`, h: 0.8 },
+  Z3: { th: `ค่าเดินทาง ${baht((BANDS[2].fee(0)))}`, h: 0.62 },
   out: { th: 'นอกพื้นที่ · รับเป็นงานโครงการ', h: 0.36 },
 };
 const PAL = {
@@ -187,7 +187,7 @@ async function bootThaiMap(host, cfg = {}) {
   let hov = null, sel = null;
   function paint(p) { if (!p) return; const on = p === hov || p === sel; p.mesh.material[0].color.copy(p.base).offsetHSL(0, on ? 0.05 : 0, on ? 0.08 : 0); p.mesh.material[0].emissive.set(p === sel ? C.hq : 0x000000); p.mesh.material[0].emissiveIntensity = p === sel ? 0.18 : 0; }
   function setHover(p) { const o = hov; hov = p; paint(o); paint(p); el.style.cursor = p ? 'pointer' : 'grab'; }
-  function describe(p) { return p.st === 'core' ? 'ไม่มีค่าเดินทาง' : p.st === 'out' ? `ส่วนที่ใกล้ที่สุดห่างประมาณ ${p.km} กม. (ระยะถนน) · รับเป็นงานโครงการ/สัญญา` : `ค่าเดินทางเริ่มต้น ${STATUS[p.st].th.replace('ค่าเดินทาง ', '')} ต่อเที่ยว (รวม VAT) · บางอำเภออยู่ช่วงไกลกว่า`; }
+  function describe(p) { return p.st === 'core' ? 'ไม่มีค่าเดินทาง' : p.st === 'out' ? `ส่วนที่ใกล้ที่สุดห่างประมาณ ${p.km} กม. (ระยะถนน) · รับเป็นงานโครงการ/สัญญา` : `ค่าเดินทางเริ่มต้น ${STATUS[p.st].th.replace('ค่าเดินทาง ', '')} ต่อเที่ยว (ก่อน VAT) · บางอำเภออยู่ช่วงไกลกว่า`; }
   function hover(e) { const p = hit(e); setHover(p); if (!p) { tip.hidden = true; return; } const r = stage.getBoundingClientRect(); tip.hidden = false; tip.innerHTML = ''; tip.append(h('b', {}, p.th), h('span', {}, describe(p))); tip.style.transform = `translate(${Math.min(e.clientX - r.left + 14, r.width - 250)}px,${e.clientY - r.top + 14}px)`; }
   function click(e) { const p = hit(e); if (!p) return; cfg.onPick && cfg.onPick(p.th); }
   new ResizeObserver(() => { const W = stage.clientWidth || 1, H = stage.clientHeight || 1; renderer.setSize(W, H, false); camera.aspect = W / H; camera.updateProjectionMatrix(); }).observe(stage);

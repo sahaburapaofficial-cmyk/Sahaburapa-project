@@ -13,10 +13,10 @@ import { judge, bkkNow, dateTh, LEAD_DAYS, RUSH_FEE_EX } from './queue.js';
 
 // Rev.15: one line under the quotation date field — what the chosen date means under the queue rules (queue.js)
 function dateHint(date, hasRush) {
-  const J = judge(date, [], 'C1'), fee = baht(incVat(RUSH_FEE_EX));
-  const txt = !date ? `จองปกติล่วงหน้า ${LEAD_DAYS} วัน (เร็วสุด ${dateTh(J.earliest)}) · เร็วกว่านั้นเป็นคิวด่วน +${fee} รวม VAT ต้องมีคิวว่าง`
+  const J = judge(date, [], 'C1'), fee = baht(RUSH_FEE_EX);
+  const txt = !date ? `จองปกติล่วงหน้า ${LEAD_DAYS} วัน (เร็วสุด ${dateTh(J.earliest)}) · เร็วกว่านั้นเป็นคิวด่วน +${fee} ก่อน VAT ต้องมีคิวว่าง`
     : J.kind === 'past' ? 'วันที่ผ่านมาแล้ว เลือกวันนี้หรือวันถัดไป'
-    : J.rush ? (hasRush ? `คิวด่วน +${fee} อยู่ในรายการแล้ว · ทีมยืนยันคิวก่อน ถ้าไม่มีคิวไม่เก็บค่านี้` : `วันนี้อยู่ในช่วงคิวด่วน (+${fee} รวม VAT ต่อการเข้างาน ถ้ามีคิวว่าง) ทีมยืนยันกับคุณก่อน`)
+    : J.rush ? (hasRush ? `คิวด่วน +${fee} อยู่ในรายการแล้ว · ทีมยืนยันคิวก่อน ถ้าไม่มีคิวไม่เก็บค่านี้` : `วันนี้อยู่ในช่วงคิวด่วน (+${fee} ก่อน VAT ต่อการเข้างาน ถ้ามีคิวว่าง) ทีมยืนยันกับคุณก่อน`)
     : 'จองปกติ · ทีมยืนยันคิวและเวลาเข้างาน';
   return h('p', { class: 's-note' + (J.rush || J.kind === 'past' ? ' warn' : ''), style: 'margin-top:-6px' }, txt + (J.closed ? ' · วันอาทิตย์เป็นงานนอกเวลา มีค่าใช้จ่ายเพิ่มเติม' : ''));
 }
@@ -24,7 +24,7 @@ function dateHint(date, hasRush) {
 const exInc = ex => (ex == null ? null : { ex, inc: incVat(ex) });
 const priceNode = (ex, unit) => ex == null
   ? h('span', { class: 's-price survey' }, 'ประเมินหน้างาน')
-  : h('span', { class: 's-price' }, h('b', {}, baht(incVat(ex))), h('small', {}, `ก่อน VAT ${baht(ex)}${unit ? ' / ' + unit : ''}`));
+  : h('span', { class: 's-price' }, h('b', {}, baht(ex)), h('small', {}, `ก่อน VAT${unit ? ' / ' + unit : ''}`));
 
 /* =========================================================
    Quote basket
@@ -79,7 +79,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
   dr.addEventListener('click', e => { if (e.target === dr) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !dr.hidden) close(); });
   let sent = null;
-  const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(incVat(i.unitEx * i.qty))}`), `พื้นที่: ${cart.zoneInput || '-'}`, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].join('\n'); };
+  const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(i.unitEx * i.qty)}`), `พื้นที่: ${cart.zoneInput || '-'}`, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].join('\n'); };
   function render() {
     const t = cart.totals();
     panel.innerHTML = '';
@@ -98,10 +98,10 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       list.append(h('li', { class: i.unitEx == null ? 'sv' : '' },
         h('div', { class: 's-l-t' }, h('b', {}, i.name), i.detail ? h('small', {}, i.detail) : null),
         i.unitEx == null ? h('span', { class: 's-price survey' }, 'ประเมินหน้างาน')
-          : i.fixed ? h('div', { class: 's-l-q' }, h('span', { class: 's-l-p' }, baht(incVat(i.unitEx * i.qty))))   // Rev.15: one per visit (คิวด่วน) — no quantity
+          : i.fixed ? h('div', { class: 's-l-q' }, h('span', { class: 's-l-p' }, baht(i.unitEx * i.qty)))   // Rev.15: one per visit (คิวด่วน) — no quantity
           : h('div', { class: 's-l-q' },
             h('div', { class: 's-stp' }, h('button', { type: 'button', 'aria-label': 'ลด', onclick: () => { cart.setQty(i.id, i.qty - 1); render(); } }, '−'), h('span', {}, String(i.qty)), h('button', { type: 'button', 'aria-label': 'เพิ่ม', onclick: () => { cart.setQty(i.id, i.qty + 1); render(); } }, '+')),
-            h('span', { class: 's-l-p' }, baht(incVat(i.unitEx * i.qty)))),
+            h('span', { class: 's-l-p' }, baht(i.unitEx * i.qty))),
         h('button', { type: 'button', class: 's-rm', 'aria-label': 'ลบ ' + i.name, onclick: () => { cart.remove(i.id); render(); } }, 'ลบ')));
     });
     body.append(list);
@@ -205,10 +205,10 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
       const choices = a.choose || [a.item];
       let cur = choices[0];
       const qty = h('input', { type: 'number', min: '0', max: '99', value: '0', inputmode: 'numeric', 'aria-label': 'จำนวน' });
-      const sel = choices.length > 1 ? h('select', { 'aria-label': 'เลือกรายการ' }, choices.map((c, i) => h('option', { value: i }, `${c.name.replace(/^งานเดินเมนไฟ 1 เฟส — /, 'เมนไฟ ').replace(/^เซอร์กิตเบรกเกอร์ /, '')} · ${baht(incVat(c.ex))}/${c.unit}`))) : null;
+      const sel = choices.length > 1 ? h('select', { 'aria-label': 'เลือกรายการ' }, choices.map((c, i) => h('option', { value: i }, `${c.name.replace(/^งานเดินเมนไฟ 1 เฟส — /, 'เมนไฟ ').replace(/^เซอร์กิตเบรกเกอร์ /, '')} · ${baht(c.ex)}/${c.unit}`))) : null;
       const set = () => { const q = Math.max(0, +qty.value || 0); state.add[key] = q ? { item: cur, qty: q } : null; refresh(); };
       qty.addEventListener('input', set); sel && sel.addEventListener('change', () => { cur = choices[+sel.value]; set(); });
-      grp.append(h('div', { class: 's-add-r' }, h('span', { class: 's-add-n' }, sel ? null : cur.name, sel, a.note ? h('small', {}, a.note) : null), h('span', { class: 's-add-u' }, sel ? '' : `${baht(incVat(cur.ex))} / ${cur.unit}`), h('label', { class: 's-qty' }, qty, h('span', {}, cur.unit))));
+      grp.append(h('div', { class: 's-add-r' }, h('span', { class: 's-add-n' }, sel ? null : cur.name, sel, a.note ? h('small', {}, a.note) : null), h('span', { class: 's-add-u' }, sel ? '' : `${baht(cur.ex)} / ${cur.unit}`), h('label', { class: 's-qty' }, qty, h('span', {}, cur.unit))));
     });
     addWrap.append(grp);
   });
@@ -237,7 +237,7 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
     const ex = L.reduce((n, l) => n + (l.unitEx == null ? 0 : l.unitEx * l.qty), 0);
     const sv = L.filter(l => l.unitEx == null).length;
     tot.innerHTML = '';
-    tot.append(h('span', { class: 's-lbl' }, `รวม ${state.qty} เครื่อง${state.level ? ' พร้อมติดตั้ง' : ''}`), h('b', {}, baht(incVat(ex))), h('small', {}, `ก่อน VAT ${baht(ex)} · VAT ${baht(Math.round(ex * VAT))}${sv ? ` · +${sv} รายการประเมินหน้างาน` : ''}`));
+    tot.append(h('span', { class: 's-lbl' }, `รวม ${state.qty} เครื่อง${state.level ? ' พร้อมติดตั้ง' : ''}`), h('b', {}, baht(ex)), h('small', {}, `ก่อน VAT · รวม VAT 7% ${baht(incVat(ex))}${sv ? ` · +${sv} รายการประเมินหน้างาน` : ''}`));
     if (detBody) { const o = opts.find(o => o.key === state.level); detBody.innerHTML = ''; if (o) detBody.append(h('p', {}, h('b', {}, 'รวม: '), o.item.inc || '—'), h('p', {}, h('b', {}, 'ไม่รวม: '), o.item.exc || '—'), h('p', {}, h('b', {}, 'รับประกัน: '), o.item.warranty || '—')); else detBody.append(h('p', {}, 'ซื้อเครื่องอย่างเดียว ไม่รวมงานติดตั้ง')); }
   }
   function addToCart() { lines().forEach(l => cart.add(l)); toast(`ใส่ใบเสนอราคาแล้ว · ${cart.count()} รายการ`); onAdded && onAdded(); }
@@ -286,7 +286,7 @@ export function materialTable(type, btu, { compact = false } = {}) {
   const cols = materialMatrix(type, btu);
   if (!cols.length) return h('p', { class: 's-note' }, 'ขนาดนี้ต้องสำรวจก่อนระบุวัสดุ');
   const t = h('table', { class: 's-mat' + (compact ? ' compact' : '') },
-    h('thead', {}, h('tr', {}, h('th', {}, 'รายการ'), cols.map(c => h('th', { class: c.key === 'STANDARD' ? 'rec' : '' }, c.th, c.key === 'STANDARD' ? h('small', {}, 'แนะนำ') : null, h('span', { class: 's-mat-p' }, baht(incVat(c.item.ex))))))),
+    h('thead', {}, h('tr', {}, h('th', {}, 'รายการ'), cols.map(c => h('th', { class: c.key === 'STANDARD' ? 'rec' : '' }, c.th, c.key === 'STANDARD' ? h('small', {}, 'แนะนำ') : null, h('span', { class: 's-mat-p' }, baht(c.item.ex)))))),
     h('tbody', {},
       MAT_ROWS.map(r => h('tr', {}, h('th', { scope: 'row' }, r.th), cols.map(c => h('td', { class: c.key === 'STANDARD' ? 'rec' : '' }, c.cell[r.id] ? c.cell[r.id].join(' · ') : '—')))),
       h('tr', {}, h('th', { scope: 'row' }, 'รับประกันงานติดตั้ง'), cols.map(c => h('td', { class: c.key === 'STANDARD' ? 'rec' : '' }, c.item.warranty || '—')))));
@@ -310,7 +310,7 @@ export function mountMaterials(root, cfg = {}) {
     sizes[type].forEach(b => sz.append(h('button', { type: 'button', 'aria-pressed': b === btu, onclick: () => { btu = b; render(); } }, (b / 1000) + 'k BTU')));
     out.innerHTML = ''; out.append(materialTable(type, btu));
   }
-  root.append(h('div', { class: 's-mat-tools' }, bar, sz), h('div', { class: 's-mat-grid' }, out, why), h('p', { class: 's-note' }, 'ข้อมูลจากแพ็กเกจติดตั้งใน Pricebook 2569 ราคาต่อเครื่องรวม VAT รวมท่อและวัสดุ 4 เมตรแรก ทุกแพ็กเกจบนเว็บใช้วัสดุเกรดพรีเมียมชุดเดียวกัน · ท่อน้ำยาทองแดง O-TWO หนา 0.70 มม. ทุกงาน'));
+  root.append(h('div', { class: 's-mat-tools' }, bar, sz), h('div', { class: 's-mat-grid' }, out, why), h('p', { class: 's-note' }, 'ข้อมูลจากแพ็กเกจติดตั้งใน Pricebook 2569 ราคาต่อเครื่องก่อน VAT รวมท่อและวัสดุ 4 เมตรแรก ทุกแพ็กเกจบนเว็บใช้วัสดุเกรดพรีเมียมชุดเดียวกัน · ท่อน้ำยาทองแดง O-TWO หนา 0.70 มม. ทุกงาน'));
   render();
 }
 
@@ -337,19 +337,19 @@ export function cleanPackageGuide(where = 'บริการ', hl = 'h4') {   /
     root.innerHTML = '';
     const cards = h('div', { class: 'pk-cards' }, PKG_INFO.map(p => { const r = DATA.clean.find(x => x.pkg === p.id && x.type); const from = startAt(p.id, 'C1');
       return h('article', { class: 'pk-card' + (p.code === 'P2' ? ' rec' : '') }, h('p', { class: 'pk-code' }, `${p.code} · ${p.id}`, p.code === 'P2' ? h('span', {}, 'แนะนำสำหรับธุรกิจ') : null), h(hl, {}, p.th), h('p', { class: 'pk-pitch' }, p.pitch),
-        h('p', { class: 'pk-from' }, h('small', {}, 'ล้างปกติ เริ่ม'), h('b', {}, from ? baht(incVat(from)) : '—'), h('small', {}, '/ เครื่อง รวม VAT')),
+        h('p', { class: 'pk-from' }, h('small', {}, 'ล้างปกติ เริ่ม'), h('b', {}, from ? baht(from) : '—'), h('small', {}, '/ เครื่อง ก่อน VAT')),
         h('ul', {}, p.gets.map(g => h('li', {}, g))), h('dl', {}, h('dt', {}, 'รับประกันงานล้าง'), h('dd', {}, r?.warranty || '—'), h('dt', {}, 'ดูแลหลังบริการ'), h('dd', {}, p.care), h('dt', {}, 'เหมาะกับ'), h('dd', {}, p.fit))); }));
     const methods = h('div', { class: 'pk-methods' }, METHOD_INFO.map(m => h('div', {}, h('b', {}, m.th), h('p', {}, m.d))));
     const seg = h('div', { class: 's-seg', role: 'group', 'aria-label': 'วิธีล้าง' }, [['C1', 'ล้างปกติ C1'], ['C2', 'ล้างใหญ่ C2']].map(([k, t]) => h('button', { type: 'button', 'aria-pressed': k === method, onclick: () => { method = k; render(); } }, t)));
     const tb = h('tbody');
     types.forEach(([t, th]) => { const bands = SIZE_BANDS.filter(b => DATA.clean.some(r => r.type === t && r.range === (t === 'wall' ? b.wall : b.other)));
-      bands.forEach((b, i) => { const rg = t === 'wall' ? b.wall : b.other; tb.append(h('tr', {}, i === 0 ? h('th', { rowspan: bands.length, scope: 'rowgroup' }, th) : null, h('td', {}, rg + ' BTU'), ...PKG_INFO.map(p => { const r = DATA.clean.find(x => x.pkg === p.id && x.level === method && x.type === t && x.range === rg); return h('td', { class: 'pr' }, r && r.rate.s != null ? baht(incVat(r.rate.s)) : 'ประเมิน'); }))); }); });
+      bands.forEach((b, i) => { const rg = t === 'wall' ? b.wall : b.other; tb.append(h('tr', {}, i === 0 ? h('th', { rowspan: bands.length, scope: 'rowgroup' }, th) : null, h('td', {}, rg + ' BTU'), ...PKG_INFO.map(p => { const r = DATA.clean.find(x => x.pkg === p.id && x.level === method && x.type === t && x.range === rg); return h('td', { class: 'pr' }, r && r.rate.s != null ? baht(r.rate.s) : 'ประเมิน'); }))); }); });
     root.append(cards,
       h('div', { class: 'pk-key' }, h('b', {}, 'ระดับบริการแพงขึ้น ไม่เท่ากับล้างลึกขึ้น: '), 'ความลึกของการล้างอยู่ที่วิธีล้าง C1 / C2 ส่วน P1 / P2 / P3 คือหลักฐาน การตรวจวัด การรับประกัน และการดูแลหลังงาน เลือกได้อิสระ เช่น P3 + ล้างปกติ'),
       methods,
-      h('div', { class: 'pk-table-h' }, h(hl, {}, 'ราคาต่อเครื่อง (รวม VAT) ตามประเภทและขนาด'), seg),
+      h('div', { class: 'pk-table-h' }, h(hl, {}, 'ราคาต่อเครื่อง (ก่อน VAT) ตามประเภทและขนาด'), seg),
       h('div', { class: 'pk-scroll', tabindex: '0', role: 'region', 'aria-label': 'ตารางราคาล้างต่อเครื่อง (' + where + ')' }, h('table', { class: 'pk-t' }, h('thead', {}, h('tr', {}, h('th', {}, 'ประเภท'), h('th', {}, 'ขนาด'), ...PKG_INFO.map(p => h('th', {}, p.id)))), tb)),
-      h('p', { class: 's-note' }, `ราคามาตรฐานจาก Pricebook 2569 · ขั้นต่ำต่อการเข้าหน้างาน ${baht(incVat(DATA.minBill))} · งานเสริมตามอาการ (น้ำยาล้างคอยล์เกรดอุตสาหกรรม, Chemical Wash สเปรย์โฟมเกรด อย., ตรวจระบบน้ำยา) เสนอราคาแยกเมื่อจำเป็น · Service Care คือสิทธิ์ดูแลหลังส่งมอบตามเงื่อนไขในใบเสนอราคา ไม่ใช่การรับประกัน · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`));
+      h('p', { class: 's-note' }, `ราคามาตรฐานจาก Pricebook 2569 · ขั้นต่ำต่อการเข้าหน้างาน ${baht(DATA.minBill)} · งานเสริมตามอาการ (น้ำยาล้างคอยล์เกรดอุตสาหกรรม, Chemical Wash สเปรย์โฟมเกรด อย., ตรวจระบบน้ำยา) เสนอราคาแยกเมื่อจำเป็น · Service Care คือสิทธิ์ดูแลหลังส่งมอบตามเงื่อนไขในใบเสนอราคา ไม่ใช่การรับประกัน · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`));
   }
   render();
   return root;
@@ -398,7 +398,7 @@ export function mountPriceCenter(root) {
       const P = CLEAN_PKGS.find(p => p.id === pkg);
       const rows = DATA.clean.filter(r => r.pkg === pkg && r.level === level);
       const first = rows.find(r => r.type);
-      out.append(h('div', { class: 's-pc-info' }, h('p', {}, h('b', {}, `${P.th} · ${level === 'C1' ? 'ล้างปกติ' : 'ล้างใหญ่'}`), ` — ${first?.doc || ''}`), h('p', { class: 's-note' }, `รับประกัน ${first?.warranty || '—'} · ${first?.care || ''} · ขั้นต่ำต่อการเข้าหน้างาน ${baht(incVat(DATA.minBill))} (${baht(DATA.minBill)} ก่อน VAT)`), first ? h('details', { class: 's-row-d' }, h('summary', {}, 'ขอบเขตงาน'), h('p', {}, h('b', {}, 'รวม: '), first.inc), h('p', {}, h('b', {}, 'ไม่รวม: '), first.exc)) : null));
+      out.append(h('div', { class: 's-pc-info' }, h('p', {}, h('b', {}, `${P.th} · ${level === 'C1' ? 'ล้างปกติ' : 'ล้างใหญ่'}`), ` — ${first?.doc || ''}`), h('p', { class: 's-note' }, `รับประกัน ${first?.warranty || '—'} · ${first?.care || ''} · ขั้นต่ำต่อการเข้าหน้างาน ${baht(DATA.minBill)} (${baht(DATA.minBill)} ก่อน VAT)`), first ? h('details', { class: 's-row-d' }, h('summary', {}, 'ขอบเขตงาน'), h('p', {}, h('b', {}, 'รวม: '), first.inc), h('p', {}, h('b', {}, 'ไม่รวม: '), first.exc)) : null));
       TYPES.forEach(t => {
         const rs = rows.filter(r => r.type === t.id && match(r.name, t.th, r.range));
         out.append(group(t.th, rs.map(r => row({ name: `${t.th} ${r.range} BTU`, ex: r.rate.s, unit: r.unit, warranty: r.warranty, add: { kind: 'service', group: 'clean', key: `C-${pkg}-${level}-${t.id}-${r.range}`, name: `${level === 'C1' ? 'ล้างปกติ' : 'ล้างใหญ่'} ${t.th} ${r.range} BTU`, detail: pkg, unitEx: r.rate.s, qty: 1 } }))));
@@ -424,14 +424,14 @@ export function mountPriceCenter(root) {
       cats.forEach(c => out.append(group(c, DATA.rep.filter(r => r.cat === c && match(r.name, c)).map(r => row({ name: r.name, ex: r.rate.s, unit: r.unit, warranty: r.warranty, inc: r.inc, exc: r.exc, add: { kind: r.rate.s == null ? 'survey' : 'service', group: 'repair', key: `R-${r.name}`, name: r.name, unitEx: r.rate.s, qty: 1 } })))));
     }
     if (tab === 'contract') {
-      out.append(h('div', { class: 's-pc-info' }, h('p', {}, h('b', {}, 'สัญญาล้างรายปี (PM)'), ' — ทีมวางรอบล่วงหน้าทั้งปี ส่งรายงานตามแพ็กเกจหลังทุกรอบ วางบิลตามรอบ'), h('p', { class: 's-note' }, `ราคาต่อเครื่องต่อครั้ง อัตรามาตรฐาน · ขั้นต่ำต่อการเข้าหน้างาน ${baht(incVat(DATA.minBill))} · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`),
+      out.append(h('div', { class: 's-pc-info' }, h('p', {}, h('b', {}, 'สัญญาล้างรายปี (PM)'), ' — ทีมวางรอบล่วงหน้าทั้งปี ส่งรายงานตามแพ็กเกจหลังทุกรอบ วางบิลตามรอบ'), h('p', { class: 's-note' }, `ราคาต่อเครื่องต่อครั้ง อัตรามาตรฐาน · ขั้นต่ำต่อการเข้าหน้างาน ${baht(DATA.minBill)} · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`),
         h('button', { type: 'button', class: 's-btn primary', onclick: () => { const b = document.getElementById('b2b'); b && b.scrollIntoView({ behavior: 'smooth' }); } }, 'คำนวณสัญญาของอาคารคุณ')));
       const cardsBox = h('div', { class: 's-pk3' });
       CLEAN_PKGS.forEach(P => {
         const rs = TYPES.map(t => { const a = DATA.clean.find(r => r.pkg === P.id && r.level === 'C1' && r.type === t.id); const b = DATA.clean.find(r => r.pkg === P.id && r.level === 'C2' && r.type === t.id); return a ? [t, a, b] : null; }).filter(Boolean);
         const first = rs[0] && rs[0][1];
         cardsBox.append(h('article', { class: 's-pk' + (P.id === 'Standard Care' ? ' rec' : '') }, h('h3', {}, P.th, P.id === 'Standard Care' ? h('small', {}, 'แนะนำ') : null), h('p', { class: 's-note' }, P.sub),
-          h('table', { class: 's-btable' }, h('thead', {}, h('tr', {}, h('th', {}, 'ประเภท (เล็กสุด)'), h('th', {}, 'ล้างปกติ'), h('th', {}, 'ล้างใหญ่'))), h('tbody', {}, rs.filter(([t, a]) => match(t.th, P.th)).map(([t, a, b]) => h('tr', {}, h('td', {}, `${t.th} ${a.range}`), h('td', {}, baht(incVat(a.rate.s))), h('td', {}, b ? baht(incVat(b.rate.s)) : '—'))))),
+          h('table', { class: 's-btable' }, h('thead', {}, h('tr', {}, h('th', {}, 'ประเภท (เล็กสุด)'), h('th', {}, 'ล้างปกติ'), h('th', {}, 'ล้างใหญ่'))), h('tbody', {}, rs.filter(([t, a]) => match(t.th, P.th)).map(([t, a, b]) => h('tr', {}, h('td', {}, `${t.th} ${a.range}`), h('td', {}, baht(a.rate.s)), h('td', {}, b ? baht(b.rate.s) : '—'))))),
           first ? h('p', { class: 's-note' }, `เอกสาร: ${first.doc} · รับประกัน ${first.warranty}`) : null));
       });
       out.append(cardsBox);

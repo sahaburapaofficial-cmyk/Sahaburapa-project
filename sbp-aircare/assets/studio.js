@@ -255,12 +255,12 @@ export async function mountStudio(root, cfg = {}) {
         const oneEx = k.px + (ins ? ins.item.ex : 0);
         list.append(h('li', {},
           h('div', { class: 'st-m-t' }, h('small', {}, `${BRAND_BY_ID[m.brand].name} · ${m.series}`), h('b', {}, k.sku), h('span', { class: 's-note' }, `${btuFmt(k.btu)}${k.d.approved ? '' : ' · ราคาอ้างอิง'}`)),
-          h('div', { class: 'st-m-p' }, h('b', {}, baht(incVat(oneEx * n))), h('small', {}, `${n} เครื่อง พร้อมติดตั้งมาตรฐาน · เครื่องละ ${baht(incVat(oneEx))}`)),
+          h('div', { class: 'st-m-p' }, h('b', {}, baht(oneEx * n)), h('small', {}, `${n} เครื่อง พร้อมติดตั้งมาตรฐาน · เครื่องละ ${baht(oneEx)}`)),
           h('div', { class: 'st-m-a' },
             h('button', { type: 'button', class: 's-btn primary', onclick: () => { cart.add({ kind: 'product', group: 'product', key: `P-${k.sku}`, name: `${BRAND_BY_ID[m.brand].name} ${k.sku}`, detail: `${TYPE_BY_ID[m.type].th} ${btuFmt(k.btu)} · จากห้องจำลอง ${state.scene.th}`, unitEx: k.px, qty: n }); if (ins) cart.add({ kind: 'service', group: 'install', key: `I-${ins.item.code}`, name: ins.item.name, detail: `สำหรับ ${k.sku}`, unitEx: ins.item.ex, qty: n }); toast(`ใส่ ${n} เครื่อง + ติดตั้งมาตรฐาน ในใบเสนอราคาแล้ว`); } }, 'ใส่ใบเสนอราคา'),
             cfg.onOpen ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => cfg.onOpen(m, i) }, 'รายละเอียด') : null)));
       });
-      col1.append(list, h('p', { class: 's-note' }, `เรียงจากราคาต่ำ · ${cands.length} รุ่นที่เข้าเงื่อนไข · ราคารวม VAT ตาม Pricebook 2569 ติดตั้งมาตรฐานรวมท่อและวัสดุ 4 เมตรแรก`));
+      col1.append(list, h('p', { class: 's-note' }, `เรียงจากราคาต่ำ · ${cands.length} รุ่นที่เข้าเงื่อนไข · ราคาก่อน VAT ตาม Pricebook 2569 ติดตั้งมาตรฐานรวมท่อและวัสดุ 4 เมตรแรก`));
     }
     // cleaning plan
     const ci = cleanInterval(dustNow()), band = sizeBandFor(type, per);
@@ -274,10 +274,10 @@ export async function mountStudio(root, cfg = {}) {
       const annualEx = v1 * (ci.visits - 1) + v2;
       col2.append(h('dl', { class: 'st-plan' },
         h('dt', {}, 'รอบล้าง'), h('dd', {}, `${ci.visits} ครั้ง/ปี (ล้างใหญ่ 1 ครั้ง)`),
-        h('dt', {}, 'ล้างปกติ / รอบ'), h('dd', {}, baht(incVat(v1))),
-        h('dt', {}, 'ล้างใหญ่ / รอบ'), h('dd', {}, baht(incVat(v2))),
-        h('dt', { class: 'tot' }, 'รวมต่อปี'), h('dd', { class: 'tot' }, baht(incVat(annualEx)))),
-        h('p', { class: 's-note' }, `อัตรามาตรฐาน ${n} เครื่อง · ขั้นต่ำต่อรอบ ${baht(incVat(DATA.minBill))}${(r1.rate.s * n) < DATA.minBill ? ' (ปรับขึ้นเป็นขั้นต่ำแล้ว — รวมหลายห้องหรือหลายเครื่องในรอบเดียวกันจะคุ้มกว่า)' : ''} · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`),
+        h('dt', {}, 'ล้างปกติ / รอบ'), h('dd', {}, baht(v1)),
+        h('dt', {}, 'ล้างใหญ่ / รอบ'), h('dd', {}, baht(v2)),
+        h('dt', { class: 'tot' }, 'รวมต่อปี'), h('dd', { class: 'tot' }, baht(annualEx))),
+        h('p', { class: 's-note' }, `อัตรามาตรฐาน ${n} เครื่อง · ขั้นต่ำต่อรอบ ${baht(DATA.minBill)}${(r1.rate.s * n) < DATA.minBill ? ' (ปรับขึ้นเป็นขั้นต่ำแล้ว — รวมหลายห้องหรือหลายเครื่องในรอบเดียวกันจะคุ้มกว่า)' : ''} · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`),
         h('button', { type: 'button', class: 's-btn', onclick: () => { cart.add({ kind: 'service', group: 'contract', key: `K-${state.scene.id}-${n}-${ci.visits}-${state.pkg}`, name: `สัญญาล้างรายปี ${state.scene.th} ${n} เครื่อง × ${ci.visits} ครั้ง/ปี`, detail: `${state.pkg} · ${TYPE_RULES[type].th} ${btuFmt(per)}`, unitEx: annualEx, qty: 1, units: n }); toast('เพิ่มสัญญาล้างรายปีในใบเสนอราคาแล้ว'); } }, '+ ใส่สัญญาล้างในใบเสนอราคา'));
     } else col2.append(h('p', { class: 's-note' }, 'ขนาดนี้ต้องประเมินค่าล้างจากหน้างาน'));
     const col = [col1, col2];
@@ -341,7 +341,7 @@ export async function mountStudio(root, cfg = {}) {
     rows.forEach(r => {
       const E = energy(r.btu, type, inv, hrs, d, rate, state.setT);
       const band = sizeBandFor(type, r.per), c1 = cleanRate('Basic Clean', 'C1', type, band);
-      const cleanCost = c1 ? incVat(c1.rate.s) * r.n : null;
+      const cleanCost = c1 ? c1.rate.s * r.n : null;
       tb.append(h('tr', { class: r.me ? 'me' : '' }, h('th', { scope: 'row' }, r.th), h('td', {}, baht(Math.round(E.bahtMonthClean))), h('td', {}, baht(Math.round(E.bahtMonth))), h('td', { class: E.extraYear > 1 ? 'up' : '' }, E.extraYear > 1 ? '+' + baht(Math.round(E.extraYear)) : '—'), h('td', {}, cleanCost ? baht(Math.round(cleanCost)) : 'ประเมินหน้างาน')));
     });
     const E0 = energy(state.n * state.per, type, inv, hrs, d, rate, state.setT);
@@ -349,7 +349,7 @@ export async function mountStudio(root, cfg = {}) {
       h('div', { class: 'st-en-head' }, h('div', {}, h('h3', {}, 'ค่าไฟ: ล้างแล้ว กับ ไม่ได้ล้าง ' + state.months + ' เดือน'), h('p', { class: 's-note' }, `ห้องนี้จ่ายค่าไฟแอร์เพิ่มราว ${baht(Math.round(E0.extraYear))} ต่อปี ถ้าปล่อยสภาพนี้ตลอดปี (ไฟฟ้าต่อความเย็น +${Math.round((effects(d).power - 1) * 100)}%)`)),
         h('div', { class: 'st-en-ctl' }, h('label', { class: 'st-rng' }, h('span', {}, 'ใช้งาน', h('b', {}, String(hrs)), h('small', {}, 'ชม./วัน')), hrsIn), setRng, h('label', { class: 's-field' }, 'ค่าไฟ บาท/หน่วย', rateIn), sys)),
       h('div', { class: 'st-en-scroll', tabindex: '0', role: 'region', 'aria-label': 'ตารางค่าไฟตามขนาดเครื่อง' }, h('table', { class: 'st-en-t' }, h('thead', {}, h('tr', {}, h('th', {}, 'ขนาดเครื่อง'), h('th', {}, 'ค่าไฟ/เดือน เมื่อสะอาด'), h('th', {}, `ค่าไฟ/เดือน ไม่ล้าง ${state.months} เดือน`), h('th', {}, 'จ่ายเพิ่ม/ปี'), h('th', {}, 'ค่าล้างมาตรฐาน/ครั้ง'))), tb)),
-      h('p', { class: 's-note' }, `ตัวเลขประมาณการ: ประสิทธิภาพเฉลี่ย ${inv ? 'Inverter' : 'Fixed speed'} ${type === 'wall' ? (inv ? EFF.inverter.wall : EFF.fixed.wall) : (inv ? EFF.inverter.other : EFF.fixed.other)} BTU/ชม. ต่อวัตต์ · เครื่องทำงานเฉลี่ย ${Math.round(LOAD_F * 100)}% ของกำลัง · ค่าไฟ ${rate.toFixed(2)} บาท/หน่วย (${bizGroup(s.g) ? 'กิจการขนาดเล็ก ประมาณการ' : 'บ้านอยู่อาศัย ช่วง 201–400 หน่วย รอบ ก.ย.–ธ.ค. 2569 รวม Ft และ VAT'}) · ผลของฝุ่นอิงช่วงที่เผยแพร่: กระทรวงพลังงานสหรัฐฯ ระบุแผ่นกรองอุดตันทำให้ใช้ไฟเพิ่ม 5–15% และ กฟน./กฟผ. ระบุการล้างช่วยประหยัดราว 5–10% · ค่าล้างคือ Basic Clean ล้างปกติ รวม VAT ต่อรอบ ยังไม่รวมขั้นต่ำต่อรอบ ${baht(incVat(DATA.minBill))}`),
+      h('p', { class: 's-note' }, `ตัวเลขประมาณการ: ประสิทธิภาพเฉลี่ย ${inv ? 'Inverter' : 'Fixed speed'} ${type === 'wall' ? (inv ? EFF.inverter.wall : EFF.fixed.wall) : (inv ? EFF.inverter.other : EFF.fixed.other)} BTU/ชม. ต่อวัตต์ · เครื่องทำงานเฉลี่ย ${Math.round(LOAD_F * 100)}% ของกำลัง · ค่าไฟ ${rate.toFixed(2)} บาท/หน่วย (${bizGroup(s.g) ? 'กิจการขนาดเล็ก ประมาณการ' : 'บ้านอยู่อาศัย ช่วง 201–400 หน่วย รอบ ก.ย.–ธ.ค. 2569 รวม Ft และ VAT'}) · ผลของฝุ่นอิงช่วงที่เผยแพร่: กระทรวงพลังงานสหรัฐฯ ระบุแผ่นกรองอุดตันทำให้ใช้ไฟเพิ่ม 5–15% และ กฟน./กฟผ. ระบุการล้างช่วยประหยัดราว 5–10% · ค่าล้างคือ Basic Clean ล้างปกติ ก่อน VAT ต่อรอบ ยังไม่รวมขั้นต่ำต่อรอบ ${baht(DATA.minBill)}`),
       typeTable(hrs, rate, d),
       h('p', { class: 'st-en-honest' }, h('b', {}, 'พูดตรงๆ: '), 'ห้องที่เปิดวันละไม่กี่ชั่วโมง ค่าไฟที่ประหยัดได้อาจน้อยกว่าค่าล้าง ประโยชน์หลักของการล้างคือ ลมแรงและเย็นเร็วขึ้น ลดกลิ่นอับและน้ำหยด และช่วยให้เครื่องไม่ทำงานหนักเกินไป ส่วนห้องที่เปิดทั้งวันหรือหลายเครื่อง ค่าไฟที่ลดลงจะเห็นผลชัดกว่า'));
   }

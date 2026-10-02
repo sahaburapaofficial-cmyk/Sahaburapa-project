@@ -30,7 +30,7 @@ const sizeTh = (t, b) => `${sizeNum(t, b)} BTU`;
 /** lowest standard per-unit cleaning price (incl. VAT) on the site — for "เริ่ม ฿…" lines in the heroes */
 export function cleanFrom() {
   const rs = DATA.clean.filter(r => r.type && r.level === 'C1' && PKG_TH[r.pkg] && r.rate.s != null);
-  return rs.length ? incVat(Math.min(...rs.map(r => r.rate.s))) : null;
+  return rs.length ? (Math.min(...rs.map(r => r.rate.s))) : null;
 }
 
 export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
@@ -84,7 +84,7 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
   /* when: quick date chips · slot · what the date means (queue.js) */
   function drawWhen(ls, J) {
     when.innerHTML = '';
-    const rushInc = baht(incVat(RUSH_FEE_EX));
+    const rushInc = baht(RUSH_FEE_EX);
     const chip = (d, t, sub) => h('button', { type: 'button', class: 'qc-chip' + (st.date === d ? ' on' : ''), 'aria-pressed': String(st.date === d), onclick: () => setDate(d) }, h('b', {}, t), h('small', {}, sub));
     when.append(h('div', { class: 'qc-chips', role: 'group', 'aria-label': 'เลือกวันเร็ว' },
       chip(today, 'วันนี้', `คิวด่วน +${rushInc}`), chip(addDays(today, 1), 'พรุ่งนี้', `คิวด่วน +${rushInc}`), chip(J.earliest, dateTh(J.earliest), 'เร็วสุดแบบจองปกติ')));
@@ -95,10 +95,10 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
     } else st.slot = '';
     const msg = [];
     const tag = (k, t) => h('span', { class: 'qc-tag qc-tag-' + k }, t);
-    if (J.kind === 'none') msg.push(h('p', {}, tag('info', 'จองปกติ'), `ล่วงหน้า ${LEAD_DAYS} วัน · เร็วสุด ${dateTh(J.earliest)} · ต้องการเร็วกว่านั้นเลือกคิวด่วน +${rushInc} รวม VAT (ต้องมีคิวว่าง)`));
+    if (J.kind === 'none') msg.push(h('p', {}, tag('info', 'จองปกติ'), `ล่วงหน้า ${LEAD_DAYS} วัน · เร็วสุด ${dateTh(J.earliest)} · ต้องการเร็วกว่านั้นเลือกคิวด่วน +${rushInc} ก่อน VAT (ต้องมีคิวว่าง)`));
     if (J.kind === 'past') msg.push(h('p', {}, tag('bad', 'วันที่ผ่านมาแล้ว'), 'เลือกวันนี้หรือวันถัดไป'));
     if (J.kind === 'normal') msg.push(h('p', {}, tag('ok', 'จองปกติ'), 'ทีมยืนยันคิวและเวลาเข้างานก่อนวันนัด'));
-    if (J.kind === 'rush') msg.push(h('p', {}, tag('warn', 'คิวด่วน'), `+${rushInc} รวม VAT ต่อการเข้างาน · รับเมื่อมีทีมว่างเท่านั้น ทีมยืนยันคิวก่อน ถ้าไม่มีคิวไม่เก็บค่าคิวด่วน และเสนอวันที่ใกล้ที่สุดให้`));
+    if (J.kind === 'rush') msg.push(h('p', {}, tag('warn', 'คิวด่วน'), `+${rushInc} ก่อน VAT ต่อการเข้างาน · รับเมื่อมีทีมว่างเท่านั้น ทีมยืนยันคิวก่อน ถ้าไม่มีคิวไม่เก็บค่าคิวด่วน และเสนอวันที่ใกล้ที่สุดให้`));
     if (J.late) msg.push(h('p', {}, tag('bad', 'เวลาวันนี้ไม่พอ'), `งานนี้ใช้เวลาเกินเวลาทำการที่เหลือของวันนี้ ส่วนที่เลย ${COMPANY.open.to} น. เป็นงานนอกเวลา มีค่าใช้จ่ายเพิ่มเติม (ทีมแจ้งในใบเสนอราคา) หรือเลือกพรุ่งนี้`));
     if (J.closed) msg.push(h('p', {}, tag('warn', 'วันหยุดบริษัท'), COMPANY.hoursNote));
     const free = st.date && st.slot ? slotFree(live, st.date, st.slot) : null;
@@ -117,7 +117,7 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
   const sum = h('aside', { class: 'qc-sum', 'aria-label': 'สรุปราคา' });
   function summaryText(t) {
     return [`ขอจองล้างแอร์ · SBP AirCare`, ...lines().map(l => `• ${l.th} ${l.qty} เครื่อง (${sizeTh(l.t, SIZE_BANDS[st.size[l.t]])})`), `วิธีล้าง: ${LEVEL_TH[st.level].th} ${st.level} · ${PKG_TH[st.pkg].th}`,
-      `พื้นที่: ${st.zone || '-'}`, st.date ? `วันเข้างาน: ${dateTh(st.date)} (${st.date})${st.slot ? ' · ' + SLOTS[st.slot].th : ''}${st.date < judge(st.date, [], st.level).earliest ? ` · คิวด่วน +${baht(incVat(RUSH_FEE_EX))} (ถ้ามีคิวว่าง)` : ''}` : null, t ? `ยอดประมาณการ ${baht(t.inc)} รวม VAT` : null].filter(Boolean).join('\n');
+      `พื้นที่: ${st.zone || '-'}`, st.date ? `วันเข้างาน: ${dateTh(st.date)} (${st.date})${st.slot ? ' · ' + SLOTS[st.slot].th : ''}${st.date < judge(st.date, [], st.level).earliest ? ` · คิวด่วน +${baht(RUSH_FEE_EX)} ก่อน VAT (ถ้ามีคิวว่าง)` : ''}` : null, t ? `ยอดประมาณการ ${baht(t.totalEx)} ก่อน VAT · รวม VAT 7% ${baht(t.inc)}` : null].filter(Boolean).join('\n');
   }
   function drawSum() {
     const ls = lines(), J = judge(st.date, ls.map(l => ({ t: l.t, qty: l.qty })), st.level), items = ls.map(l => l.item).filter(Boolean);
@@ -127,17 +127,17 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
     zOut.textContent = !st.zone ? 'กรุงเทพฯ นนทบุรี ปทุมธานี สมุทรปราการ สมุทรสาคร ไม่มีค่าเดินทาง' : !zone ? 'พิมพ์ชื่อเขตหรืออำเภออย่างน้อย 2 ตัวอักษร' : `${(TIER_TH[zone.tier] || TIER_TH.unknown).th}${zone.province ? ' · ' + zone.province : ''}${zone.tier === 'extended' ? ' · ' + travelNote(zone) : ''}`;
     zOut.dataset.tier = zone ? zone.tier : '';
     sum.innerHTML = '';
-    sum.append(h('p', { class: 'qc-sum-h' }, 'ราคาประมาณการ'));
+    sum.append(h('p', { class: 'qc-sum-h' }, 'ราคาประมาณการ · ราคาต่อรายการก่อน VAT'));
     if (!units) { sum.append(h('p', { class: 'qc-empty' }, 'เลือกประเภทแอร์และจำนวนเครื่องในขั้นที่ 1')); return; }
-    sum.append(h('ul', { class: 'qc-lines' }, ls.map(l => h('li', {}, h('span', {}, `${l.th} × ${l.qty}`, h('small', {}, sizeTh(l.t, SIZE_BANDS[st.size[l.t]]))), h('b', {}, l.item ? baht(incVat(l.item.unitEx * l.qty)) : 'ประเมินหน้างาน')))));
+    sum.append(h('ul', { class: 'qc-lines' }, ls.map(l => h('li', {}, h('span', {}, `${l.th} × ${l.qty}`, h('small', {}, sizeTh(l.t, SIZE_BANDS[st.size[l.t]]))), h('b', {}, l.item ? baht(l.item.unitEx * l.qty) : 'ประเมินหน้างาน')))));
     const row = (k, v, cls = '') => h('div', { class: 'qc-row ' + cls }, h('span', {}, k), h('b', {}, v));
-    if (t.minGap) sum.append(row(`ปรับยอดขั้นต่ำงานล้างต่อการเข้าหน้างาน (${baht(incVat(DATA.minBill))})`, baht(incVat(t.minGap)), 'warn'));
+    if (t.minGap) sum.append(row(`ปรับยอดขั้นต่ำงานล้างต่อการเข้าหน้างาน (${baht(DATA.minBill)})`, baht(t.minGap), 'warn'));
     // Rev.13: say what the minimum already covers — more units of the same kind at no extra cost (arithmetic on the shown prices)
     if (t.minGap) { const l0 = ls.find(l => l.item && l.item.unitEx > 0), extra = l0 ? Math.floor(t.minGap / l0.item.unitEx) : 0;
       if (extra > 0) sum.append(h('p', { class: 'qc-fill' }, h('span', {}, `เพิ่มแอร์${l0.th}ได้อีก ${extra} เครื่อง โดยยอดรวมยังเท่าเดิม`),
         h('button', { type: 'button', class: 'qc-fill-b', 'aria-label': `เพิ่มแอร์${l0.th} 1 เครื่อง`, onclick: () => { st.n[l0.t] = Math.min(99, st.n[l0.t] + 1); drawTypes(); drawSum(); } }, '+1 เครื่อง'))); }
-    if (items.some(i => i.group === 'rush')) sum.append(row('คิวด่วน (ถ้ามีคิวว่าง)', baht(incVat(RUSH_FEE_EX)), 'warn'));
-    if (zone && zone.tier === 'extended') sum.append(row(t.travelWaived ? 'ค่าเดินทาง (ยกเว้นตามจำนวนเครื่อง)' : 'ค่าเดินทาง', t.travelWaived ? baht(0) : baht(incVat(t.travel))));
+    if (items.some(i => i.group === 'rush')) sum.append(row('คิวด่วน (ถ้ามีคิวว่าง)', baht(RUSH_FEE_EX), 'warn'));
+    if (zone && zone.tier === 'extended') sum.append(row(t.travelWaived ? 'ค่าเดินทาง (ยกเว้นตามจำนวนเครื่อง)' : 'ค่าเดินทาง', t.travelWaived ? baht(0) : baht(t.travel)));
     sum.append(h('div', { class: 'qc-total' }, h('span', {}, 'รวมทั้งสิ้น', h('small', {}, `ก่อน VAT ${baht(t.totalEx)} · VAT 7% ${baht(t.vat)}`)), h('b', {}, baht(t.inc))));
     const notes = [];
     if (zone && zone.tier === 'out') notes.push('พื้นที่นี้เกินระยะรับงานรายเครื่อง ส่งข้อมูลได้ ทีมจะประเมินเป็นงานโครงการ');

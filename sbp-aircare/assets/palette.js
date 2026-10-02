@@ -18,7 +18,7 @@ export function mountPalette(cfg) {
   const items = [];
   const add = (grp, th, sub, run, keys = '', btu = null) => items.push({ grp, th, sub, run, btu, k: norm(th + ' ' + sub + ' ' + keys) });
   add('ทำทันที', 'จองล้างแอร์', 'เลือกแอร์ วิธีล้าง พื้นที่ เห็นราคารวม', () => go('book'), 'book clean ล้าง จอง');
-  add('ทำทันที', 'ดูใบเสนอราคาของฉัน', 'รายการที่เพิ่มไว้ รวม VAT', () => openCart && openCart(), 'cart quote ตะกร้า');
+  add('ทำทันที', 'ดูใบเสนอราคาของฉัน', 'รายการที่เพิ่มไว้ พร้อมยอดรวม', () => openCart && openCart(), 'cart quote ตะกร้า');
   add('ทำทันที', 'ส่งรูปหน้างานให้ทีมประเมิน', 'ถ่ายตามรายการแล้วส่งทาง LINE', () => go('photo-survey'), 'photo survey สำรวจ รูป');
   add('ทำทันที', `แชท LINE ${COMPANY.line}`, 'เปิดแชตกับทีม', () => window.open(COMPANY.lineUrl, '_blank', 'noopener'), 'line chat');
   add('ทำทันที', `โทร ${COMPANY.tel}`, COMPANY.hours || '', () => { location.href = COMPANY.telHref; }, 'call phone โทรศัพท์');
@@ -30,7 +30,7 @@ export function mountPalette(cfg) {
   // services per unit type: standard cleaning from the Pricebook (C1 · Basic Clean, smallest size) and where to see installation
   ['wall', 'ceiling', 'cassette', 'floor'].forEach(t => {
     const T = TYPE_BY_ID[t], r = cleanRate('Basic Clean', 'C1', t, 0), th = T ? T.th : t;
-    add('บริการ', `ล้างแอร์${th}`, r && r.rate.s != null ? `เริ่ม ${baht(incVat(r.rate.s))} ต่อเครื่อง รวม VAT · จองได้ 3 ขั้น` : 'จองล้าง 3 ขั้น', () => go('book'), `clean ล้าง ${t}`);
+    add('บริการ', `ล้างแอร์${th}`, r && r.rate.s != null ? `เริ่ม ${baht(r.rate.s)} ต่อเครื่อง ก่อน VAT · จองได้ 3 ขั้น` : 'จองล้าง 3 ขั้น', () => go('book'), `clean ล้าง ${t}`);
     add('บริการ', `ติดตั้งแอร์${th}`, 'ขั้นตอนทีมช่าง มาตรฐาน / พรีเมียม · ราคาติดตั้งตามขนาด', () => go('cleanflow'), `install ติดตั้ง ${t}`);
   });
   add('บริการ', 'ซ่อม / ตรวจเช็กแอร์', 'ไม่เย็น น้ำหยด มีเสียง · ค่าตรวจเช็กและค่าซ่อม', () => go('prices'), 'repair ซ่อม เสีย น้ำหยด ไม่เย็น');

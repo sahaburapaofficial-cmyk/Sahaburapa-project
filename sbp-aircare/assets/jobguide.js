@@ -241,7 +241,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
             h('dt', {}, 'ทดสอบรั่ว'), h('dd', {}, leak ? leak.d : '—'), h('dt', {}, 'สุญญากาศ'), h('dd', {}, vac ? vac.d : '—'), h('dt', {}, 'ส่งมอบ'), h('dd', {}, hand ? hand.d : '—'),
             h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, (it.exc || '').split(',').slice(0, 4).join(', ')),
             h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME.install[st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
-          h('div', { class: 'cg-pr' }, it.ex != null ? [h('b', {}, baht(incVat(it.ex))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(it.ex)} · ${it.name}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
+          h('div', { class: 'cg-pr' }, it.ex != null ? [h('b', {}, baht(it.ex)), h('small', {}, `ต่อเครื่อง ก่อน VAT · ${it.name}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
           h('div', { class: 'cg-act' },
             h('button', { type: 'button', class: 's-btn ' + (on ? 'primary' : 'ghost'), onclick: () => { st.level = o.key; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${steps.length} ขั้นตอน`),
             it.ex != null ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'service', group: 'install', key: `I-${it.code}`, name: it.name, detail: it.warranty || '', unitEx: it.ex, qty: 1 }); toast(`เพิ่ม "${it.name}" แล้ว`); } }, 'ใส่ใบเสนอราคา') : null)));
@@ -265,12 +265,12 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
         h('dl', {}, h('dt', {}, 'ถอดออกมาล้าง'), h('dd', {}, out.join(' · ')), h('dt', {}, 'ล้างในเครื่อง'), h('dd', {}, inPlace.join(' · ')), h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, notInc.join(' · ')),
           c2 ? [h('dt', {}, 'เพิ่มจาก C1'), h('dd', {}, 'ทะเบียนชิ้นส่วนที่ถอด + ภาพ (บังคับ) · ชิ้นที่ไม่ได้ถอดต้องระบุเหตุผล')] : null,
           h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME[lv][st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
-        h('div', { class: 'cg-pr' }, r ? [h('b', {}, baht(incVat(r.rate.s))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(r.rate.s)} · ${st.pkg}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
+        h('div', { class: 'cg-pr' }, r ? [h('b', {}, baht(r.rate.s)), h('small', {}, `ต่อเครื่อง ก่อน VAT · ${st.pkg}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
         h('div', { class: 'cg-act' },
           h('button', { type: 'button', class: 's-btn ' + (st.level === lv ? 'primary' : 'ghost'), onclick: () => { st.level = lv; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${n} ขั้นตอน`),
           r ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'service', group: 'clean', key: `CL-${st.pkg}-${lv}-${st.type}-${st.size}`, name: `${r.name} · ${c2 ? 'ล้างใหญ่ C2' : 'ล้างปกติ C1'}`, detail: `${st.pkg} · ${r.warranty || ''}`, unitEx: r.rate.s, qty: 1 }); toast(`เพิ่ม "${r.name} · ${c2 ? 'ล้างใหญ่ C2' : 'ล้างปกติ C1'}" แล้ว`); } }, 'ใส่ใบเสนอราคา') : null));
     };
-    cmp.append(col('C1'), col('C2'), h('p', { class: 'cg-when' }, h('b', {}, 'เลือกล้างใหญ่เมื่อ'), ' เห็นคราบดำที่ใบพัด กลิ่นอับไม่หายหลังล้างปกติ หรือไม่ได้ล้างมานาน · งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ', baht(incVat(DATA.minBill)), ' รวม VAT'));
+    cmp.append(col('C1'), col('C2'), h('p', { class: 'cg-when' }, h('b', {}, 'เลือกล้างใหญ่เมื่อ'), ' เห็นคราบดำที่ใบพัด กลิ่นอับไม่หายหลังล้างปกติ หรือไม่ได้ล้างมานาน · งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ', baht(DATA.minBill), ' ก่อน VAT'));
   }
   const PHI = { pre: 'ก่อนเริ่มงาน', work: 'งานติดตั้ง', test: 'ทดสอบ', hand: 'ส่งมอบ' };
   const phName = ph => st.job === 'install' ? PHI[ph] : PH[ph];

@@ -57,7 +57,7 @@ export const JOURNEYS = {
 // what to do after each view
 const NEXT = {
   shop: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รวมเครื่อง ติดตั้ง อุปกรณ์เสริม และ VAT' }, { go: 'area', th: 'ตรวจพื้นที่และค่าเดินทาง', sub: 'ฟรีในกรุงเทพฯ และปริมณฑล' }, { go: 'cleanflow', pre: 'install', th: 'ดูขั้นตอนติดตั้งของทีม', sub: 'มาตรฐาน / พรีเมียม ทดสอบอะไรบ้าง' }],
-  service: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รายการที่กดเพิ่มไว้ รวม VAT' }, { ask: 'ล้างแอร์', th: 'นัดวันกับทีม', sub: 'ฝากชื่อและเบอร์ ทีมโทรกลับ' }, { go: 'catalog', th: 'ซื้อแอร์ใหม่พร้อมติดตั้ง', sub: 'ทุกรุ่นพร้อมราคา' }],
+  service: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รายการที่กดเพิ่มไว้ พร้อมยอดรวม' }, { ask: 'ล้างแอร์', th: 'นัดวันกับทีม', sub: 'ฝากชื่อและเบอร์ ทีมโทรกลับ' }, { go: 'catalog', th: 'ซื้อแอร์ใหม่พร้อมติดตั้ง', sub: 'ทุกรุ่นพร้อมราคา' }],
   business: [{ ask: 'สัญญาล้างรายปี', th: 'ส่งรายการเครื่องให้ทีม', sub: 'ทีมขายเตรียมใบเสนอราคาสัญญา' }, { go: 'cleanflow', pre: 'clean', th: 'ดูมาตรฐานงานล้าง', sub: 'ขั้นตอนตามแบบฟอร์มของบริษัท' }, { go: 'area', th: 'พื้นที่ให้บริการ', sub: 'และค่าเดินทางนอกพื้นที่หลัก' }],
   knowledge: [{ go: 'studio|room', th: 'หาขนาด BTU ที่เหมาะ', sub: 'เลือกห้องที่ใกล้เคียงของคุณ' }, { go: 'catalog', th: 'ดูรุ่นแอร์และราคา', sub: 'เทียบรุ่นได้' }, { ask: 'อื่น ๆ', th: 'ถามทีมของเรา', sub: 'ฝากคำถาม ทีมติดต่อกลับ' }],
   contact: [{ go: 'home', th: 'กลับไปเลือกบริการ', sub: 'เริ่มจากสิ่งที่ต้องการ' }, { go: 'catalog', th: 'ดูรุ่นแอร์', sub: 'พร้อมราคาติดตั้ง' }, { go: 'cleanflow', th: 'ดูทีมช่างทำงาน', sub: 'ล้าง และติดตั้ง ทีละขั้น' }],
@@ -330,7 +330,7 @@ export function mountSite(cfg) {
   // Rev.11: business facts for search engines (schema.org), built from COMPANY so the page and the data never disagree
   try {
     const ld = { '@context': 'https://schema.org', '@type': 'HVACBusiness', name: `${COMPANY.brand} · ${COMPANY.th}`, alternateName: [COMPANY.en, COMPANY.service],
-      description: 'ล้างแอร์ ติดตั้ง ซ่อม และจำหน่ายเครื่องปรับอากาศ โดยทีมช่างของบริษัท ราคามาตรฐานรวม VAT แสดงบนเว็บไซต์ · สัญญาล้างรายปีสำหรับองค์กร',
+      description: 'ล้างแอร์ ติดตั้ง ซ่อม และจำหน่ายเครื่องปรับอากาศ โดยทีมช่างของบริษัท ราคามาตรฐานก่อน VAT แสดงบนเว็บไซต์ · สัญญาล้างรายปีสำหรับองค์กร',
       url: location.origin + location.pathname, telephone: COMPANY.tel, email: COMPANY.email, taxID: COMPANY.taxId,
       address: { '@type': 'PostalAddress', streetAddress: '593 ถนนพระราม 2 แขวงบางมด', addressLocality: 'เขตจอมทอง', addressRegion: 'กรุงเทพมหานคร', postalCode: '10150', addressCountry: 'TH' },
       areaServed: ['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'สมุทรสาคร'].map(n => ({ '@type': 'AdministrativeArea', name: n })),

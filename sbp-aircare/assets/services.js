@@ -419,7 +419,7 @@ export function mountServices(root, cfg = {}) {
   }
 
   const addBtn = (label, line, cls = 'primary') => h('button', { type: 'button', class: 's-btn ' + cls, onclick: () => { cart.add(line); toast(`เพิ่ม "${line.name}" แล้ว`); } }, label);
-  const priceBig = (ex, unit) => ex == null ? h('div', { class: 'sv-price' }, h('b', {}, 'ประเมินหน้างาน')) : h('div', { class: 'sv-price' }, h('b', {}, baht(incVat(ex))), h('small', {}, `ต่อ${unit || 'เครื่อง'} รวม VAT · ก่อน VAT ${baht(ex)}`));
+  const priceBig = (ex, unit) => ex == null ? h('div', { class: 'sv-price' }, h('b', {}, 'ประเมินหน้างาน')) : h('div', { class: 'sv-price' }, h('b', {}, baht(ex)), h('small', {}, `ต่อ${unit || 'เครื่อง'} · ก่อน VAT`));
   const list = (title, items, cls = '') => items && items.length ? h('div', { class: 'sv-box ' + cls }, h('h4', {}, title), h('ul', {}, items.map(x => h('li', {}, x)))) : null;
   const splitTxt = s => (s || '').replace(/^ไม่รวม\s*/, '').split(/[;,]\s*|\s+และ\s+/).map(x => x.trim()).filter(Boolean);
 
@@ -438,7 +438,7 @@ export function mountServices(root, cfg = {}) {
           h('dt', {}, 'ดูแลหลังบริการ'), h('dd', {}, r?.care || '—'),
           h('dt', {}, 'เอกสารที่ได้รับ'), h('dd', {}, r?.doc || '—'),
           h('dt', {}, 'กำลังทีม (ล้างปกติ)'), h('dd', {}, `ประมาณ ${per} เครื่อง / ทีม / วัน ขึ้นกับหน้างาน`),
-          h('dt', {}, 'ขั้นต่ำต่อครั้ง'), h('dd', {}, `ค่าล้างรวมต่อครั้งขั้นต่ำ ${baht(incVat(DATA.minBill))} (รวม VAT)`)),
+          h('dt', {}, 'ขั้นต่ำต่อครั้ง'), h('dd', {}, `ค่าล้างรวมต่อครั้งขั้นต่ำ ${baht(DATA.minBill)} (ก่อน VAT)`)),
         list('รวมในราคา', r ? [r.inc] : []),
         list('ไม่รวม', splitTxt(r?.exc), 'exc'),
         extrasBox(),
@@ -473,15 +473,15 @@ export function mountServices(root, cfg = {}) {
         list('สาเหตุที่เป็นไปได้ (ต้องตรวจยืนยันหน้างาน)', S.causes),
         items.length ? h('div', { class: 'sv-box' }, h('h4', {}, 'ราคาซ่อมที่อาจเกี่ยวข้อง'), h('ul', { class: 'sv-rep' }, items.map(r => h('li', {},
           h('span', {}, r.name, h('small', {}, r.warranty || '')),
-          h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(incVat(r.rate.s))))))) : null,
-        h('p', { class: 's-note' }, 'รายการด้านบนเป็นตัวอย่างงานซ่อมในกลุ่มอาการนี้ ยังไม่ใช่ผลวินิจฉัย ช่างต้องตรวจและแจ้งราคาจริงก่อนซ่อม ราคารวม VAT ต่อหน่วยตาม Pricebook 2569 ไม่รวมอะไหล่เฉพาะรุ่นที่ระบุ "ประเมิน"'),
+          h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(r.rate.s)))))) : null,
+        h('p', { class: 's-note' }, 'รายการด้านบนเป็นตัวอย่างงานซ่อมในกลุ่มอาการนี้ ยังไม่ใช่ผลวินิจฉัย ช่างต้องตรวจและแจ้งราคาจริงก่อนซ่อม ราคาก่อน VAT ต่อหน่วยตาม Pricebook 2569 ไม่รวมอะไหล่เฉพาะรุ่นที่ระบุ "ประเมิน"'),
         h('div', { class: 'sv-box' }, h('h4', {}, 'ข้อมูลที่ช่วยให้ตรวจเร็วขึ้น'), h('ul', {}, ['ภาพป้าย Nameplate คอยล์เย็นและคอยล์ร้อน', 'Error Code ที่ขึ้น (ภาพหน้าจอหรือไฟกะพริบ)', 'วิดีโออาการ 10–20 วินาที', 'อายุเครื่องและประวัติการล้าง/ซ่อม'].map(x => h('li', {}, x)))));
     }
   }
   function extrasBox() {
     const ex = DATA.clean.filter(r => r.pkg === st.pkg && r.level === st.level && ['งานเพิ่ม', 'Access/Risk', 'เงื่อนไขเวลา'].includes(r.ty));
     if (!ex.length) return null;
-    return h('div', { class: 'sv-box' }, h('h4', {}, 'งานเพิ่มที่อาจเกิด (แจ้งก่อนทำ)'), h('ul', { class: 'sv-rep' }, ex.map(r => h('li', {}, h('span', {}, r.name), h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(incVat(r.rate.s)))))));
+    return h('div', { class: 'sv-box' }, h('h4', {}, 'งานเพิ่มที่อาจเกิด (แจ้งก่อนทำ)'), h('ul', { class: 'sv-rep' }, ex.map(r => h('li', {}, h('span', {}, r.name), h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(r.rate.s))))));
   }
 
   function render() {

@@ -6,6 +6,12 @@
 
 export const VAT = 0.07;
 export const incVat = n => Math.round(n * (1 + VAT));
+// ★Rev.16 owner decision (2 ต.ค. 2569: "ราคาก่อนแวททั้งหมด ทุกราคา งานบริการให้เป็นตัวเลข round up hundred digit และระบุราคาก่อน VAT เสมอ"):
+// every price on the site is shown BEFORE VAT and labelled so; VAT 7% appears only in the totals of a quotation.
+// Service rates (cleaning, repair, installation service) are rounded UP to the next 100 baht when loaded — the Pricebook file
+// is not edited (tools_recon.py still checks it 1:1). Materials sold per metre / piece keep their exact Pricebook price.
+export const up100 = n => n == null ? n : Math.ceil(n / 100) * 100;
+export const EX_TH = 'ก่อน VAT';
 
 /* ---------- taxonomy ---------- */
 export const TYPES = [
@@ -42,7 +48,7 @@ export async function loadData(url) {
     const inverter = /inverter/i.test(d.system || '');
     const key = [bid, d.series || model, type, inverter].join('|');
     if (!groups.has(key)) groups.set(key, { id: slug(key), code: model, brand: bid, type, inverter, label: d.refrigerant || '—', series: (d.series || model) + (/inverter|fixed/i.test(d.series || '') ? '' : inverter ? ' · Inverter' : d.system ? ' · ' + d.system : ''), popular: false, isNew: false, skus: [] });
-    groups.get(key).skus.push({ sku: model, btu, px, price: incVat(px), installStdEx: ix, stock: 'check', d });
+    groups.get(key).skus.push({ sku: model, btu, px, price: px, installStdEx: ix, stock: 'check', d });
     skuCount++;
   }
   DEMO.models = [...groups.values()].map(m => (m.skus.sort((a, b) => a.btu - b.btu), m.code = m.skus[0].sku, m));
@@ -54,19 +60,19 @@ export async function loadData(url) {
   // the Basic/MASS tier stays in the Pricebook for the sales team. Copper brand shown as O-TWO (Pricebook to be updated to match).
   // Rev.08 owner decision: the web shows one copper spec only — O-TWO 0.70 mm. Type L / project-grade copper stays in the Pricebook (QTN/BOQ work) but is not listed on the web.
   const brand = t => t == null ? t : t.replace(/K Copper Type L/g, 'O-TWO').replace(/K Copper/g, 'O-TWO').replace(/ท่อน้ำยาทองแดง 0\.70 มม\./g, 'ท่อน้ำยาทองแดง O-TWO 0.70 มม.').replace(/ท่อ Type L หรือ Project-grade ใช้เมื่อระบุใน QTN\/BOQ;\s*ไม่รวมอัตโนมัติหากไม่ระบุ;\s*/g, '');
-  DATA.inst = j.inst.map(([c, cat, n, u, p, inc, exc, w, sv]) => ({ code: c, cat: S(cat), name: brand(n), unit: S(u), ex: p, inc: brand(S(inc)), exc: S(exc), warranty: S(w), survey: S(sv) })).filter(i => !/-MASS$/.test(i.code) && !/^MAT-CU-L-/.test(i.code));
+  DATA.inst = j.inst.map(([c, cat, n, u, p, inc, exc, w, sv]) => ({ code: c, cat: S(cat), name: brand(n), unit: S(u), ex: /^INS-/.test(c) ? up100(p) : p, inc: brand(S(inc)), exc: S(exc), warranty: S(w), survey: S(sv) })).filter(i => !/-MASS$/.test(i.code) && !/^MAT-CU-L-/.test(i.code));
   DATA.instByCode = Object.fromEntries(DATA.inst.map(i => [i.code, i]));
-  DATA.clean = j.clean.map(([pk, lv, ty, rg, u, s, sp, pj, w, care, doc, inc, exc, st, n]) => ({ pkg: S(pk), level: lv, ty: S(ty), type: TYPE_FROM_CLEAN[S(ty)] || null, range: S(rg), unit: S(u), rate: { s, sp, pj }, warranty: S(w), care: S(care), doc: S(doc), inc: S(inc), exc: S(exc), status: S(st), name: n }));
-  DATA.rep = j.rep.map(([ty, n, u, s, sp, pj, w, inc, exc, st]) => ({ cat: S(ty), name: n.replace(/^ซ่อมแอร์:\s*/, ''), unit: S(u), rate: { s, sp, pj }, warranty: S(w), inc: S(inc), exc: S(exc), status: S(st) }));
+  DATA.clean = j.clean.map(([pk, lv, ty, rg, u, s, sp, pj, w, care, doc, inc, exc, st, n]) => ({ pkg: S(pk), level: lv, ty: S(ty), type: TYPE_FROM_CLEAN[S(ty)] || null, range: S(rg), unit: S(u), rate: { s: up100(s), sp, pj, pb: s }, warranty: S(w), care: S(care), doc: S(doc), inc: S(inc), exc: S(exc), status: S(st), name: n }));
+  DATA.rep = j.rep.map(([ty, n, u, s, sp, pj, w, inc, exc, st]) => ({ cat: S(ty), name: n.replace(/^ซ่อมแอร์:\s*/, ''), unit: S(u), rate: { s: up100(s), sp, pj, pb: s }, warranty: S(w), inc: S(inc), exc: S(exc), status: S(st) }));
   // headline "from" prices for service cards
   const minOf = arr => Math.min(...arr.filter(x => x != null));
   const c1 = DATA.clean.filter(r => r.pkg === 'Basic Clean' && r.level === 'C1' && r.type).map(r => r.rate.s);
   const ins = DATA.inst.filter(i => /^INS-/.test(i.code) && i.ex).map(i => i.ex);
   const dia = DATA.rep.filter(r => r.cat === 'ตรวจวินิจฉัย').map(r => r.rate.s);
   const set = (id, from) => { const s = SERVICES.find(x => x.id === id); if (s) s.from = from; };
-  set('clean', `เริ่ม ${baht(incVat(minOf(c1)))} / เครื่อง`);
-  set('install', `เริ่ม ${baht(incVat(minOf(ins)))} / เครื่อง`);
-  set('repair', `ค่าตรวจเริ่ม ${baht(incVat(minOf(dia)))}`);
+  set('clean', `เริ่ม ${baht((minOf(c1)))} / เครื่อง`);
+  set('install', `เริ่ม ${baht((minOf(ins)))} / เครื่อง`);
+  set('repair', `ค่าตรวจเริ่ม ${baht((minOf(dia)))}`);
   DATA.loaded = true;
   return DATA;
 }
@@ -249,7 +255,7 @@ export function travelCharge(zone, units = 1) {
   return { fee: waived ? 0 : zone.fee, waived, short: Math.max(0, (zone.minUnits || 1) - units) };
 }
 export const travelNote = z => z && z.tier === 'extended'
-  ? `ค่าเดินทาง ${baht(incVat(z.fee))}/เที่ยว (${z.bandTh})${z.waiveAt ? ` · ยกเว้นเมื่อ ${z.waiveAt} เครื่องขึ้นไป` : ''}${z.minUnits > 1 ? ` · ขั้นต่ำ ${z.minUnits} เครื่อง` : ''}`
+  ? `ค่าเดินทาง ${baht(z.fee)}/เที่ยว (${z.bandTh})${z.waiveAt ? ` · ยกเว้นเมื่อ ${z.waiveAt} เครื่องขึ้นไป` : ''}${z.minUnits > 1 ? ` · ขั้นต่ำ ${z.minUnits} เครื่อง` : ''}`
   : '';
 export function checkZone(input) {
   const q = norm(input);
@@ -326,7 +332,7 @@ export function estimateContract({ units, visits, zone = null, high = false, pkg
     count, visits, level: lvl, lines, perVisitC1: v1, perVisitC2: v2, travel, travelWaived: tc.waived, travelShort: tc.short,
     minBillApplied: c1 < minBill || (deep && c2 < minBill),
     annualEx, vat: Math.round(annualEx * VAT), annualInc: incVat(annualEx),
-    perUnitYear: incVat(annualEx) / count, teamDaysPerVisit: Math.ceil(teamDays * 2) / 2, high,
+    perUnitYear: annualEx / count, teamDaysPerVisit: Math.ceil(teamDays * 2) / 2, high,
     // aliases kept for older markup
     low: annualEx, high_: incVat(annualEx),
   };
@@ -368,8 +374,8 @@ export const PROCESS = [
 // visit, only when a crew is free. queue.js works out everything else from these two numbers.
 export const QUEUE_RULES = { leadDays: 3, rushFeeEx: 500 };
 export const FAQ = [
-  { q: 'ต้องจองล่วงหน้ากี่วัน ถ้าต้องการด่วนได้ไหม', a: `จองปกติล่วงหน้า ${QUEUE_RULES.leadDays} วัน ถ้าต้องการเร็วกว่านั้น (รวมถึงวันนี้) เลือกคิวด่วน มีค่าบริการเพิ่ม ${(QUEUE_RULES.rushFeeEx).toLocaleString('en-US')} บาทต่อการเข้างาน (ก่อน VAT · ${incVat(QUEUE_RULES.rushFeeEx).toLocaleString('en-US')} บาทรวม VAT) รับเมื่อมีทีมว่างเท่านั้น ทีมยืนยันคิวก่อนทุกครั้ง ถ้าไม่มีคิวจะไม่เก็บค่าคิวด่วนและเสนอวันที่ใกล้ที่สุดให้ งานนอกเวลาทำการและวันอาทิตย์มีค่าใช้จ่ายเพิ่มเติม ทีมแจ้งในใบเสนอราคา` },
-  { q: 'ราคาบนเว็บรวม VAT แล้วหรือยัง', a: 'ราคาตัวใหญ่รวม VAT 7% แล้ว ราคาก่อน VAT แสดงไว้ข้างกันทุกรายการ ใบเสนอราคาเบื้องต้นแยกยอดก่อน VAT และ VAT ให้' },
+  { q: 'ต้องจองล่วงหน้ากี่วัน ถ้าต้องการด่วนได้ไหม', a: `จองปกติล่วงหน้า ${QUEUE_RULES.leadDays} วัน ถ้าต้องการเร็วกว่านั้น (รวมถึงวันนี้) เลือกคิวด่วน มีค่าบริการเพิ่ม ${(QUEUE_RULES.rushFeeEx).toLocaleString('en-US')} บาทต่อการเข้างาน (ก่อน VAT) รับเมื่อมีทีมว่างเท่านั้น ทีมยืนยันคิวก่อนทุกครั้ง ถ้าไม่มีคิวจะไม่เก็บค่าคิวด่วนและเสนอวันที่ใกล้ที่สุดให้ งานนอกเวลาทำการและวันอาทิตย์มีค่าใช้จ่ายเพิ่มเติม ทีมแจ้งในใบเสนอราคา` },
+  { q: 'ราคาบนเว็บรวม VAT แล้วหรือยัง', a: 'ทุกราคาบนเว็บเป็นราคาก่อน VAT ราคางานบริการปัดเป็นหลักร้อยให้อ่านง่าย VAT 7% คิดครั้งเดียวที่ยอดรวมของใบเสนอราคา (แสดงยอดก่อน VAT · VAT · รวมทั้งสิ้น แยกให้เห็น)' },
   { q: 'ราคาติดตั้งรวมอะไรบ้าง', a: 'รวมท่อน้ำยาและวัสดุ 4 เมตรแรก ท่อน้ำทิ้ง สายไฟตามระยะที่ระบุ เบรกเกอร์ ขาแขวน Vacuum และทดสอบ ส่วนที่เกินเลือกเพิ่มได้ในหน้าสินค้า' },
   { q: 'รายการที่ขึ้นว่า "ประเมินหน้างาน" คืออะไร', a: 'งานที่ราคาขึ้นกับสภาพจริง เช่น รื้อเครื่องเดิม งานสูง นั่งร้าน เปิดฝ้า ทีมจะแจ้งราคาให้ยืนยันก่อนเริ่มงานทุกครั้ง' },
   { q: 'สัญญารายปีต่างจากเรียกล้างทีละครั้งอย่างไร', a: 'ทีมวางรอบล่วงหน้าทั้งปี ได้อัตราตามจำนวนเครื่อง มีรายงานตามแพ็กเกจหลังทุกรอบ และวางบิลตามรอบ' },

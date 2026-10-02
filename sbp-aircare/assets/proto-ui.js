@@ -3,7 +3,7 @@
 import {
   DEMO, TYPES, TYPE_BY_ID, BRANDS, BRAND_BY_ID, BTU_BANDS, PRICE_BANDS, emptyFilter, queryCatalog, facetCounts,
   baht, btuFmt, checkZone, TIER_TH, estimateContract, PRESETS, recommendBtu, h, $, $$, countUp, reduceMotion,
-  CLEAN_PKGS, SIZE_BANDS, DATA, incVat, TRAVEL, stockTh, travelNote, VOLUME_HINT,
+  CLEAN_PKGS, SIZE_BANDS, DATA, incVat, up100, TRAVEL, stockTh, travelNote, VOLUME_HINT,
 } from './sbp-core.js';
 import { createACViewer, createRoomSim, PARTS } from './ac3d.js';
 import { deferred } from './lazy.js';
@@ -27,7 +27,7 @@ export function mountCatalog(root, cfg) {
     { key: 'type', th: 'ประเภท', opts: TYPES.map(t => ({ id: t.id, th: t.th, dot: t.color })) },
     { key: 'btu', th: 'ขนาด BTU', opts: BTU_BANDS.map(b => ({ id: b.id, th: b.th })) },
     { key: 'brand', th: 'แบรนด์', opts: BRANDS.map(b => ({ id: b.id, th: b.name, own: b.own })), collapsible: 8 },
-    { key: 'price', th: 'ราคาเครื่อง (รวม VAT)', opts: PRICE_BANDS.map(b => ({ id: b.id, th: b.th })) },
+    { key: 'price', th: 'ราคาเครื่อง (ก่อน VAT)', opts: PRICE_BANDS.map(b => ({ id: b.id, th: b.th })) },
     { key: 'inverter', th: 'ระบบ', opts: [{ id: 'inv', th: 'Inverter' }, { id: 'fix', th: 'Fixed speed' }], single: true },
   ];
   function renderFacets() {
@@ -154,18 +154,18 @@ export function mountBuilder(root, cfg = {}) {
     const has = e.count > 0;
     root.classList.toggle('has-est', has);
     out('count').forEach(x => countUp(x, e.count || 0, 500));
-    out('low').forEach(x => has ? countUp(x, e.annualInc, 700, n => baht(n)) : x.textContent = '—');
-    out('high').forEach(x => x.textContent = has ? `${baht(e.annualEx)} ก่อน VAT` : '—');
-    out('perunit').forEach(x => x.textContent = has ? baht(e.perUnitYear) : '—');
+    out('low').forEach(x => has ? countUp(x, e.annualEx, 700, n => baht(n)) : x.textContent = '—');
+    out('high').forEach(x => x.textContent = has ? `ก่อน VAT · รวม VAT ${baht(e.annualInc)}` : '—');
+    out('perunit').forEach(x => x.textContent = has ? `≈ ${baht(up100(e.perUnitYear))} ก่อน VAT` : '—');
     out('teamdays').forEach(x => x.textContent = has ? `${e.teamDaysPerVisit} ทีม-วัน / รอบ (ประมาณ)` : '—');
     out('off').forEach(x => x.textContent = has ? `ใช้${e.level.th} (${e.count} เครื่อง)${e.minBillApplied ? ` · ปรับขั้นต่ำ ${baht(DATA.minBill)}/รอบ` : ''}${high ? ' · งานสูงเกิน 3 ม. ประเมินหน้างาน' : ''}${e.count >= VOLUME_HINT ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไขบริษัท ทีมขายยืนยันในใบเสนอราคา' : ''}` : '');
     out('visits').forEach(x => x.textContent = `${visits} ครั้ง / ปี${deep ? ' (ล้างใหญ่ 1)' : ''}`);
-    out('tier').forEach(x => x.textContent = !zone || zone.tier === 'core' ? 'กทม.และปริมณฑล' : zone.tier === 'extended' ? (e.travelWaived ? `ยกเว้นค่าเดินทาง (${e.count} เครื่อง)` : `+ค่าเดินทาง ${baht(incVat(zone.fee))}/รอบ${e.travelShort ? ` · ขั้นต่ำ ${zone.minUnits} เครื่อง` : ''}`) : zone.tier === 'out' ? 'เกินระยะ — ประเมินแยก' : 'ตรวจพื้นที่');
+    out('tier').forEach(x => x.textContent = !zone || zone.tier === 'core' ? 'กทม.และปริมณฑล' : zone.tier === 'extended' ? (e.travelWaived ? `ยกเว้นค่าเดินทาง (${e.count} เครื่อง)` : `+ค่าเดินทาง ${baht(zone.fee)}/รอบ${e.travelShort ? ` · ขั้นต่ำ ${zone.minUnits} เครื่อง` : ''}`) : zone.tier === 'out' ? 'เกินระยะ — ประเมินแยก' : 'ตรวจพื้นที่');
     $$('[data-b-bar]', root).forEach(bar => { const k = bar.dataset.bBar; const max = Math.max(1, ...Object.values(units)); bar.style.setProperty('--w', ((units[k] || 0) / max * 100).toFixed(1) + '%'); });
     linesBox.innerHTML = '';
     if (has) linesBox.append(h('table', { class: 's-btable' }, h('thead', {}, h('tr', {}, h('th', {}, 'ประเภท'), h('th', {}, 'เครื่อง'), h('th', {}, 'ล้างปกติ/เครื่อง'), h('th', {}, 'ล้างใหญ่/เครื่อง'))),
-      h('tbody', {}, e.lines.map(l => h('tr', {}, h('td', {}, `${TYPE_BY_ID[l.type].th} ${l.range || ''}`), h('td', {}, String(l.n)), h('td', {}, baht(incVat(l.c1))), h('td', {}, baht(incVat(l.c2))))))),
-      h('p', { class: 's-note' }, `ราคารวม VAT ตาม Pricebook · ${pkg}`));
+      h('tbody', {}, e.lines.map(l => h('tr', {}, h('td', {}, `${TYPE_BY_ID[l.type].th} ${l.range || ''}`), h('td', {}, String(l.n)), h('td', {}, baht(l.c1)), h('td', {}, baht(l.c2)))))),
+      h('p', { class: 's-note' }, `ราคาก่อน VAT ตาม Pricebook (ปัดขึ้นเป็นหลักร้อย) · ${pkg}`));
     cfg.onChange && cfg.onChange(e, { units: { ...units }, visits, zone, high });
   }
   $$('[data-b-unit]', root).forEach(inp => inp.addEventListener('input', () => { units[inp.dataset.bUnit] = Math.max(0, Math.min(999, parseInt(inp.value || '0', 10) || 0)); markPreset(null); calc(); }));
@@ -498,7 +498,7 @@ export function compareTable(items) {
   const rows = [
     ['แบรนด์', x => BRAND_BY_ID[x.m.brand].name], ['รุ่น', x => x.m.series], ['ประเภท', x => TYPE_BY_ID[x.m.type].th],
     ['ขนาด', x => btuFmt(x.sku.btu)], ['ระบบ', x => x.m.inverter ? 'Inverter' : 'Fixed speed'], ['น้ำยา', x => x.m.label],
-    ['ราคาเครื่อง รวม VAT', x => baht(x.sku.price)], ['พร้อมติดตั้งมาตรฐาน', x => x.sku.installStdEx ? baht(incVat(x.sku.px + x.sku.installStdEx)) : '—'], ['รับประกัน', x => x.sku.d?.warranty || '—'],
+    ['ราคาเครื่อง ก่อน VAT', x => baht(x.sku.price)], ['พร้อมติดตั้งมาตรฐาน', x => x.sku.installStdEx ? baht(x.sku.px + x.sku.installStdEx) : '—'], ['รับประกัน', x => x.sku.d?.warranty || '—'],
   ];
   const tbl = h('table', { class: 'cmp' });
   tbl.append(h('thead', {}, h('tr', {}, h('th', {}, ''), ...items.map(x => h('th', {}, `${x.sku.sku}`)))));
