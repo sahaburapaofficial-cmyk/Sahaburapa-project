@@ -3,6 +3,7 @@
 // sections, every air-con model in the catalogue (with its price), FAQ answers and quick actions (book a cleaning, open the
 // quotation, call, chat on LINE, send site photos). Keyboard first (↑ ↓ Enter Esc), ARIA combobox + listbox, works on touch
 // from the header button. Styling follows the variant: A clean card · B terminal sheet · C glass (shared.css .cp-*).
+import { QUEUE_URL } from './queue.js';
 import { h, $, DEMO, BRAND_BY_ID, TYPE_BY_ID, btuFmt, baht, FAQ, COMPANY, cleanRate, incVat } from './sbp-core.js';
 
 const norm = s => String(s || '').toLowerCase().replace(/[\s·\-\/,().]/g, '');
@@ -18,6 +19,9 @@ export function mountPalette(cfg) {
   const items = [];
   const add = (grp, th, sub, run, keys = '', btu = null) => items.push({ grp, th, sub, run, btu, k: norm(th + ' ' + sub + ' ' + keys) });
   add('ทำทันที', 'จองล้างแอร์', 'เลือกแอร์ วิธีล้าง พื้นที่ เห็นราคารวม', () => go('book'), 'book clean ล้าง จอง');
+  add('ทำทันที', 'จองติดตั้งแอร์', 'เลือกรุ่นพร้อมติดตั้ง หรือติดตั้งเครื่องที่มีอยู่ แล้วส่งใบจองงาน', () => go('prices'), 'install booking ติดตั้ง ย้ายแอร์ จองคิว');
+  add('ทำทันที', 'ส่งใบจองงาน / นัดคิว', 'วันเข้างาน · สภาพหน้างาน · รูป · ผู้ติดต่อ', () => openCart && openCart(), 'booking ticket คิว นัด จอง');
+  if (QUEUE_URL) add('ทำทันที', 'ตรวจสถานะคำขอ', 'ใช้เลขอ้างอิงและเบอร์ 4 ตัวท้าย', () => go('contact'), 'status track ติดตาม สถานะ');
   add('ทำทันที', 'ดูใบเสนอราคาของฉัน', 'รายการที่เพิ่มไว้ พร้อมยอดรวม', () => openCart && openCart(), 'cart quote ตะกร้า');
   add('ทำทันที', 'ส่งรูปหน้างานให้ทีมประเมิน', 'ถ่ายตามรายการแล้วส่งทาง LINE', () => go('photo-survey'), 'photo survey สำรวจ รูป');
   add('ทำทันที', `แชท LINE ${COMPANY.line}`, 'เปิดแชตกับทีม', () => window.open(COMPANY.lineUrl, '_blank', 'noopener'), 'line chat');

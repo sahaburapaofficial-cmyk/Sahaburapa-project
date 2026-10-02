@@ -117,6 +117,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
   let sent = null;
   const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(i.unitEx * i.qty)}`), `พื้นที่: ${cart.zoneInput || '-'}`, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].join('\n'); };
   function render() {
+    if (!sent) syncRush(cart.prefDate);   // Rev.16.1: the rush line follows the date and disappears with the last visit line
     const t = cart.totals();
     panel.innerHTML = '';
     panel.append(h('div', { class: 's-cart-h' }, h('div', {}, h('b', {}, (() => { const j = jobsIn(cart.items); return j.clean || j.install ? 'ใบจองงาน · ใบเสนอราคาเบื้องต้น' : 'ใบเสนอราคาเบื้องต้น'; })()), h('small', {}, `${cart.items.length} รายการ`)), h('button', { type: 'button', class: 's-x', 'aria-label': 'ปิด', onclick: close }, '×')));
@@ -187,7 +188,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     const slotRow = visit.length && J.slots.length ? h('div', { class: 'qc-seg qc-slot', role: 'radiogroup', 'aria-label': 'ช่วงเวลา' }, J.slots.map(id => h('button', { type: 'button', role: 'radio', 'aria-checked': String(cart.prefSlot === SLOTS[id].th), class: cart.prefSlot === SLOTS[id].th ? 'on' : '',
       onclick: () => { cart.prefSlot = SLOTS[id].th; cart.saveDraft(); render(); } }, h('b', {}, SLOTS[id].th), h('small', {}, SLOTS[id].sub)))) : null;
     const whenBox = h('div', { class: 's-when' }, step(visit.length ? 2 : 1, 'วันเข้างาน', visit.length ? `จองปกติล่วงหน้า ${LEAD_DAYS} วัน` : null),
-      h('label', { class: 's-field' }, cart.prefSlot ? `วันที่สะดวก · ${cart.prefSlot}` : 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', min: bkkNow().date, value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; syncRush(cart.prefDate); cart.saveDraft(); render(); } })),
+      h('label', { class: 's-field' }, visit.length && cart.prefSlot ? `วันที่สะดวก · ${cart.prefSlot}` : 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', min: bkkNow().date, value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; syncRush(cart.prefDate); cart.saveDraft(); render(); } })),
       dh, slotRow, visit.length && cart.prefDate && J.kind !== 'past' ? h('p', { class: 's-note' }, `เวลาหน้างานโดยประมาณ ${timeTh(J.time)} · ${J.fit.kind === 'half' ? 'ไม่เกินครึ่งวัน' : J.fit.kind === 'day' ? 'ประมาณ 1 วันทำการ' : `ประมาณ ${J.fit.days} วันทำการ (ช่าง 1 ทีม)`}`) : null);
     body.append(whenBox);
     if (jobs.clean || jobs.install) body.append(step(3, 'สภาพหน้างาน + รูป', 'ให้ทีมประเมินงานนอกมาตรฐานก่อนนัด'), ticketPanel(D, jobs, { onChange: () => cart.saveDraft() }));
@@ -223,9 +224,9 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       const t = cart.totals(), sc = (D.scope || []).flatMap(x => x.r.lines), scEx = (D.scope || []).reduce((n, x) => n + x.r.est, 0);
       const tk = isJob ? ticketText(D) : '';
       sent = { ref, isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
-        fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': cart.prefSlot || '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc),
+        fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc),
           ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'รูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
-        text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null].filter(x => x != null).join('\n') };
+        text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${visit.length && cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null].filter(x => x != null).join('\n') };
       render();
     });
     body.append(f);
@@ -326,7 +327,7 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
     tot.append(h('span', { class: 's-lbl' }, `รวม ${state.qty} เครื่อง${state.level ? ' พร้อมติดตั้ง' : ''}`), h('b', {}, baht(ex)), h('small', {}, `ก่อน VAT · รวม VAT 7% ${baht(incVat(ex))}${sv ? ` · +${sv} รายการประเมินหน้างาน` : ''}`));
     if (detBody) { const o = opts.find(o => o.key === state.level); detBody.innerHTML = ''; if (o) detBody.append(h('p', {}, h('b', {}, 'รวม: '), o.item.inc || '—'), h('p', {}, h('b', {}, 'ไม่รวม: '), o.item.exc || '—'), h('p', {}, h('b', {}, 'รับประกัน: '), o.item.warranty || '—')); else detBody.append(h('p', {}, 'ซื้อเครื่องอย่างเดียว ไม่รวมงานติดตั้ง')); }
   }
-  function addToCart() { lines().forEach(l => cart.add(l)); toast(`ใส่ใบเสนอราคาแล้ว · ${cart.count()} รายการ`); onAdded && onAdded(); }
+  function addToCart() { const L = lines(); L.forEach(l => cart.add(l)); toast(L.some(l => l.group === 'install') ? `ใส่ใบเสนอราคาแล้ว · เปิดใบเสนอราคาเพื่อเลือกวันติดตั้งและส่งใบจองงาน` : `ใส่ใบเสนอราคาแล้ว · ${cart.count()} รายการ`); onAdded && onAdded(); }
   refresh();
   return root;
 }

@@ -148,7 +148,7 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
     sum.append(h('ul', { class: 'qc-notes' }, notes.map(n => h('li', {}, n))));
     const send = h('button', { type: 'button', class: 's-btn primary qc-go', onclick: () => {
       cart.items = cart.items.filter(i => i.src !== 'qc'); items.forEach(i => cart.add({ ...i }));
-      if (st.date && J.kind !== 'past') { cart.prefDate = st.date; cart.prefSlot = st.slot ? SLOTS[st.slot].th : ''; }   // the quotation form reads it every time it renders (no timing race)
+      if (st.date && J.kind !== 'past') { cart.prefDate = st.date; cart.prefSlot = st.slot ? SLOTS[st.slot].th : ''; cart.saveDraft(); }   // the quotation form reads it every time it renders (no timing race)
       if (st.zone) cart.setZone(st.zone); else cart.save();
       openCart();
       requestAnimationFrame(() => { const n = document.getElementById('s-q-name'); if (!n) return; if (matchMedia('(pointer: coarse)').matches) n.scrollIntoView({ block: 'center' }); else n.focus({ preventScroll: true }); });   // Rev.14: on phones show the field without popping the keyboard over the totals
