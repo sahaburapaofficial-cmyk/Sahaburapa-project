@@ -121,6 +121,8 @@ export function mountPalette(cfg) {
     h('span', { class: 'cp-ico', 'aria-hidden': 'true', html: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>' }),
     h('span', { class: 'cp-trig-t' }, 'ค้นหา'), h('kbd', { class: 'cp-trig-k' }, mac ? '⌘K' : 'Ctrl K'));
   const vsw = $('.hdr .vsw'), hw = $('.hdr .wrap');
-  if (vsw) vsw.before(trigger); else if (hw) hw.append(trigger);
+  // B's header is a grid of bordered cells: the trigger gets a cell of its own (a bare child would wrap to a new row)
+  const slot = vsw && vsw.classList.contains('cell') ? h('div', { class: 'cell cp-cell' }, trigger) : trigger;
+  if (vsw) vsw.before(slot); else if (hw) hw.append(slot);
   return { open, close, search };
 }

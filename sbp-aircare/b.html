@@ -57,7 +57,7 @@ button{font:inherit;color:inherit;cursor:pointer}a{color:inherit}
 
 /* title-block header */
 .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--sheet);border-bottom:1.5px solid var(--ink)}
-.hdr .wrap{display:grid;grid-template-columns:auto 1fr auto auto;align-items:stretch;height:58px}
+.hdr .wrap{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:stretch;height:58px}
 .hdr .cell{display:flex;align-items:center;gap:10px;padding-inline:16px;border-left:1px solid var(--rule)}
 .hdr .cell:first-child{border-left:0;padding-left:0}
 .logo{font:600 16px var(--sans);text-decoration:none;display:flex;gap:10px;align-items:center}
@@ -69,9 +69,11 @@ button{font:inherit;color:inherit;cursor:pointer}a{color:inherit}
 .vsw a{font:600 12px var(--mono);text-decoration:none;padding:4px 9px;border:1px solid var(--rule);margin-left:-1px;color:var(--ink-3)}
 .vsw a[aria-current]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .hdr .btn-primary{min-height:38px;font-size:14px}
-@media (max-width:1100px){.hdr .nav{display:none}.hdr .wrap{grid-template-columns:1fr auto auto}}
+@media (max-width:1100px){.hdr .nav{display:none}.hdr .wrap{grid-template-columns:1fr auto auto auto}}
 @media (max-width:640px){.hdr .vsw{display:none}}
-@media (max-width:640px){.hdr .wrap{grid-template-columns:1fr auto}.hdr .cell{padding-inline:10px}}
+@media (max-width:640px){.hdr .wrap{grid-template-columns:1fr auto auto}.hdr .cell{padding-inline:10px}.hdr .cp-cell{padding-inline:8px}}
+@media (max-width:400px){.hdr .cell{padding-inline:6px}.hdr .cell:first-child{padding-left:0}.hdr .logo{gap:6px;font-size:15px}.hdr .logo-mk{width:32px;height:auto}.hdr .cta button{padding-inline:10px}}
+@media (max-width:340px){.hdr .logo b{display:none}}   /* 320 px phones: the SP mark stays */
 
 /* sheet frame */
 .sheet{background:var(--sheet);border:1.5px solid var(--ink);position:relative}
