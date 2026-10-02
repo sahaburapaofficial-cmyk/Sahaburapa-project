@@ -1317,3 +1317,4 @@ html.fx-C .fx-spot::after{content:"";position:absolute;inset:0;border-radius:inh
 .s-row2 select{width:100%;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card);color:var(--s-ink);font:inherit;padding:0 10px}
 .s-err:empty{display:none}.s-err{font-weight:600}
 .s-after{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.s-after a.s-btn{text-decoration:none}
+@media (max-width:480px){.cg-pill{white-space:normal;max-width:calc(100% - 24px);text-align:center;line-height:1.35}}   /* Rev.16.1: step name was cut on phones */

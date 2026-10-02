@@ -211,6 +211,7 @@ section.s{padding-block:40px 0}
 .card .acts [aria-pressed="true"]{color:var(--safety)}
 table.rows{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed;min-width:820px}
 .rows td{padding:8px 12px;border-bottom:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:600px){.rows td{white-space:normal;overflow-wrap:anywhere}}   /* Rev.16.1: series names were cut on phones */
 .rows td:nth-child(-n+2){white-space:normal;overflow-wrap:anywhere;line-height:1.4}   /* Rev.14: model codes / series wrap instead of being cut */
 .rows td:nth-child(1){width:130px;font-family:var(--mono);font-size:12.5px}.rows td:nth-child(2){width:150px}.rows td:nth-child(4){width:110px}.rows td:nth-child(5),.rows td:nth-child(6){width:96px;text-align:right;font-family:var(--mono)}.rows td:nth-child(7){width:96px;text-align:right;font-family:var(--mono)}.rows td:nth-child(8){width:70px}
 .rows tr:hover td{background:var(--blue-l)}
