@@ -244,7 +244,8 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
   const ctas = h('div', { class: 'rf-ctas' },
     h('button', { type: 'button', class: 's-btn primary', onclick: addQuote }, 'ใส่ใบเสนอราคา'),
     h('button', { type: 'button', class: 's-btn', onclick: () => { if (S.sel && S.sel.m.preview) askTeam('FUJIVA'); else if (S.sel && onOpenModel) onOpenModel(S.sel.m, S.sel.si); } }, 'รายละเอียดรุ่น'),
-    h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'survey', group: 'install', key: `SV-FIT-${roomText()}`, name: 'ขอสำรวจหน้างานติดตั้ง', detail: `${roomText()} · ${S.sel ? BRAND_BY_ID[S.sel.m.brand].name + ' ' + S.sel.m.skus[S.sel.si].sku : TYPE_BY_ID[S.unit.type].th}`, unitEx: null, qty: 1 }); toast('เพิ่มคำขอสำรวจในใบเสนอราคาแล้ว'); } }, 'ขอสำรวจหน้างาน'));
+    h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'survey', group: 'install', key: `SV-FIT-${roomText()}`, name: 'ขอสำรวจหน้างานติดตั้ง', detail: `${roomText()} · ${S.sel ? BRAND_BY_ID[S.sel.m.brand].name + ' ' + S.sel.m.skus[S.sel.si].sku : TYPE_BY_ID[S.unit.type].th}`, unitEx: null, qty: 1 }); toast('เพิ่มคำขอสำรวจในใบเสนอราคาแล้ว'); } }, 'ขอสำรวจหน้างาน'),
+    h('a', { class: 's-btn ghost', href: '#photo-survey' }, 'ส่งรูปให้ทีมประเมินก่อน'));   // Rev.13: fewer site visits (survey.js)
   stage.append(h('section', { class: 'rf-sec rf-res' }, h('h3', {}, h('span', {}, '5'), 'ผลตรวจการติดตั้ง'), sum, ul, price, ctas));   // under the view: keeps both columns balanced
 
   const roomText = () => `ห้อง ${S.room.w.toFixed(1)}×${S.room.l.toFixed(1)}×${S.room.h.toFixed(2)} ม.`;

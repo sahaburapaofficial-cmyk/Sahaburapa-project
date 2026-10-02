@@ -1170,3 +1170,22 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 .s-ph.render .s-ph-art{color:#5d6b7c;position:relative;z-index:1}
 .s-ph.render figcaption{background:rgba(255,255,255,.88);color:#4f5d6d;z-index:2}
 .s-ph.render .s-ph-tag{z-index:2}
+/* ---- Rev.13 · photo survey by LINE (survey.js) ---- */
+.sx-survey{margin-top:16px}
+.sv2{border:1px solid var(--s-line);border-radius:var(--s-r);background:var(--s-card);padding:18px 20px;display:grid;gap:14px}
+.sv2-head h3{margin:2px 0 6px;font-size:22px;line-height:1.3;color:var(--s-ink)}.sv2-head p{margin:0;color:var(--s-ink-2);max-width:70ch}
+.sv2-eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.02em;color:var(--s-ok)!important}
+.sv2-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.sv2-tabs button{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card-2);color:var(--s-ink-2);font:inherit;font-size:14px;cursor:pointer}
+.sv2-tabs button[aria-checked=true]{background:var(--s-ink);border-color:var(--s-ink);color:var(--s-card)}
+.sv2-lead{margin:0;font-size:14px;color:var(--s-ink-2)}
+.sv2-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:8px;counter-reset:sv2}
+.sv2-list li{counter-increment:sv2;position:relative;display:grid;gap:3px;padding:12px 12px 12px 46px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .8);background:var(--s-card-2)}
+.sv2-list li::before{content:counter(sv2);position:absolute;left:12px;top:12px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--s-ink);color:var(--s-card);font:600 12px var(--s-mono)}
+.sv2-list b{font-size:14.5px;color:var(--s-ink)}.sv2-list small{font-size:13px;line-height:1.55;color:var(--s-ink-2)}
+.sv2-k{justify-self:start;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid var(--s-line);color:var(--s-ink-2);background:var(--s-card)}
+.sv2-k.k-video{color:var(--s-accent);border-color:color-mix(in oklab,var(--s-accent) 40%,var(--s-line))}.sv2-k.k-measure{color:var(--s-ok);border-color:color-mix(in oklab,var(--s-ok) 40%,var(--s-line))}
+.sv2-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.sv2-ref{font:500 13px var(--s-mono);color:var(--s-ink-3)}
+.sv2 .s-note{margin:0}
+@media (pointer:coarse){.sv2-tabs button{min-height:44px}}
+.sv2-act a.s-btn{text-decoration:none}.sv2-k.k-note{color:var(--s-ink-3)}

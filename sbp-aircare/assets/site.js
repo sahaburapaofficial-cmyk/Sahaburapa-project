@@ -11,6 +11,7 @@ import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
+import { mountRemoteSurvey } from './survey.js';
 
 // Rev.12: official logo files — inlined by the build (globalThis.__SBP_LOGOS), read from assets/logos/ on the dev server
 const logoSrc = k => (globalThis.__SBP_LOGOS && globalThis.__SBP_LOGOS[k]) || `assets/logos/${k}.png`;
@@ -289,6 +290,10 @@ export function mountSite(cfg) {
       requestAnimationFrame(() => ORIG.call(out, { behavior: RM() ? 'auto' : 'smooth', block: 'nearest' }));
     });
   }
+
+  /* ---- 8b · Rev.13: photo survey by LINE (fewer site visits) under the contact form ---- */
+  const qsec = $('#quote');
+  if (qsec && !qsec.querySelector('.sv2')) { const box = h('div', { class: 'sx-survey', id: 'photo-survey' }); qsec.append(box); mountRemoteSurvey(box); }
 
   /* ---- 9 · beta notice, feedback, footer, mobile bar ---- */
   const proto = $('aside.proto');
