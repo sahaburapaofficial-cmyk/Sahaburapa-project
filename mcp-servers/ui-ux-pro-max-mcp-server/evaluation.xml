@@ -1,0 +1,47 @@
+<!--
+  Evaluation questions for the ui-ux-pro-max MCP server (format from the mcp-builder skill).
+  Answers were verified with the server's own tools against the skill data committed in
+  .claude/skills/ui-ux-pro-max (and ui-ux-pro-max-cli 2.15.0); re-check them after updating the skill.
+-->
+<evaluation>
+  <qa_pair>
+    <question>A vet practice wants a new website. The database's product recommendation for that kind of business names two primary UI styles. What complexity rating does the style catalogue give the first one?</question>
+    <answer>Medium</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>For a hotel website, take the first UI style the product recommendations suggest. Which framework is listed first in that style's framework compatibility?</question>
+    <answer>swiftui</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>I need a chart showing how a starting value is built up by a series of gains and losses. For the chart type the database recommends, above how many bars should minor items be grouped into an "Other" bar?</question>
+    <answer>12</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>For a page showing open/high/low/close price data, what is the maximum number of candles the database says should be visible at once?</question>
+    <answer>500</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>A tourism site in Thailand needs a font pairing. Which single font does the database recommend for both headings and body text?</question>
+    <answer>Noto Sans Thai</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>The colour palette for restaurant and food service sites had its accent colour adjusted. What was the original accent hex code before the adjustment?</question>
+    <answer>#CA8A04</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find the landing page pattern recommended for a flower and plant shop, take the first pattern it names, and count the sections in that pattern's recommended section order. How many sections are there?</question>
+    <answer>4</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>In a Next.js site that loads product photos from an external CDN, which next.config.js setting do the stack guidelines say to configure for those image hosts?</question>
+    <answer>remotePatterns</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>According to the UX guidelines, what is the minimum gap to leave between adjacent tap targets on mobile?</question>
+    <answer>8px</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>A bridal invitation site wants a romantic script typeface for headings. Which heading font does the matching font pairing in the database use?</question>
+    <answer>Great Vibes</answer>
+  </qa_pair>
+</evaluation>

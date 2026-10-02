@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ui-ux-pro-max": {
+      "command": "bash",
+      "args": ["mcp-servers/ui-ux-pro-max-mcp-server/run.sh"]
+    }
+  }
+}
