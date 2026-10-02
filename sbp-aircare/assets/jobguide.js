@@ -204,10 +204,16 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
   const trayH = h('h3', {}), tray = h('ul', { class: 'cg-tray' }), trayNote = h('p', { class: 'cg-note' });
   const strip = h('ol', { class: 'cg-strip', 'aria-label': 'ทุกขั้นตอน' });
   const cap = h('p', { class: 'cg-cap' });
-  root.append(h('div', { class: 'cg-main' },
-    h('div', { class: 'cg-stage' }, lvlSeg, host, fb, cap),
-    h('div', { class: 'cg-side' }, card, h('div', { class: 'cg-nav' }, prev, play, next), h('section', { class: 'cg-trayw' }, trayH, tray, trayNote))),
-    h('div', { class: 'cg-stripw' }, strip));
+  /* Rev.12 · "4 มิติ" = the 3D crew scene + time: in scroll mode the player stays pinned while the page scrolls, and the
+     scroll position walks the job step by step (scroll back to go back), with a time ruler of the job's phases. */
+  const ruler = h('div', { class: 'cg-time', hidden: true, 'aria-hidden': 'true' });
+  const mode4 = h('button', { type: 'button', class: 's-btn cg-4dbtn', 'aria-pressed': 'false', onclick: () => set4D(!st.d4) }, h('span', { class: 'cg-4di', 'aria-hidden': 'true' }, '4D'), 'ดูทั้งงานแบบเลื่อนจอ');
+  const hint4 = h('span', { class: 'cg-4dhint' }, 'เลื่อนจอแล้วทีมช่างทำงานไปตามลำดับเวลา ตั้งแต่เริ่มงานจนส่งมอบ · เลื่อนขึ้นเพื่อย้อนดู');
+  const main = h('div', { class: 'cg-main' },
+    h('div', { class: 'cg-stage' }, h('div', { class: 'cg-4dbar' }, mode4, hint4), lvlSeg, ruler, host, fb, cap),
+    h('div', { class: 'cg-side' }, card, h('div', { class: 'cg-nav' }, prev, play, next), h('section', { class: 'cg-trayw' }, trayH, tray, trayNote)));
+  const w4 = h('div', { class: 'cg-4dw' }, main);
+  root.append(w4, h('div', { class: 'cg-stripw' }, strip));
 
   function renderLvl() {
     lvlSeg.innerHTML = '';
@@ -326,10 +332,38 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
       : `แบบจำลองเพื่ออธิบาย · สถานที่ตัวอย่าง: ${v.venue} · ความสกปรกเป็นภาพประกอบ ไม่ใช่ผลตรวจเครื่องจริง · ขั้นตอนตามแบบฟอร์มงานล้างของบริษัท SBP-SR-ACCL-UNI-001 Rev.07`;
   }
 
+  /* ----- Rev.12 · 4D scroll mode ----- */
+  let q4 = 0, rulerP = 0;
+  const stepPx = () => Math.round(innerHeight * (innerWidth < 700 ? 0.42 : 0.55));
+  function size4() { w4.style.height = st.d4 ? `${main.offsetHeight + TL.length * stepPx()}px` : ''; }
+  function renderRuler() {
+    ruler.innerHTML = '';
+    const groups = []; TL.forEach((t, i) => { const g = groups[groups.length - 1]; if (g && g.ph === t.step.ph) g.n++; else groups.push({ ph: t.step.ph, n: 1, at: i }); });
+    const cur = TL[st.i] ? TL[st.i].step.ph : '';
+    ruler.append(
+      h('div', { class: 'cg-tr' }, groups.map(g => h('i', { class: 'ph-' + g.ph + (g.ph === cur ? ' on' : ''), style: `--n:${g.n}` })), h('b', { class: 'cg-mk', style: `--p:${rulerP}` })),
+      h('div', { class: 'cg-tl' }, groups.map(g => h('span', { class: g.ph === cur ? 'on' : '', style: `--n:${g.n}` }, phName(g.ph)))),
+      h('p', { class: 'cg-tnow' }, h('b', {}, `ขั้นที่ ${st.i + 1} จาก ${TL.length}`), ` · ${phName(cur)} · ${Math.round(rulerP * 100)}% ของงาน`));
+  }
+  function onScroll4() {
+    if (!st.d4) return;
+    const r = w4.getBoundingClientRect(), top = parseFloat(getComputedStyle(main).top) || 0, span = Math.max(1, w4.offsetHeight - main.offsetHeight);
+    rulerP = Math.max(0, Math.min(1, (top - r.top) / span));
+    const i = Math.min(TL.length - 1, Math.floor(rulerP * TL.length));
+    if (i !== st.i) go(i); else renderRuler();
+  }
+  function set4D(on) {
+    st.d4 = on; stop(); root.classList.toggle('cg-scroll', on); mode4.setAttribute('aria-pressed', String(on)); ruler.hidden = !on;
+    size4();
+    if (on) { rulerP = 0; go(0); w4.scrollIntoView({ block: 'start', behavior: RM() ? 'auto' : 'smooth' }); }
+  }
+  addEventListener('scroll', () => { if (st.d4 && !q4) q4 = requestAnimationFrame(() => { q4 = 0; onScroll4(); }); }, { passive: true });
+  addEventListener('resize', () => { if (st.d4) { size4(); onScroll4(); } });
+
   let lastI = -1;
   function go(i) {
     st.i = Math.max(0, Math.min(TL.length - 1, i));
-    renderCard(); renderTray(); renderSheet(); renderTags();
+    renderCard(); renderTray(); renderSheet(); renderTags(); if (st.d4) renderRuler();
     const s = TL[st.i].state;
     if (V3) V3.show(clone(s), { jump: Math.abs(st.i - lastI) !== 1 });
     lastI = st.i;
@@ -343,6 +377,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
     const j = keepStep && cur ? TL.findIndex(t => t.step.id === cur) : -1;
     if (V3 && j < 0) V3.reset();
     lastI = -9; go(j >= 0 ? j : 0);
+    if (st.d4) { size4(); onScroll4(); }
   }
   function stop() { st.playing = false; clearTimeout(timer); play.textContent = 'เล่นทีละขั้น'; }
   function togglePlay() {
@@ -372,7 +407,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
   return {
     setJob: j => { st.job = j; st.level = j === 'install' ? 'STANDARD' : 'C1'; $$('button', jobSeg).forEach(b => b.setAttribute('aria-pressed', String(b.textContent.startsWith(j === 'install' ? 'งานติดตั้ง' : 'งานล้าง')))); refresh(false); },
     setLevel: lv => { st.level = lv; refresh(true); }, setType: t => { st.type = t; $$('button', typeSeg).forEach((b, i) => b.setAttribute('aria-pressed', String(JOB_TYPES[i].id === t))); refresh(false); },
-    go: i => go(i), steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
+    go: i => go(i), set4D: on => set4D(!!on), steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
   };
 }
 // the pages call it by its round-3 name too

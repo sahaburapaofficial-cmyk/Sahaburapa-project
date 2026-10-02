@@ -1,6 +1,6 @@
 # CLAUDE.md — SBP AirCare Website · Technical Handover Specification
 
-> **สถานะ:** Rev.10 · 2 ต.ค. 2569 (ดู §7.1c) · ก่อนหน้า Rev.09 r5 (ต่อจาก Rev.08.1 — r5 = โครงเว็บตามเส้นทางลูกค้า เตรียม Beta) · เจ้าของโปรเจกต์: ธนวัฒน์ (บริษัท สหบูรพากรุ๊ป จำกัด) · repo: `sahaburapaofficial-cmyk/Sahaburapa-project` โฟลเดอร์ `sbp-aircare/` (Public · เว็บ https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/)
+> **สถานะ:** Rev.12 · 2 ต.ค. 2569 (ดู §7.1e) · ก่อนหน้า Rev.09 r5 (ต่อจาก Rev.08.1 — r5 = โครงเว็บตามเส้นทางลูกค้า เตรียม Beta) · เจ้าของโปรเจกต์: ธนวัฒน์ (บริษัท สหบูรพากรุ๊ป จำกัด) · repo: `sahaburapaofficial-cmyk/Sahaburapa-project` โฟลเดอร์ `sbp-aircare/` (Public · เว็บ https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/)
 > **เริ่มที่ [`HANDOFF.md`](HANDOFF.md)** — ภาพรวม สถานะฟีเจอร์ ตัวแปร/ไฟล์ config และ todo ล่าสุดในไฟล์เดียว · ไฟล์นี้คือสเปกเชิงลึก
 > **ไฟล์นี้คืออะไร:** เอกสารส่งมอบงานสำหรับ Claude Code (CLI) วางไว้ที่ root ของ repo — Claude Code อ่าน `CLAUDE.md` อัตโนมัติทุกครั้งที่เปิดโปรเจกต์
 > **ซอร์สโค้ดเต็ม:** อยู่ในไฟล์ `SBP-WEB-011_Prototype_Source.zip` (ทุกไฟล์ ไบต์ตรงกับที่เผยแพร่ล่าสุด) — เอกสารนี้สรุปสัญญา (API), กติกา และงานถัดไป ไม่ได้คัดลอกโค้ด 3 มิติทั้งหมดซ้ำ เพราะโค้ดจริงอยู่ในไฟล์แล้วและแม่นยำกว่า
@@ -833,6 +833,11 @@ body: `400 16px/1.7` · self-hosted woff2 แยก subset Thai/Latin (`fonts.cs
 - ✅ **จองล้างแอร์ 3 ขั้น** `assets/quickclean.js` (`mountQuickClean`, `cleanFrom`) ใน section `#book` ทั้ง 3 แบบ + หัวเรื่องหน้าแรกเน้นงานล้าง · ราคาใช้ `cleanRate` (อัตรามาตรฐาน) และ `commerce.quoteTotals` (แยกจาก `cart.totals` เป็นฟังก์ชันล้วน — กฎ VAT/ขั้นต่ำ/ค่าเดินทางที่เดียว) · รายการที่ใส่จาก quick booking มี `src: 'qc'` และกดซ้ำจะแทนที่ ไม่ซ้อน
 - ✅ ภาษาลูกค้าสำหรับแพ็กเกจ (`PKG_INFO.th`, `jobguide PKGS`, `quickclean PKG_TH`) · ปุ่ม "แชท LINE" (`site.js`, สีเขียวเข้ม #04803A ให้ contrast 5:1) · `contact.lineLink(text)` เปิดแชต OA พร้อมข้อความ · meta/OG/canonical + `assets/og/` + schema.org HVACBusiness (`site.js` จาก `COMPANY`) + sitemap
 - ✅ เทสต์ `tests/quickclean.mjs` (`npm run booking`) · `npm run smoke:site` · `tools/og-image.mjs` (`npm run og`)
+
+### 7.1e ทำเสร็จ Rev.12 (2 ต.ค. 2569 — "ทำ 4 มิติ และปรับภาพ 3 มิติให้สมจริงขึ้น")
+
+- ✅ **4D แบบเลื่อนจอ** ใน `jobguide.js` (`set4D(on)`, `renderRuler`, `onScroll4`; CSS `.cg-4d*`, `.cg-scroll`, `.cg-t*` ใน shared.css): ฉาก sticky ใต้ header (`--cg-top` 74 / 62 px ที่ ≤640) · ความสูงเลื่อน = จำนวนขั้น × `stepPx()` · แถบเวลาแบ่งตามเฟส · ไม่มีเวลาเป็นนาที (รอข้อมูลหัวหน้าช่าง)
+- ✅ `assets/quality3d.js` `enhance(renderer)` → `prepare(scene)` เรียกใน `gl-pool.track` ก่อนทุกเฟรม (ตรวจซ้ำทุก 3 วิ): shadow map 2048 + anisotropy ≤ 8 เฉพาะเครื่องที่ `HQ_WANTED` และไม่ใช่ GPU ซอฟต์แวร์ · ไม่มี pass เพิ่ม · **ห้ามใส่ post-processing (GTAO/SSAO) กลับ** โดยไม่เทียบภาพ: เคยทำให้สีลม (additive) เพี้ยนและฝาข้างตัวเครื่องมืด
 
 ### 7.2 บั๊ก / ปัญหาที่ยังค้าง (เรียงตามความสำคัญ)
 

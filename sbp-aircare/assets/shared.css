@@ -1111,3 +1111,25 @@ html.sx-on .mbar:has(.s-mmenu):has(>a~a){grid-template-columns:.85fr .9fr .85fr 
 body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 @media (max-width:760px){.sx-line{display:none}}
 @media (prefers-reduced-motion:reduce){.sx-line{transition:none}.sx-line:hover{transform:none}}
+/* Rev.12 — "4 มิติ": the crew scene pinned while the page scrolls; scroll walks the job, the ruler shows where in time we are */
+.cg-4dbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.cg-4dbtn{gap:8px}
+.cg-4di{display:inline-grid;place-items:center;min-width:30px;height:22px;padding:0 6px;border-radius:6px;background:var(--s-accent);color:var(--s-on-accent);font:700 12px/1 var(--s-mono,inherit);letter-spacing:.5px}
+.cg-4dbtn[aria-pressed=true]{background:var(--s-ink);border-color:var(--s-ink);color:var(--s-card)}
+.cg-4dhint{font-size:12.5px;line-height:1.5;color:var(--s-ink-3);flex:1 1 220px}
+.cg.cg-scroll{overflow:visible!important}
+.cg-scroll .cg-main{position:sticky;top:var(--cg-top,74px);z-index:2;background:var(--s-card);border-radius:var(--s-r);padding-block:4px}
+.cg-scroll .cg-nav,.cg-scroll .cg-trayw{display:none}
+.cg-time{display:grid;gap:5px}
+.cg-time[hidden]{display:none}
+.cg-tr{position:relative;display:flex;gap:3px;height:10px}
+.cg-tr i{flex:var(--n) 1 0;border-radius:999px;background:color-mix(in oklab,var(--s-ink-3) 28%,transparent)}
+.cg-tr i.on{background:var(--s-ink-2)}
+.cg-tr i.ph-c2{background:color-mix(in oklab,var(--s-accent) 45%,transparent)}.cg-tr i.ph-c2.on{background:var(--s-accent)}
+.cg-mk{position:absolute;top:-4px;bottom:-4px;left:calc(var(--p) * 100%);width:4px;margin-left:-2px;border-radius:2px;background:var(--s-accent);box-shadow:0 0 0 2px var(--s-card)}
+.cg-tl{display:flex;gap:3px;font-size:11.5px;color:var(--s-ink-3)}
+.cg-tl span{flex:var(--n) 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cg-tl span.on{color:var(--s-ink);font-weight:600}
+.cg-tnow{margin:0;font-size:13px;color:var(--s-ink-2)}.cg-tnow b{color:var(--s-ink)}
+@media (max-width:1000px){.cg-scroll .cg-side{max-height:24vh;overflow:auto}.cg-scroll .cg-card .cg-who,.cg-scroll .cg-card .cg-chk,.cg-scroll .cg-card .cg-how,.cg-scroll .cg-card .cg-form{display:none}}
+@media (max-width:640px){:root{--cg-top:62px}.cg-tl span:not(.on){visibility:hidden}.cg-scroll .cg-lvl{display:none}.cg-4dhint{flex-basis:100%}}
