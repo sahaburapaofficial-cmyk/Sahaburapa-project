@@ -40,6 +40,7 @@ export function quoteTotals(items, zone) {
 }
 export const cart = {
   items: [], zone: null, zoneInput: '', subs: new Set(),
+  prefDate: '',   // Rev.11: preferred date carried in from the quick booking (kept in memory; the form shows it whenever it renders)
   load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = j.items || []; this.zoneInput = j.zoneInput || ''; this.zone = this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {} },
   save() { try { localStorage.setItem(KEY, JSON.stringify({ items: this.items, zoneInput: this.zoneInput })); } catch (e) {} this.subs.forEach(f => f(this)); },
   add(line) {
@@ -117,7 +118,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     const f = h('form', { class: 's-form' },
       h('label', { class: 's-field' }, 'ชื่อ / บริษัท', h('input', { id: 's-q-name', required: true, autocomplete: 'name' })),
       h('label', { class: 's-field' }, 'เบอร์โทร', h('input', { id: 's-q-tel', required: true, inputmode: 'tel', pattern: '[0-9\\- ]{9,12}', autocomplete: 'tel' })),
-      h('label', { class: 's-field' }, 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date' })),
+      h('label', { class: 's-field' }, 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; } })),
       h('label', { class: 's-field' }, 'ต้องการใบกำกับภาษีในนาม', h('input', { id: 's-q-tax', placeholder: 'ชื่อบริษัท / เลขผู้เสียภาษี (ถ้ามี)' })),
       honeypot(), h('button', { class: 's-btn primary', type: 'submit' }, canSend() ? 'ส่งขอใบเสนอราคาอย่างเป็นทางการ' : 'ขอใบเสนอราคาอย่างเป็นทางการ'), privacyNote());
     f.addEventListener('submit', e => {

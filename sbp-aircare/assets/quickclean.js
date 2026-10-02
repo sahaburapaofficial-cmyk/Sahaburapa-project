@@ -99,9 +99,10 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
     sum.append(h('ul', { class: 'qc-notes' }, notes.map(n => h('li', {}, n))));
     const send = h('button', { type: 'button', class: 's-btn primary qc-go', onclick: () => {
       cart.items = cart.items.filter(i => i.src !== 'qc'); items.forEach(i => cart.add({ ...i }));
+      if (st.date) cart.prefDate = st.date;   // the quotation form reads it every time it renders (no timing race)
       if (st.zone) cart.setZone(st.zone); else cart.save();
       openCart();
-      requestAnimationFrame(() => { const d = document.getElementById('s-q-date'); if (d && st.date && !d.value) d.value = st.date; const n = document.getElementById('s-q-name'); n && n.focus({ preventScroll: true }); });
+      requestAnimationFrame(() => { const n = document.getElementById('s-q-name'); n && n.focus({ preventScroll: true }); });
     } }, 'จองล้างแอร์ · กรอกชื่อและเบอร์');
     const line = h('a', { class: 's-btn ghost qc-line', href: lineLink(summaryText(t)), target: '_blank', rel: 'noopener' }, 'ส่งทาง LINE');
     sum.append(h('div', { class: 'qc-acts' }, send, line));
