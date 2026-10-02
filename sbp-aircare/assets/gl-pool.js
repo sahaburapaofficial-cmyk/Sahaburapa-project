@@ -72,4 +72,5 @@ export function track(renderer, el, opts = {}) {
   entries.push(e); wire(); if (queued) { cancelAnimationFrame(queued); } balance();
   return { release() { const i = entries.indexOf(e); if (i >= 0) entries.splice(i, 1); schedule(); } };
 }
+export { whenNear, deferred } from './lazy.js';   // Rev.11 (moved to lazy.js so 2D modules can use it without three.js)
 export const glBudget = () => ({ max: MAX, live: entries.filter(e => e.state === 'live').length, total: entries.length });

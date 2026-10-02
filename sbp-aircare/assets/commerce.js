@@ -19,6 +19,25 @@ const priceNode = (ex, unit) => ex == null
    Quote basket
    ========================================================= */
 const KEY = 'sbp-quote-v2';
+// Rev.11: the quotation maths as pure functions — the cart and the quick cleaning booking (quickclean.js) share them,
+// so every total on the site follows the same rules (VAT, cleaning minimum per visit, travel by zone and unit count).
+// machines on site = the largest per-group count (a product + its install line is still one machine)
+export function quoteUnits(items) {
+  const by = {}; items.forEach(i => { if (['product', 'install', 'clean', 'repair'].includes(i.group)) by[i.group] = (by[i.group] || 0) + (i.units || i.qty); });
+  return Math.max(0, ...Object.values(by));
+}
+export function quoteTotals(items, zone) {
+  let ex = 0, cleanEx = 0;
+  items.forEach(i => { if (i.unitEx != null) { ex += i.unitEx * i.qty; if (i.group === 'clean') cleanEx += i.unitEx * i.qty; } });
+  const units = quoteUnits(items);
+  // annual contracts already carry travel per visit — only charge a trip for the one-off lines
+  const oneOff = items.some(i => i.group !== 'contract' && i.kind !== 'survey');
+  const tc = oneOff ? travelCharge(zone, units) : { fee: 0, waived: false, short: 0 };
+  const travel = tc.fee;
+  const minGap = cleanEx > 0 && cleanEx < DATA.minBill ? DATA.minBill - cleanEx : 0;
+  const totalEx = ex + travel + minGap;
+  return { ex, travel, travelWaived: tc.waived, travelShort: tc.short, units, minGap, totalEx, vat: Math.round(totalEx * VAT), inc: totalEx + Math.round(totalEx * VAT), surveys: items.filter(i => i.unitEx == null).length };
+}
 export const cart = {
   items: [], zone: null, zoneInput: '', subs: new Set(),
   load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = j.items || []; this.zoneInput = j.zoneInput || ''; this.zone = this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {} },
@@ -33,24 +52,8 @@ export const cart = {
   clear() { this.items = []; this.save(); },
   setZone(input) { this.zoneInput = input; this.zone = checkZone(input); this.save(); },
   count() { return this.items.reduce((n, i) => n + (i.kind === 'survey' ? 0 : i.qty), 0); },
-  totals() {
-    let ex = 0, cleanEx = 0;
-    this.items.forEach(i => { if (i.unitEx != null) { ex += i.unitEx * i.qty; if (i.group === 'clean') cleanEx += i.unitEx * i.qty; } });
-    const z = this.zone;
-    const units = this.units();
-    // annual contracts already carry travel per visit — only charge a trip for the one-off lines
-    const oneOff = this.items.some(i => i.group !== 'contract' && i.kind !== 'survey');
-    const tc = oneOff ? travelCharge(z, units) : { fee: 0, waived: false, short: 0 };
-    const travel = tc.fee;
-    const minGap = cleanEx > 0 && cleanEx < DATA.minBill ? DATA.minBill - cleanEx : 0;
-    const totalEx = ex + travel + minGap;
-    return { ex, travel, travelWaived: tc.waived, travelShort: tc.short, units, minGap, totalEx, vat: Math.round(totalEx * VAT), inc: totalEx + Math.round(totalEx * VAT), surveys: this.items.filter(i => i.unitEx == null).length };
-  },
-  // machines on site = the largest per-group count (a product + its install line is still one machine)
-  units() {
-    const by = {}; this.items.forEach(i => { if (['product', 'install', 'clean', 'repair'].includes(i.group)) by[i.group] = (by[i.group] || 0) + (i.units || i.qty); });
-    return Math.max(0, ...Object.values(by));
-  },
+  totals() { return quoteTotals(this.items, this.zone); },
+  units() { return quoteUnits(this.items); },
 };
 
 export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
@@ -300,9 +303,9 @@ export function mountMaterials(root, cfg = {}) {
    Cleaning packages — what each level gives, who it suits, starting prices (Pricebook) — from sales manual SBP-SAL-001
    ========================================================= */
 export const PKG_INFO = [
-  { id: 'Basic Clean', code: 'P1', pitch: 'คุ้มค่า', fit: 'บ้าน คอนโด ร้านเล็ก ที่ต้องการล้างตามรอบ', gets: ['ใบรับมอบงาน / รายงานแบบย่อรายเครื่อง', 'ทดสอบการทำงาน น้ำทิ้ง และ Error Code หลังล้าง (T1)'], care: 'ไม่มี' },
-  { id: 'Standard Care', code: 'P2', pitch: 'มีหลักฐาน วางแผนซ่อมได้', fit: 'สำนักงาน ร้านค้า คลินิก ร้านอาหาร ที่ต้องการเอกสารและภาพ', gets: ['Service Report พร้อมภาพ 2–4 ภาพต่อเครื่อง', 'วัดค่าก่อน–หลัง (T2): ลมกลับ ลมจ่าย ผลต่างอุณหภูมิ กระแส แรงดัน', 'ประเมินสภาพเครื่อง A–D + สรุปโครงการ'], care: 'Service Care 90 วัน' },
-  { id: 'Corporate Control', code: 'P3', pitch: 'บริหารทรัพย์สิน', fit: 'องค์กรหลายสาขา โรงงาน โรงแรม โรงพยาบาล', gets: ['ทะเบียนทรัพย์สิน รุ่น / หมายเลขเครื่อง รายเครื่อง', 'ดัชนีภาพ + ค่าตรวจวัดเชื่อมกับทะเบียน (T3)', 'จัดลำดับความสำคัญ แนวโน้ม ผู้รับผิดชอบ กำหนดปิดเคส'], care: 'Service Care Plus 90 วัน' },
+  { id: 'Basic Clean', code: 'P1', th: 'ล้างมาตรฐาน', pitch: 'คุ้มค่า', fit: 'บ้าน คอนโด ร้านเล็ก ที่ต้องการล้างตามรอบ', gets: ['ใบรับมอบงาน / รายงานแบบย่อรายเครื่อง', 'ทดสอบการทำงาน น้ำทิ้ง และ Error Code หลังล้าง (T1)'], care: 'ไม่มี' },
+  { id: 'Standard Care', code: 'P2', th: 'ล้างพร้อมรายงานภาพ', pitch: 'มีหลักฐาน วางแผนซ่อมได้', fit: 'สำนักงาน ร้านค้า คลินิก ร้านอาหาร ที่ต้องการเอกสารและภาพ', gets: ['Service Report พร้อมภาพ 2–4 ภาพต่อเครื่อง', 'วัดค่าก่อน–หลัง (T2): ลมกลับ ลมจ่าย ผลต่างอุณหภูมิ กระแส แรงดัน', 'ประเมินสภาพเครื่อง A–D + สรุปโครงการ'], care: 'Service Care 90 วัน' },
+  { id: 'Corporate Control', code: 'P3', th: 'ล้างพร้อมทะเบียนทรัพย์สิน', pitch: 'บริหารทรัพย์สิน', fit: 'องค์กรหลายสาขา โรงงาน โรงแรม โรงพยาบาล', gets: ['ทะเบียนทรัพย์สิน รุ่น / หมายเลขเครื่อง รายเครื่อง', 'ดัชนีภาพ + ค่าตรวจวัดเชื่อมกับทะเบียน (T3)', 'จัดลำดับความสำคัญ แนวโน้ม ผู้รับผิดชอบ กำหนดปิดเคส'], care: 'Service Care Plus 90 วัน' },
 ];
 export const METHOD_INFO = [
   { id: 'C1', th: 'ล้างปกติ (C1)', d: 'ล้างที่ตำแหน่งเดิม ล้างจุดบริการและส่วนที่เข้าถึงได้ ไม่ปลดเครื่อง ไม่เปิดวงจรน้ำยา' },
@@ -317,7 +320,7 @@ export function cleanPackageGuide(where = 'บริการ', hl = 'h4') {   /
   function render() {
     root.innerHTML = '';
     const cards = h('div', { class: 'pk-cards' }, PKG_INFO.map(p => { const r = DATA.clean.find(x => x.pkg === p.id && x.type); const from = startAt(p.id, 'C1');
-      return h('article', { class: 'pk-card' + (p.code === 'P2' ? ' rec' : '') }, h('p', { class: 'pk-code' }, p.code, p.code === 'P2' ? h('span', {}, 'แนะนำสำหรับธุรกิจ') : null), h(hl, {}, p.id), h('p', { class: 'pk-pitch' }, p.pitch),
+      return h('article', { class: 'pk-card' + (p.code === 'P2' ? ' rec' : '') }, h('p', { class: 'pk-code' }, `${p.code} · ${p.id}`, p.code === 'P2' ? h('span', {}, 'แนะนำสำหรับธุรกิจ') : null), h(hl, {}, p.th), h('p', { class: 'pk-pitch' }, p.pitch),
         h('p', { class: 'pk-from' }, h('small', {}, 'ล้างปกติ เริ่ม'), h('b', {}, from ? baht(incVat(from)) : '—'), h('small', {}, '/ เครื่อง รวม VAT')),
         h('ul', {}, p.gets.map(g => h('li', {}, g))), h('dl', {}, h('dt', {}, 'รับประกันงานล้าง'), h('dd', {}, r?.warranty || '—'), h('dt', {}, 'ดูแลหลังบริการ'), h('dd', {}, p.care), h('dt', {}, 'เหมาะกับ'), h('dd', {}, p.fit))); }));
     const methods = h('div', { class: 'pk-methods' }, METHOD_INFO.map(m => h('div', {}, h('b', {}, m.th), h('p', {}, m.d))));

@@ -3,7 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SBP AirCare · แบบ C Virtual Showroom</title>
+<!-- Rev.11: search and link previews (LINE / Facebook). Company facts for search engines are added by site.js from COMPANY. -->
+<meta name="description" content="ล้างแอร์ ติดตั้ง ซ่อม โดยทีมช่างของบริษัท สหบูรพากรุ๊ป จำกัด กรุงเทพฯ และปริมณฑล — เลือกแอร์ วิธีล้าง และพื้นที่ แล้วเห็นราคามาตรฐานรวม VAT ก่อนจอง พร้อมสัญญาล้างรายปีสำหรับองค์กร">
+<meta name="theme-color" content="#090E14">
+<link rel="canonical" href="https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/c.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="th_TH">
+<meta property="og:site_name" content="SBP AirCare · บริษัท สหบูรพากรุ๊ป จำกัด">
+<meta property="og:title" content="ล้างแอร์ ติดตั้ง ซ่อม · เห็นราคารวมก่อนจอง | SBP AirCare">
+<meta property="og:description" content="ล้างแอร์ ติดตั้ง ซ่อม โดยทีมช่างของบริษัท สหบูรพากรุ๊ป จำกัด กรุงเทพฯ และปริมณฑล — เลือกแอร์ วิธีล้าง และพื้นที่ แล้วเห็นราคามาตรฐานรวม VAT ก่อนจอง พร้อมสัญญาล้างรายปีสำหรับองค์กร">
+<meta property="og:url" content="https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/c.html">
+<meta property="og:image" content="https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/og/sbp-aircare-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="SBP AirCare — ล้าง ติดตั้ง ซ่อมแอร์ เห็นราคารวมก่อนจอง">
+<meta name="twitter:card" content="summary_large_image">
+<title>ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ C)</title>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/shared.css">
 <link rel="stylesheet" href="assets/studio.css">
@@ -337,9 +352,9 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
   </div>
   <div class="hero-copy"><div class="wrap"><div class="t">
     <p class="eyebrow">SBP AirCare · Virtual Showroom</p>
-    <h1>เห็นทุกชิ้นในแอร์<br><em>ก่อนตัดสินใจ</em></h1>
-    <p>หมุนดู แยกชิ้นส่วน และลองล้างแบบเสมือนจริง จากนั้นเลือกรุ่น หรือให้ทีมวางแผนล้างทั้งองค์กรในสัญญาเดียว</p>
-    <div class="ctas"><a class="btn-primary" href="#b2b">สัญญาล้างรายปี</a><a class="btn-ghost" href="#room">ลองห้องจำลอง</a></div>
+    <h1>ล้างแอร์ถึงชิ้นส่วนข้างใน<br><em>เห็นทุกขั้นก่อนจอง</em></h1>
+    <p>หมุนดู แยกชิ้นส่วน และลองล้างแบบเสมือนจริง แล้วจองล้างได้ใน 3 ขั้น เห็นราคารวม VAT ก่อนส่งคำขอ หรือให้ทีมวางแผนล้างทั้งองค์กรในสัญญาเดียว</p>
+    <div class="ctas"><a class="btn-primary" href="#book">จองล้างแอร์ · เริ่ม <span data-clean-from>฿696</span></a><a class="btn-ghost" href="#b2b">สัญญาล้างรายปี</a></div>
   </div></div></div>
 </section>
 
@@ -351,6 +366,11 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
 
 <main class="wrap">
   <!-- START: WHAT DO YOU NEED (Rev.09 r5) -->
+  <section class="sec" id="book">
+    <div class="sec-h"><p class="eyebrow">จองล้างแอร์ · 3 ขั้น</p><h2>เลือกแอร์ วิธีล้าง และพื้นที่ เห็นราคารวมทันที</h2><p>ราคามาตรฐานจาก Pricebook รวม VAT ค่าเดินทาง และยอดขั้นต่ำครบ แล้วส่งคำขอหรือส่งทาง LINE ทีมยืนยันคิวก่อนเข้างาน</p></div>
+    <div id="bookRoot"></div>
+  </section>
+
   <section class="sec" id="start">
     <div class="sec-h"><p class="eyebrow">เริ่มต้นที่นี่</p><h2>วันนี้ต้องการอะไร</h2><p>เลือกสิ่งที่ตรงกับคุณ ระบบพาไปทีละขั้นจนส่งคำขอ ทำต่อจากเดิมได้เมื่อกลับมา</p></div>
     <div id="startRoot"></div>
@@ -495,10 +515,14 @@ import { mountRoomFit } from './assets/roomfit.js';
 import { mountKnowledge } from './assets/knowledge.js';
 import { mountJobGuide } from './assets/jobguide.js';
 import { mountSite } from './assets/site.js';
+import { mountQuickClean, cleanFrom } from './assets/quickclean.js';
 await loadData(); await loadMedia();
 enhanceQuoteForm();
 $$('[data-ask]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); askTeam(a.dataset.ask); }));
 const CART = mountCart();
+// Rev.11: cleaning first — quick booking on the home page + "เริ่ม ฿…" from the Pricebook
+mountQuickClean(document.getElementById('bookRoot'), { openCart: CART.open, onB2B: () => document.getElementById('b2b').scrollIntoView({ behavior: 'smooth', block: 'start' }) });
+{ const f = cleanFrom(); if (f) $$('[data-clean-from]').forEach(x => x.textContent = baht(f)); }
 mountQuotePill(CART.open);
 mountFlow(document.getElementById('flowRoot'), { room: 'room', product: 'catalog', service: 'cleanflow', area: 'area', quote: 'quote' }, { openCart: CART.open });
 mountMobileMenu();
@@ -578,7 +602,7 @@ reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountSite({
   variant: 'C', openCart: CART.open,
-  views: { home: ['top', 'start', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'howto', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['top', 'book', 'start', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'howto', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'ช่างทำงานในบ้านจำลอง', cleanflow: 'ทีมช่างล้าง · ติดตั้ง' },
   hooks: {
     clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'),

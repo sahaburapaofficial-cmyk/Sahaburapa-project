@@ -17,7 +17,8 @@ export const JOB_TYPES = [
   { id: 'cassette', th: 'แอร์สี่ทิศทาง', venue: 'คาเฟ่' },
   { id: 'floor', th: 'แอร์ตู้ตั้งพื้น', venue: 'ห้องประชุม / รับรองลูกค้า' },
 ];
-const PKGS = [{ id: 'Basic Clean', th: 'Basic Clean (P1)', sub: 'ตรวจการทำงาน T1' }, { id: 'Standard Care', th: 'Standard Care (P2)', sub: 'วัดค่า T2 + ภาพ + เกรด' }];
+// Rev.11: plain Thai first, the company's package name second (internal P1/P2 · T1/T2 codes stay in the step references)
+const PKGS = [{ id: 'Basic Clean', th: 'ล้างมาตรฐาน', sub: 'Basic Clean · ทดสอบการทำงานหลังล้าง' }, { id: 'Standard Care', th: 'ล้างพร้อมรายงานภาพ', sub: 'Standard Care · วัดค่าก่อน–หลัง + ภาพ + เกรด' }];
 // which part groups come off at each teardown step, per unit type (ids of the ac3d / units3d part groups)
 export const TEAR = {
   wall: { parts: ['front', 'filter', 'louver'], lower: [], fan: ['blower'], pan: ['pan'], fanW: 'blower', panW: 'pan' },

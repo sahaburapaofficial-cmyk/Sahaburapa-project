@@ -827,6 +827,13 @@ body: `400 16px/1.7` · self-hosted woff2 แยก subset Thai/Latin (`fonts.cs
 - ✅ เทสต์ใหม่ `npm run submit` (`tests/submit.mjs`): 3 ฟอร์ม × 3 โหมด (ส่งสำเร็จ / ล้มเหลว / ไม่ตั้งค่า) ด้วย endpoint จำลอง — ผ่านทั้ง A/B/C
 - ✅ `PROPOSAL_Rev10.md`: ทางเลือกระบบรับคำขอ + ต้นทุน/ความเสี่ยง · เช็กลิสต์มือถือจริง 16 ข้อ · วิธีลดภาระ 3 มิติ 9 ข้อ · แนวทางพัฒนา (งานล้างเป็นหลัก, B2C/B2B, ภาพสมจริง/"4 มิติ") · สิ่งที่ต้องการจากเจ้าของ
 
+### 7.1d ทำเสร็จ Rev.11 (2 ต.ค. 2569 — "สวยขึ้น ดีขึ้น ลื่นขึ้น พัฒนาอย่างเดียว")
+
+- ✅ **ความเร็ว:** `assets/lazy.js` (`whenNear`, `deferred`) — `mountViewer` / `mountThaiMap` คืนตัวแทนทันที แล้วสร้างฉากจริงเมื่อ section ใกล้จอ (หน้าที่ซ่อนไม่สร้าง WebGL; คำสั่งก่อนบูตถูกจำแล้วเล่นซ้ำ) · `product-media.productShot(key)` เรนเดอร์ทีละภาพเมื่อการ์ดใกล้จอ + cache `localStorage['sbp-shots-r11']` + คืน GL context เมื่อว่าง · `build.py` สร้าง `dist/site/` (code splitting, `js/data-*.js`, CSS/ฟอนต์เป็นไฟล์) ให้ GitHub Pages · ผล (มือถือจำลอง 4G + CPU 4×, swiftshader): DCL 17–26 วิ → 4.8–5.5 วิ
+- ✅ **จองล้างแอร์ 3 ขั้น** `assets/quickclean.js` (`mountQuickClean`, `cleanFrom`) ใน section `#book` ทั้ง 3 แบบ + หัวเรื่องหน้าแรกเน้นงานล้าง · ราคาใช้ `cleanRate` (อัตรามาตรฐาน) และ `commerce.quoteTotals` (แยกจาก `cart.totals` เป็นฟังก์ชันล้วน — กฎ VAT/ขั้นต่ำ/ค่าเดินทางที่เดียว) · รายการที่ใส่จาก quick booking มี `src: 'qc'` และกดซ้ำจะแทนที่ ไม่ซ้อน
+- ✅ ภาษาลูกค้าสำหรับแพ็กเกจ (`PKG_INFO.th`, `jobguide PKGS`, `quickclean PKG_TH`) · ปุ่ม "แชท LINE" (`site.js`, สีเขียวเข้ม #04803A ให้ contrast 5:1) · `contact.lineLink(text)` เปิดแชต OA พร้อมข้อความ · meta/OG/canonical + `assets/og/` + schema.org HVACBusiness (`site.js` จาก `COMPANY`) + sitemap
+- ✅ เทสต์ `tests/quickclean.mjs` (`npm run booking`) · `npm run smoke:site` · `tools/og-image.mjs` (`npm run og`)
+
 ### 7.2 บั๊ก / ปัญหาที่ยังค้าง (เรียงตามความสำคัญ)
 
 | # | ปัญหา | ผลกระทบ | หลักฐาน / จุดที่ต้องดู |

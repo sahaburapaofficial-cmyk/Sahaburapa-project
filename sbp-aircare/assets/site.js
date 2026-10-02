@@ -27,7 +27,7 @@ export const VIEWS = {
   contact: { th: 'ติดต่อเรา', lead: 'ข้อมูลบริษัท ช่องทางติดต่อ พื้นที่ให้บริการ และส่งคำขอให้ทีมติดต่อกลับ' },
 };
 const SEC_TH = {
-  hero: 'เริ่มต้น', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
+  hero: 'เริ่มต้น', book: 'จองล้างแอร์', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
   catalog: 'เลือกรุ่นและราคา', studio: 'หาขนาด BTU ตามห้อง', room: 'หาขนาด BTU ตามห้อง', fit: 'ลองวางในห้องของคุณ',
   cleanflow: 'ทีมช่างทำงานทีละขั้น', prices: 'ราคาทุกบริการ', quality: 'วัสดุในแพ็กเกจ', story: 'ล้างถึงชิ้นไหน', inside: 'ข้างในแอร์',
   howto: 'แอร์ทำงานอย่างไร · ขั้นตอนบริการ', b2b: 'ประเมินงบสัญญารายปี', learn: 'คู่มือก่อนตัดสินใจ', journey: 'แอร์ทำงานอย่างไร',
@@ -36,7 +36,7 @@ const SEC_TH = {
 // guided journeys: [section id (alternatives a|b), what the customer does there]; 'quote' = the quotation (or the contact form)
 export const JOURNEYS = {
   clean: { th: 'ล้างแอร์', sub: 'บ้าน คอนโด ร้าน สำนักงาน · ล้างปกติ C1 หรือล้างใหญ่ C2', topic: 'ล้างแอร์', ico: 'M4 9h16v6H4zM7 15v3M12 15v4M17 15v3',
-    steps: [['cleanflow', 'ดูขั้นตอนช่าง เลือก C1 / C2'], ['prices', 'ดูราคาตามประเภทและขนาด'], ['area', 'ตรวจพื้นที่และค่าเดินทาง'], ['quote', 'ส่งคำขอนัดล้าง']] },
+    steps: [['book', 'เลือกแอร์ วิธีล้าง และพื้นที่ ดูราคารวม'], ['cleanflow', 'ดูทีมช่างล้างทีละขั้น ล้างปกติ / ล้างใหญ่'], ['quote', 'ส่งคำขอนัดล้าง']] },   // Rev.11: starts at the quick booking
   buy: { th: 'ซื้อแอร์ใหม่ + ติดตั้ง', sub: '', topic: 'ซื้อแอร์', ico: 'M3 7h18v8H3zM6 15v2M18 15v2M7 11h6',
     steps: [['studio|room', 'หาขนาด BTU ที่เหมาะกับห้อง'], ['catalog', 'เลือกรุ่นและแพ็กเกจติดตั้ง'], ['fit', 'ลองวางในห้องของคุณ'], ['quote', 'ส่งใบเสนอราคา']] },
   install: { th: 'ติดตั้ง / ย้ายแอร์', sub: 'มีเครื่องแล้ว · ติดตั้งมาตรฐาน หรือพรีเมียม', topic: 'ติดตั้งแอร์', ico: 'M14 4l6 6-9 9H5v-6z',
@@ -301,6 +301,20 @@ export function mountSite(cfg) {
       h('div', {}, h('h4', {}, 'ช่วงทดลองใช้'), h('p', {}, 'เว็บไซต์เวอร์ชันทดลองสำหรับลูกค้ากลุ่มแรก ราคาตาม Pricebook 2569 ยืนยันอีกครั้งในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
       h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))))));
   }
+  // Rev.11: business facts for search engines (schema.org), built from COMPANY so the page and the data never disagree
+  try {
+    const ld = { '@context': 'https://schema.org', '@type': 'HVACBusiness', name: `${COMPANY.brand} · ${COMPANY.th}`, alternateName: [COMPANY.en, COMPANY.service],
+      description: 'ล้างแอร์ ติดตั้ง ซ่อม และจำหน่ายเครื่องปรับอากาศ โดยทีมช่างของบริษัท ราคามาตรฐานรวม VAT แสดงบนเว็บไซต์ · สัญญาล้างรายปีสำหรับองค์กร',
+      url: location.origin + location.pathname, telephone: COMPANY.tel, email: COMPANY.email, taxID: COMPANY.taxId,
+      address: { '@type': 'PostalAddress', streetAddress: '593 ถนนพระราม 2 แขวงบางมด', addressLocality: 'เขตจอมทอง', addressRegion: 'กรุงเทพมหานคร', postalCode: '10150', addressCountry: 'TH' },
+      areaServed: ['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'สมุทรสาคร'].map(n => ({ '@type': 'AdministrativeArea', name: n })),
+      sameAs: [COMPANY.webUrl, COMPANY.fbUrl, COMPANY.lineUrl], currenciesAccepted: 'THB' };
+    document.head.append(h('script', { type: 'application/ld+json' }, JSON.stringify(ld)));
+  } catch (e) { /* optional */ }
+  // Rev.11: a "แชท LINE" button on computers and tablets (phones have LINE in the bottom bar) — opens the LINE OA chat
+  document.body.append(h('a', { class: 'sx-line', href: COMPANY.lineUrl, target: '_blank', rel: 'noopener', 'aria-label': `แชทกับทีมทาง LINE ${COMPANY.line}` },
+    h('span', { 'aria-hidden': 'true', html: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5 1.1-.5 6-3.5 8.2-6 1.5-1.6 1.8-3.2 1.8-4.8C22 6.6 17.5 3 12 3z"/></svg>' }),
+    h('span', {}, 'แชท LINE')));
   const mbar = $('.mbar');
   // Rev.10: LINE OA is confirmed (@sahaservices on the company site) → the LINE button is back in the mobile bar
   if (mbar) { const ls = $$('a', mbar); if (ls[0]) { ls[0].textContent = 'ติดต่อ'; ls[0].setAttribute('href', '#contact'); } if (ls[1]) { ls[1].textContent = 'LINE'; ls[1].setAttribute('href', COMPANY.lineUrl); ls[1].setAttribute('target', '_blank'); ls[1].setAttribute('rel', 'noopener'); } }

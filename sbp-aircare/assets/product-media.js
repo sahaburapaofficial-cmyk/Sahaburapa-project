@@ -10,6 +10,7 @@
 // captioned "ภาพประกอบ" so a render is never mistaken for the real product.
 import { h, TYPE_BY_ID, BRAND_BY_ID } from './sbp-core.js';
 import { typeArt } from './proto-ui.js';
+import { whenNear } from './lazy.js';
 
 let MEDIA = { models: {}, series: {}, brands: {} };
 let BASE = './assets/products/';
@@ -32,61 +33,84 @@ export function photosFor(m, sku) {
 export const hasPhoto = (m, sku) => photosFor(m, sku).length > 0;
 
 /* ---------- rendered product shots (one temporary WebGL context, then released) ---------- */
-let shotsP = null;
+// Rev.11 (speed, same pictures): shots are rendered only when a card that needs one comes near the screen, one shot per
+// frame (the page never freezes on a long render), the GL context is released once the queue is empty, and finished
+// shots are kept in localStorage per render version so returning visitors see them at once.
 const SHOTS = {};
-export function productShots() {
-  if (shotsP) return shotsP;
-  shotsP = (async () => {
+const KEYS = ['wall', 'wall:fujiva', 'ceiling', 'cassette', 'floor'];
+const CACHE = 'sbp-shots-r11';
+try { Object.assign(SHOTS, JSON.parse(localStorage.getItem(CACHE) || '{}')); } catch (e) { /* storage blocked */ }
+const saveShots = () => { try { localStorage.setItem(CACHE, JSON.stringify(SHOTS)); } catch (e) { /* full or blocked: render again next time */ } };
+let studioP = null, queue = Promise.resolve(), idle = null;
+function studio() {
+  if (studioP) return studioP;
+  studioP = (async () => {
+    const THREE = await import('./three.module.min.js');
+    const { buildPremiumIndoor, buildOutdoor, materialSet } = await import('./ac3d.js');
+    const { buildCeilingUnit, buildCassetteUnit, buildFloorUnit } = await import('./units3d.js');
+    const { RoomEnvironment } = await import('./RoomEnvironment.js');
     let r;
-    try {
-      const THREE = await import('./three.module.min.js');
-      const { buildPremiumIndoor, buildOutdoor, materialSet } = await import('./ac3d.js');
-      const { buildCeilingUnit, buildCassetteUnit, buildFloorUnit } = await import('./units3d.js');
-      const { RoomEnvironment } = await import('./RoomEnvironment.js');
-      const W = 720, H = 480;
-      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-      r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
-      r.setPixelRatio(1); r.setSize(W, H, false);
-      r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.06;
-      r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
-      const scene = new THREE.Scene();
-      const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.85;
-      scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe6ee, 0.55));
-      const key = new THREE.DirectionalLight(0xffffff, 1.6); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 6;
-      scene.add(key, key.target);
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.16 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const cam = new THREE.PerspectiveCamera(26, W / H, 0.05, 30);
-      const M = materialSet('studio');
-      const shadowAll = g => g.traverse(o => { if (o.isMesh) { o.castShadow = !o.userData.noShadow; o.receiveShadow = true; } });
-      const floating = U => U.root.traverse(o => { o.userData.noShadow = true; });   // indoor units float in the shot: only the outdoor unit grounds it
-      const shot = (build, { yaw = -0.5, pitch = 0.16, pad = 1.06, floorAt = 'min', keyUp = 4 } = {}) => {
-        const g = new THREE.Group(); build(g); shadowAll(g); scene.add(g);
-        const bb = new THREE.Box3().setFromObject(g), c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
-        ground.position.y = floorAt === 'min' ? bb.min.y - 0.002 : -50;
-        // fit the box in both directions of the frame (tall floor units and wide ceiling units alike)
-        const tv = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)), rad = sz.length() / 2;
-        const dist = Math.max(sz.y / 2 / tv, Math.max(sz.x, sz.z) / 2 / (tv * cam.aspect)) * pad + Math.max(sz.x, sz.z) * 0.3;
-        cam.position.set(c.x + Math.sin(yaw) * Math.cos(pitch) * dist, c.y + Math.sin(pitch) * dist, c.z + Math.cos(yaw) * Math.cos(pitch) * dist); cam.lookAt(c);
-        key.position.set(c.x + 2.2, c.y + keyUp, c.z + 3); key.target.position.copy(c);
-        const sc = key.shadow.camera; sc.left = sc.bottom = -rad * 1.6; sc.right = sc.top = rad * 1.6; sc.near = 0.1; sc.far = 12; sc.updateProjectionMatrix();
-        r.render(scene, cam);
-        let out = null; try { out = cv.toDataURL('image/webp', 0.9); if (!/^data:image\/webp/.test(out)) out = cv.toDataURL('image/png'); } catch (e) {}
-        scene.remove(g); g.traverse(o => { if (o.isMesh) { o.geometry.dispose(); } });
-        return out;
-      };
-      const outdoor = (g, x, z, s = 0.62) => { const O = buildOutdoor(M); O.root.scale.setScalar(s); O.root.position.set(x, 0.55 * s / 2, z); O.root.rotation.y = -0.18; g.add(O.root); };
-      SHOTS.wall = shot(g => { const U = buildPremiumIndoor(M, { logo: false }); floating(U); U.root.position.set(0, 0.62, 0); U.root.rotation.y = 0.04; g.add(U.root); outdoor(g, 0.72, -0.62); }, { yaw: -0.42, pitch: 0.12 });
-      SHOTS['wall:fujiva'] = shot(g => { const U = buildPremiumIndoor(M, { logo: true }); floating(U); U.root.position.set(0, 0.62, 0); U.root.rotation.y = 0.04; g.add(U.root); outdoor(g, 0.72, -0.62); }, { yaw: -0.42, pitch: 0.12 });   // company brand: wordmark allowed
-      SHOTS.ceiling = shot(g => { const U = buildCeilingUnit(M, { interior: false, rod: 0 }); floating(U); U.parts.hangers && (U.parts.hangers.visible = false); U.root.position.set(0, 0.7, 0); g.add(U.root); outdoor(g, 1.0, -0.9, 0.7); }, { yaw: -0.5, pitch: 0.05 });
-      SHOTS.cassette = shot(g => { const U = buildCassetteUnit(M, { interior: false, rod: 0 }); floating(U); U.root.position.set(0, 0.75, 0); U.root.rotation.x = -0.95; U.parts.hangers && (U.parts.hangers.visible = false); g.add(U.root); outdoor(g, 0.95, -0.8, 0.7); }, { yaw: -0.5, pitch: 0.1 });   // panel tilted toward the camera, as product shots show it
-      SHOTS.floor = shot(g => { const U = buildFloorUnit(M); g.add(U.root); outdoor(g, 0.92, -0.3, 0.62); }, { yaw: -0.45, pitch: 0.14, keyUp: 9 });   // high key light: short shadow under a tall unit
-      pm.dispose();
-    } catch (e) { /* no WebGL → the line-art illustration stays */ }
-    finally { if (r) { r.dispose(); r.forceContextLoss(); } }
-    return SHOTS;
-  })();
-  return shotsP;
+    const W = 720, H = 480;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
+    r.setPixelRatio(1); r.setSize(W, H, false);
+    r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.06;
+    r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
+    const scene = new THREE.Scene();
+    const pm = new THREE.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.85;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe6ee, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 1.6); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 6;
+    scene.add(key, key.target);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.16 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    const cam = new THREE.PerspectiveCamera(26, W / H, 0.05, 30);
+    const M = materialSet('studio');
+    const shadowAll = g => g.traverse(o => { if (o.isMesh) { o.castShadow = !o.userData.noShadow; o.receiveShadow = true; } });
+    const floating = U => U.root.traverse(o => { o.userData.noShadow = true; });   // indoor units float in the shot: only the outdoor unit grounds it
+    const shot = (build, { yaw = -0.5, pitch = 0.16, pad = 1.06, floorAt = 'min', keyUp = 4 } = {}) => {
+      const g = new THREE.Group(); build(g); shadowAll(g); scene.add(g);
+      const bb = new THREE.Box3().setFromObject(g), c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
+      ground.position.y = floorAt === 'min' ? bb.min.y - 0.002 : -50;
+      // fit the box in both directions of the frame (tall floor units and wide ceiling units alike)
+      const tv = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)), rad = sz.length() / 2;
+      const dist = Math.max(sz.y / 2 / tv, Math.max(sz.x, sz.z) / 2 / (tv * cam.aspect)) * pad + Math.max(sz.x, sz.z) * 0.3;
+      cam.position.set(c.x + Math.sin(yaw) * Math.cos(pitch) * dist, c.y + Math.sin(pitch) * dist, c.z + Math.cos(yaw) * Math.cos(pitch) * dist); cam.lookAt(c);
+      key.position.set(c.x + 2.2, c.y + keyUp, c.z + 3); key.target.position.copy(c);
+      const sc = key.shadow.camera; sc.left = sc.bottom = -rad * 1.6; sc.right = sc.top = rad * 1.6; sc.near = 0.1; sc.far = 12; sc.updateProjectionMatrix();
+      r.render(scene, cam);
+      let out = null; try { out = cv.toDataURL('image/webp', 0.9); if (!/^data:image\/webp/.test(out)) out = cv.toDataURL('image/png'); } catch (e) {}
+      scene.remove(g); g.traverse(o => { if (o.isMesh) { o.geometry.dispose(); } });
+      return out;
+    };
+    const outdoor = (g, x, z, s = 0.62) => { const O = buildOutdoor(M); O.root.scale.setScalar(s); O.root.position.set(x, 0.55 * s / 2, z); O.root.rotation.y = -0.18; g.add(O.root); };
+    const BUILD = {
+      wall: () => shot(g => { const U = buildPremiumIndoor(M, { logo: false }); floating(U); U.root.position.set(0, 0.62, 0); U.root.rotation.y = 0.04; g.add(U.root); outdoor(g, 0.72, -0.62); }, { yaw: -0.42, pitch: 0.12 }),
+      'wall:fujiva': () => shot(g => { const U = buildPremiumIndoor(M, { logo: true }); floating(U); U.root.position.set(0, 0.62, 0); U.root.rotation.y = 0.04; g.add(U.root); outdoor(g, 0.72, -0.62); }, { yaw: -0.42, pitch: 0.12 }),   // company brand: wordmark allowed
+      ceiling: () => shot(g => { const U = buildCeilingUnit(M, { interior: false, rod: 0 }); floating(U); U.parts.hangers && (U.parts.hangers.visible = false); U.root.position.set(0, 0.7, 0); g.add(U.root); outdoor(g, 1.0, -0.9, 0.7); }, { yaw: -0.5, pitch: 0.05 }),
+      cassette: () => shot(g => { const U = buildCassetteUnit(M, { interior: false, rod: 0 }); floating(U); U.root.position.set(0, 0.75, 0); U.root.rotation.x = -0.95; U.parts.hangers && (U.parts.hangers.visible = false); g.add(U.root); outdoor(g, 0.95, -0.8, 0.7); }, { yaw: -0.5, pitch: 0.1 }),   // panel tilted toward the camera, as product shots show it
+      floor: () => shot(g => { const U = buildFloorUnit(M); g.add(U.root); outdoor(g, 0.92, -0.3, 0.62); }, { yaw: -0.45, pitch: 0.14, keyUp: 9 }),   // high key light: short shadow under a tall unit
+    };
+    return { render: k => BUILD[k](), dispose() { pm.dispose(); r.dispose(); r.forceContextLoss(); } };
+  })().catch(() => null);   // no WebGL → the line-art illustration stays
+  return studioP;
 }
+/** one rendered shot (data URL) — queued, one per frame; resolves to null when WebGL is unavailable */
+export function productShot(key) {
+  if (SHOTS[key]) return Promise.resolve(SHOTS[key]);
+  const job = queue.then(async () => {
+    if (SHOTS[key]) return SHOTS[key];
+    clearTimeout(idle);
+    const st = await studio(); if (!st) return null;
+    await new Promise(res => requestAnimationFrame(() => setTimeout(res, 0)));   // let the page breathe between shots
+    try { SHOTS[key] = st.render(key); } catch (e) { SHOTS[key] = null; }
+    if (SHOTS[key]) saveShots();
+    idle = setTimeout(() => { const p = studioP; studioP = null; p && p.then(s => s && s.dispose()); }, 1500);   // free the GL context
+    return SHOTS[key];
+  });
+  queue = job.catch(() => null);
+  return job;
+}
+/** all shots (kept for callers that want the whole set) */
+export async function productShots() { for (const k of KEYS) await productShot(k); return SHOTS; }
 
 /* ---------- the visual used by catalog cards, product detail and the room-fit picker ---------- */
 // size: 'card' | 'detail' | 'thumb'
@@ -106,8 +130,8 @@ export function productVisual(m, sku, { size = 'card', tag = null } = {}) {
     const holder = h('div', { class: 's-ph-art', html: typeArt(m.type) });
     fig.append(holder, h('figcaption', {}, 'ภาพประกอบ'));
     const key = m.brand === 'fujiva' && m.type === 'wall' ? 'wall:fujiva' : m.type;
-    const swap = S => { if (!S[key]) return; holder.replaceWith(h('img', { src: S[key], alt: `ภาพประกอบ ${t ? t.th : ''}`, decoding: 'async' })); };
-    if (SHOTS[key]) swap(SHOTS); else productShots().then(swap);
+    const swap = src => { if (src && holder.isConnected !== false) holder.replaceWith(h('img', { src, alt: `ภาพประกอบ ${t ? t.th : ''}`, decoding: 'async' })); };
+    if (SHOTS[key]) swap(SHOTS[key]); else whenNear(fig, () => productShot(key).then(swap));
   }
   if (tag) fig.append(h('span', { class: 's-ph-tag' }, tag));
   return fig;

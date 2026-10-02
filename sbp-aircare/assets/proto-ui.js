@@ -6,6 +6,7 @@ import {
   CLEAN_PKGS, SIZE_BANDS, DATA, incVat, TRAVEL, stockTh, travelNote, VOLUME_HINT,
 } from './sbp-core.js';
 import { createACViewer, createRoomSim, PARTS } from './ac3d.js';
+import { deferred } from './lazy.js';
 
 export { DEMO, TYPES, TYPE_BY_ID, BRANDS, BRAND_BY_ID, baht, btuFmt, h, $, $$, countUp, reduceMotion, PARTS, stockTh, incVat };
 
@@ -242,7 +243,9 @@ export function mountBtu(root, cfg = {}) {
 }
 
 /* ---------------- 3D viewer wiring ---------------- */
-export function mountViewer(root, cfg = {}) {
+// Rev.11: the viewer boots when its section nears the screen (gl-pool.deferred) — hidden pages no longer create WebGL at load
+export function mountViewer(root, cfg = {}) { return root ? deferred(root, () => bootViewer(root, cfg)) : null; }
+function bootViewer(root, cfg = {}) {
   const canvasBox = $('[data-v-canvas]', root);
   const labels = $('[data-v-labels]', root);
   const info = $('[data-v-info]', root);

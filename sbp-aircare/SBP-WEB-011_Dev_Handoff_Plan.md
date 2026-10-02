@@ -737,3 +737,10 @@ s.setDirt(0..1)   s.setCap(ratio)   s.setTemp(°C)   s.setLayer('air'|'heat'|'du
 - ข้อมูลบริษัทจากเว็บทางการ sahaburapagroup.com: LINE OA @sahaservices · เลขผู้เสียภาษี 0105553009307 · เว็บบริษัท sahaburapagroup.com (sahaburapa.com ไม่ใช่ของบริษัทแล้ว)
 - ฟอร์มติดต่อ / ใบเสนอราคา / ความเห็น ส่งถึงทีมผ่าน Google Apps Script → Google Sheet + อีเมล (`assets/submit.js`, `backend/`) — รอเจ้าของ deploy สคริปต์และใส่ `ENDPOINT`
 - รายละเอียด: `CLAUDE.md` §7.1c · `HANDOFF.md` · ข้อเสนอรอบถัดไป `PROPOSAL_Rev10.md`
+
+## Rev.11 (2 ต.ค. 2569) — บันทึกการเปลี่ยนแปลง
+
+- เร็วขึ้นบนมือถือโดยไม่ลดคุณภาพภาพ: ฉาก 3 มิติ/แผนที่บูตเมื่อใกล้จอ · ภาพเรนเดอร์สินค้าทำทีละภาพ + cache · เว็บที่โฮสต์เป็น build แยกไฟล์ (`dist/site`)
+- หน้าแรกทั้ง 3 แบบเน้นงานล้าง + จองล้างแอร์ 3 ขั้นพร้อมราคารวมจริง (Pricebook) + ส่งทาง LINE พร้อมข้อความ
+- ชื่อแพ็กเกจภาษาลูกค้า · ปุ่มแชท LINE · SEO/ภาพตัวอย่างลิงก์/ข้อมูลธุรกิจ schema.org
+- รายละเอียด: `CLAUDE.md` §7.1c–7.1d · `HANDOFF.md`
