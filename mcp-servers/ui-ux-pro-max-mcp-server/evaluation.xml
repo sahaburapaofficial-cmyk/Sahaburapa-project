@@ -1,7 +1,7 @@
 <!--
   Evaluation questions for the ui-ux-pro-max MCP server (format from the mcp-builder skill).
-  Answers were verified with the server's own tools against ui-ux-pro-max-cli 2.15.0 data;
-  re-check them if a newer CLI version changes the database.
+  Answers were verified with the server's own tools against the skill data committed in
+  .claude/skills/ui-ux-pro-max (and ui-ux-pro-max-cli 2.15.0); re-check them after updating the skill.
 -->
 <evaluation>
   <qa_pair>

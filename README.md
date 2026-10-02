@@ -5,12 +5,12 @@ For Webdesign
 
 This project uses the UI UX Pro Max skill set (ui-ux-pro-max, design-system,
 design, ui-styling, brand, slides, banner-design) plus Anthropic's
-frontend-design and mcp-builder skills. They are not stored in the repo:
+frontend-design and mcp-builder skills, all committed under `.claude/skills/`.
 
-- In Claude Code cloud sessions they are installed automatically at session
-  start by `.claude/hooks/session-start.sh`.
-- Locally, run `bash scripts/install-skills.sh` once (needs Node.js, git and
-  Python 3).
+`scripts/install-skills.sh` reinstalls any skill that is missing (`--force`
+reinstalls all of them from their sources) and builds the MCP server below. In
+Claude Code cloud sessions it runs automatically at session start via
+`.claude/hooks/session-start.sh`. It needs Node.js, git and Python 3.
 
 ## MCP server
 

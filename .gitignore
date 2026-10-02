@@ -1,13 +1,2 @@
 __pycache__/
 *.pyc
-
-# Installed by scripts/install-skills.sh (runs automatically in cloud sessions)
-.claude/skills/ui-ux-pro-max/
-.claude/skills/design-system/
-.claude/skills/design/
-.claude/skills/ui-styling/
-.claude/skills/brand/
-.claude/skills/slides/
-.claude/skills/banner-design/
-.claude/skills/frontend-design/
-.claude/skills/mcp-builder/
