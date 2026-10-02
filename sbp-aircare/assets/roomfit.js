@@ -173,7 +173,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
   // 1 · model
   const typeSeg = seg(FIT_TYPES.map(id => ({ id, th: TYPE_BY_ID[id].th })), S.unit.type, v => { S.unit.type = v; S.sel = null; pickBest(); renderPick(); sync(); }, 'ประเภทแอร์', 'rf-types');
   const q = h('input', { type: 'search', class: 'rf-q', placeholder: 'ค้นหารุ่น แบรนด์ หรือ BTU', 'aria-label': 'ค้นหารุ่นแอร์' });
-  const list = h('div', { class: 'rf-list', role: 'list' });
+  const list = h('div', { class: 'rf-list', role: 'group', 'aria-label': 'รุ่นที่แนะนำ' });   // Rev.13: toggle buttons in a group (a list item cannot be pressed)
   const selBox = h('div', { class: 'rf-selm' });
   const fj = BRAND_BY_ID.fujiva;
   const fjNote = fj && !fj.n ? h('p', { class: 'rf-fj' }, h('b', {}, 'FUJIVA'), ' แบรนด์ของเรา · ข้อมูลรุ่นกำลังนำเข้า ', h('button', { type: 'button', class: 'rf-link', onclick: () => { const need = fitCheck(S).need; const i = FUJIVA_PREVIEW.skus.findIndex(k => k.btu >= need); setModel(FUJIVA_PREVIEW, i < 0 ? 3 : i); } }, 'ลองตัวเครื่อง FUJIVA'), ' · ', h('button', { type: 'button', class: 'rf-link', onclick: () => askTeam('FUJIVA', 'สนใจ FUJIVA สำหรับ' + roomText()) }, 'สอบถาม FUJIVA')) : null;
@@ -282,7 +282,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     if (!out.length) list.append(h('p', { class: 'rf-note' }, 'ไม่พบรุ่นที่ค้นหา'));
     out.forEach(x => {
       const on = S.sel && S.sel.m === x.m && S.sel.si === x.si;
-      list.append(h('button', { type: 'button', class: 'rf-item', role: 'listitem', 'aria-pressed': on, onclick: () => { setModel(x.m, x.si); } },
+      list.append(h('button', { type: 'button', class: 'rf-item', 'aria-pressed': on, onclick: () => { setModel(x.m, x.si); } },
         h('b', {}, BRAND_BY_ID[x.m.brand].name, ' ', x.s.sku), h('small', {}, `${TYPE_BY_ID[x.m.type].th} · ${btuFmt(x.s.btu)} · ${baht(x.s.price)}`)));
     });
   }

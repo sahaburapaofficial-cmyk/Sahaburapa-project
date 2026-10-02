@@ -241,7 +241,7 @@ table.rows{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed
 .ptable td,.ptable th{padding:6px 8px;border-bottom:1px solid var(--rule);text-align:left}
 .ptable th{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .ptable tr{cursor:pointer}.ptable tr:hover td{background:var(--blue-l)}
-.ptable tr[aria-selected="true"] td{background:var(--safety-l)}
+.ptable tr[data-sel] td{background:var(--safety-l)}
 .ptable td.m{font-family:var(--mono);color:var(--ink-3);width:34px}
 .parts{display:none}
 @media (max-width:900px){.ins{grid-template-columns:1fr}.ins .stage{border-right:0;border-bottom:1px solid var(--rule);min-height:420px}}
@@ -680,7 +680,6 @@ if (ins) {
   ins.setXray(true);
   const action = { front: 'ถอด เช็ด', filter: 'ถอดล้างน้ำ ผึ่งแห้ง', coil: 'ฉีดปั๊มแรงดัน + น้ำยา', blower: 'ฉีดไล่คราบดำ', pan: 'ล้างเมือก เคลียร์ท่อ', louver: 'เช็ด ถอดล้าง', motor: 'ตรวจเสียง ห้ามน้ำ', pcb: 'คลุมกันน้ำ ตรวจ', chassis: 'ตรวจยึด ท่อหลัง' };
   PARTS.indoor.forEach((p, i) => { const tr = h('tr', { 'data-part': p.id, tabindex: '0' }, h('td', { class: 'm' }, String(i + 1).padStart(2, '0')), h('td', {}, p.th), h('td', {}, action[p.id])); tr.addEventListener('click', () => ins.select(p.id)); tr.addEventListener('keydown', e => e.key === 'Enter' && ins.select(p.id)); $('#ptab').append(tr); });
-  new MutationObserver(() => $$('#ptab tr').forEach(tr => tr.setAttribute('aria-selected', tr.getAttribute('aria-pressed') === 'true'))).observe($('#ptab'), { attributes: true, subtree: true, attributeFilter: ['aria-pressed'] });
 }
 mountStudio($('#studioRoot'), { theme: 'blueprint', sceneStart: 'openoffice', onOpen: (m, i) => openProduct(m, i) });
 const FIT = mountRoomFit($('#fitRoot'), { theme: 'light', preset: 'office', onOpenModel: (m, i) => openProduct(m, i) });

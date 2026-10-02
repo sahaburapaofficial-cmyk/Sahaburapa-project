@@ -1149,3 +1149,12 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 .qc-fill{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 6px;padding:8px 10px;border-radius:10px;background:color-mix(in oklab,var(--s-ok) 10%,transparent);font-size:13px;color:var(--s-ink-2)}
 .qc-fill-b{flex:none;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--s-ok);background:var(--s-card);color:var(--s-ok);font:600 13px/1 inherit;cursor:pointer}
 @media (pointer:coarse){.qc-fill-b{min-height:44px}}
+/* ---- Rev.13 · 3D loading state: a soft sweep (and a line of text in the crew scene) until the scene's canvas arrives,
+   instead of an empty box — disappears by itself once the canvas is in (CSS :has) ---- */
+[data-v-canvas]:not(:has(canvas)){background-image:linear-gradient(100deg,transparent 35%,color-mix(in oklab,var(--s-accent,#1B5AA8) 9%,transparent) 50%,transparent 65%);background-size:220% 100%;animation:s3dLoad 1.8s linear infinite}
+.cg-host:not(:has(canvas)){background-image:linear-gradient(100deg,transparent 35%,color-mix(in oklab,var(--s-accent,#1B5AA8) 9%,transparent) 50%,transparent 65%),linear-gradient(180deg,var(--s-card-2),var(--s-card));background-size:220% 100%,100% 100%;animation:s3dLoad 1.8s linear infinite}
+.cg-host:not(:has(canvas))::after{content:"กำลังเตรียมภาพ 3 มิติ…";position:absolute;inset:0;display:grid;place-items:center;font-size:13px;color:var(--s-ink-3);pointer-events:none}
+@keyframes s3dLoad{from{background-position:110% 0,0 0}to{background-position:-110% 0,0 0}}
+@media (prefers-reduced-motion:reduce){.cg-host:not(:has(canvas)),[data-v-canvas]:not(:has(canvas)){animation:none}}
+/* Rev.13: on tablets (≈600–800 px) aspect-ratio + min-height used to widen the technician stage past its column → page scrolled sideways */
+.ts-stage{width:100%;min-width:0;max-width:100%}

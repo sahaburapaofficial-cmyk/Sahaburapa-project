@@ -275,7 +275,8 @@ function bootViewer(root, cfg = {}) {
     });
   }
   function showInfo(meta) {
-    $$('[data-part]', root).forEach(b => b.setAttribute('aria-pressed', !!meta && b.dataset.part === meta.id));
+    // Rev.13: aria-pressed only on real buttons; other part rows (B's table) get data-sel + aria-current (valid on a table row)
+    $$('[data-part]', root).forEach(b => { const on = !!meta && b.dataset.part === meta.id; if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', on); else { b.toggleAttribute('data-sel', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); } });
     if (!info) return;
     if (!meta) { info.classList.remove('on'); info.innerHTML = cfg.infoEmpty || '<p>แตะชิ้นส่วนเพื่อดูว่าทำหน้าที่อะไร และช่างทำอะไรกับมันตอนล้าง</p>'; return; }
     info.classList.add('on');
