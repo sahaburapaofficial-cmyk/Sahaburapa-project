@@ -69,7 +69,7 @@ button{font:inherit;color:inherit;cursor:pointer}a{color:inherit}
 .vsw a[aria-current]{background:var(--cool);color:#04121C}
 .hdr .btn-primary{min-height:38px;padding:0 14px;font-size:14.5px}
 @media (max-width:1080px){.nav{display:none}.vsw{margin-left:auto}}
-@media (max-width:379px){.vsw{display:none}}
+@media (max-width:480px){.vsw{display:none}}   /* Rev.14: room for the search button; the tester bar keeps the A·B·C link */
 @media (max-width:480px){.hdr .wrap{gap:10px}.logo{font-size:17px;gap:6px}}   /* Rev.12: room for the SP mark beside the A·B·C switch and the quote button */
 @media (max-width:640px){.hdr .btn-primary{display:none}}
 
@@ -607,7 +607,7 @@ $$('[data-quote]').forEach(a => a.addEventListener('click', e => {
 reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountSite({
-  variant: 'C', openCart: CART.open,
+  variant: 'C', openCart: CART.open, openProduct,
   views: { home: ['top', 'book', 'start', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'howto', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'ช่างทำงานในบ้านจำลอง', cleanflow: 'ทีมช่างล้าง · ติดตั้ง' },
   hooks: {

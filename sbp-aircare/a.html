@@ -82,7 +82,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 @media (max-width:1080px){.nav{display:none}.hdr .wrap{gap:12px}.vsw{margin-left:auto}}
 @media (max-width:640px){.hdr .btn-primary{display:none}}
 @media (max-width:400px){.hdr .wrap{gap:8px}.logo{gap:6px;font-size:15px}}   /* Rev.12: room for the SP mark */
-@media (max-width:379px){.vsw{display:none}}
+@media (max-width:480px){.vsw{display:none}}   /* Rev.14: room for the search button; the tester bar keeps the A·B·C link */
 
 /* bento */
 .tile{background:var(--tile);border-radius:var(--r);box-shadow:var(--shadow);padding:24px;position:relative;overflow:hidden;min-width:0}
@@ -809,7 +809,7 @@ $$('[data-quote]').forEach(a => a.addEventListener('click', e => {
 reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountSite({
-  variant: 'A', openCart: CART.open,
+  variant: 'A', openCart: CART.open, openProduct,
   views: { home: ['hero', 'book', 'start', 'flow', 'services'], shop: ['catalog', 'studio', 'fit'], service: ['cleanflow', 'prices', 'quality', 'story', 'inside'], business: ['b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });

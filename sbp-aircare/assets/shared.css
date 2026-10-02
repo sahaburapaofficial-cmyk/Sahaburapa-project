@@ -1189,3 +1189,66 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 .sv2 .s-note{margin:0}
 @media (pointer:coarse){.sv2-tabs button{min-height:44px}}
 .sv2-act a.s-btn{text-decoration:none}.sv2-k.k-note{color:var(--s-ink-3)}
+/* ---- Rev.14 · command palette (palette.js) — A clean card · B terminal sheet · C glass ---- */
+html.cp-on{overflow:hidden}
+.cp{position:fixed;inset:0;z-index:200;display:grid;justify-items:center;align-items:start;padding:12vh 16px 16px}
+.cp[hidden]{display:none}
+.cp-back{position:absolute;inset:0;background:color-mix(in oklab,#0b1420 46%,transparent);backdrop-filter:blur(3px)}
+.cp-box{position:relative;width:min(640px,100%);max-height:min(72vh,620px);display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;border-radius:16px;background:var(--s-card);color:var(--s-ink);border:1px solid var(--s-line);box-shadow:0 30px 80px -20px rgba(8,20,36,.45),0 2px 6px rgba(8,20,36,.12);overflow:hidden;animation:cpIn .16s ease-out}
+@keyframes cpIn{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cp-box{animation:none}}
+.cp-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--s-line)}
+.cp-ico{display:inline-grid;place-items:center;color:var(--s-ink-3)}
+.cp-in{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--s-ink);font:inherit;font-size:17px}
+.cp-in::-webkit-search-cancel-button{display:none}
+.cp kbd,.cp-trig kbd{font:600 11px var(--s-mono);padding:2px 6px;border-radius:6px;border:1px solid var(--s-line);background:var(--s-card-2);color:var(--s-ink-2);white-space:nowrap}
+.cp-list{list-style:none;margin:0;padding:6px;overflow:auto;overscroll-behavior:contain}
+.cp-grp{padding:10px 10px 4px;font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--s-ink-3)}
+.cp-opt{display:grid;gap:1px;padding:9px 12px;border-radius:10px;cursor:pointer}
+.cp-opt b{font-size:15px;font-weight:600}.cp-opt small{font-size:12.5px;color:var(--s-ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cp-opt[aria-selected=true]{background:var(--s-accent-soft);box-shadow:inset 3px 0 0 var(--s-accent)}
+.cp-status{margin:0;padding:6px 16px;font-size:12px;color:var(--s-ink-3)}
+.cp-foot{margin:0;display:flex;flex-wrap:wrap;gap:14px;padding:10px 16px;border-top:1px solid var(--s-line);font-size:12px;color:var(--s-ink-3)}
+.cp-foot span{display:inline-flex;align-items:center;gap:4px}
+/* header trigger */
+.cp-trig{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 10px 0 12px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink-2);font:inherit;font-size:14px;cursor:pointer;white-space:nowrap;flex:none}
+.cp-trig:hover{color:var(--s-ink);border-color:color-mix(in oklab,var(--s-accent) 40%,var(--s-line))}
+@media (max-width:1080px){.cp-trig-t,.cp-trig-k{display:none}.cp-trig{padding:0;width:38px;justify-content:center}}
+@media (max-width:420px){.cp-trig{width:34px;min-height:34px}}
+@media (pointer:coarse){.cp-opt{padding:12px}.cp{padding-top:8vh}}
+/* B — engineering sheet: square corners, mono, ruled */
+.cp-B .cp-box{border-radius:2px;border:1.5px solid var(--s-ink);box-shadow:8px 8px 0 color-mix(in oklab,var(--s-ink) 18%,transparent)}
+.cp-B .cp-in{font-family:var(--s-mono);font-size:15px}.cp-B .cp-in::placeholder{letter-spacing:.02em}
+.cp-B .cp-bar::before{content:"›";font:700 18px var(--s-mono);color:var(--s-accent)}.cp-B .cp-bar .cp-ico{display:none}
+.cp-B .cp-grp{font-family:var(--s-mono);text-transform:uppercase;border-top:1px dashed var(--s-line);margin-top:4px}
+.cp-B .cp-opt{border-radius:0}.cp-B .cp-opt[aria-selected=true]{box-shadow:inset 3px 0 0 var(--s-accent);background:color-mix(in oklab,var(--s-accent) 10%,transparent)}
+.cp-trig-B{border-radius:2px}
+/* C — showroom glass */
+.cp-C .cp-back{background:rgba(4,8,14,.55);backdrop-filter:blur(8px)}
+.cp-C .cp-box{background:color-mix(in oklab,var(--s-card) 82%,transparent);backdrop-filter:blur(18px) saturate(1.3);border:1px solid color-mix(in oklab,var(--s-accent) 35%,var(--s-line));box-shadow:0 0 0 1px rgba(255,255,255,.04),0 30px 90px -20px rgba(0,0,0,.7),0 0 60px -20px color-mix(in oklab,var(--s-accent) 60%,transparent)}
+.cp-C .cp-opt[aria-selected=true]{background:color-mix(in oklab,var(--s-accent) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--s-accent) 45%,transparent)}
+.cp-in:focus,.cp-in:focus-visible{outline:none;box-shadow:none}
+.cp-bar:focus-within{box-shadow:inset 0 -2px 0 var(--s-accent)}
+/* ---- Rev.14 · page fade + reading progress hairline ---- */
+html.sx-enter main{animation:sxIn .3s ease-out}
+@keyframes sxIn{from{opacity:.001}to{opacity:1}}
+.sx-prog{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--s-accent);transform-origin:0 50%;transform:scaleX(0);pointer-events:none;z-index:1}
+@media (prefers-reduced-motion:reduce){html.sx-enter main{animation:none}}
+/* ---- Rev.14 · pointer effects (fx.js) — mouse only, never with reduced motion ---- */
+.fx-rel{position:relative}
+.fx-spot{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;opacity:0;transition:opacity .2s ease;animation:fxOn .2s ease forwards}
+@keyframes fxOn{to{opacity:1}}
+.fx-host{isolation:isolate}
+html.fx-A .fx-spot{background:radial-gradient(320px circle at var(--mx) var(--my),color-mix(in oklab,var(--s-accent) 9%,transparent),transparent 65%)}
+html.fx-B .fx-spot{background:radial-gradient(240px circle at var(--mx) var(--my),color-mix(in oklab,var(--s-accent) 7%,transparent),transparent 70%)}
+html.fx-C .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my),color-mix(in oklab,var(--s-accent) 10%,transparent),transparent 60%)}
+html.fx-C .fx-spot::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:radial-gradient(220px circle at var(--mx) var(--my),color-mix(in oklab,var(--s-accent) 85%,#fff 15%),transparent 70%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+/* B crosshair */
+.fx-xh{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .15s;z-index:3}
+.fx-xh.on{opacity:1}
+.fx-xh i{position:absolute;background:color-mix(in oklab,var(--s-accent) 70%,transparent)}
+.fx-xh .h{left:0;right:0;top:var(--y);height:1px}.fx-xh .v{top:0;bottom:0;left:var(--x);width:1px}
+.fx-xh b{position:absolute;left:calc(var(--x) + 10px);top:calc(var(--y) + 10px);font:600 11px var(--s-mono);letter-spacing:.04em;padding:2px 6px;background:var(--s-card);color:var(--s-accent);border:1px solid var(--s-accent);white-space:nowrap}
+.fx-xh.flip b{left:auto;right:calc(100% - var(--x) + 10px)}
+/* C stage light */
+.fx-stagelight{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(42% 55% at var(--gx,60%) var(--gy,40%),color-mix(in oklab,var(--s-accent) 16%,transparent),transparent 70%);mix-blend-mode:screen}

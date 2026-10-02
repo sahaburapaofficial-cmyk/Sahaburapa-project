@@ -12,6 +12,8 @@ import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
 import { mountRemoteSurvey } from './survey.js';
+import { mountPalette } from './palette.js';
+import { mountFx } from './fx.js';
 
 // Rev.12: official logo files — inlined by the build (globalThis.__SBP_LOGOS), read from assets/logos/ on the dev server
 const logoSrc = k => (globalThis.__SBP_LOGOS && globalThis.__SBP_LOGOS[k]) || `assets/logos/${k}.png`;
@@ -122,6 +124,8 @@ export function mountSite(cfg) {
       try { document.title = v === 'home' ? baseTitle : `${VIEWS[v].th} · ${baseTitle}`; } catch (e) { /* ignore */ }
       paintJourney(); observeSteps();
       hooks.onView && hooks.onView(v);
+      // Rev.14: the new page fades in as one piece (no per-section reveal), skipped for reduced motion and the first paint
+      if (seen.size > 1 && !RM()) { const de = document.documentElement; de.classList.remove('sx-enter'); void de.offsetWidth; de.classList.add('sx-enter'); clearTimeout(show.t); show.t = setTimeout(() => de.classList.remove('sx-enter'), 400); }
     }
     if (scroll === 'top') instant(() => scrollTo({ top: 0, behavior: 'instant' }), () => scrollTo(0, 0));   // a new view starts at its top at once
     if (focus && INTRO[v]) INTRO[v].h1.focus({ preventScroll: true });
@@ -360,5 +364,15 @@ export function mountSite(cfg) {
   }
 
   route(location.hash, true);
+  // Rev.14: reading progress — a hairline along the bottom of the header (Stripe / Medium pattern)
+  const hdr = $('header.hdr');
+  if (hdr && !hdr.querySelector('.sx-prog')) {
+    const bar = h('div', { class: 'sx-prog', 'aria-hidden': 'true' }); hdr.append(bar); let q = 0;
+    const upd = () => { q = 0; const max = document.documentElement.scrollHeight - innerHeight; bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max).toFixed(4) : 0})`; };
+    addEventListener('scroll', () => { if (!q) q = requestAnimationFrame(upd); }, { passive: true }); addEventListener('resize', upd); upd();
+  }
+  // Rev.14: command palette (Ctrl / ⌘ K) over every page, section, model, FAQ and quick action
+  try { mountPalette({ variant, views, viewTh: Object.fromEntries(Object.entries(VIEWS).map(([k, v]) => [k, v.th])), secTh: { ...SEC_TH, ...labels, 'photo-survey': 'ส่งรูปหน้างานให้ทีมประเมิน' }, go, openCart, openProduct: cfg.openProduct, openFeedback }); } catch (e) { console.warn('palette unavailable', e); }
+  try { mountFx(variant); } catch (e) { /* decorative only */ }
   return { go, view: () => cur, startJourney, openFeedback };
 }

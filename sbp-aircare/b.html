@@ -709,7 +709,7 @@ $$('[data-quote]').forEach(a => a.addEventListener('click', e => {
 
 // Rev.09 r5: views by customer journey (site.js) — organisation first in this variant
 mountSite({
-  variant: 'B', openCart: CART.open,
+  variant: 'B', openCart: CART.open, openProduct,
   order: ['home', 'business', 'service', 'shop', 'knowledge', 'contact'],
   navFmt: (i, th) => `${String(i).padStart(2, '0')} ${th}`,
   views: { home: ['hero', 'book', 'start', 'flow'], business: ['b2b'], service: ['cleanflow', 'howto', 'prices', 'quality'], shop: ['catalog', 'fit', 'studio'], knowledge: ['learn', 'inside'], contact: ['about', 'area', 'faq', 'quote'] },
