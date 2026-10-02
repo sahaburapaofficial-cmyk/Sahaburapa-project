@@ -1,0 +1,5 @@
+node_modules/
+dist/
+internal/
+_entry_*.mjs
+*.png

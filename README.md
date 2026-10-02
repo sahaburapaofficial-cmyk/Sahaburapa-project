@@ -1,6 +1,17 @@
 # Sahaburapa-project
 For Webdesign
 
+## SBP AirCare website (`sbp-aircare/`)
+
+Website prototypes A / B / C for SBP AirCare (บริษัท สหบูรพากรุ๊ป จำกัด): air-conditioner cleaning, installation,
+repair and sales, with standard prices from the company Pricebook and interactive 3D explanations.
+
+- **Live site (GitHub Pages):** https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/ · works on computer, tablet and phone
+  (`a.html` · `b.html` · `c.html` for each design). Built by `.github/workflows/sbp-aircare-pages.yml` on every push to `main`.
+- **Start here:** `sbp-aircare/HANDOFF.md` (status, rules, todo) → `sbp-aircare/CLAUDE.md` (technical spec).
+- **Requests from the site** (quote, contact, feedback) go to a Google Sheet + e-mail once the Apps Script in
+  `sbp-aircare/backend/` is deployed (see its README).
+
 ## Claude Code skills
 
 This project uses the UI UX Pro Max skill set (ui-ux-pro-max, design-system,

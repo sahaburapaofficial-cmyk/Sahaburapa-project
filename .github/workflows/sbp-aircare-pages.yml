@@ -1,0 +1,52 @@
+# Build the SBP AirCare website (sbp-aircare/) and publish it on GitHub Pages.
+# One-time set-up by a repo admin: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+name: SBP AirCare · GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['sbp-aircare/**', '.github/workflows/sbp-aircare-pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sbp-aircare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # single-file pages (CSS, fonts, data and every JS module inlined by build.py + esbuild)
+      - run: python3 build.py
+      - name: Site files
+        run: |
+          touch dist/offline/.nojekyll
+          ls -la dist/offline
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: sbp-aircare/dist/offline
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,20 @@
+{
+  "name": "sbp-aircare-prototype",
+  "private": true,
+  "type": "module",
+  "description": "SBP AirCare website prototypes A/B/C (vanilla ES modules + three.js r170). See CLAUDE.md.",
+  "scripts": {
+    "serve": "python3 -m http.server 8765",
+    "build": "python3 build.py --urls urls.json",
+    "build:dev": "python3 build.py --urls urls.dev.json",
+    "recon": "python3 tools_recon.py",
+    "smoke": "node tests/smoke.mjs a.html && node tests/smoke.mjs b.html && node tests/smoke.mjs c.html",
+    "smoke:mobile": "node tests/smoke.mjs a.html 390 844 && node tests/smoke.mjs b.html 390 844 && node tests/smoke.mjs c.html 390 844",
+    "textscan": "node tests/textscan.mjs a.html && node tests/textscan.mjs b.html && node tests/textscan.mjs c.html",
+    "submit": "node tests/submit.mjs a.html && node tests/submit.mjs b.html && node tests/submit.mjs c.html"
+  },
+  "devDependencies": {
+    "playwright": "1.56.0",
+    "axe-core": "4.13.0"
+  }
+}
