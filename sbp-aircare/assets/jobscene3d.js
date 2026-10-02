@@ -17,6 +17,7 @@ import { buildTrunk, bentPath } from './trunk3d.js';
 import { createAirflow } from './airflow3d.js';
 import { createCrew, buildLadder } from './crew3d.js';
 import { matTex, bagTex, boxTex, chestTex, decal, drawSbp } from './brand3d.js';
+import { hqFor } from './quality3d.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -605,8 +606,24 @@ export function createJobScene(container, o = {}) {
     const pull = asp < 1.1 ? 1.38 : asp < 1.4 ? 1.12 : 1;   // phones: step back
     wantP.copy(c[0]).sub(c[1]).multiplyScalar(pull).add(c[1]);
     const k = snap || RM() ? 1 : 1 - Math.pow(0.03, dt);
-    camP.lerp(wantP, k); camT.lerp(c[1], k); cam.position.copy(camP); cam.lookAt(camT);
+    camP.lerp(wantP, k); camT.lerp(c[1], k);
+    // Rev.12 "movement view": a slow cinematic sway around the subject (capable computers) + the viewer's own drag,
+    // which eases back to the step's framing — applied to the drawn camera only, the step presets stay as they are
+    if (!look.down) { look.idle += dt; if (look.idle > 2.5) { const r = 1 - Math.pow(0.25, dt); look.yaw -= look.yaw * r; look.pitch -= look.pitch * r; } }
+    const sw = DRIFT ? Math.sin(clock * 0.21) * 0.07 : 0, swp = DRIFT ? Math.sin(clock * 0.13 + 1.1) * 0.025 : 0;
+    off.copy(camP).sub(camT); const yaw = look.yaw + sw, pitch = look.pitch + swp;
+    if (yaw || pitch) { off.applyAxisAngle(UP, yaw); const side = V(0, 0, 0).crossVectors(off, UP).normalize(); off.applyAxisAngle(side, pitch); }
+    cam.position.copy(camT).add(off); cam.lookAt(camT);
   }
+  const UP = V(0, 1, 0), off = V(0, 0, 0), DRIFT = hqFor(renderer) && !RM();
+  const look = { yaw: 0, pitch: 0, down: false, idle: 9, x: 0, y: 0, touch: false };
+  { const el = renderer.domElement; el.style.touchAction = 'pan-y'; el.style.cursor = 'grab';
+    el.addEventListener('pointerdown', e => { look.down = true; look.touch = e.pointerType === 'touch'; look.x = e.clientX; look.y = e.clientY; el.style.cursor = 'grabbing'; try { el.setPointerCapture(e.pointerId); } catch (_) {} kick(); });
+    el.addEventListener('pointermove', e => { if (!look.down) return; const w = el.clientWidth || 600;
+      look.yaw = Math.max(-0.55, Math.min(0.55, look.yaw - (e.clientX - look.x) / w * 1.6)); if (!look.touch) look.pitch = Math.max(-0.12, Math.min(0.18, look.pitch + (e.clientY - look.y) / w * 0.9));
+      look.x = e.clientX; look.y = e.clientY; look.idle = 0; kick(); });
+    const up = () => { if (!look.down) return; look.down = false; look.idle = 0; el.style.cursor = 'grab'; kick(); };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up); }
 
   /* ---------------------------------------------------------------- loop */
   let raf = 0, last = performance.now(), vis = false, clock = 0, idle = 0;
@@ -622,8 +639,9 @@ export function createJobScene(container, o = {}) {
     renderer.render(scene, cam);
     o.onFrame && o.onFrame(cam, renderer.domElement.clientWidth, renderer.domElement.clientHeight);
     // the crew keeps moving (idle sway, work motion): keep rendering while visible, slower when nothing happens
-    idle = isBusy() || sprayOn || st.run > 0.5 ? 0 : idle + dt;
-    if (idle < 6) raf = requestAnimationFrame(tick); else { raf = 0; setTimeout(() => { if (vis && !raf) { last = performance.now(); raf = requestAnimationFrame(tick); } }, 250); idle = 5.5; }
+    idle = isBusy() || sprayOn || st.run > 0.5 || look.down || Math.abs(look.yaw) + Math.abs(look.pitch) > 0.002 ? 0 : idle + dt;
+    // idle: slower frames (~4 fps; ~30 fps while the cinematic sway runs on capable computers)
+    if (idle < 6) raf = requestAnimationFrame(tick); else { raf = 0; setTimeout(() => { if (vis && !raf) { last = performance.now(); raf = requestAnimationFrame(tick); } }, DRIFT ? 33 : 250); idle = 5.5; }
   }
 
   function setType(t) {
