@@ -546,6 +546,8 @@ export function createStudio3D(container, opts = {}) {
     marks.forEach(m => { tmpV.copy(m.v).project(camera); m.ok = tmpV.z < 1 && Math.abs(tmpV.x) < 1.05 && Math.abs(tmpV.y) < 1.05; m.x = (tmpV.x + 1) / 2 * W; m.y = (1 - tmpV.y) / 2 * H; m.w = m.w || (m.el.lastChild.offsetWidth || 120); m.dx = (m.x - m.w / 2 < 6) ? 6 + m.w / 2 - m.x : (m.x + m.w / 2 > W - 6) ? W - 6 - m.w / 2 - m.x : 0; });   // keep chips inside the stage
     // nudge chips upward until they no longer overlap the ones already placed (the dot stays on the true point)
     marks.filter(m => m.ok).sort((a, b) => b.y - a.y).forEach(m => { let dy = 0; for (let k = 0; k < 8; k++) { const top = m.y - dy - 30, hit = placed.find(p => Math.abs(p.x - (m.x + m.dx)) < (p.w + m.w) / 2 + 4 && Math.abs(p.top - top) < 22); if (!hit) break; dy += 22 - Math.abs(hit.top - top) + 2; } m.dy = dy; placed.push({ x: m.x + m.dx, w: m.w, top: m.y - dy - 30 }); });
+    // Rev.13: never push a chip above the stage's top strip (view tabs / temperature) — clamp it just below instead
+    marks.forEach(m => { if (m.ok && m.y - (m.dy || 0) - 30 < 50) m.dy = m.y - 30 - 50; });
     marks.forEach(m => { m.el.style.display = m.ok ? '' : 'none'; if (m.ok) { m.el.style.transform = `translate(${m.x.toFixed(1)}px,${m.y.toFixed(1)}px)`; m.el.lastChild.style.marginBottom = (m.dy || 0) + 'px'; m.el.lastChild.style.marginLeft = (m.dx || 0).toFixed(1) + 'px'; } });
   }
 
