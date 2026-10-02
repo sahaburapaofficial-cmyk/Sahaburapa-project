@@ -12,6 +12,11 @@ export const ENDPOINT = 'https://formsubmit.co/ajax/Sahaburapa.official@gmail.co
 const TIMEOUT = 15000;
 const inArtifact = () => { try { return /(^|\.)claude(usercontent)?\.(ai|com)$/.test(location.hostname); } catch (e) { return false; } };
 export const canSend = () => !!ENDPOINT && !inArtifact() && navigator.onLine !== false;
+// ★Rev.16 the company back office (Google Apps Script web app, backend/apps-script/Code.gs + Board.html): job tickets with
+// photos, the live queue (?q=slots) and request status (?q=status). Empty until the company deploys it — then paste the
+// /exec URL here (ENDPOINT may point at the same URL so every form lands in the same Sheet).
+export const BACKEND = '';
+export const canReach = () => !!BACKEND && !inArtifact() && navigator.onLine !== false;
 
 // kind: 'quote' | 'contact' | 'feedback' · fields: flat {label: value} for the sheet · text: the same summary the customer sees
 export async function sendRequest(kind, { ref, variant, fields = {}, text, hp = '' }) {
@@ -24,7 +29,7 @@ export async function sendRequest(kind, { ref, variant, fields = {}, text, hp = 
   } catch (e) { return { ok: false, reason: e.name === 'AbortError' ? 'timeout' : 'network' }; } finally { clearTimeout(t); }
 }
 
-const KIND_TH = { quote: 'ใบเสนอราคา', contact: 'ติดต่อ', feedback: 'ความเห็นทดลองใช้' };
+const KIND_TH = { quote: 'ใบเสนอราคา', booking: 'ใบจองงาน', contact: 'ติดต่อ', feedback: 'ความเห็นทดลองใช้' };
 // FormSubmit wants flat JSON (fields become rows of the e-mail table; `_honey` is its bot trap); Apps Script reads one JSON blob
 // sent as text/plain so the request stays "simple" (no CORS preflight, which Apps Script cannot answer).
 export function requestBody(url, { kind, ref, variant, page, fields = {}, text = '', hp = '' }) {

@@ -10,10 +10,11 @@
 //     "คิว") → full slots are shown as full; empty URL / no answer → "ทีมยืนยันคิว" (never a made-up free slot)
 // Pure logic, no DOM.
 import { COMPANY, JOB_TIME, QUEUE_RULES } from './sbp-core.js';
+import { BACKEND } from './submit.js';
 
 export const LEAD_DAYS = QUEUE_RULES.leadDays;
 export const RUSH_FEE_EX = QUEUE_RULES.rushFeeEx;
-export const QUEUE_URL = '';   // e.g. https://script.google.com/macros/s/<deployment id>/exec — see backend/README.md
+export const QUEUE_URL = BACKEND;   // the back office (submit.js) — empty = "ทีมยืนยันคิว", never a made-up free slot
 const toMin = s => { const [a, b] = s.split(':').map(Number); return a * 60 + b; };
 export const DAY_FROM = toMin(COMPANY.open.from), DAY_TO = toMin(COMPANY.open.to), DAY_MIN = DAY_TO - DAY_FROM;   // 08:30–17:30 = 540
 export const SLOTS = {
@@ -38,8 +39,7 @@ export const earliestNormal = (now = bkkNow()) => nextOpen(addDays(now.date, LEA
 
 /** on-site time of one crew for the cleaning lines [{t, qty}] at level C1/C2 → [min, max] minutes */
 export function visitTime(lines, level = 'C1') {
-  const T = JOB_TIME[level] || JOB_TIME.C1;
-  return lines.reduce(([a, b], l) => { const r = T[l.t] || T.wall; return [a + r[0] * l.qty, b + r[1] * l.qty]; }, [0, 0]);
+  return lines.reduce(([a, b], l) => { const T = JOB_TIME[l.level || level] || JOB_TIME.C1, r = T[l.t] || T.wall; return [a + r[0] * l.qty, b + r[1] * l.qty]; }, [0, 0]);
 }
 /** how the visit fits the working day: 'half' (a morning or an afternoon), 'day', or several working days */
 export function fitOf([, max]) {
