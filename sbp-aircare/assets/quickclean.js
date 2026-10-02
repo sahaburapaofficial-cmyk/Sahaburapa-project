@@ -107,7 +107,7 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
       if (st.date) cart.prefDate = st.date;   // the quotation form reads it every time it renders (no timing race)
       if (st.zone) cart.setZone(st.zone); else cart.save();
       openCart();
-      requestAnimationFrame(() => { const n = document.getElementById('s-q-name'); n && n.focus({ preventScroll: true }); });
+      requestAnimationFrame(() => { const n = document.getElementById('s-q-name'); if (!n) return; if (matchMedia('(pointer: coarse)').matches) n.scrollIntoView({ block: 'center' }); else n.focus({ preventScroll: true }); });   // Rev.14: on phones show the field without popping the keyboard over the totals
     } }, 'จองล้างแอร์ · กรอกชื่อและเบอร์');
     const line = h('a', { class: 's-btn ghost qc-line', href: lineLink(summaryText(t)), target: '_blank', rel: 'noopener' }, 'ส่งทาง LINE');
     sum.append(h('div', { class: 'qc-acts' }, send, line));

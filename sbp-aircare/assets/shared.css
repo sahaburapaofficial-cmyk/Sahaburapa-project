@@ -1252,3 +1252,6 @@ html.fx-C .fx-spot::after{content:"";position:absolute;inset:0;border-radius:inh
 .fx-xh.flip b{left:auto;right:calc(100% - var(--x) + 10px)}
 /* C stage light */
 .fx-stagelight{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(42% 55% at var(--gx,60%) var(--gy,40%),color-mix(in oklab,var(--s-accent) 16%,transparent),transparent 70%);mix-blend-mode:screen}
+/* ---- Rev.14 · detail fixes from the audit ---- */
+.s-row-d summary{display:block;padding:6px 0}
+@media (pointer:coarse){.s-row-d summary,.s-det summary{min-height:44px;display:flex;align-items:center}}

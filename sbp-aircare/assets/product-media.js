@@ -84,6 +84,8 @@ function studio() {
       const sc = key.shadow.camera; sc.left = sc.bottom = -rad * 1.6; sc.right = sc.top = rad * 1.6; sc.near = 0.1; sc.far = 12; sc.updateProjectionMatrix();
       r.render(scene, cam);
       let out = null; try { out = cv.toDataURL('image/webp', 0.9); if (!/^data:image\/webp/.test(out)) out = cv.toDataURL('image/png'); } catch (e) {}
+      // Rev.14: a render that came out (almost) empty — software / broken GL draws only the shadow — is not a shot: keep the line art
+      if (out && out.length < 24000) out = null;
       scene.remove(g); g.traverse(o => { if (o.isMesh) { o.geometry.dispose(); } });
       return out;
     };

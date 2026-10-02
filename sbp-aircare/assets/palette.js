@@ -3,7 +3,7 @@
 // sections, every air-con model in the catalogue (with its price), FAQ answers and quick actions (book a cleaning, open the
 // quotation, call, chat on LINE, send site photos). Keyboard first (↑ ↓ Enter Esc), ARIA combobox + listbox, works on touch
 // from the header button. Styling follows the variant: A clean card · B terminal sheet · C glass (shared.css .cp-*).
-import { h, $, DEMO, BRAND_BY_ID, TYPE_BY_ID, btuFmt, baht, FAQ, COMPANY } from './sbp-core.js';
+import { h, $, DEMO, BRAND_BY_ID, TYPE_BY_ID, btuFmt, baht, FAQ, COMPANY, cleanRate, incVat } from './sbp-core.js';
 
 const norm = s => String(s || '').toLowerCase().replace(/[\s·\-\/,().]/g, '');
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -27,6 +27,13 @@ export function mountPalette(cfg) {
     add('หน้า', viewTh[v] || v, ids.map(id => secTh[id]).filter(Boolean).slice(0, 4).join(' · '), () => go(v), v);
     ids.forEach(id => { if (secTh[id] && document.getElementById(id)) add('หัวข้อ', secTh[id], viewTh[v] || '', () => go(id), id); });
   });
+  // services per unit type: standard cleaning from the Pricebook (C1 · Basic Clean, smallest size) and where to see installation
+  ['wall', 'ceiling', 'cassette', 'floor'].forEach(t => {
+    const T = TYPE_BY_ID[t], r = cleanRate('Basic Clean', 'C1', t, 0), th = T ? T.th : t;
+    add('บริการ', `ล้างแอร์${th}`, r && r.rate.s != null ? `เริ่ม ${baht(incVat(r.rate.s))} ต่อเครื่อง รวม VAT · จองได้ 3 ขั้น` : 'จองล้าง 3 ขั้น', () => go('book'), `clean ล้าง ${t}`);
+    add('บริการ', `ติดตั้งแอร์${th}`, 'ขั้นตอนทีมช่าง มาตรฐาน / พรีเมียม · ราคาติดตั้งตามขนาด', () => go('cleanflow'), `install ติดตั้ง ${t}`);
+  });
+  add('บริการ', 'ซ่อม / ตรวจเช็กแอร์', 'ไม่เย็น น้ำหยด มีเสียง · ค่าตรวจเช็กและค่าซ่อม', () => go('prices'), 'repair ซ่อม เสีย น้ำหยด ไม่เย็น');
   DEMO.models.forEach(m => {
     const b = BRAND_BY_ID[m.brand], t = TYPE_BY_ID[m.type], lo = m.skus[0], hi = m.skus[m.skus.length - 1];
     const price = m.skus.map(s => s.price).filter(p => p > 0);
@@ -34,7 +41,7 @@ export function mountPalette(cfg) {
       () => openProduct && openProduct(m, lastBtu ? m.skus.reduce((bi, s2, i2) => Math.abs(s2.btu - lastBtu) < Math.abs(m.skus[bi].btu - lastBtu) ? i2 : bi, 0) : 0), m.skus.map(s => s.sku).join(' ') + (m.inverter ? ' inverter' : ''), m.skus.map(s => s.btu));
   });
   FAQ.forEach(f => add('คำถามที่พบบ่อย', f.q, f.a.slice(0, 80) + (f.a.length > 80 ? '…' : ''), () => go('faq'), f.a));
-  const GROUPS = ['ทำทันที', 'หน้า', 'หัวข้อ', 'รุ่นแอร์', 'คำถามที่พบบ่อย'];
+  const GROUPS = ['ทำทันที', 'บริการ', 'หน้า', 'หัวข้อ', 'รุ่นแอร์', 'คำถามที่พบบ่อย'];
 
   // numbers ≥ 5,000 (or "12k") are read as BTU: a model matches when one of its sizes is within ±12 % — "12000" must not hit
   // a 120,000 BTU unit by substring
@@ -51,8 +58,10 @@ export function mountPalette(cfg) {
         if (!i.btu || !btus.every(v => i.btu.some(b => Math.abs(b - v) <= v * 0.12)) || !toks.every(t => i.k.includes(t))) return { i, s: 0 };
         return { i, s: 2 };
       }
-      const nt = norm(i.th); return { i, s: nt.startsWith(n) ? 3 : nt.includes(n) ? 2 : toks.every(t => i.k.includes(t)) ? 1 : 0 };
-    }).filter(x => x.s && !seen.has(x.i.grp === 'หัวข้อ' ? x.i.th : x.i.grp + x.i.th) && seen.add(x.i.grp === 'หัวข้อ' ? x.i.th : x.i.grp + x.i.th) && !(x.i.grp === 'หัวข้อ' && items.some(o => o.grp === 'ทำทันที' && o.th === x.i.th)))
+      // whole phrase first; otherwise rank by how many of the words match ("ล้าง สี่ทิศทาง" → ล้างแอร์สี่ทิศทาง first)
+      const nt = norm(i.th), hit = toks.filter(t => i.k.includes(t)).length;
+      return { i, s: nt.startsWith(n) ? 30 : nt.includes(n) ? 20 : hit === toks.length && hit ? 10 + hit : hit ? hit / toks.length * 5 : 0 };
+    }).filter((x, _, all) => x.s && (x.s >= 10 || !(all.full ??= all.some(y => y.s >= 10))) && !seen.has(x.i.grp === 'หัวข้อ' ? x.i.th : x.i.grp + x.i.th) && seen.add(x.i.grp === 'หัวข้อ' ? x.i.th : x.i.grp + x.i.th) && !(x.i.grp === 'หัวข้อ' && items.some(o => o.grp === 'ทำทันที' && o.th === x.i.th)))
       .sort((a, b) => b.s - a.s || GROUPS.indexOf(a.i.grp) - GROUPS.indexOf(b.i.grp))
       .reduce((acc, x) => { const c = acc.cnt[x.i.grp] = (acc.cnt[x.i.grp] || 0) + 1; if (c <= (x.i.grp === 'รุ่นแอร์' ? 8 : 6)) acc.out.push(x.i); return acc; }, { out: [], cnt: {} }).out;
   }

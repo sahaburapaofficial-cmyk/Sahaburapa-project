@@ -103,6 +103,7 @@ section.s{padding-block:40px 0}
 .leaders circle{fill:var(--sheet);stroke:var(--safety);stroke-width:1.5}
 .hs{position:absolute;left:0;top:0;pointer-events:auto;border:1px solid var(--ink);background:var(--sheet);font:500 11.5px var(--mono);padding:2px 7px;opacity:0;transition:opacity .2s;white-space:nowrap;border-radius:0}
 .hs b{font-family:var(--sans);font-weight:500;font-size:12.5px}
+@media (pointer:coarse){.hs{min-height:36px;padding:6px 9px;display:inline-flex;align-items:center}}
 .hs.on{opacity:1}.hs.sel{background:var(--ink);color:var(--paper)}
 .tblock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--ink);margin:0 22px 22px;border:1px solid var(--ink);border-top:0;font-size:12.5px}
 .tblock div{padding:6px 10px;border-left:1px solid var(--rule);min-width:0}
@@ -208,6 +209,7 @@ section.s{padding-block:40px 0}
 .card .acts [aria-pressed="true"]{color:var(--safety)}
 table.rows{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed;min-width:820px}
 .rows td{padding:8px 12px;border-bottom:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rows td:nth-child(-n+2){white-space:normal;overflow-wrap:anywhere;line-height:1.4}   /* Rev.14: model codes / series wrap instead of being cut */
 .rows td:nth-child(1){width:130px;font-family:var(--mono);font-size:12.5px}.rows td:nth-child(2){width:150px}.rows td:nth-child(4){width:110px}.rows td:nth-child(5),.rows td:nth-child(6){width:96px;text-align:right;font-family:var(--mono)}.rows td:nth-child(7){width:96px;text-align:right;font-family:var(--mono)}.rows td:nth-child(8){width:70px}
 .rows tr:hover td{background:var(--blue-l)}
 .thead{min-width:820px;display:grid;grid-template-columns:130px 150px 1fr 110px 96px 96px 96px 70px;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--paper);border-bottom:1px solid var(--ink)}
