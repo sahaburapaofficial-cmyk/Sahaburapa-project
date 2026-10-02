@@ -36,6 +36,11 @@ for (const mode of ['ok', 'fail', 'off', 'fs']) {
   if (await add.count()) { await add.click(); await p.waitForTimeout(500); }
   await p.evaluate(() => document.querySelector('[data-cart-btn]')?.click()); await p.waitForTimeout(800);
   if (await p.locator('#s-q-name').count()) {
+    if (await p.locator('#s-q-addr').count()) {   // Rev.16.1: a cleaning / installation line makes it a job ticket — date, area and address are required
+      const d = await p.evaluate(() => new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10));
+      await p.fill('#s-q-date', d); await p.dispatchEvent('#s-q-date', 'change'); await p.waitForTimeout(300);
+      await p.fill('#s-cart-zone', 'บางขุนเทียน'); await p.waitForTimeout(500); await p.fill('#s-q-addr', '99/1 ถนนพระราม 2');
+    }
     await p.fill('#s-q-name', 'ทดสอบ ใบเสนอราคา'); await p.fill('#s-q-tel', '0812345678');
     await p.locator('.s-form button[type="submit"]').click(); await p.waitForTimeout(1500);
     out.quote = (await p.locator('.s-cart-b .s-hand').first().innerText()).split('\n').slice(0, 2).join(' / ');

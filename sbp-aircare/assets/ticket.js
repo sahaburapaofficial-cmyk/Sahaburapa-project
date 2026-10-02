@@ -167,7 +167,7 @@ export function ticketPanel(draft, jobs, { onChange = () => {} } = {}) {
   const cnt = h('small', { class: 'tk-cnt' });
   const file = h('input', { type: 'file', accept: 'image/*', multiple: true, class: 'tk-file', id: 'tk-file',
     onchange: async e => { const fs = [...e.target.files].slice(0, MAX_PHOTOS - draft.photos.length); for (const f of fs) { try { draft.photos.push({ name: f.name.replace(/\.[^.]+$/, '') + '.jpg', data: await shrink(f) }); } catch (er) { /* not an image the browser can read */ } } e.target.value = ''; drawThumbs(); } });
-  const note = h('textarea', { class: 'tk-note', rows: 3, placeholder: 'เช่น เครื่องอยู่ห้องนอนชั้น 2 · มีน้ำหยดตอนเปิดนาน ๆ · จอดรถหน้าบ้านได้ · คอนโดต้องแลกบัตร', 'aria-label': 'หมายเหตุหน้างาน', oninput: e => { draft.note = e.target.value; } }, draft.note || '');
+  const note = h('textarea', { class: 'tk-note', rows: 3, placeholder: 'เช่น เครื่องอยู่ห้องนอนชั้น 2 · มีน้ำหยดตอนเปิดนาน ๆ · จอดรถหน้าบ้านได้ · คอนโดต้องแลกบัตร', 'aria-label': 'หมายเหตุหน้างาน', oninput: e => { draft.note = e.target.value; onChange(); } }, draft.note || '');
   box.append(h('div', { class: 'tk-ph' },
     h('p', { class: 'tk-l' }, 'รูปหน้างาน ', h('small', {}, '(ช่วยให้ทีมประเมินได้ก่อนนัด ไม่ต้องรอช่างไปดู)')),
     h('ul', { class: 'tk-hint' }, hint.map(t => h('li', {}, t))),

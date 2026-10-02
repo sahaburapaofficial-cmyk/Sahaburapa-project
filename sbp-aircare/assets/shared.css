@@ -1310,3 +1310,10 @@ html.fx-C .fx-spot::after{content:"";position:absolute;inset:0;border-radius:inh
 .tk-line{margin-top:10px}
 @media (pointer:coarse){.tk-o{min-height:44px}.tk-rm{width:32px;height:32px}}
 .s-l-n{font-size:12px;color:var(--s-ink-3)}
+/* Rev.16.1 booking: location, contact prefs, errors, after-send tools */
+.s-where{display:grid;gap:8px}.s-where textarea{width:100%;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card);color:var(--s-ink);font:inherit;padding:8px 10px;resize:vertical}
+.s-geo{justify-self:start}.s-geo-o{font-size:12px;color:var(--s-ink-3)}
+.s-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media (max-width:420px){.s-row2{grid-template-columns:1fr}}
+.s-row2 select{width:100%;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card);color:var(--s-ink);font:inherit;padding:0 10px}
+.s-err:empty{display:none}.s-err{font-weight:600}
+.s-after{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.s-after a.s-btn{text-decoration:none}
