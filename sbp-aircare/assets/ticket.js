@@ -33,7 +33,7 @@ export const QUESTIONS = {
     { id: 'cdu', th: 'วางคอยล์ร้อนที่', opts: [O('floor', 'พื้น / ระเบียง'), O('wall', 'แขวนผนัง เอื้อมถึงจากระเบียง'), O('high', 'ผนังสูง ต้องนั่งร้าน / โรยตัว'), O('roof', 'ดาดฟ้า / หลังคา')] },
     { id: 'power', th: 'ไฟฟ้าสำหรับแอร์', opts: [O('ready', 'มีเบรกเกอร์ / สายแอร์เดิม'), O('new', 'ต้องเดินสายเมนใหม่'), O('na', 'ไม่แน่ใจ')] },
     { id: 'powerM', th: 'ระยะตู้ไฟถึงจุดติดตั้ง (เมตร)', num: [1, 60, 10], when: a => a.power === 'new' },
-    { id: 'drain', th: 'น้ำทิ้ง', opts: [O('near', 'มีจุดทิ้งใกล้ (ไม่เกิน 3 ม.)'), O('far', 'ต้องเดินท่อยาว'), O('pump', 'ไม่มีทางลาด ต้องใช้ปั๊มน้ำทิ้ง')] },
+    { id: 'drain', th: 'น้ำทิ้ง', opts: [O('near', 'มีจุดทิ้งใกล้ (ไม่เกิน 4 ม.)'), O('far', 'ต้องเดินท่อยาว'), O('pump', 'ไม่มีทางลาด ต้องใช้ปั๊มน้ำทิ้ง')] },
     { id: 'drainM', th: 'ความยาวท่อน้ำทิ้งโดยประมาณ (เมตร)', num: [1, 40, 6], when: a => a.drain === 'far' },
     { id: 'hide', th: 'การเก็บท่อ', opts: [O('trunk', 'รางครอบท่อ (มาตรฐาน)'), O('chase', 'ฝังในผนัง / ซ่อนท่อ')] },
     { id: 'site', th: 'สถานที่', opts: [O('home', 'บ้าน'), O('condo', 'คอนโด / อาคารต้องแจ้งนิติ'), O('shop', 'ร้านค้า / สำนักงาน'), O('ctrl', 'ห้อง Server / รพ. / พื้นที่ควบคุม')] },
@@ -79,9 +79,9 @@ export function scope(kind, a, ctx = {}) {
     if (a.wall === 'conc' || a.wall === 'glass') push(L('เจาะ Core Drill / ทางผ่านพิเศษ', inst('CIV-CORE'), n, a.wall === 'conc' ? 'ผนังคอนกรีต / หนา' : 'ผนังกระจก'));
     if (a.cdu === 'high') push(L('งานที่สูง (นั่งร้าน / โรยตัว)', inst('ACC-SCAFF') || inst('ACC-HEIGHT'), 1, 'วางคอยล์ร้อนที่สูง'));
     if (a.cdu === 'roof') push(L('ฐานรองบนหลังคาพร้อมกันซึม', inst('SUP-ROOF'), n, 'วางบนดาดฟ้า / หลังคา'));
-    if (a.power === 'new') { const m = Math.max(1, +a.powerM || 0); push(L(`เดินสายเมนใหม่ ${m} ม.`, inst('ELE-MAIN-1P-2.5'), m * n, 'ขนาดสายจริงตามกระแสของรุ่น ช่างยืนยันก่อนติดตั้ง')); push(L('เบรกเกอร์ NANO RCBO แยกวงจร', inst('ELE-NANO-RCBO20'), n, 'วงจรใหม่')); }
+    if (a.power === 'new') { const m = Math.max(1, +a.powerM || 0); push(L(`เดินเมนไฟจากตู้ไฟ ${m} ม.`, inst('ELE-MAIN-1P-2.5'), m * n, 'ขนาดสายจริงตามกระแสของรุ่น ช่างยืนยันก่อนติดตั้ง · เบรกเกอร์ 1 ตัวรวมในแพ็กเกจแล้ว')); }   // Rev.17: the package already has the breaker — no RCBO line
     if (a.power === 'na') push(L('ตรวจระบบไฟก่อนติดตั้ง', null, 1, 'ส่งรูปตู้ไฟให้ทีมดู'));
-    if (a.drain === 'far') { const m = Math.max(0, (+a.drainM || 0) - 3); if (m) push(L(`ท่อน้ำทิ้งเพิ่ม ${m} ม.`, inst('MAT-SCG-DRAIN-34'), m * n, `ยาวประมาณ ${a.drainM} ม.`)); }
+    if (a.drain === 'far') { const m = Math.max(0, Math.ceil((+a.drainM || 0) - 4)); if (m) push(L(`ท่อน้ำทิ้งเพิ่ม ${m} ม.`, inst('MAT-SCG-DRAIN-34'), m * n, `ยาวประมาณ ${a.drainM} ม. · แพ็กเกจรวม 4 ม. แรก`)); }   // Rev.17: 4 m are in the package (was 3)
     if (a.drain === 'pump') push(L('ชุดปั๊มน้ำทิ้ง', inst('DRAIN-PUMP-15'), n, 'ไม่มีทางลาดให้น้ำไหล'));
     if (a.hide === 'chase') push(L('กรีดผนังฝังท่อ / คืนสภาพ', inst('CIV-CHASE'), 1, 'ซ่อนท่อในผนัง'));
     if (a.site === 'ctrl') push(L('ประสาน Permit / ควบคุมพื้นที่', inst('ACC-PERMIT'), 1, 'พื้นที่ควบคุม'));

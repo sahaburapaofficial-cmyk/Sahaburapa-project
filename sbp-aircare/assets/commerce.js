@@ -12,6 +12,7 @@ import { productVisual } from './product-media.js';
 import { judge, bkkNow, dateTh, LEAD_DAYS, RUSH_FEE_EX, SLOTS } from './queue.js';
 import { ticketPanel, ticketText, sendTicket, photoLine, jobsIn } from './ticket.js';
 import { canReach } from './submit.js';
+import { breakdown, packageParts, pipeBundle, optionNote, pipeItemFor } from './costs.js';
 
 // Rev.16: what the crew will do on the visit, for the queue rules (visit time → slots)
 const QC_KEY = /^QC-[^-]+(?: [^-]+)?-(C1|C2)-(wall|ceiling|cassette|floor)-/;
@@ -295,11 +296,22 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
       const sel = choices.length > 1 ? h('select', { 'aria-label': 'เลือกรายการ' }, choices.map((c, i) => h('option', { value: i }, `${c.name.replace(/^งานเดินเมนไฟ 1 เฟส — /, 'เมนไฟ ').replace(/^เซอร์กิตเบรกเกอร์ /, '')} · ${baht(c.ex)}/${c.unit}`))) : null;
       const set = () => { const q = Math.max(0, +qty.value || 0); state.add[key] = q ? { item: cur, qty: q } : null; refresh(); };
       qty.addEventListener('input', set); sel && sel.addEventListener('change', () => { cur = choices[+sel.value]; set(); });
-      grp.append(h('div', { class: 's-add-r' }, h('span', { class: 's-add-n' }, sel ? null : cur.name, sel, a.note ? h('small', {}, a.note) : null), h('span', { class: 's-add-u' }, sel ? '' : `${baht(cur.ex)} / ${cur.unit}`), h('label', { class: 's-qty' }, qty, h('span', {}, cur.unit))));
+      grp.append(h('div', { class: 's-add-r' }, h('span', { class: 's-add-n' }, sel ? null : cur.name, sel, (a.note || optionNote(cur.code)) ? h('small', {}, a.note || optionNote(cur.code)) : null), h('span', { class: 's-add-u' }, sel ? '' : `${baht(cur.ex)} / ${cur.unit}`), h('label', { class: 's-qty' }, qty, h('span', {}, cur.unit))));
     });
     addWrap.append(grp);
   });
+  // Rev.17: what one extra metre of the bundle holds, against the same metre line by line (Pricebook prices, before VAT)
+  const pb = pipeBundle(pipeItemFor(m.type, s.btu));
+  if (pb && pb.parts) addWrap.append(h('details', { class: 's-det s-bundle' }, h('summary', {}, `ชุดวัสดุส่วนเกิน ${baht(pb.item.ex)} ต่อเมตร มีอะไรบ้าง`),
+    h('table', { class: 's-btable' }, h('thead', {}, h('tr', {}, h('th', {}, 'ใน 1 เมตร'), h('th', {}, 'รายการใน Pricebook'), h('th', {}, 'ถ้าซื้อแยก'))),
+      h('tbody', {}, pb.parts.map(x => h('tr', {}, h('td', {}, x.th), h('td', {}, x.name + (x.qty > 1 ? ` × ${x.qty}` : '')), h('td', {}, baht(x.ex * x.qty)))),
+        h('tr', { class: 'tot' }, h('td', {}, 'รวมถ้าซื้อแยกชิ้น'), h('td', {}, 'ยังไม่รวมค่าแรงเดินท่อ เชื่อม บานแฟลร์'), h('td', {}, baht(pb.sum))),
+        h('tr', { class: 'tot' }, h('td', {}, 'ชุดเหมาต่อเมตร'), h('td', {}, 'วัสดุครบชุด + ค่าแรงติดตั้ง'), h('td', {}, h('b', {}, baht(pb.item.ex)))))),
+    h('p', { class: 's-note' }, 'ราคาก่อน VAT จาก Pricebook 2569 ของบริษัท · วัสดุคิดตามราคาจริงไม่ปัด · ทีมวัดระยะจริงก่อนติดตั้งและแจ้งก่อนเพิ่มทุกครั้ง')));
   root.append(addWrap);
+  // Rev.17: itemised cost — every option as a line: unit price × quantity = amount
+  const bd = h('div', { class: 's-bd', 'aria-live': 'polite' });
+  root.append(h('details', { class: 's-det s-bd-w', open: true }, h('summary', {}, 'ค่าใช้จ่ายแยกรายการ (ก่อน VAT)'), bd));
   // specs
   const spec = [['รหัสรุ่น', s.sku], ['ซีรีส์', d.series], ['ระบบ', d.system], ['ขนาด', btuFmt(s.btu)], ['น้ำยา', d.refrigerant], ['ท่อน้ำยา', d.pipeLiquid && d.pipeGas ? `${d.pipeLiquid}" / ${d.pipeGas}"` : null], ['คอยล์เย็น (มม.)', d.indoorDim], ['น้ำหนักคอยล์เย็น', d.indoorKg && d.indoorKg + ' กก.'], ['คอยล์ร้อน (มม.)', d.outdoorDim], ['น้ำหนักคอยล์ร้อน', d.outdoorKg && d.outdoorKg + ' กก.'], ['ไฟ', d.power], ['คอมเพรสเซอร์', d.compressor], ['รับประกันเครื่อง', d.warranty]];
   root.append(h('details', { class: 's-det', open: true }, h('summary', {}, 'สเปกเครื่อง'), h('dl', { class: 's-spec' }, spec.filter(([, v]) => v).map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]))));
@@ -325,7 +337,21 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
     const sv = L.filter(l => l.unitEx == null).length;
     tot.innerHTML = '';
     tot.append(h('span', { class: 's-lbl' }, `รวม ${state.qty} เครื่อง${state.level ? ' พร้อมติดตั้ง' : ''}`), h('b', {}, baht(ex)), h('small', {}, `ก่อน VAT · รวม VAT 7% ${baht(incVat(ex))}${sv ? ` · +${sv} รายการประเมินหน้างาน` : ''}`));
+    drawBreakdown();
     if (detBody) { const o = opts.find(o => o.key === state.level); detBody.innerHTML = ''; if (o) detBody.append(h('p', {}, h('b', {}, 'รวม: '), o.item.inc || '—'), h('p', {}, h('b', {}, 'ไม่รวม: '), o.item.exc || '—'), h('p', {}, h('b', {}, 'รับประกัน: '), o.item.warranty || '—')); else detBody.append(h('p', {}, 'ซื้อเครื่องอย่างเดียว ไม่รวมงานติดตั้ง')); }
+  }
+  function drawBreakdown() {
+    const o = opts.find(o => o.key === state.level), Q = state.qty;
+    const rows = [{ group: 'product', key: `P-${s.sku}`, name: `${b.name} ${s.sku} (${btuFmt(s.btu)})`, unit: 'เครื่อง', unitEx: s.px, qty: Q }];
+    if (o) rows.push({ group: 'install', key: `I-${o.item.code}`, name: o.th || o.item.name, unit: 'เครื่อง', unitEx: o.item.ex, qty: Q });
+    Object.values(state.add).filter(Boolean).forEach(a => rows.push(a.flag ? { group: 'addon', key: `S-${a.item.code}`, name: a.item.name, unitEx: null, qty: 1 } : { group: 'addon', key: `A-${a.item.code}`, name: a.item.name, unit: a.item.unit, unitEx: a.item.ex, qty: a.qty * Q }));
+    const B = breakdown(rows), parts = o ? packageParts(o.item) : [];
+    bd.innerHTML = '';
+    B.groups.forEach(g => bd.append(h('div', { class: 's-bd-g' }, h('p', { class: 's-lbl' }, g.th),
+      h('ul', {}, g.rows.map(r => h('li', {}, h('span', {}, r.name, r.amount != null && (r.qty > 1 || r.unit !== 'เครื่อง') ? h('small', {}, `${baht(r.ex)} / ${r.unit || 'หน่วย'} × ${r.qty}`) : null, r.note ? h('small', {}, r.note) : null), h('b', {}, r.amount == null ? 'ประเมิน' : baht(r.amount))))),
+      g.th === 'แพ็กเกจติดตั้ง' && parts.length ? h('details', { class: 's-bd-inc' }, h('summary', {}, `รวมในแพ็กเกจแล้ว ${parts.length} รายการ`), h('ul', {}, parts.map(x => h('li', {}, x)))) : null)));
+    bd.append(h('dl', { class: 's-sum' }, h('dt', {}, 'รวมก่อน VAT'), h('dd', {}, baht(B.ex)), h('dt', {}, 'VAT 7%'), h('dd', {}, baht(B.vat)), h('dt', { class: 'tot' }, 'รวมทั้งสิ้น'), h('dd', { class: 'tot' }, baht(B.inc)),
+      B.assess ? h('p', { class: 's-note', style: 'grid-column:1/-1' }, `+ ${B.assess} รายการประเมินหน้างาน — ทีมแจ้งราคาให้อนุมัติก่อนทำ`) : null));
   }
   function addToCart() { const L = lines(); L.forEach(l => cart.add(l)); toast(L.some(l => l.group === 'install') ? `ใส่ใบเสนอราคาแล้ว · เปิดใบเสนอราคาเพื่อเลือกวันติดตั้งและส่งใบจองงาน` : `ใส่ใบเสนอราคาแล้ว · ${cart.count()} รายการ`); onAdded && onAdded(); }
   refresh();
