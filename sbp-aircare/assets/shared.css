@@ -1156,5 +1156,6 @@ body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
 .cg-host:not(:has(canvas))::after{content:"กำลังเตรียมภาพ 3 มิติ…";position:absolute;inset:0;display:grid;place-items:center;font-size:13px;color:var(--s-ink-3);pointer-events:none}
 @keyframes s3dLoad{from{background-position:110% 0,0 0}to{background-position:-110% 0,0 0}}
 @media (prefers-reduced-motion:reduce){.cg-host:not(:has(canvas)),[data-v-canvas]:not(:has(canvas)){animation:none}}
-/* Rev.13: on tablets (≈600–800 px) aspect-ratio + min-height used to widen the technician stage past its column → page scrolled sideways */
-.ts-stage{width:100%;min-width:0;max-width:100%}
+/* Rev.13: aspect-ratio + min-height let a stage grow wider than its column on tablets (≈600–800 px: B/C service pages scrolled
+   sideways) → every 3D stage takes its column's width; the height still honours min-height */
+.ts-stage,.sy3-stage,.tm-stage,.hw-stage,.mt3-stage,.rf-host,.cg-host,.st-stage{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
