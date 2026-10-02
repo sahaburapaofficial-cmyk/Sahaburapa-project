@@ -4,6 +4,7 @@
 // Rings show where each band actually ends. The exact fee always comes from the address checker.
 import * as THREE from './three.module.min.js';
 import { track as glTrack } from './gl-pool.js';
+import { deferred } from './lazy.js';
 import { ZONES, TRAVEL, HQ, NEARBY, incVat, baht, h } from './sbp-core.js';
 
 const LAT0 = 13.7, LON0 = 100.5, KX = 111.32 * Math.cos(LAT0 * Math.PI / 180) / 10, KZ = 110.57 / 10;   // 1 unit = 10 km
@@ -46,7 +47,15 @@ async function loadGeo() {
   return (await fetch(new URL('./thai-provinces.json', import.meta.url))).json();
 }
 
+// Rev.11: the map (data, markup and WebGL) is built when its section nears the screen; until then a same-size placeholder
+// keeps the layout, and highlight()/setView() calls are remembered and replayed (gl-pool.deferred)
 export async function mountThaiMap(host, cfg = {}) {
+  if (!host) return { highlight() {}, setView() {} };
+  const hold = h('div', { class: 'tm-stage tm-wait', 'aria-hidden': 'true' });
+  host.classList.add('tm', 'tm-' + (cfg.theme || 'light')); host.append(hold);
+  return deferred(host, () => { hold.remove(); return bootThaiMap(host, cfg); });
+}
+async function bootThaiMap(host, cfg = {}) {
   const theme = cfg.theme || 'light', C = PAL[theme] || PAL.light;
   const geoAll = await loadGeo(); const raw = geoAll.prov || geoAll, NB = geoAll.nb || [];
   const [hx, hz] = P(HQ.lon, HQ.lat);

@@ -1,4 +1,4 @@
-# Build the SBP AirCare website (sbp-aircare/) and publish it on GitHub Pages.
+# Build the SBP AirCare website (sbp-aircare/) and publish it on GitHub Pages (dist/site: split JS chunks, cacheable files).
 # One-time set-up by a repo admin: Settings → Pages → Build and deployment → Source: "GitHub Actions".
 name: SBP AirCare · GitHub Pages
 
@@ -31,15 +31,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      # single-file pages (CSS, fonts, data and every JS module inlined by build.py + esbuild)
+      # Rev.11: build.py writes dist/site — the split, cacheable version for hosting (dist/offline + dist/art stay single-file)
       - run: python3 build.py
       - name: Site files
-        run: |
-          touch dist/offline/.nojekyll
-          ls -la dist/offline
+        run: ls -la dist/site dist/site/js
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: sbp-aircare/dist/offline
+          path: sbp-aircare/dist/site
 
   deploy:
     needs: build

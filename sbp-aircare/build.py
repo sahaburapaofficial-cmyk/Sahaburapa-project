@@ -75,6 +75,18 @@ if os.path.isdir(PRODUCT_DIR):
             for sub in ('offline', 'art'):
                 os.makedirs(os.path.join(DIST, sub, 'products'), exist_ok=True)
                 shutil.copy2(os.path.join(PRODUCT_DIR, f), os.path.join(DIST, sub, 'products', f))
+# Rev.11: link-preview image (og:image in each page head) + sitemap for the self-hosted site (GitHub Pages → dist/offline)
+SITE = 'https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/'
+OG_DIR = os.path.join(A, 'og')
+if os.path.isdir(OG_DIR):
+    os.makedirs(os.path.join(DIST, 'offline', 'og'), exist_ok=True)
+    for f in os.listdir(OG_DIR):
+        shutil.copy2(os.path.join(OG_DIR, f), os.path.join(DIST, 'offline', 'og', f))
+import datetime
+_today = datetime.date.today().isoformat()
+open(os.path.join(DIST, 'offline', 'sitemap.xml'), 'w', encoding='utf-8').write(
+    '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + ''.join(f'  <url><loc>{SITE}{p}</loc><lastmod>{_today}</lastmod></url>\n' for p in ('', 'a.html', 'b.html', 'c.html')) + '</urlset>\n')
 VNAME = {'a': 'A · Bento', 'b': 'B · Engineering', 'c': 'C · Showroom'}
 
 def build_variant(v):
@@ -145,4 +157,53 @@ art_pv = pv.replace('<body>', '<body>' + urls_tag + packs, 1)
 open(os.path.join(DIST, 'art', 'index.html'), 'w', encoding='utf-8').write(strip_doc(art_pv))
 open(os.path.join(DIST, 'offline', 'index.html'), 'w', encoding='utf-8').write(pv.replace('href="./"', 'href="./index.html"'))
 sizes['tester'] = len(art_pv.encode()) // 1024
+# ---- Rev.11: multi-file site for self-hosting (GitHub Pages → dist/site) ----
+# Same pages and code as the single-file builds, but split so phones fetch and run less up front: CSS and fonts as cacheable
+# files, the price/map data as one shared script, and the JS bundled with code splitting — the scenes that are only opened
+# on demand (crew 3D, room studio, room fit, materials showroom, engineering drawings) become separate chunks loaded when
+# needed, and three.js is one shared chunk cached across A / B / C. dist/offline and dist/art are unchanged.
+import hashlib
+SITE_DIR = os.path.join(DIST, 'site')
+shutil.rmtree(SITE_DIR, ignore_errors=True)
+os.makedirs(os.path.join(SITE_DIR, 'js'), exist_ok=True)
+shutil.copytree(os.path.join(A, 'fonts'), os.path.join(SITE_DIR, 'assets', 'fonts'))
+for f in os.listdir(A):
+    if f.endswith('.css'): shutil.copy2(os.path.join(A, f), os.path.join(SITE_DIR, 'assets', f))
+for sub in ('products', 'og'):
+    src = os.path.join(DIST, 'offline', sub)
+    if os.path.isdir(src): shutil.copytree(src, os.path.join(SITE_DIR, sub))
+shutil.copy2(os.path.join(DIST, 'offline', 'sitemap.xml'), os.path.join(SITE_DIR, 'sitemap.xml'))
+data_js = re.sub(r'</?script>', '', DATA_TAG.replace('</script><script>', ';\n'))
+dh = hashlib.sha1(data_js.encode()).hexdigest()[:10]
+open(os.path.join(SITE_DIR, 'js', f'data-{dh}.js'), 'w', encoding='utf-8').write(data_js.replace('<\\/', '</'))
+entries = {}
+for v in 'abc':
+    html = read(os.path.join(ROOT, f'{v}.html'))
+    m = re.search(r'<script type="module">(.*?)</script>', html, flags=re.S)
+    entries[v] = (html, m)
+    open(os.path.join(ROOT, f'_entry_site_{v}.mjs'), 'w', encoding='utf-8').write(m.group(1))
+meta_path = os.path.join(ROOT, '_entry_site_meta.json')
+try:
+    subprocess.run(['npx', '--yes', 'esbuild@0.28.2', *[f'_entry_site_{v}.mjs' for v in 'abc'], '--bundle', '--splitting', '--format=esm', '--minify',
+                    '--target=es2022', '--legal-comments=none', '--log-level=warning', '--outdir=' + os.path.join(SITE_DIR, 'js'),
+                    '--entry-names=[name]-[hash]', '--chunk-names=c-[hash]', '--metafile=' + meta_path], cwd=ROOT, check=True)
+    meta = json.load(open(meta_path))
+finally:
+    for v in 'abc':
+        try: os.remove(os.path.join(ROOT, f'_entry_site_{v}.mjs'))
+        except OSError: pass
+out_of = {v: next(os.path.basename(k) for k, o in meta['outputs'].items() if o.get('entryPoint', '').endswith(f'_entry_site_{v}.mjs')) for v in 'abc'}
+os.remove(meta_path)
+for v in 'abc':
+    html, m = entries[v]
+    tag = (f'<link rel="modulepreload" href="js/{out_of[v]}"><script src="js/data-{dh}.js"></script>'
+           f'<script type="module" src="js/{out_of[v]}"></script>')
+    page = html[:m.start()] + tag + html[m.end():]
+    open(os.path.join(SITE_DIR, f'{v}.html'), 'w', encoding='utf-8').write(links(page, 'offline'))
+site_pv = read(os.path.join(ROOT, 'preview.html'))
+if EP: site_pv = site_pv.replace('__SBP_ENDPOINT__', EP)
+open(os.path.join(SITE_DIR, 'index.html'), 'w', encoding='utf-8').write(site_pv.replace('href="./"', 'href="./index.html"'))
+open(os.path.join(SITE_DIR, '.nojekyll'), 'w').close()
+site_kb = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(SITE_DIR) for f in fs) // 1024
+sizes['site_total'] = site_kb
 print(json.dumps({'variant_kb': sizes, 'product_photos': len(media_files)}))

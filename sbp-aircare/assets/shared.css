@@ -1055,3 +1055,59 @@ html.sx-on .mbar:has(.s-mmenu):has(>a~a){grid-template-columns:.85fr .9fr .85fr 
 .s-hand-ok .s-hand-b{background:var(--s-ok);color:var(--s-card)}
 .s-privacy{margin:6px 0 0;font-size:12.5px;color:var(--s-ink-3)}
 .s-hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+/* Rev.11 — quick cleaning booking (quickclean.js): 3 steps + live total. Shared tokens only, so A / B / C each keep their look. */
+.qc{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:18px;align-items:start;color:var(--s-ink)}
+.qc-steps{list-style:none;margin:0;padding:0;display:grid;gap:14px;min-width:0}
+.qc-step{padding:16px;border:1px solid var(--s-line);border-radius:var(--s-r);background:var(--s-card);min-width:0}
+.qc-n{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-weight:700;font-size:16px;color:var(--s-ink)}
+.qc-n span{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--s-accent);color:var(--s-on-accent);font:700 14px/1 var(--s-mono,inherit);font-variant-numeric:tabular-nums}
+.qc-types{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.qc-type{display:grid;gap:8px;align-content:start;padding:12px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .8);background:var(--s-card-2);transition:border-color .2s,box-shadow .2s,background .2s}
+.qc-type.on{border-color:var(--s-accent);background:var(--s-card);box-shadow:0 0 0 1px var(--s-accent) inset}
+.qc-art{color:var(--s-ink-2);height:54px;display:grid;place-items:center}
+.qc-svg{width:100%;max-width:120px;height:54px}
+.qc-type.on .qc-art{color:var(--s-ink)}
+.qc-tt{display:grid;gap:1px}.qc-tt b{font-size:15px}.qc-tt small{font-size:12.5px;color:var(--s-ink-3)}
+.qc-stp{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;border:1px solid var(--s-line);border-radius:999px;overflow:hidden;background:var(--s-card)}
+.qc-stp button{min-height:40px;border:0;background:transparent;color:var(--s-ink);font:600 20px/1 inherit;cursor:pointer}
+.qc-stp button:hover:not(:disabled){background:var(--s-accent-soft)}
+.qc-stp button:disabled{color:var(--s-ink-3);cursor:default}
+.qc-stp output{text-align:center;font:700 17px/1 var(--s-mono,inherit);font-variant-numeric:tabular-nums}
+.qc-size{display:grid;gap:3px;font-size:12.5px;color:var(--s-ink-3)}
+.qc-size select{min-height:36px;width:100%;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card);color:var(--s-ink);font:inherit;font-size:13px;padding:0 6px}
+.qc-how{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.qc-seg{display:grid;gap:8px}
+.qc-seg button{display:grid;gap:2px;text-align:left;padding:10px 12px;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .7);background:var(--s-card-2);color:var(--s-ink);font:inherit;cursor:pointer;transition:border-color .2s,background .2s}
+.qc-seg button b{font-size:15px}.qc-seg button small{font-size:12.5px;line-height:1.45;color:var(--s-ink-2)}
+.qc-seg button.on{border-color:var(--s-accent);background:var(--s-card);box-shadow:0 0 0 1px var(--s-accent) inset}
+.qc-where{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px 12px;align-items:start}
+.qc-where input{width:100%;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card);color:var(--s-ink);font:inherit;padding:0 12px}
+.qc-zout{grid-column:1/-1;margin:-4px 0 0;font-size:13px;color:var(--s-ink-2)}
+.qc-zout[data-tier="core"]{color:var(--s-ok)}.qc-zout[data-tier="out"],.qc-zout[data-tier="unknown"]{color:var(--s-warn)}
+.qc-sum{position:sticky;top:84px;display:grid;gap:10px;padding:18px;border:1px solid var(--s-line);border-radius:var(--s-r);background:var(--s-card);box-shadow:0 10px 30px -18px rgba(10,30,60,.35)}
+.qc-sum-h{margin:0;font-size:13px;font-weight:600;color:var(--s-ink-3)}
+.qc-empty{margin:0;color:var(--s-ink-2);font-size:14px}
+.qc-lines{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.qc-lines li,.qc-row{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.qc-lines span{display:grid}.qc-lines small{font-size:12px;color:var(--s-ink-3)}
+.qc-lines b,.qc-row b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.qc-row{color:var(--s-ink-2)}.qc-row.warn span{color:var(--s-warn)}
+.qc-total{display:flex;justify-content:space-between;align-items:end;gap:12px;padding-top:10px;border-top:1px solid var(--s-line)}
+.qc-total span{display:grid;font-weight:600}.qc-total small{font-weight:400;font-size:12px;color:var(--s-ink-3)}
+.qc-total b{font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--s-ink)}
+.qc-notes{margin:0;padding-left:18px;display:grid;gap:4px;font-size:12.5px;color:var(--s-ink-2)}
+.qc-acts{display:grid;gap:8px}
+.qc-acts .s-btn{width:100%;justify-content:center;text-align:center;min-height:46px;text-decoration:none}
+.qc-b2b{margin:0;font-size:13px;color:var(--s-ink-2)}.qc-b2b a{color:var(--s-ink);font-weight:600}
+@media (max-width:1080px){.qc{grid-template-columns:1fr}.qc-sum{position:static}}
+@media (max-width:760px){.qc-types{grid-template-columns:repeat(2,minmax(0,1fr))}.qc-how{grid-template-columns:1fr}.qc-where{grid-template-columns:1fr}}
+@media (max-width:420px){.qc-step{padding:12px}.qc-type{padding:10px}.qc-art{height:44px}.qc-svg{height:44px}}
+@media (prefers-reduced-motion:reduce){.qc-type,.qc-seg button{transition:none}}
+.tm-wait{display:block}
+/* Rev.11 — "แชท LINE" floating button (computer / tablet). LINE green darkened to #04803A so white text keeps 5:1 contrast. Sits above the quotation pill when that one is showing. */
+.sx-line{position:fixed;right:20px;bottom:20px;z-index:59;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px;border-radius:999px;background:#04803A;color:#fff;font-weight:700;font-size:15px;text-decoration:none;box-shadow:0 12px 28px -12px rgba(6,120,60,.6);transition:transform .2s,box-shadow .2s}
+.sx-line:hover{transform:translateY(-2px);box-shadow:0 16px 32px -14px rgba(6,120,60,.7)}
+.sx-line:focus-visible{outline:3px solid var(--s-accent);outline-offset:3px}
+body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
+@media (max-width:760px){.sx-line{display:none}}
+@media (prefers-reduced-motion:reduce){.sx-line{transition:none}.sx-line:hover{transform:none}}

@@ -1,6 +1,12 @@
 // SBP AirCare — contact form topic + message, and askTeam() — Rev.09
 // Every "ติดต่อสอบถาม" button (VRV / VRF, project work, FUJIVA, survey requests) scrolls to #quote with the topic pre-selected.
 import { h, CONTACT_TOPICS, COMPANY } from './sbp-core.js';
+// Rev.11: open a chat with the company's LINE OA with the text already typed in (LINE URL scheme oaMessage). Long summaries
+// are cut so the link stays within what phones accept; the customer can still edit the message before sending.
+export function lineLink(text = '') {
+  const t = String(text).slice(0, 900);
+  return `https://line.me/R/oaMessage/${encodeURIComponent(COMPANY.line)}/` + (t ? `?${encodeURIComponent(t)}` : '');
+}
 export function enhanceQuoteForm(form = document.getElementById('qform')) {
   if (!form || form.querySelector('.s-qtopic')) return;
   const sel = h('select', { id: 'q-topic', 'aria-label': 'เรื่องที่ต้องการติดต่อ' }, CONTACT_TOPICS.map(t => h('option', { value: t }, t)));
@@ -39,7 +45,7 @@ export function handoffBox({ ref, title = 'สรุปคำขอของค�
     h('p', { class: 's-hand-b' }, 'ช่วงทดลองใช้ (Beta)'),
     h('h3', {}, title, ref ? h('small', {}, ` · เลขอ้างอิง ${ref}`) : null),
     h('p', {}, note),
-    ta, h('div', { class: 's-hand-act' }, copyBtn, h('a', { class: 's-btn ghost', href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, `ส่งทาง LINE ${COMPANY.line}`), mail), msg,
+    ta, h('div', { class: 's-hand-act' }, copyBtn, h('a', { class: 's-btn ghost', href: lineLink(text), target: '_blank', rel: 'noopener' }, `ส่งทาง LINE ${COMPANY.line}`), mail), msg,
     h('dl', { class: 's-hand-c' }, h('dt', {}, 'อีเมล'), h('dd', {}, em, h('button', { type: 'button', class: 's-hand-x', onclick: async () => { msg.textContent = (await copyText(COMPANY.email)) ? 'คัดลอกอีเมลแล้ว' : 'เลือกอีเมลแล้วคัดลอกจากเครื่องของคุณ'; } }, 'คัดลอก')),
       h('dt', {}, 'โทร'), h('dd', {}, h('a', { href: COMPANY.telHref }, COMPANY.tel)),
       h('dt', {}, 'LINE'), h('dd', {}, h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line))));
