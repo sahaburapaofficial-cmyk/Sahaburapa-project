@@ -1,6 +1,6 @@
 // SBP AirCare — Room Studio UI (shared by all three variants). Builds its own markup inside `root`,
 // styled by assets/studio.css through the variant's --s-* tokens. cfg: { theme, onOpen(model, skuIndex), sceneStart }
-import { DEMO, BRAND_BY_ID, TYPE_BY_ID, DATA, CLEAN_PKGS, VAT, incVat, baht, btuFmt, h, $, $$, installOptions, cleanRate } from './sbp-core.js';
+import { DEMO, BRAND_BY_ID, TYPE_BY_ID, DATA, TRAVEL, CLEAN_PKGS, VAT, incVat, baht, btuFmt, h, $, $$, installOptions, cleanRate } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { toast } from './proto-ui.js';
 import { SCENE_GROUPS, SCENES, SCENE_BY_ID, TYPE_RULES, STD_SIZES, needBtu, btuBreakdown, recommendUnits, dirtFrom, effects, cleanInterval, dirtTh, thermal, stepT, timeToSet, steadyT, T_START, T_SET, ORIENT, GLASS, defaultOrient, dustRate, RISK, energy, RATE, EFF, LOAD_F, SET_REF, SET_RANGE, SET_PER_DEG, PETS, LOCS, PM_STD_24H, envF, clogRisk } from './studio-model.js';
@@ -270,14 +270,15 @@ export async function mountStudio(root, cfg = {}) {
     pk.addEventListener('change', () => { state.pkg = pk.value; renderReco(); });
     col2.append(h('label', { class: 's-field' }, 'แพ็กเกจ', pk));
     if (r1) {
-      const v1 = Math.max(r1.rate.s * n, DATA.minBill), v2 = Math.max((r2 ? r2.rate.s : r1.rate.s) * n, DATA.minBill);
+      const c1 = r1.rate.s * n, c2 = (r2 ? r2.rate.s : r1.rate.s) * n, tf = c => c < DATA.minBill ? TRAVEL.baseFee : 0;   // Rev.20 below the minimum = trip fee
+      const v1 = c1 + tf(c1), v2 = c2 + tf(c2);
       const annualEx = v1 * (ci.visits - 1) + v2;
       col2.append(h('dl', { class: 'st-plan' },
         h('dt', {}, 'รอบล้าง'), h('dd', {}, `${ci.visits} ครั้ง/ปี (ล้างใหญ่ 1 ครั้ง)`),
         h('dt', {}, 'ล้างปกติ / รอบ'), h('dd', {}, baht(v1)),
         h('dt', {}, 'ล้างใหญ่ / รอบ'), h('dd', {}, baht(v2)),
         h('dt', { class: 'tot' }, 'รวมต่อปี'), h('dd', { class: 'tot' }, baht(annualEx))),
-        h('p', { class: 's-note' }, `อัตรามาตรฐาน ${n} เครื่อง · ขั้นต่ำต่อรอบ ${baht(DATA.minBill)}${(r1.rate.s * n) < DATA.minBill ? ' (ปรับขึ้นเป็นขั้นต่ำแล้ว — รวมหลายห้องหรือหลายเครื่องในรอบเดียวกันจะคุ้มกว่า)' : ''} · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`),
+        h('p', { class: 's-note' }, `อัตรามาตรฐาน ${n} เครื่อง ก่อน VAT · รวมค่าเดินทางในกรุงเทพฯ ระยะ ${TRAVEL.freeKm} กม. (${tf(c1) ? `ยอดล้างต่ำกว่า ${baht(DATA.minBill)} คิดค่าเดินทาง ${baht(TRAVEL.baseFee)}/รอบ` : 'ไม่มีค่าเดินทาง'}) · นอกพื้นที่คิดตามระยะ`),
         h('button', { type: 'button', class: 's-btn', onclick: () => { cart.add({ kind: 'service', group: 'contract', key: `K-${state.scene.id}-${n}-${ci.visits}-${state.pkg}`, name: `สัญญาล้างรายปี ${state.scene.th} ${n} เครื่อง × ${ci.visits} ครั้ง/ปี`, detail: `${state.pkg} · ${TYPE_RULES[type].th} ${btuFmt(per)}`, unitEx: annualEx, qty: 1, units: n }); toast('เพิ่มสัญญาล้างรายปีในใบเสนอราคาแล้ว'); } }, '+ ใส่สัญญาล้างในใบเสนอราคา'));
     } else col2.append(h('p', { class: 's-note' }, 'ขนาดนี้ต้องประเมินค่าล้างจากหน้างาน'));
     const col = [col1, col2];

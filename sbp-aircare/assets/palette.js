@@ -28,7 +28,7 @@ export function mountPalette(cfg) {
   add('ทำทันที', 'ส่งรูปหน้างานให้ทีมประเมิน', 'ถ่ายตามรายการแล้วส่งทาง LINE', () => go('photo-survey'), 'photo survey สำรวจ รูป');
   add('ทำทันที', `แชท LINE ${COMPANY.line}`, 'เปิดแชตกับทีม', () => window.open(COMPANY.lineUrl, '_blank', 'noopener'), 'line chat');
   add('ทำทันที', `โทร ${COMPANY.tel}`, COMPANY.hours || '', () => { location.href = COMPANY.telHref; }, 'call phone โทรศัพท์');
-  if (openFeedback) add('ทำทันที', 'ให้ความเห็นเว็บไซต์', 'ช่วงทดลองใช้', () => openFeedback(), 'feedback');
+  if (openFeedback) add('ทำทันที', 'ส่งความคิดเห็นต่อเว็บไซต์', 'บอกเราว่าควรปรับอะไร', () => openFeedback(), 'feedback');
   Object.entries(views).forEach(([v, ids]) => {
     add('หน้า', viewTh[v] || v, ids.map(id => secTh[id]).filter(Boolean).slice(0, 4).join(' · '), () => go(v), v);
     ids.forEach(id => { if (secTh[id] && document.getElementById(id)) add('หัวข้อ', secTh[id], viewTh[v] || '', () => go(id), id); });

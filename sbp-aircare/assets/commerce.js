@@ -3,7 +3,7 @@
 // Markup uses the "s-" classes styled in assets/shared.css through each variant's alias tokens.
 import {
   DATA, DEMO, cleanRate, TYPES, TYPE_BY_ID, BRAND_BY_ID, CLEAN_PKGS, VAT, incVat, timeTh, TIME_NOTE, baht, btuFmt, installOptions, addonsFor,
-  checkZone, TIER_TH, TRAVEL, h, $, $$, stockTh, travelCharge, travelNote, SIZE_BANDS, isVRF, VRF_NOTE, COMPANY,
+  checkZone, TIER_TH, TRAVEL, h, $, $$, stockTh, jobTravel, travelNote, zoneOf, addrTh, SIZE_BANDS, isVRF, VRF_NOTE, COMPANY,
 } from './sbp-core.js';
 import { typeArt, toast } from './proto-ui.js';
 import { askTeam, copyText, lineLink, handoffBox } from './contact.js';
@@ -13,6 +13,7 @@ import { judge, bkkNow, dateTh, addDays, isOpen, LEAD_DAYS, RUSH_FEE_EX, SLOTS, 
 import { ticketPanel, ticketText, sendTicket, photoLine, jobsIn } from './ticket.js';
 import { canReach, ENDPOINT, BACKEND } from './submit.js';
 import { breakdown, packageParts, pipeBundle, optionNote, pipeItemFor } from './costs.js';
+import { addrPicker } from './addrpick.js';
 
 // Rev.16: what the crew will do on the visit, for the queue rules (visit time → slots)
 const QC_KEY = /^QC-[^-]+(?: [^-]+)?-(C1|C2)-(wall|ceiling|cassette|floor)-/;
@@ -92,22 +93,22 @@ export function quoteTotals(items, zone) {
   const units = quoteUnits(items);
   // annual contracts already carry travel per visit — only charge a trip for the one-off lines
   const oneOff = items.some(i => i.group !== 'contract' && i.kind !== 'survey');
-  const tc = oneOff ? travelCharge(zone, units) : { fee: 0, waived: false, short: 0 };
-  const travel = tc.fee;
-  const minGap = cleanEx > 0 && cleanEx < DATA.minBill ? DATA.minBill - cleanEx : 0;
-  const totalEx = ex + travel + minGap;
-  return { ex, travel, travelWaived: tc.waived, travelShort: tc.short, units, minGap, totalEx, vat: Math.round(totalEx * VAT), inc: totalEx + Math.round(totalEx * VAT), surveys: items.filter(i => i.unitEx == null).length };
+  // ★Rev.20 travel: core area free when the cleaning reaches the minimum, otherwise one trip fee; distance fee outside the core area
+  const tr = oneOff ? jobTravel(zone, cleanEx) : { fee: 0, small: false, label: '' };
+  const travel = tr.fee, minGap = 0;
+  const totalEx = ex + travel;
+  return { ex, travel, travelLabel: tr.label, travelSmall: tr.small, travelWaived: false, travelShort: 0, units, minGap, cleanEx, totalEx, vat: Math.round(totalEx * VAT), inc: totalEx + Math.round(totalEx * VAT), surveys: items.filter(i => i.unitEx == null).length };
 }
 export const cart = {
-  items: [], zone: null, zoneInput: '', subs: new Set(),
+  items: [], zone: null, zoneInput: '', addr: null, subs: new Set(),   // Rev.20 addr = picked {p, d, s, z}
   draft: { name: '', tel: '', line: '', tax: '', ans: {}, photos: [], note: '', scope: [], addr: '', map: '', when: '' },   // Rev.16 booking form + ticket (memory only — photos never stored)
   prefSlot: '',   // Rev.15: slot chosen in the quick booking (ช่วงเช้า / ช่วงบ่าย / ทั้งวัน)
   prefDate: '',   // Rev.11: preferred date carried in from the quick booking (kept in memory; the form shows it whenever it renders)
-  load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = (j.items || []).map(l => (j.pv || 0) < PRICE_V ? repriceLine(l) : l); this.zoneInput = j.zoneInput || ''; this.zone = this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {}
+  load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = (j.items || []).map(l => (j.pv || 0) < PRICE_V ? repriceLine(l) : l); this.zoneInput = j.zoneInput || ''; this.addr = j.addr || null; this.zone = this.addr ? zoneOf(this.addr) : this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {}
     try { const d = JSON.parse(localStorage.getItem(DKEY) || 'null'); if (d) { Object.assign(this.draft, d.draft || {}, { photos: [] }); if (d.date && d.date >= bkkNow().date) { this.prefDate = d.date; this.prefSlot = d.slot || ''; } } } catch (e) {} },
   saveDraft() { try { const { photos, scope, ...rest } = this.draft; localStorage.setItem(DKEY, JSON.stringify({ draft: rest, date: this.prefDate, slot: this.prefSlot })); } catch (e) {} },
   clearDraft() { this.draft = { name: this.draft.name, tel: this.draft.tel, line: this.draft.line, tax: this.draft.tax, ans: {}, photos: [], note: '', scope: [], addr: '', map: '', when: this.draft.when }; this.prefDate = ''; this.prefSlot = ''; this.saveDraft(); },
-  save() { try { localStorage.setItem(KEY, JSON.stringify({ pv: PRICE_V, items: this.items, zoneInput: this.zoneInput })); } catch (e) {} this.subs.forEach(f => f(this)); },
+  save() { try { localStorage.setItem(KEY, JSON.stringify({ pv: PRICE_V, items: this.items, zoneInput: this.zoneInput, addr: this.addr })); } catch (e) {} this.subs.forEach(f => f(this)); },
   add(line) {
     const same = this.items.find(i => i.key && i.key === line.key);
     if (same && line.kind !== 'survey') same.qty += line.qty || 1; else if (!same) this.items.push({ id: Math.random().toString(36).slice(2, 9), qty: 1, ...line });
@@ -116,7 +117,8 @@ export const cart = {
   setQty(id, q) { const it = this.items.find(i => i.id === id); if (!it) return; it.qty = Math.max(1, Math.min(999, q)); this.save(); },
   remove(id) { this.items = this.items.filter(i => i.id !== id); this.save(); },
   clear() { this.items = []; this.save(); },
-  setZone(input) { this.zoneInput = input; this.zone = checkZone(input); this.save(); },
+  setZone(input) { if (input && typeof input === 'object') { this.addr = input; this.zoneInput = addrTh(input); this.zone = zoneOf(input); } else { this.addr = null; this.zoneInput = input || ''; this.zone = checkZone(input); } this.save(); },
+  setAddr(a, text) { this.addr = a || null; this.zoneInput = a ? addrTh(a) : (text || ''); this.zone = a ? zoneOf(a) : (text ? checkZone(text) : null); this.save(); },
   count() { return this.items.reduce((n, i) => n + (i.kind === 'survey' ? 0 : i.qty), 0); },
   totals() { return quoteTotals(this.items, this.zone); },
   units() { return quoteUnits(this.items); },
@@ -132,7 +134,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
   dr.addEventListener('click', e => { if (e.target === dr) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !dr.hidden) close(); });
   let sent = null;
-  const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(i.unitEx * i.qty)}`), `พื้นที่: ${cart.zoneInput || '-'}`, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].join('\n'); };
+  const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(i.unitEx * i.qty)}`), `พื้นที่: ${cart.zoneInput || '-'}${cart.zone && cart.zone.km != null ? ` (ระยะถนนประมาณ ${cart.zone.km} กม.)` : ''}`, t.travel ? `${t.travelLabel}: ${baht(t.travel)}` : null, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].filter(x => x != null).join('\n'); };
   function render() {
     if (!sent) syncRush(cart.prefDate);   // Rev.16.1: the rush line follows the date and disappears with the last visit line
     const t = cart.totals();
@@ -177,21 +179,17 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     });
     body.append(list);
     // zone
-    const zi = h('input', { id: 's-cart-zone', value: cart.zoneInput, placeholder: 'เขต / อำเภอ ที่ติดตั้งหรือล้าง', autocomplete: 'off' });
-    const zr = h('p', { class: 's-zr' });
-    const showZ = () => { const z = cart.zone; zr.dataset.tier = z ? z.tier : ''; zr.textContent = !z ? 'กรอกพื้นที่เพื่อคำนวณค่าเดินทาง' : z.tier === 'core' ? `${z.match} · ${TIER_TH.core.th} ไม่มีค่าเดินทาง` : z.tier === 'extended' ? `${z.match}, ${z.province} · ประมาณ ${z.km} กม. · ${travelNote(z)}` : z.tier === 'out' ? `${z.match} · ประมาณ ${z.km} กม. · ${TIER_TH.out.th} (เกิน ${TRAVEL.maxKm} กม.)` : TIER_TH.unknown.th; };
-    let zt; zi.addEventListener('input', () => { clearTimeout(zt); zt = setTimeout(() => { cart.setZone(zi.value); showZ(); sumBox.replaceWith(sumBox = summary()); }, 250); });
-    showZ();
-    body.append(h('label', { class: 's-field', for: 's-cart-zone' }, 'พื้นที่ปฏิบัติงาน', zi), zr);
+    // ★Rev.20 job area like a postal form (addrpick.js): search or step by step → zone + travel at once
+    const ap = addrPicker({ id: 's-cart-zone', cascade: true, value: cart.addr || cart.zoneInput,
+      onPick: (a, z, how) => { cart.setAddr(a, how === 'type' ? ap.input.value : ''); sumBox.replaceWith(sumBox = summary()); } });
+    body.append(h('div', { class: 's-field s-area' }, h('label', { for: 's-cart-zone' }, 'พื้นที่หน้างาน (แขวง/ตำบล · เขต/อำเภอ · รหัสไปรษณีย์)'), ap.el));
     let sumBox = summary(); body.append(sumBox);
     function summary() {
       const t = cart.totals();
       return h('dl', { class: 's-sum' },
         h('dt', {}, 'รวมรายการ (ก่อน VAT)'), h('dd', {}, baht(t.ex)),
-        t.travel ? [h('dt', {}, 'ค่าเดินทาง 1 เที่ยว'), h('dd', {}, baht(t.travel))] : null,
-        t.travelWaived ? [h('dt', {}, `ค่าเดินทาง (ยกเว้น ${t.units} เครื่อง)`), h('dd', {}, baht(0))] : null,
-        t.travelShort ? h('p', { class: 's-note bad', style: 'grid-column:1/-1' }, `ระยะนี้รับงานขั้นต่ำ ${cart.zone.minUnits} เครื่องต่อเที่ยว (ตอนนี้ ${t.units}) ส่งข้อมูลได้ ทีมจะรวมคิวกับงานใกล้เคียงหรือเสนอทางเลือก`) : null,
-        t.minGap ? [h('dt', {}, `ปรับขั้นต่ำงานล้าง ${baht(DATA.minBill)}`), h('dd', {}, baht(t.minGap))] : null,
+        t.travel ? [h('dt', {}, t.travelLabel || 'ค่าเดินทาง'), h('dd', {}, baht(t.travel))] : null,
+        t.travelSmall && cart.zone?.tier !== 'extended' ? h('p', { class: 's-note', style: 'grid-column:1/-1' }, `งานล้างครบ ${baht(DATA.minBill)} ก่อน VAT ไม่มีค่าเดินทางในพื้นที่หลัก (ตอนนี้ ${baht(t.cleanEx)})`) : null,
         h('dt', {}, 'VAT 7%'), h('dd', {}, baht(t.vat)),
         h('dt', { class: 'tot' }, 'รวมทั้งสิ้น'), h('dd', { class: 'tot' }, baht(t.inc)),
         t.surveys ? h('p', { class: 's-note', style: 'grid-column:1/-1' }, `+ ${t.surveys} รายการประเมินหน้างาน ทีมแจ้งราคาให้ยืนยันก่อนเริ่มงาน`) : null,
@@ -245,19 +243,19 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     f.addEventListener('submit', e => {
       e.preventDefault(); const v = id => (f.querySelector('#' + id)?.value || '').trim(), isJob = !!(jobs.clean || jobs.install || jobs.repair), ref = (isJob ? 'B' : 'Q') + Date.now().toString().slice(-7);
       if (isJob) {   // Rev.16.1: a job ticket needs a date and where it is (zone for travel, address for the crew)
-        const miss = !cart.prefDate ? ['s-q-date', 'เลือกวันเข้างาน'] : judge(cart.prefDate, [], 'C1').kind === 'past' ? ['s-q-date', 'วันที่เลือกผ่านมาแล้ว'] : !cart.zoneInput ? ['s-cart-zone', 'กรอกพื้นที่ปฏิบัติงาน (เขต / อำเภอ) ด้านบน'] : !v('s-q-addr') ? ['s-q-addr', 'กรอกที่อยู่หน้างาน'] : allFull ? ['s-q-date', 'วันที่เลือกคิวเต็มแล้ว เลือกวันอื่น'] : null;
+        const miss = !cart.prefDate ? ['s-q-date', 'เลือกวันเข้างาน'] : judge(cart.prefDate, [], 'C1').kind === 'past' ? ['s-q-date', 'วันที่เลือกผ่านมาแล้ว'] : !cart.zoneInput || !cart.zone || cart.zone.tier === 'unknown' ? ['s-cart-zone', 'เลือกพื้นที่หน้างาน (แขวง/ตำบล เขต/อำเภอ) ด้านบน'] : !v('s-q-addr') ? ['s-q-addr', 'กรอกที่อยู่หน้างาน'] : allFull ? ['s-q-date', 'วันที่เลือกคิวเต็มแล้ว เลือกวันอื่น'] : null;
         if (miss) { err.textContent = miss[1]; const el = document.getElementById(miss[0]); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } return; }
       }
       const t = cart.totals(), sc = (D.scope || []).flatMap(x => x.r.lines), scEx = (D.scope || []).reduce((n, x) => n + x.r.est, 0);
       const tk = isJob ? ticketText(D) : '';
       sent = { ref, isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
-        fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc),
+        fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'แขวง/ตำบล': cart.addr?.s || '', 'เขต/อำเภอ': cart.addr?.d || cart.zone?.district || '', 'จังหวัด': cart.addr?.p || cart.zone?.province || '', 'รหัสไปรษณีย์': cart.addr?.z || '', 'ระยะถนนประมาณ (กม.)': cart.zone?.km ?? '', 'ค่าเดินทาง (ก่อน VAT)': t.travel, 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc),
           ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : '', jobs.repair ? `ซ่อม / ตรวจเช็ก ${jobs.repair} รายการ` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'รูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
         text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${visit.length && cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null].filter(x => x != null).join('\n') };
       render();
     });
     body.append(f);
-    body.append(h('button', { type: 'button', class: 's-btn ghost', onclick: async () => { toast((await copyText(quoteText())) ? 'คัดลอกสรุปแล้ว วางในอีเมลหรือแชตได้เลย' : 'คัดลอกไม่ได้ในหน้านี้'); } }, 'คัดลอกสรุปรายการ'));
+    body.append(h('button', { type: 'button', class: 's-btn ghost', onclick: async () => { toast((await copyText(quoteText())) ? 'คัดลอกสรุปแล้ว วางในอีเมลหรือแชตได้' : 'คัดลอกไม่ได้ในหน้านี้'); } }, 'คัดลอกสรุปรายการ'));
   }
   const upd = () => $$(buttons).forEach(b => { const n = cart.count(); b.dataset.n = n; const c = $('[data-cart-n]', b); if (c) c.textContent = n; b.classList.toggle('has', n > 0); b.setAttribute('aria-label', `ใบเสนอราคา ${n} รายการ`); });
   cart.subs.add(upd); upd();

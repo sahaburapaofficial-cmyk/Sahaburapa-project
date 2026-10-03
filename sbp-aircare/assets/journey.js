@@ -1,18 +1,19 @@
 // Small shared pieces for the customer journey: travel-fee table, quote progress pill, contact form topic (Rev.09).
-import { TRAVEL, incVat, baht, h, $$ } from './sbp-core.js';
+import { TRAVEL, DATA, travelFee, incVat, baht, h, $$ } from './sbp-core.js';
 import { cart } from './commerce.js';
 
+// ★Rev.20 travel rule (sbp-core TRAVEL): core = Bangkok within freeKm; outside = baseFee + perKm beyond freeKm (examples from travelFee)
 export function travelTable() {
-  const rows = [['กรุงเทพฯ นนทบุรี ปทุมธานี สมุทรปราการ สมุทรสาคร', 'ไม่มีค่าเดินทาง', '—']];
-  TRAVEL.bands.forEach(b => {
-    const fee = `${baht(b.fee(0))} ก่อน VAT`;
-    rows.push([`ระยะถนน ${b.th}`, fee, [b.minUnits > 1 ? `ขั้นต่ำ ${b.minUnits} เครื่อง` : null, b.waiveAt ? `ยกเว้นเมื่อ ${b.waiveAt} เครื่องขึ้นไป` : null].filter(Boolean).join(' · ') || '—']);
-  });
-  rows.push([`เกิน ${TRAVEL.maxKm} กม.`, 'รับเป็นงานโครงการ / สัญญา', `ค่าทีมต่อวัน + ทางด่วน + ที่พักตามจริง`]);
+  const T = TRAVEL, ex = km => `${baht(travelFee(km))}`;
+  const rows = [
+    [`กรุงเทพฯ ในระยะ ${T.freeKm} กม. จากสำนักงานใหญ่`, 'ไม่มีค่าเดินทาง', `เมื่อยอดงานล้างถึง ${baht(DATA.minBill)} ก่อน VAT · ต่ำกว่านั้น ${baht(T.baseFee)} ต่อการเข้างาน · งานติดตั้งและซ่อมไม่มีค่าเดินทาง`],
+    [`นอกระยะ ${T.freeKm} กม. หรือนอกกรุงเทพฯ (ไม่เกิน ${T.maxKm} กม.)`, `${baht(T.baseFee)} + ${baht(T.perKm)} ต่อ กม. ที่เกิน ${T.freeKm} กม.`, `ตัวอย่าง 40 กม. ${ex(40)} · 60 กม. ${ex(60)} · 100 กม. ${ex(100)} · ${T.maxKm} กม. ${ex(T.maxKm)} (ปัดขึ้นหลักร้อย)`],
+    [`เกิน ${T.maxKm} กม.`, 'รับเป็นงานโครงการ / สัญญา', 'ทีมแจ้งค่าเดินทางในใบเสนอราคา'],
+  ];
   return h('div', { class: 's-mat-wrap', tabindex: '0', role: 'region', 'aria-label': 'ตารางค่าเดินทาง' }, h('table', { class: 's-mat compact s-travel' },
     h('thead', {}, h('tr', {}, h('th', {}, 'พื้นที่'), h('th', {}, 'ค่าเดินทางต่อเที่ยว (ก่อน VAT)'), h('th', {}, 'เงื่อนไข'))),
     h('tbody', {}, rows.map(r => h('tr', {}, r.map((c, i) => i ? h('td', {}, c) : h('th', { scope: 'row' }, c)))))),
-    h('p', { class: 's-note', style: 'padding:8px 12px;margin:0' }, 'คิดต่อเที่ยว ไม่ใช่ต่อเครื่อง · งานสัญญารายปีรวมค่าเดินทางต่อรอบไว้ในราคาต่อปีแล้ว'));
+    h('p', { class: 's-note', style: 'padding:8px 12px;margin:0' }, `ระยะ = ระยะถนนโดยประมาณจากสำนักงานใหญ่ 593 ถ.พระราม 2 ถึงแขวง/ตำบลของหน้างาน คิดต่อเที่ยว ไม่ใช่ต่อเครื่อง ทีมยืนยันจากที่อยู่จริงในใบเสนอราคา`));
 }
 
 // floating "your quote" pill for desktop — appears after the first item is added
@@ -36,7 +37,7 @@ export function mountMobileMenu() {
   const fill = () => {
     panel.innerHTML = ''; panel.append(h('p', { class: 's-lbl' }, 'ไปที่หัวข้อ'));
     links().forEach(a => panel.append(h('a', { href: a.getAttribute('href'), 'aria-current': a.getAttribute('aria-current'), onclick: close }, a.textContent.replace(/^\d+\s*/, ''))));
-    if (hub) panel.append(h('a', { href: hub, class: 'hub', target: /^https?:/.test(hub) ? '_blank' : null }, 'หน้ารวมต้นแบบ A · B · C'));
+    if (hub) panel.append(h('a', { href: hub, class: 'hub', target: /^https?:/.test(hub) ? '_blank' : null }, 'เทียบแบบ A · B · C'));
   };
   sheet.append(panel); document.body.append(sheet);
   sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
@@ -56,7 +57,7 @@ const FLOW = [
   { k: 'room', th: 'เลือกห้องและขนาด', d: 'เลือกแบบห้อง ทิศแดด และจำนวนคน ดู BTU ที่เหมาะ', cta: 'เปิดห้องจำลอง' },
   { k: 'product', th: 'เลือกรุ่นแอร์', d: 'ทุกรุ่นมีราคาจริง (ก่อน VAT) และแพ็กเกจติดตั้ง', cta: 'ดูสินค้า' },
   { k: 'service', th: 'เลือกบริการ', d: 'ดูขั้นตอนล้าง ติดตั้ง ซ่อม สิ่งที่รวม/ไม่รวม และราคา', cta: 'ดูขั้นตอนบริการ' },
-  { k: 'area', th: 'เช็กพื้นที่และค่าเดินทาง', d: 'กรุงเทพฯ และปริมณฑลไม่มีค่าเดินทาง จังหวัดใกล้เคียงคิดตามระยะ', cta: 'เช็กพื้นที่' },
+  { k: 'area', th: 'เช็กพื้นที่และค่าเดินทาง', d: 'กรุงเทพฯ ในระยะ 30 กม. จากพระราม 2 เป็นพื้นที่หลัก นอกนั้นคิดค่าเดินทางตามระยะ', cta: 'เช็กพื้นที่' },
   { k: 'quote', th: 'ส่งใบเสนอราคาเบื้องต้น', d: 'ระบบรวมยอดและ VAT ส่งให้ทีมทาง LINE หรือโทร', cta: 'ดูใบเสนอราคา' },
   { k: 'site', th: 'ทีมยืนยันหน้างาน · ส่งมอบรายงาน', d: 'ยืนยันราคาก่อนเริ่มงาน ทำงานตามขั้นตอน ส่งรายงานและเงื่อนไขรับประกัน' },
 ];

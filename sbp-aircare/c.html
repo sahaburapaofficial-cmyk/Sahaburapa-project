@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Rev.11: search and link previews (LINE / Facebook). Company facts for search engines are added by site.js from COMPANY. -->
 <meta name="description" content="ล้างแอร์ ติดตั้ง ซ่อม โดยทีมช่างของบริษัท สหบูรพากรุ๊ป จำกัด กรุงเทพฯ และปริมณฑล — เลือกแอร์ วิธีล้าง และพื้นที่ แล้วเห็นราคามาตรฐานก่อน VAT ก่อนจอง พร้อมสัญญาล้างรายปีสำหรับองค์กร">
-<meta name="theme-color" content="#090E14">
+<meta name="theme-color" content="#F3F9FD">
 <link rel="canonical" href="https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/c.html">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
@@ -26,18 +26,16 @@
 <style>
 /* Layout concept C — "Virtual showroom": a dark stage where the product is the light source. Cool air = cyan, heat = orange, used as meaning, not decoration. Full-bleed 3D first, content in solid panels below. */
 :root{
-  --bg:#090E14; --stage:#0C131B; --panel:#111A24; --panel-2:#172230; --line:rgba(150,190,230,.13); --ink:#EAF0F6; --ink-2:#A6B3C2; --ink-3:#8A99AB; --on-heat:#0F1C2B;
-  --cool:#5AD0FF; --cool-d:#1F9BD6; --heat:#FF8A3D; --heat-d:#E2711D; --ok:#4ED39A; --warn:#FFB35C; --bad:#FF6B6B;
-  --display:'Kanit','Anuphan',Tahoma,sans-serif; --sans:'Anuphan','Noto Sans Thai',Tahoma,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
-  --r:18px; --ease:cubic-bezier(.2,.75,.2,1); color-scheme:dark;
+  /* ★Rev.20 bright, fresh, cool by default (owner 3 ต.ค. 2569) — the showroom is daylit; the dark stage stays for viewers who choose dark */
+  --bg:#F3F9FD; --stage:#E6F2FA; --panel:#FFFFFF; --panel-2:#F5FAFE; --line:rgba(0,60,153,.12); --ink:#0F1F33; --ink-2:#4A5B6E; --ink-3:#5E6C7C; --on-heat:#FFFFFF;
+  --blue-deep:#003C99; --cool:#0B74B5; --cool-d:#0A6FAD; --heat:#C93A0A; --heat-d:#C93A0A; --ok:#1B7A45; --warn:#B4560D; --bad:#B02A26;
+  --display:'Anuphan','IBM Plex Sans Thai',Tahoma,sans-serif; --sans:'IBM Plex Sans Thai','Noto Sans Thai',Tahoma,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --r:18px; --ease:cubic-bezier(.2,.75,.2,1); color-scheme:light;
   --s-card:var(--panel); --s-card-2:var(--panel-2); --s-ink:var(--ink); --s-ink-2:var(--ink-2); --s-ink-3:var(--ink-3); --s-line:var(--line); --s-accent:var(--heat-d); --s-on-accent:var(--on-heat); --s-accent-soft:color-mix(in oklab,var(--cool) 12%,var(--panel)); --s-ok:var(--ok); --s-warn:var(--warn); --s-bad:var(--bad); --s-r:12px; --s-mono:var(--mono);
 }
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
-  --bg:#EDF2F7; --stage:#E3EAF2; --panel:#FFFFFF; --panel-2:#F3F6FA; --line:rgba(18,63,123,.12); --ink:#0F1C2B; --ink-2:#4B5B6E; --ink-3:#616C7A; --on-heat:#FFFFFF;
-  --cool:#0A76AC; --cool-d:#0A6B9C; --heat:#B35410; --heat-d:#B9540A; --ok:#1B7A45; --warn:#B4560D; --bad:#B02A26; color-scheme:light;}}
-:root[data-theme="light"]{
-  --bg:#EDF2F7; --stage:#E3EAF2; --panel:#FFFFFF; --panel-2:#F3F6FA; --line:rgba(18,63,123,.12); --ink:#0F1C2B; --ink-2:#4B5B6E; --ink-3:#616C7A; --on-heat:#FFFFFF;
-  --cool:#0A76AC; --cool-d:#0A6B9C; --heat:#B35410; --heat-d:#B9540A; --ok:#1B7A45; --warn:#B4560D; --bad:#B02A26; color-scheme:light;}
+:root[data-theme="dark"]{
+  --bg:#090E14; --stage:#0C131B; --panel:#111A24; --panel-2:#172230; --line:rgba(150,190,230,.13); --ink:#EAF0F6; --ink-2:#A6B3C2; --ink-3:#8A99AB; --on-heat:#0F1C2B;
+  --blue-deep:#A8F0FF; --cool:#5AD0FF; --cool-d:#1F9BD6; --heat:#FF8A3D; --heat-d:#E2711D; --ok:#4ED39A; --warn:#FFB35C; --bad:#FF6B6B; color-scheme:dark;}
 *{box-sizing:border-box}[hidden]{display:none!important}
 html{scroll-behavior:smooth;scroll-padding-top:70px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
@@ -94,7 +92,7 @@ button{font:inherit;color:inherit;cursor:pointer}a{color:inherit}
 .hero-copy .wrap{display:flex;justify-content:space-between;align-items:end;gap:24px}
 .hero-copy .t{max-width:640px;pointer-events:auto}
 .hero-copy h1{font-size:clamp(34px,5vw,66px);font-weight:500;letter-spacing:-.005em;line-height:1.14}
-.hero-copy h1 em{font-style:normal;background:linear-gradient(90deg,var(--cool),#A8F0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-copy h1 em{font-style:normal;background:linear-gradient(90deg,var(--blue-deep,#003C99),var(--cool));-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero-copy p{color:var(--ink-2);margin-top:10px;font-size:17px;max-width:34em}
 .hero-copy .ctas{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 .dock{position:absolute;right:clamp(16px,3vw,32px);top:22px;z-index:3;width:300px;display:grid;gap:10px}
@@ -328,11 +326,11 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
 </style>
 </head>
 <body>
-<aside class="proto" aria-label="สถานะต้นแบบ">ต้นแบบแบบ C · ราคาสินค้าและค่าบริการจาก Pricebook 2569 ของบริษัท · ฉาก 3 มิติและห้องจำลองเป็นแบบจำลองเพื่ออธิบาย · ฟอร์มยังไม่ส่งข้อมูลจริง · <a href="./">กลับหน้ารวม</a></aside>
+<aside class="proto" aria-label="แบบเว็บไซต์">ต้นแบบแบบ C · ราคาสินค้าและค่าบริการจาก Pricebook 2569 ของบริษัท · ฉาก 3 มิติและห้องจำลองเป็นแบบจำลองเพื่ออธิบาย · ฟอร์มยังไม่ส่งข้อมูลจริง · <a href="./">กลับหน้ารวม</a></aside>
 <header class="hdr"><div class="wrap">
   <a class="logo" href="#top"><img class="logo-mk" data-logo="sbp" alt="" width="44" height="32">SBP AirCare</a>
   <nav class="nav" aria-label="เมนูหลัก"><a href="#learn">ความรู้</a><a href="#journey">แอร์ทำงาน</a><a href="#room">ห้องจำลอง</a><a href="#fit">ลองวางในห้อง</a><a href="#cleanflow">ล้าง·ติดตั้ง</a><a href="#howto">งานช่าง</a><a href="#catalog">สินค้า</a><a href="#prices">ค่าบริการ</a><a href="#quality">วัสดุ</a><a href="#b2b">สัญญารายปี</a><a href="#area">พื้นที่</a></nav>
-  <div class="vsw" aria-label="สลับต้นแบบ"><a href="./a.html">A</a><a href="./b.html">B</a><a href="./c.html" aria-current="page">C</a></div>
+  <div class="vsw" aria-label="เลือกแบบเว็บไซต์"><a href="./a.html">A</a><a href="./b.html">B</a><a href="./c.html" aria-current="page">C</a></div>
   <button type="button" data-cart-btn>ใบเสนอราคา <span data-cart-n>0</span></button>
 </div></header>
 
@@ -381,6 +379,20 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
   <section class="sec" id="start">
     <div class="sec-h"><p class="eyebrow">เริ่มต้นที่นี่</p><h2>วันนี้ต้องการอะไร</h2><p>เลือกสิ่งที่ตรงกับคุณ ระบบพาไปทีละขั้นจนส่งคำขอ ทำต่อจากเดิมได้เมื่อกลับมา</p></div>
     <div id="startRoot"></div>
+  </section>
+
+  <!-- Rev.20 service area on the home page -->
+  <section class="sec" id="coverage">
+    <div class="sec-h"><p class="eyebrow">พื้นที่ให้บริการ</p><h2>ทีมออกจากพระราม 2 ทุกเช้า</h2><p>กรุงเทพฯ ในระยะ 30 กม. จากสำนักงานใหญ่ 593 ถ.พระราม 2 ไม่มีค่าเดินทางเมื่อยอดงานล้างถึงขั้นต่ำ นอกระยะนั้นและจังหวัดใกล้เคียงรับงานถึง 150 กม. คิดค่าเดินทางตามระยะทาง เลือกแขวง/ตำบลของหน้างานเพื่อดูค่าเดินทางทันที</p></div>
+    <div class="cov2 panel" data-zone>
+      <div id="covMap"></div>
+      <div class="cov2-side">
+        <label class="field">ตรวจพื้นที่หน้างาน<input data-z-input placeholder="แขวง/ตำบล เขต/อำเภอ หรือรหัสไปรษณีย์"></label>
+        <div class="zres" data-z-result hidden></div>
+        <ul class="cov2-facts"><li><b>พื้นที่หลัก</b> กรุงเทพฯ ในระยะ 30 กม. ไม่มีค่าเดินทางเมื่องานล้างถึงขั้นต่ำ</li><li><b>นอกพื้นที่หลัก</b> 300 บาท + 10 บาทต่อ กม. ที่เกิน 30 กม. (ก่อน VAT)</li><li><b>เกิน 150 กม.</b> รับเป็นงานโครงการหรือสัญญา</li></ul>
+        <a class="cov2-more" href="#area">ตารางค่าเดินทางและแผนที่เต็ม</a>
+      </div>
+    </div>
   </section>
 
   <!-- WORKFLOW -->
@@ -462,6 +474,12 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
   </section>
 
   <!-- PRICE CENTRE -->
+  <!-- Rev.20 standards -->
+  <section class="sec" id="standards">
+    <div class="sec-h"><p class="eyebrow">มาตรฐานงานของเรา</p><h2>ล้าง ติดตั้ง ซ่อม ตามมาตรฐานที่ตรวจสอบได้</h2><p>งานล้างปกติและล้างใหญ่ทำอะไรบ้าง น้ำยาและสเปรย์โฟมที่ทีมเลือกใช้ งานติดตั้งตามแบบฟอร์มของบริษัทพร้อมวัสดุที่ระบุยี่ห้อ และสิ่งที่ลูกค้าได้รับทุกงาน</p></div>
+    <div class="panel" id="stdRoot"></div>
+  </section>
+
   <section class="sec" id="prices" data-reveal>
     <div class="sec-h"><p class="eyebrow">ค่าบริการทั้งหมด</p><h2>ราคาชัด ก่อนเรียกช่าง</h2><p>ราคาทุกรายการดึงจาก Pricebook 2569 ของบริษัท (ใบเสนอราคาติดตั้ง / ล้างและซ่อม) ทุกราคาเป็นราคาก่อน VAT · ล้างและติดตั้งครอบคลุมทุกประเภท ยกเว้นระบบ VRV / VRF <a href="#quote" data-ask="ระบบ VRV / VRF">ติดต่อทีมโครงการแยก</a></p></div>
     <div class="panel" id="priceCenter"></div>
@@ -481,15 +499,14 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
 
   <!-- COVERAGE -->
   <section class="sec" id="area" data-reveal>
-    <div class="sec-h"><p class="eyebrow">พื้นที่ให้บริการ</p><h2>ทีมออกจากพระราม 2 ทุกเช้า</h2><p>แผนที่ประเทศไทย 3 มิติ แสดงจังหวัดที่ให้บริการและช่วงค่าเดินทาง แตะจังหวัดหรือพิมพ์เขต/อำเภอเพื่อตรวจ</p></div>
+    <div class="sec-h"><p class="eyebrow">พื้นที่ให้บริการ</p><h2>ทีมออกจากพระราม 2 ทุกเช้า</h2><p>กรุงเทพฯ ในระยะ 30 กม. จากสำนักงานใหญ่ 593 ถ.พระราม 2 ไม่มีค่าเดินทางเมื่อยอดงานล้างถึงขั้นต่ำ นอกระยะนั้นและจังหวัดใกล้เคียงรับงานถึง 150 กม. คิดค่าเดินทางตามระยะทาง เลือกแขวง/ตำบลของหน้างานเพื่อดูค่าเดินทางทันที</p></div>
     <div class="cov" data-zone>
       <div id="mapRoot"></div>
       <div class="panel" style="display:grid;gap:12px;align-content:start">
         <label class="field">ตรวจพื้นที่<input data-z-input placeholder="เขต อำเภอ จังหวัด หรือรหัสไปรษณีย์"></label>
         <div class="try"><button type="button" data-z-try="สาทร">สาทร</button><button type="button" data-z-try="บางบัวทอง">บางบัวทอง</button><button type="button" data-z-try="บางพลี">บางพลี</button><button type="button" data-z-try="สามพราน">สามพราน</button><button type="button" data-z-try="ศรีราชา">ศรีราชา</button><button type="button" data-z-try="ระยอง">ระยอง</button></div>
         <div class="zres" data-z-result hidden></div>
-        <p class="note"><span style="color:var(--cool)">●</span> พื้นที่หลัก &nbsp; <span style="color:var(--warn)">●</span> นอกพื้นที่ คิดค่าเดินทางตามช่วงระยะ (ไม่เกิน 150 กม.)</p>
-        <div id="travelTbl"></div>
+                <div id="travelTbl"></div>
       </div>
     </div>
   </section>
@@ -508,14 +525,15 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
 <script type="module">
 import { mountCatalog, mountBuilder, mountZone, mountFaq, mountViewer, mountRoom, toast, reveal, wireDrawers, openDrawer, closeDrawer,
   productDrawerContent, compareTable, typeArt, h, $, $$, baht, BRAND_BY_ID, TYPE_BY_ID, reduceMotion, incVat } from './assets/proto-ui.js';
-import { FAQ, PRESETS, TYPES, ZONES } from './assets/sbp-core.js';
+import { FAQ, PRESETS, TYPES } from './assets/sbp-core.js';
 import { loadData, DEMO as CATA, BRANDS as BRS, DATA as PBK } from './assets/sbp-core.js';
 import { mountCart, productDetail, mountPriceCenter, cart, mountMaterials } from './assets/commerce.js';
 import { mountStudio } from './assets/studio.js';
 import { mountServices } from './assets/services.js';
 import { mountHowItWorks } from './assets/howitworks3d.js';
 import { mountTechStory } from './assets/techstory.js';
-import { mountThaiMap } from './assets/thaimap3d.js';
+import { mountAreaMap } from './assets/areamap3d.js';
+import { mountStandards } from './assets/standards.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
 import { mountRoomFit } from './assets/roomfit.js';
@@ -552,6 +570,7 @@ mountKnowledge($('#learnRoot'), { ids: { cleanflow: 'cleanflow', fit: 'fit', stu
 mountMaterials($('#qualityRoot'), { theme: dark() ? 'dark' : 'light' });
 const TSX = mountTechStory($('#storyRoot'), { theme: dark() ? 'dark' : 'light' });
 const SVX = mountServices($('#servicesRoot'), { how: false, onType: t => HWX.setType(t) });
+mountStandards($('#stdRoot'));   // Rev.20 standards: cleaning · chemicals · installation · repair · what every job includes
 $('#travelTbl').append(travelTable());
 
 // builder
@@ -592,9 +611,13 @@ wireDrawers();
 // dot-matrix coverage (083-inspired)
 
 // 3D Thailand service-area map linked to the address checker
-const zoneRoot = $('#area [data-zone]'), zIn = $('[data-z-input]', zoneRoot);
-const TMAP = await mountThaiMap($('#mapRoot'), { theme: '' + (dark() ? 'dark' : 'light') + '', onPick: th => { zIn.value = th; zIn.dispatchEvent(new Event('input')); } });
-mountZone(zoneRoot, { onResult: z => TMAP.highlight(z) });
+// Rev.20 service area in 3D with motion (areamap3d.js) — home band + the area section, each linked to its address picker
+const MAPTHEME = dark() ? 'dark' : 'light';
+const COV = await mountAreaMap($('#covMap'), { theme: MAPTHEME, compact: true });
+mountZone($('#coverage [data-zone]'), { onResult: z => COV.highlight(z) });
+const zoneRoot = $('#area [data-zone]'); let ZONE = null;
+const AMAP = await mountAreaMap($('#mapRoot'), { theme: MAPTHEME, onPick: a => ZONE && ZONE.pick(a) });
+ZONE = mountZone(zoneRoot, { onResult: z => AMAP.highlight(z) });
 
 FAQ.forEach(f => $('#faqList').append(h('details', {}, h('summary', {}, f.q), h('p', {}, f.a))));
 mountFaq($('#faqList'));
@@ -609,7 +632,7 @@ reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountSite({
   variant: 'C', openCart: CART.open, openProduct,
-  views: { home: ['top', 'book', 'start', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'howto', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'howto', 'standards', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'ช่างทำงานในบ้านจำลอง', cleanflow: 'ทีมช่างล้าง · ติดตั้ง' },
   hooks: {
     clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'),

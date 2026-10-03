@@ -66,7 +66,7 @@ console.log(JSON.stringify({ page, results }, null, 1));
 await b.close();
 const bad = results.some(r => r.errors) ||
   !results[0].contact.includes('ส่งถึงทีมแล้ว') || !results[0].quote.includes('ส่งถึงทีมแล้ว') || !results[0].feedback.includes('ส่งถึงทีมแล้ว') || results[0].posts.length !== 3 ||
-  !results[1].contact.includes('ช่วงทดลองใช้') || results[1].posts.length !== 3 ||
+  !results[1].contact.includes('ส่งคำขอถึงทีม') || results[1].posts.length !== 3 ||
   results[2].posts.length !== 0 || results[2].contact.includes('ส่งถึงทีมแล้ว') ||
   !results[3].contact.includes('ส่งถึงทีมแล้ว') || !results[3].quote.includes('ส่งถึงทีมแล้ว') || !results[3].feedback.includes('ส่งถึงทีมแล้ว') || results[3].posts.length !== 3;
 process.exit(bad ? 1 : 0);

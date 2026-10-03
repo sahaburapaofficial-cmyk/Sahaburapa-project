@@ -80,9 +80,9 @@ for (const page of pages) {
   if (await p.locator('.sx-fbf').count()) {
     await p.locator('.sx-fbf input[type="radio"]').first().check(); await p.fill('.sx-fbf textarea', `ทดสอบความเห็น ${V}`);
     await p.locator('.sx-fbf button[type="submit"]').click(); await p.waitForTimeout(1500);
-    ok(`${V} ความเห็นทดลองใช้ → แท็บ "ความเห็น"`, tabRows('ความเห็น').some(r => r.includes(V)));
+    ok(`${V} ความคิดเห็น → แท็บ "ความเห็น"`, tabRows('ความเห็น').some(r => r.includes(V)));
     await p.keyboard.press('Escape');
-  } else ok(`${V} ความเห็นทดลองใช้`, false, 'button not found');
+  } else ok(`${V} ความคิดเห็น`, false, 'button not found');
 
   // 4 · status lookup on the site
   await p.goto(`${BASE}/${page}#quote`); await p.waitForTimeout(2000);

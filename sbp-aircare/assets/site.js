@@ -15,6 +15,7 @@ import { mountRemoteSurvey } from './survey.js';
 import { QUEUE_URL, fetchStatus } from './queue.js';
 import { mountPalette } from './palette.js';
 import { mountFx } from './fx.js';
+import { mountAcBot } from './acbot.js';
 
 // Rev.12: official logo files — inlined by the build (globalThis.__SBP_LOGOS), read from assets/logos/ on the dev server
 const logoSrc = k => (globalThis.__SBP_LOGOS && globalThis.__SBP_LOGOS[k]) || `assets/logos/${k}.png`;
@@ -35,7 +36,7 @@ export const VIEWS = {
   contact: { th: 'ติดต่อเรา', lead: 'ข้อมูลบริษัท ช่องทางติดต่อ พื้นที่ให้บริการ และส่งคำขอให้ทีมติดต่อกลับ' },
 };
 const SEC_TH = {
-  hero: 'เริ่มต้น', book: 'จองล้างแอร์', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
+  hero: 'เริ่มต้น', book: 'จองล้างแอร์', coverage: 'พื้นที่ให้บริการ', standards: 'มาตรฐานงานของเรา', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
   catalog: 'เลือกรุ่นและราคา', studio: 'หาขนาด BTU ตามห้อง', room: 'หาขนาด BTU ตามห้อง', fit: 'ลองวางในห้องของคุณ',
   cleanflow: 'ทีมช่างทำงานทีละขั้น', prices: 'ราคาทุกบริการ', quality: 'วัสดุในแพ็กเกจ', story: 'ล้างถึงชิ้นไหน', inside: 'ข้างในแอร์',
   howto: 'แอร์ทำงานอย่างไร · ขั้นตอนบริการ', b2b: 'ประเมินงบสัญญารายปี', learn: 'คู่มือก่อนตัดสินใจ', journey: 'แอร์ทำงานอย่างไร',
@@ -56,7 +57,7 @@ export const JOURNEYS = {
 };
 // what to do after each view
 const NEXT = {
-  shop: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รวมเครื่อง ติดตั้ง อุปกรณ์เสริม และ VAT' }, { go: 'area', th: 'ตรวจพื้นที่และค่าเดินทาง', sub: 'ฟรีในกรุงเทพฯ และปริมณฑล' }, { go: 'cleanflow', pre: 'install', th: 'ดูขั้นตอนติดตั้งของทีม', sub: 'มาตรฐาน / พรีเมียม ทดสอบอะไรบ้าง' }],
+  shop: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รวมเครื่อง ติดตั้ง อุปกรณ์เสริม และ VAT' }, { go: 'area', th: 'ตรวจพื้นที่และค่าเดินทาง', sub: 'เลือกแขวง/เขต เห็นค่าเดินทางทันที' }, { go: 'cleanflow', pre: 'install', th: 'ดูขั้นตอนติดตั้งของทีม', sub: 'มาตรฐาน / พรีเมียม ทดสอบอะไรบ้าง' }],
   service: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รายการที่กดเพิ่มไว้ พร้อมยอดรวม' }, { ask: 'ล้างแอร์', th: 'นัดวันกับทีม', sub: 'ฝากชื่อและเบอร์ ทีมโทรกลับ' }, { go: 'catalog', th: 'ซื้อแอร์ใหม่พร้อมติดตั้ง', sub: 'ทุกรุ่นพร้อมราคา' }],
   business: [{ ask: 'สัญญาล้างรายปี', th: 'ส่งรายการเครื่องให้ทีม', sub: 'ทีมขายเตรียมใบเสนอราคาสัญญา' }, { go: 'cleanflow', pre: 'clean', th: 'ดูมาตรฐานงานล้าง', sub: 'ขั้นตอนตามแบบฟอร์มของบริษัท' }, { go: 'area', th: 'พื้นที่ให้บริการ', sub: 'และค่าเดินทางนอกพื้นที่หลัก' }],
   knowledge: [{ go: 'studio|room', th: 'หาขนาด BTU ที่เหมาะ', sub: 'เลือกห้องที่ใกล้เคียงของคุณ' }, { go: 'catalog', th: 'ดูรุ่นแอร์และราคา', sub: 'เทียบรุ่นได้' }, { ask: 'อื่น ๆ', th: 'ถามทีมของเรา', sub: 'ฝากคำถาม ทีมติดต่อกลับ' }],
@@ -243,7 +244,7 @@ export function mountSite(cfg) {
         svgI(j.ico), h('b', {}, j.th), h('small', {}, j.sub),
         h('ol', {}, steps.map(s => h('li', {}, s.th))), h('span', { class: 'sx-int-go' }, 'เริ่ม'));
     });
-    cards.push(h('button', { type: 'button', class: 'sx-int sx-int-fuj', onclick: () => askTeam('FUJIVA') }, h('span', { class: 'sx-ico sx-ico-logo', 'aria-hidden': 'true' }, logoImg('fujiva', '')), h('b', {}, 'แอร์ FUJIVA'), h('small', {}, 'แบรนด์ของบริษัท · ราคากำลังจะขึ้นเว็บ'), h('ol', {}, h('li', {}, 'สอบถามรุ่นและราคากับทีมขาย')), h('span', { class: 'sx-int-go' }, 'สอบถาม')));
+    cards.push(h('button', { type: 'button', class: 'sx-int sx-int-fuj', onclick: () => askTeam('FUJIVA') }, h('span', { class: 'sx-ico sx-ico-logo', 'aria-hidden': 'true' }, logoImg('fujiva', '')), h('b', {}, 'แอร์ FUJIVA'), h('small', {}, 'แบรนด์ของบริษัท · สอบถามรุ่นและราคากับทีมขาย'), h('ol', {}, h('li', {}, 'สอบถามรุ่นและราคากับทีมขาย')), h('span', { class: 'sx-int-go' }, 'สอบถาม')));
     startRoot.append(homeJ, h('div', { class: 'sx-ints' }, cards),
       h('ul', { class: 'sx-trust', 'aria-label': 'ทำไมเลือกเรา' }, [
         `ประสบการณ์ด้านแอร์ ${COMPANY.years}`, 'ทีมช่างของบริษัทเอง', 'ราคามาตรฐานจาก Pricebook แสดงก่อนเรียกช่าง', 'ใบกำกับภาษีเต็มรูป', 'รายงานหลังงานรายเครื่อง', 'วัสดุติดตั้งระบุยี่ห้อ'].map(t => h('li', {}, t))));
@@ -315,11 +316,12 @@ export function mountSite(cfg) {
 
   /* ---- 9 · beta notice, feedback, footer, mobile bar ---- */
   const proto = $('aside.proto');
-  const fbBtn = () => h('button', { type: 'button', class: 'sx-fbb', onclick: openFeedback }, 'ให้ความเห็น');
+  const fbBtn = () => h('button', { type: 'button', class: 'sx-fbb', onclick: openFeedback }, 'ส่งความคิดเห็น');
   if (proto) {
     const hub = proto.querySelector('a');
     proto.innerHTML = ''; proto.classList.add('sx-beta');
-    proto.append(h('b', {}, `ทดลองใช้ (Beta) · แบบ ${variant}`), h('span', { class: 'sx-bt' }, canSend() ? ' · ราคาจาก Pricebook 2569 · คำขอส่งถึงทีมโดยตรง' : ' · ราคาจาก Pricebook 2569 · ช่วงทดลองระบบยังไม่ส่งคำขอถึงทีมอัตโนมัติ'), ' ', fbBtn());
+    // Rev.20 production wording: only which design this is + the A · B · C comparison (for the owner's review), no trial notice
+    proto.append(h('b', {}, `แบบเว็บไซต์ ${variant}`), h('span', { class: 'sx-bt' }, ' · ราคามาตรฐาน Pricebook 2569 ก่อน VAT'));
     if (hub) { hub.textContent = 'เทียบแบบ A · B · C'; proto.append(' ', hub); }
   }
   const foot = $('footer');
@@ -328,8 +330,8 @@ export function mountSite(cfg) {
     foot.append(h('div', { class: 'wrap sx-foot' },
       h('div', {}, h('b', { class: 'sx-fb-brand' }, logoImg('sbp', ''), COMPANY.brand), h('p', {}, COMPANY.th), h('p', {}, COMPANY.addr), COMPANY.hours ? h('p', {}, 'เวลาทำการ ', COMPANY.hours) : null, h('p', {}, 'โทร ', h('a', { href: COMPANY.telHref }, COMPANY.tel), ' · ', h('span', { class: 'sx-sel' }, COMPANY.email)), h('p', {}, 'LINE ', h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line), ' · เลขผู้เสียภาษี ', COMPANY.taxId)),
       h('div', {}, h('h4', {}, 'บริการและสินค้า'), h('ul', {}, live.filter(v => v !== 'home').map(v => h('li', {}, h('a', { href: '#' + v }, VIEWS[v].th))))),
-      h('div', {}, h('h4', {}, 'ช่วงทดลองใช้'), h('p', {}, 'เว็บไซต์เวอร์ชันทดลองสำหรับลูกค้ากลุ่มแรก ราคาตาม Pricebook 2569 ยืนยันอีกครั้งในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
-      h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))))));
+      h('div', {}, h('h4', {}, 'มาตรฐานบริการ'), h('ul', {}, h('li', {}, h('a', { href: '#standards' }, 'มาตรฐานงานล้างและติดตั้ง')), h('li', {}, h('a', { href: '#area' }, 'พื้นที่ให้บริการและค่าเดินทาง')), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))), h('p', {}, 'ราคามาตรฐานตาม Pricebook 2569 ก่อน VAT ยืนยันในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
+      h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: COMPANY.fbUrl, target: '_blank', rel: 'noopener' }, 'Facebook'))))));
   }
   // Rev.11: business facts for search engines (schema.org), built from COMPANY so the page and the data never disagree
   try {
@@ -362,15 +364,15 @@ export function mountSite(cfg) {
       h('label', { class: 's-field' }, 'อะไรที่สับสน หรืออยากให้ปรับ', h('textarea', { name: 'sx-fix', rows: 3 })),
       h('label', { class: 's-field' }, 'ชื่อ / เบอร์ (ถ้าต้องการให้ทีมติดต่อกลับ)', h('input', { name: 'sx-who', autocomplete: 'name' })),
       h('div', { class: 'sx-dlg-a' }, h('button', { type: 'submit', class: 's-btn primary' }, canSend() ? 'ส่งความเห็น' : 'สร้างสรุปความเห็น'), h('button', { type: 'button', class: 's-btn ghost', onclick: close }, 'ปิด')));
-    const body = h('div', { class: 'sx-dlg-b' }, h('h2', { id: 'sx-fb-h' }, `ช่วยเราปรับเว็บไซต์ · แบบ ${variant}`), h('p', {}, 'ใช้เวลาไม่ถึง 1 นาที ความเห็นของคุณใช้ตัดสินใจเลือกแบบเว็บไซต์จริง'), f);
+    const body = h('div', { class: 'sx-dlg-b' }, h('h2', { id: 'sx-fb-h' }, 'ความคิดเห็นต่อเว็บไซต์'), h('p', {}, 'ใช้เวลาไม่ถึง 1 นาที ความเห็นของคุณใช้ตัดสินใจเลือกแบบเว็บไซต์จริง'), f);
     const dlg = h('div', { class: 'sx-dlg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'sx-fb-h' }, body);
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
     f.addEventListener('submit', e => {
       e.preventDefault(); const fd = new FormData(f), g = k => (fd.get(k) || '').toString().trim();
-      const text = [`ความเห็นทดลองใช้เว็บไซต์ SBP AirCare · แบบ ${variant}`, `ใช้งานง่าย: ${g('sx-ease') || '-'}`, `หาสิ่งที่ต้องการ: ${g('sx-find') || '-'}`, `ส่วนที่ชอบที่สุด: ${g('sx-best') || '-'}`, `ควรปรับ: ${g('sx-fix') || '-'}`, `หน้าที่เปิดดู: ${[...seen].map(v => VIEWS[v].th).join(', ')}`, g('sx-who') ? `ผู้ให้ความเห็น: ${g('sx-who')}` : null].filter(Boolean).join('\n');
+      const text = [`ความคิดเห็นต่อเว็บไซต์ SBP AirCare · แบบ ${variant}`, `ใช้งานง่าย: ${g('sx-ease') || '-'}`, `หาสิ่งที่ต้องการ: ${g('sx-find') || '-'}`, `ส่วนที่ชอบที่สุด: ${g('sx-best') || '-'}`, `ควรปรับ: ${g('sx-fix') || '-'}`, `หน้าที่เปิดดู: ${[...seen].map(v => VIEWS[v].th).join(', ')}`, g('sx-who') ? `ผู้ให้ความเห็น: ${g('sx-who')}` : null].filter(Boolean).join('\n');
       const box = h('div'), ref = 'F' + Date.now().toString().slice(-7);
       body.innerHTML = ''; body.append(h('h2', { id: 'sx-fb-h' }, 'ขอบคุณสำหรับความเห็น'), box, h('div', { class: 'sx-dlg-a' }, h('button', { type: 'button', class: 's-btn ghost', onclick: close }, 'ปิด')));
-      deliver(box, 'feedback', { ref, variant, text, title: 'ความเห็นของคุณ', subject: `ความเห็นทดลองใช้เว็บไซต์ แบบ ${variant}`,
+      deliver(box, 'feedback', { ref, variant, text, title: 'ความเห็นของคุณ', subject: `ความคิดเห็นต่อเว็บไซต์ แบบ ${variant}`,
         fields: { 'ใช้งานง่าย': g('sx-ease'), 'หาสิ่งที่ต้องการ': g('sx-find'), 'ส่วนที่ชอบที่สุด': g('sx-best'), 'ควรปรับ': g('sx-fix'), 'หน้าที่เปิดดู': [...seen].map(v => VIEWS[v].th).join(', '), 'ผู้ให้ความเห็น': g('sx-who') } });
     });
     document.body.append(dlg); addEventListener('keydown', esc);
@@ -388,5 +390,7 @@ export function mountSite(cfg) {
   // Rev.14: command palette (Ctrl / ⌘ K) over every page, section, model, FAQ and quick action
   try { mountPalette({ variant, views, viewTh: Object.fromEntries(Object.entries(VIEWS).map(([k, v]) => [k, v.th])), secTh: { ...SEC_TH, ...labels, 'photo-survey': 'ส่งรูปหน้างานให้ทีมประเมิน' }, go, openCart, openProduct: cfg.openProduct, openFeedback }); } catch (e) { console.warn('palette unavailable', e); }
   try { mountFx(variant); } catch (e) { /* decorative only */ }
-  return { go, view: () => cur, startJourney, openFeedback };
+  // Rev.20 "ถามอาการแอร์" automatic assistant (rule based, in the page)
+  let BOT = null; try { BOT = mountAcBot({ openCart, go }); } catch (e) { /* optional */ }
+  return { go, view: () => cur, startJourney, openFeedback, bot: BOT };
 }

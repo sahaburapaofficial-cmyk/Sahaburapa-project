@@ -14,7 +14,7 @@ const TABS = { quote: 'ใบเสนอราคา', contact: 'ติดต�
 const BOARD_COLS = ['ราคาเพิ่มที่แจ้ง (ก่อน VAT)', 'นัดวัน', 'นัดช่วง', 'หมายเหตุทีม', 'รูป'];   // filled by the team on the board
 const MAX_PHOTOS = 8, MAX_PHOTO_B64 = 1500000;
 const MAX_TEXT = 8000;
-const VERSION = 'Rev.19.1';
+const VERSION = 'Rev.20';
 let SILENT = false;   // selfTest(): no e-mail / LINE for the test request
 
 // the company sheet: the one this script is bound to, or SHEET_ID (set by setup() for a standalone script)
@@ -245,8 +245,8 @@ function setup() {
   P.setProperty('SHEET_ID', ss.getId());
   const base = ['เวลา', 'เลขอ้างอิง', 'สถานะ', 'แบบ', 'หน้า'];
   const cols = {
-    quote: ['ชื่อ / บริษัท', 'โทร', 'วันที่สะดวก', 'ช่วงเวลา', 'ใบกำกับภาษีในนาม', 'พื้นที่', 'จำนวนรายการ', 'ยอดประมาณการรวม VAT'],
-    booking: ['ชื่อ / บริษัท', 'โทร', 'LINE ID', 'สะดวกให้ติดต่อ', 'วันที่สะดวก', 'ช่วงเวลา', 'พื้นที่', 'ที่อยู่หน้างาน', 'แผนที่', 'งาน', 'ขอบเขต', 'ส่วนเพิ่มประมาณ (ก่อน VAT)', 'ยอดประมาณการรวม VAT', 'หมายเหตุหน้างาน', 'ใบกำกับภาษีในนาม', 'จำนวนรายการ'].concat(BOARD_COLS),
+    quote: ['ชื่อ / บริษัท', 'โทร', 'วันที่สะดวก', 'ช่วงเวลา', 'ใบกำกับภาษีในนาม', 'พื้นที่', 'แขวง/ตำบล', 'เขต/อำเภอ', 'จังหวัด', 'รหัสไปรษณีย์', 'ค่าเดินทาง (ก่อน VAT)', 'จำนวนรายการ', 'ยอดประมาณการรวม VAT'],
+    booking: ['ชื่อ / บริษัท', 'โทร', 'LINE ID', 'สะดวกให้ติดต่อ', 'วันที่สะดวก', 'ช่วงเวลา', 'พื้นที่', 'แขวง/ตำบล', 'เขต/อำเภอ', 'จังหวัด', 'รหัสไปรษณีย์', 'ระยะถนนประมาณ (กม.)', 'ค่าเดินทาง (ก่อน VAT)', 'ที่อยู่หน้างาน', 'แผนที่', 'งาน', 'ขอบเขต', 'ส่วนเพิ่มประมาณ (ก่อน VAT)', 'ยอดประมาณการรวม VAT', 'หมายเหตุหน้างาน', 'ใบกำกับภาษีในนาม', 'จำนวนรายการ'].concat(BOARD_COLS),
     contact: ['ชื่อ', 'โทร'], feedback: [],
   };
   Object.keys(TABS).forEach(k => { let sh = ss.getSheetByName(TABS[k]); if (!sh) { sh = ss.insertSheet(TABS[k]); sh.appendRow(base.concat(cols[k], ['สรุป'])); sh.setFrozenRows(1); } });

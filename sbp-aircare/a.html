@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Rev.11: search and link previews (LINE / Facebook). Company facts for search engines are added by site.js from COMPANY. -->
 <meta name="description" content="ล้างแอร์ ติดตั้ง ซ่อม โดยทีมช่างของบริษัท สหบูรพากรุ๊ป จำกัด กรุงเทพฯ และปริมณฑล — เลือกแอร์ วิธีล้าง และพื้นที่ แล้วเห็นราคามาตรฐานก่อน VAT ก่อนจอง พร้อมสัญญาล้างรายปีสำหรับองค์กร">
-<meta name="theme-color" content="#123F7B">
+<meta name="theme-color" content="#F3F9FD">
 <link rel="canonical" href="https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/a.html">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
@@ -26,22 +26,21 @@
 <style>
 /* Layout concept A — "Bento Clean": calm neutral ground, white tiles on a 4-col named grid, one dark feature tile, brand orange only on primary CTAs. */
 :root{
-  --bg:#EEF2F6; --tile:#FFFFFF; --tile-2:#F6F8FB; --ink:#15202C; --ink-2:#4F5D6D; --ink-3:#616C7A;
-  --line:rgba(18,63,123,.10); --blue:#123F7B; --blue-2:#1B5AA8; --blue-l:#E6EEF8; --or:#AD5110; --or-d:#93440C; --or-l:#FCEBDD; --on-or:#FFFFFF;
-  --ok:#1B7A45; --warn:#B4560D; --bad:#B02A26; --feature:#0F2744; --feature-ink:#EAF1FA;
-  --shadow:0 1px 1px rgba(16,34,60,.04),0 2px 6px rgba(16,34,60,.05),0 16px 32px -20px rgba(16,34,60,.25);
-  --r:22px; --r-s:14px; --sans:'Anuphan','Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  /* ★Rev.20 bright, fresh, cool (owner 3 ต.ค. 2569) — FUJIVA navy #003C99 + sky blue, SP orange-red only on primary actions */
+  --bg:#F3F9FD; --tile:#FFFFFF; --tile-2:#F6FAFE; --ink:#0F1F33; --ink-2:#4A5B6E; --ink-3:#5E6C7C;
+  --line:rgba(0,60,153,.10); --blue:#003C99; --blue-2:#0B74B5; --blue-l:#E3F2FC; --or:#C93A0A; --or-d:#A92F07; --or-l:#FDECE4; --on-or:#FFFFFF;
+  --ok:#1B7A45; --warn:#B4560D; --bad:#B02A26; --feature:#003C99; --feature-ink:#EEF6FF;
+  --shadow:0 1px 1px rgba(0,60,153,.04),0 2px 6px rgba(0,60,153,.05),0 16px 32px -20px rgba(0,60,153,.22);
+  --r:22px; --r-s:14px; --sans:'IBM Plex Sans Thai','Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif; --display:'Anuphan','IBM Plex Sans Thai','Noto Sans Thai',Tahoma,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --ease:cubic-bezier(.22,.7,.18,1); color-scheme:light;
   --s-card:var(--tile); --s-card-2:var(--tile-2); --s-ink:var(--ink); --s-ink-2:var(--ink-2); --s-ink-3:var(--ink-3); --s-line:var(--line); --s-accent:var(--or); --s-on-accent:var(--on-or); --s-accent-soft:var(--blue-l); --s-ok:var(--ok); --s-warn:var(--warn); --s-bad:var(--bad); --s-r:14px; --s-mono:var(--mono);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0C1117; --tile:#141B24; --tile-2:#1A232E; --ink:#E7EDF4; --ink-2:#A9B6C4; --ink-3:#8A99AB; --line:rgba(160,190,230,.12);
-  --blue:#7FB0EE; --blue-2:#8DB9F2; --blue-l:#17263A; --or:#F08A3A; --or-d:#F29C55; --or-l:#2E1D10; --on-or:#15202C; --feature:#0A1A2E; --feature-ink:#E6EEF8;
-  --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 18px 36px -24px rgba(0,0,0,.7); color-scheme:dark;}}
+/* dark only when the viewer chooses it explicitly — the brand look is bright */
 :root[data-theme="dark"]{
   --bg:#0C1117; --tile:#141B24; --tile-2:#1A232E; --ink:#E7EDF4; --ink-2:#A9B6C4; --ink-3:#8A99AB; --line:rgba(160,190,230,.12);
   --blue:#7FB0EE; --blue-2:#8DB9F2; --blue-l:#17263A; --or:#F08A3A; --or-d:#F29C55; --or-l:#2E1D10; --on-or:#15202C; --feature:#0A1A2E; --feature-ink:#E6EEF8;
   --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 18px 36px -24px rgba(0,0,0,.7); color-scheme:dark;}
+h1,h2,h3{font-family:var(--display)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{scroll-behavior:smooth;scroll-padding-top:84px}
@@ -105,7 +104,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .seg button{border:0;background:transparent;border-radius:999px;padding:7px 13px;font-size:14px;color:var(--ink-2)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .pill{border:1px solid var(--line);background:color-mix(in oklab,var(--tile) 88%,transparent);backdrop-filter:blur(8px);border-radius:999px;padding:7px 14px;font-size:14px}
-.pill[aria-pressed="true"]{border-color:var(--blue-2);color:var(--blue-2);background:var(--blue-l)}
+.pill[aria-pressed="true"]{border-color:var(--blue-2);color:var(--blue);background:var(--blue-l)}
 .t-b2b{grid-area:b2b;background:var(--feature);color:var(--feature-ink);display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:end}
 .t-b2b h2{font-size:26px}
 .t-b2b p{color:color-mix(in oklab,var(--feature-ink) 72%,transparent);margin-top:8px}
@@ -121,7 +120,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 @keyframes ping{70%{box-shadow:0 0 0 10px rgba(27,122,69,0)}100%{box-shadow:0 0 0 0 rgba(27,122,69,0)}}
 .demo{font-size:11px;color:var(--ink-3);border:1px dashed var(--line);border-radius:6px;padding:1px 6px;display:inline-block;margin-top:8px}
 .t-area{grid-area:area;display:flex;flex-direction:column;gap:12px}
-.t-area svg{width:100%;height:auto;max-height:210px}
+.t-area #areaTile{min-width:0}
 .t-area input{width:100%}
 .t-fuj{grid-area:fuj;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(160deg,var(--blue-l),var(--tile) 70%)}
 .t-fuj .art{width:100%;height:auto;color:var(--blue-2);margin-block:10px}
@@ -378,14 +377,14 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
 </style>
 </head>
 <body>
-<aside class="proto" aria-label="สถานะต้นแบบ">ต้นแบบแบบ A · ราคาสินค้าและค่าบริการจาก Pricebook 2569 ของบริษัท · สถานะคิวและรายงานเป็นตัวอย่าง · ฟอร์มยังไม่ส่งข้อมูลจริง · <a href="./">กลับหน้ารวม</a></aside>
+<aside class="proto" aria-label="แบบเว็บไซต์">ต้นแบบแบบ A · ราคาสินค้าและค่าบริการจาก Pricebook 2569 ของบริษัท · สถานะคิวและรายงานเป็นตัวอย่าง · ฟอร์มยังไม่ส่งข้อมูลจริง · <a href="./">กลับหน้ารวม</a></aside>
 <header class="hdr">
   <div class="wrap">
     <a class="logo" href="#top"><img class="logo-mk" data-logo="sbp" alt="" width="44" height="32"><span>SBP AirCare<small>สหบูรพากรุ๊ป</small></span></a>
     <nav class="nav" aria-label="เมนูหลัก">
       <a href="#learn">ความรู้</a><a href="#catalog">สินค้า</a><a href="#cleanflow">ขั้นตอนช่าง</a><a href="#howto">งานบริการ</a><a href="#prices">ค่าบริการ</a><a href="#studio">ห้องจำลอง</a><a href="#fit">ลองวางในห้อง</a><a href="#b2b">สัญญารายปี</a><a href="#quality">วัสดุ</a><a href="#area">พื้นที่</a>
     </nav>
-    <div class="vsw" aria-label="สลับต้นแบบ"><a href="./a.html" aria-current="page">A</a><a href="./b.html">B</a><a href="./c.html">C</a></div>
+    <div class="vsw" aria-label="เลือกแบบเว็บไซต์"><a href="./a.html" aria-current="page">A</a><a href="./b.html">B</a><a href="./c.html">C</a></div>
     <button type="button" data-cart-btn>ใบเสนอราคา <span data-cart-n>0</span></button>
   </div>
 </header>
@@ -446,18 +445,12 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
     </div>
     <div class="tile t-area" data-zone>
       <p class="eyebrow">พื้นที่ให้บริการ</p>
-      <svg viewBox="0 0 260 170" aria-hidden="true">
-        <g class="prov core" data-z-prov="นนทบุรี"><rect x="40" y="18" width="70" height="40" rx="10"/><text x="75" y="43" text-anchor="middle">นนทบุรี</text></g>
-        <g class="prov core" data-z-prov="ปทุมธานี"><rect x="118" y="8" width="96" height="40" rx="10"/><text x="166" y="33" text-anchor="middle">ปทุมธานี</text></g>
-        <g class="prov core" data-z-prov="กรุงเทพมหานคร"><rect x="60" y="64" width="150" height="50" rx="12"/><text x="135" y="94" text-anchor="middle">กรุงเทพฯ</text></g>
-        <g class="prov core" data-z-prov="สมุทรสาคร"><rect x="8" y="104" width="80" height="40" rx="10"/><text x="48" y="129" text-anchor="middle">สมุทรสาคร</text></g>
-        <g class="prov core" data-z-prov="สมุทรปราการ"><rect x="150" y="120" width="100" height="40" rx="10"/><text x="200" y="145" text-anchor="middle">สมุทรปราการ</text></g>
-      </svg>
-      <input class="inp" data-z-input placeholder="พิมพ์เขต อำเภอ หรือรหัสไปรษณีย์" aria-label="ตรวจพื้นที่ให้บริการ">
+      <div id="areaTile"></div>
+      <input class="inp" data-z-input placeholder="แขวง/ตำบล เขต/อำเภอ หรือรหัสไปรษณีย์" aria-label="ตรวจพื้นที่ให้บริการ">
       <div class="zres" data-z-result hidden></div>
     </div>
     <div class="tile t-fuj">
-      <div><p class="eyebrow">แบรนด์ของเราเอง</p><h3 style="margin-top:4px">FUJIVA Inverter</h3><p class="demo">ราคาและรุ่นกำลังจะขึ้นเว็บ · สอบถามทีมขายได้</p></div>
+      <div><p class="eyebrow">แบรนด์ของเราเอง</p><h3 style="margin-top:4px">FUJIVA Inverter</h3><p class="demo">สอบถามรุ่นและราคากับทีมขาย</p></div>
       <div id="fujArt"></div>
       <a class="btn-soft" href="#quote">สอบถาม FUJIVA</a>
     </div>
@@ -577,6 +570,12 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
     </div>
   </section>
 
+  <!-- Rev.20 standards -->
+  <section class="sec" id="standards">
+    <div class="sec-h"><div><p class="eyebrow">มาตรฐานงานของเรา</p><h2>ล้าง ติดตั้ง ซ่อม ตามมาตรฐานที่ตรวจสอบได้</h2><p>งานล้างปกติและล้างใหญ่ทำอะไรบ้าง น้ำยาและสเปรย์โฟมที่ทีมเลือกใช้ งานติดตั้งตามแบบฟอร์มของบริษัทพร้อมวัสดุที่ระบุยี่ห้อ และสิ่งที่ลูกค้าได้รับทุกงาน</p></div></div>
+    <div class="tile" id="stdRoot"></div>
+  </section>
+
   <!-- PRICE CENTRE -->
   <section class="sec" id="prices" data-reveal>
     <div class="sec-h"><div><p class="eyebrow">ค่าบริการทั้งหมด</p><h2>ราคาล้าง ติดตั้ง ซ่อม และอุปกรณ์เสริม</h2><p>ราคาทุกรายการดึงจาก Pricebook 2569 ของบริษัท (ใบเสนอราคาติดตั้ง / ล้างและซ่อม) ทุกราคาเป็นราคาก่อน VAT กด "เพิ่ม" เพื่อรวมยอดในใบเสนอราคาเบื้องต้น</p></div></div>
@@ -648,7 +647,7 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
 
   <!-- AREA -->
   <section class="sec" id="area" data-reveal>
-    <div class="sec-h"><div><p class="eyebrow">พื้นที่ให้บริการ</p><h2>กรุงเทพฯ และปริมณฑล</h2><p>ไม่มีค่าเดินทางใน 5 จังหวัดนี้ จังหวัดใกล้เคียงรับงานถึงประมาณ 150 กม. จากสำนักงานใหญ่ 593 ถ.พระราม 2 คิดค่าเดินทางต่อเที่ยวตามช่วงระยะ</p></div></div>
+    <div class="sec-h"><div><p class="eyebrow">พื้นที่ให้บริการ</p><h2>กรุงเทพฯ ในระยะ 30 กม. และจังหวัดใกล้เคียง</h2><p>กรุงเทพฯ ในระยะ 30 กม. จากสำนักงานใหญ่ 593 ถ.พระราม 2 ไม่มีค่าเดินทางเมื่อยอดงานล้างถึงขั้นต่ำ นอกระยะนั้นและจังหวัดใกล้เคียงรับงานถึง 150 กม. คิดค่าเดินทางตามระยะทาง เลือกแขวง/ตำบลของหน้างานเพื่อดูค่าเดินทางทันที</p></div></div>
     <div class="area" data-zone>
       <div class="tile" id="mapRoot"></div>
       <div class="tile" style="display:grid;gap:12px;align-content:start">
@@ -656,7 +655,7 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
         <div class="try"><button type="button" data-z-try="บางนา">บางนา</button><button type="button" data-z-try="ปากเกร็ด">ปากเกร็ด</button><button type="button" data-z-try="สามพราน">สามพราน</button><button type="button" data-z-try="ศรีราชา">ศรีราชา</button><button type="button" data-z-try="ระยอง">ระยอง</button></div>
         <div class="zres" data-z-result hidden></div>
         <div id="travelTbl"></div>
-        <p style="font-size:13px;color:var(--ink-3)">ระยะทางในต้นแบบคำนวณโดยประมาณ เว็บจริงคำนวณจากที่อยู่ด้วย Google Maps</p>
+        <p style="font-size:13px;color:var(--ink-3)">ระยะทางเป็นระยะถนนโดยประมาณจากแขวง/ตำบลของหน้างาน ทีมยืนยันจากที่อยู่จริงในใบเสนอราคา</p>
       </div>
     </div>
   </section>
@@ -692,7 +691,8 @@ import { mountCart, productDetail, mountPriceCenter, cart, mountMaterials } from
 import { mountStudio } from './assets/studio.js';
 import { mountServices } from './assets/services.js';
 import { mountHowItWorks } from './assets/howitworks3d.js';
-import { mountThaiMap } from './assets/thaimap3d.js';
+import { mountAreaMap } from './assets/areamap3d.js';
+import { mountStandards } from './assets/standards.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
 import { mountRoomFit } from './assets/roomfit.js';
@@ -791,12 +791,14 @@ mountMaterials($('#qualityRoot'), { theme: 'light' });
 let SVX = null;
 const HWX = mountHowItWorks($('#howRoot'), { theme: 'light', throwStyle: 'remote', onType: t => SVX && SVX.setType(t) });
 SVX = mountServices($('#servicesRoot'), { how: false, onType: t => HWX.setType(t), onPart: p => HWX.focusPart(p) });
+mountStandards($('#stdRoot'));   // Rev.20 standards: cleaning · chemicals · installation · repair · what every job includes
 $('#travelTbl').append(travelTable());
-$$('[data-zone]').forEach(z => z.closest('#area') || mountZone(z));
-// 3D Thailand service-area map linked to the address checker
-const zoneRoot = $('#area [data-zone]'), zIn = $('[data-z-input]', zoneRoot);
-const TMAP = await mountThaiMap($('#mapRoot'), { theme: 'light', onPick: th => { zIn.value = th; zIn.dispatchEvent(new Event('input')); } });
-mountZone(zoneRoot, { onResult: z => TMAP.highlight(z) });
+// Rev.20 service area in 3D with motion (areamap3d.js) — home tile + the area section, each linked to its address picker
+const ATILE = await mountAreaMap($('#areaTile'), { theme: 'light', compact: true });
+mountZone($('.t-area[data-zone]'), { onResult: z => ATILE.highlight(z) });
+const zoneRoot = $('#area [data-zone]'); let ZONE = null;
+const AMAP = await mountAreaMap($('#mapRoot'), { theme: 'light', onPick: a => ZONE && ZONE.pick(a) });
+ZONE = mountZone(zoneRoot, { onResult: z => AMAP.highlight(z) });
 
 FAQ.forEach(f => $('#faqList').append(h('details', {}, h('summary', {}, f.q), h('p', {}, f.a))));
 mountFaq($('#faqList'));
@@ -811,7 +813,7 @@ reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountSite({
   variant: 'A', openCart: CART.open, openProduct,
-  views: { home: ['hero', 'book', 'start', 'flow', 'services'], shop: ['catalog', 'studio', 'fit'], service: ['cleanflow', 'prices', 'quality', 'story', 'inside'], business: ['b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['hero', 'book', 'start', 'flow', 'services'], shop: ['catalog', 'studio', 'fit'], service: ['cleanflow', 'standards', 'prices', 'quality', 'story', 'inside'], business: ['b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });
 </script>

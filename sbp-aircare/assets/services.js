@@ -2,7 +2,7 @@
 // for cleaning / installing / repairing it, with pricebook prices and "add to quote".
 // Process text follows the company forms: SBP-SR-ACCL-UNI-001 Rev.07 (cleaning), SBP-SR-ACIN-UNI-001 Rev.04 (installation)
 // and the repair section of the pricebook. Prices are read from DATA (standard rate only).
-import { DATA, CLEAN_PKGS, SIZE_BANDS, PRICING, TYPE_BY_ID, incVat, baht, btuFmt, installOptions, cleanRate, h, $$, reduceMotion } from './sbp-core.js';
+import { DATA, TRAVEL, CLEAN_PKGS, SIZE_BANDS, PRICING, TYPE_BY_ID, incVat, baht, btuFmt, installOptions, cleanRate, h, $$, reduceMotion } from './sbp-core.js';
 import { cart, materialTable, cleanPackageGuide } from './commerce.js';
 import { toast } from './proto-ui.js';
 
@@ -438,7 +438,7 @@ export function mountServices(root, cfg = {}) {
           h('dt', {}, 'ดูแลหลังบริการ'), h('dd', {}, r?.care || '—'),
           h('dt', {}, 'เอกสารที่ได้รับ'), h('dd', {}, r?.doc || '—'),
           h('dt', {}, 'กำลังทีม (ล้างปกติ)'), h('dd', {}, `ประมาณ ${per} เครื่อง / ทีม / วัน ขึ้นกับหน้างาน`),
-          h('dt', {}, 'ขั้นต่ำต่อครั้ง'), h('dd', {}, `ค่าล้างรวมต่อครั้งขั้นต่ำ ${baht(DATA.minBill)} (ก่อน VAT)`)),
+          h('dt', {}, 'ยอดขั้นต่ำต่อครั้ง'), h('dd', {}, `งานล้าง ${baht(DATA.minBill)} ก่อน VAT · ต่ำกว่านี้คิดค่าเดินทาง ${baht(TRAVEL.baseFee)} ต่อการเข้างาน`)),
         list('รวมในราคา', r ? [r.inc] : []),
         list('ไม่รวม', splitTxt(r?.exc), 'exc'),
         extrasBox(),

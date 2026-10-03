@@ -13,7 +13,9 @@ await p.evaluate(() => localStorage.removeItem('sbp-quote-v2'));
 const baht = s => +String(s).replace(/[^\d]/g, '');
 const total = async () => baht(await p.locator('.qc-total b').innerText());
 const out = { page, w: +w };
-out.start = await total();                                                   // 1 wall unit → raised to the cleaning minimum
+out.start = await total();                                                   // 1 wall unit: below the cleaning minimum
+// Rev.20 travel rule: a cleaning job below the minimum carries one trip fee (300 before VAT) instead of a top-up to the minimum
+out.startTravel = await p.locator('#bookRoot .qc-row', { hasText: 'ค่าเดินทาง' }).count();
 await p.click('#bookRoot button[aria-label="เพิ่ม ติดผนัง"]'); await p.click('#bookRoot button[aria-label="เพิ่ม แขวนใต้ฝ้า"]');
 await p.locator('#bookRoot .qc-seg button', { hasText: 'ล้างใหญ่' }).click();
 await p.fill('#qc-zone', 'ศรีราชา'); await p.fill('#qc-date', '2026-11-20'); await p.dispatchEvent('#qc-date', 'change'); await p.waitForTimeout(600);
@@ -41,5 +43,5 @@ out.lineHref = (await p.locator('.qc-line').getAttribute('href')).slice(0, 48);
 out.errors = errs.length; if (errs.length) out.err = errs.slice(0, 3);
 console.log(JSON.stringify(out));
 await b.close();
-const bad = errs.length || !(out.start > 0) || out.quick !== out.cartTotal || cart.n !== 2 || cart.qty !== 3 || cart.zone !== 'ศรีราชา' || cart.date !== '2026-11-20' || out.again !== 3 || out.rushAdds !== 535 || out.rushLine !== 1 || !out.rushCart || !out.rushGone || !out.lineHref.startsWith('https://line.me/R/oaMessage/%40sahaservices/');
+const bad = errs.length || !(out.start > 0) || out.startTravel !== 1 || out.quick !== out.cartTotal || cart.n !== 2 || cart.qty !== 3 || !/ศรีราชา/.test(cart.zone || '') || cart.date !== '2026-11-20' || out.again !== 3 || out.rushAdds !== 535 || out.rushLine !== 1 || !out.rushCart || !out.rushGone || !out.lineHref.startsWith('https://line.me/R/oaMessage/%40sahaservices/');
 process.exit(bad ? 1 : 0);

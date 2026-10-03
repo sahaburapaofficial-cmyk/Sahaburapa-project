@@ -36,7 +36,7 @@ export async function sendRequest(kind, { ref, variant, fields = {}, text, hp = 
   } catch (e) { return { ok: false, reason: e.name === 'AbortError' ? 'timeout' : 'network' }; } finally { clearTimeout(t); }
 }
 
-const KIND_TH = { quote: 'ใบเสนอราคา', booking: 'ใบจองงาน', contact: 'ติดต่อ', feedback: 'ความเห็นทดลองใช้' };
+const KIND_TH = { quote: 'ใบเสนอราคา', booking: 'ใบจองงาน', contact: 'ติดต่อ', feedback: 'ความคิดเห็นจากลูกค้า' };
 // FormSubmit wants flat JSON (fields become rows of the e-mail table; `_honey` is its bot trap); Apps Script reads one JSON blob
 // sent as text/plain so the request stays "simple" (no CORS preflight, which Apps Script cannot answer).
 export function requestBody(url, { kind, ref, variant, page, fields = {}, text = '', hp = '' }) {

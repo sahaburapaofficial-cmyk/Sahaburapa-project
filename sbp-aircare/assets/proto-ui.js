@@ -5,6 +5,7 @@ import {
   baht, btuFmt, checkZone, TIER_TH, estimateContract, PRESETS, recommendBtu, h, $, $$, countUp, reduceMotion,
   CLEAN_PKGS, SIZE_BANDS, DATA, incVat, up100, TRAVEL, stockTh, travelNote, VOLUME_HINT,
 } from './sbp-core.js';
+import { attachAddr } from './addrpick.js';
 import { createACViewer, createRoomSim, PARTS } from './ac3d.js';
 import { deferred } from './lazy.js';
 
@@ -158,9 +159,9 @@ export function mountBuilder(root, cfg = {}) {
     out('high').forEach(x => x.textContent = has ? `ก่อน VAT · รวม VAT ${baht(e.annualInc)}` : '—');
     out('perunit').forEach(x => x.textContent = has ? `≈ ${baht(up100(e.perUnitYear))} ก่อน VAT` : '—');
     out('teamdays').forEach(x => x.textContent = has ? `${e.teamDaysPerVisit} ทีม-วัน / รอบ (ประมาณ)` : '—');
-    out('off').forEach(x => x.textContent = has ? `ใช้${e.level.th} (${e.count} เครื่อง)${e.minBillApplied ? ` · ปรับขั้นต่ำ ${baht(DATA.minBill)}/รอบ` : ''}${high ? ' · งานสูงเกิน 3 ม. ประเมินหน้างาน' : ''}${e.count >= VOLUME_HINT ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไขบริษัท ทีมขายยืนยันในใบเสนอราคา' : ''}` : '');
+    out('off').forEach(x => x.textContent = has ? `ใช้${e.level.th} (${e.count} เครื่อง)${e.travel ? ` · ${e.travelLabel || 'ค่าเดินทาง'} ${baht(e.travel)}/รอบ` : ''}${high ? ' · งานสูงเกิน 3 ม. ประเมินหน้างาน' : ''}${e.count >= VOLUME_HINT ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไขบริษัท ทีมขายยืนยันในใบเสนอราคา' : ''}` : '');
     out('visits').forEach(x => x.textContent = `${visits} ครั้ง / ปี${deep ? ' (ล้างใหญ่ 1)' : ''}`);
-    out('tier').forEach(x => x.textContent = !zone || zone.tier === 'core' ? 'กทม.และปริมณฑล' : zone.tier === 'extended' ? (e.travelWaived ? `ยกเว้นค่าเดินทาง (${e.count} เครื่อง)` : `+ค่าเดินทาง ${baht(zone.fee)}/รอบ${e.travelShort ? ` · ขั้นต่ำ ${zone.minUnits} เครื่อง` : ''}`) : zone.tier === 'out' ? 'เกินระยะ — ประเมินแยก' : 'ตรวจพื้นที่');
+    out('tier').forEach(x => x.textContent = e.travel ? `+ค่าเดินทาง ${baht(e.travel)}/รอบ` : zone && zone.tier === 'out' ? 'เกินระยะ · ทีมประเมินเป็นงานโครงการ' : 'ไม่มีค่าเดินทาง');
     $$('[data-b-bar]', root).forEach(bar => { const k = bar.dataset.bBar; const max = Math.max(1, ...Object.values(units)); bar.style.setProperty('--w', ((units[k] || 0) / max * 100).toFixed(1) + '%'); });
     linesBox.innerHTML = '';
     if (has) linesBox.append(h('table', { class: 's-btable' }, h('thead', {}, h('tr', {}, h('th', {}, 'ประเภท'), h('th', {}, 'เครื่อง'), h('th', {}, 'ล้างปกติ/เครื่อง'), h('th', {}, 'ล้างใหญ่/เครื่อง'))),
@@ -183,12 +184,14 @@ export function mountBuilder(root, cfg = {}) {
   $('[data-b-pkg]', root).addEventListener('change', e => { pkg = e.target.value; calc(); });
   $('[data-b-size]', root).addEventListener('change', e => { size = +e.target.value; calc(); });
   $('[data-b-deep]', root).addEventListener('change', e => { deep = e.target.checked; calc(); });
-  const zi = $('[data-b-zone]', root), zr = $('[data-b-zone-result]', root);
-  zi && zi.addEventListener('input', () => {
-    zone = checkZone(zi.value);
-    if (zr) { zr.dataset.tier = zone ? zone.tier : ''; zr.textContent = !zone ? '' : zone.tier === 'core' ? `${zone.match} — ${TIER_TH.core.th}` : zone.tier === 'extended' ? `${zone.match} ${zone.province} · ~${zone.km} กม. · ${travelNote(zone)}` : zone.tier === 'out' ? `${zone.match} · ~${zone.km} กม. — ${TIER_TH.out.th}` : TIER_TH.unknown.th; }
+  // Rev.20 area picker (addrpick.js) in place of the free-text box
+  const zr = $('[data-b-zone-result]', root);
+  const zap = attachAddr($('[data-b-zone]', root), { onPick: (a, z) => {
+    zone = z && z.tier !== 'unknown' ? z : null;
+    if (zr) { zr.dataset.tier = z ? z.tier : ''; zr.textContent = !z ? '' : `${z.match} — ${(TIER_TH[z.tier] || TIER_TH.unknown).th} · ${travelNote(z)}`; }
     calc();
-  });
+  } });
+  const zi = zap && zap.input;
   const first = PRESETS[1]; setUnits(first.units); visits = first.visits; markPreset(first.id);
   $$('[data-b-visits]', root).forEach(r => r.checked = +r.value === visits);
   calc();
@@ -197,21 +200,24 @@ export function mountBuilder(root, cfg = {}) {
 
 /* ---------------- Service-area checker ---------------- */
 export function mountZone(root, cfg = {}) {
-  const inp = $('[data-z-input]', root), res = $('[data-z-result]', root);
-  function run() {
-    const z = checkZone(inp.value);
+  const res = $('[data-z-result]', root);
+  // Rev.20 postal-style picker: แขวง/ตำบล · เขต/อำเภอ · จังหวัด · รหัสไปรษณีย์ → zone and travel fee of that exact place
+  const ap = attachAddr($('[data-z-input]', root), { onPick: (a, z) => show(z) });
+  function show(z) {
     $$('[data-z-prov]', root).forEach(el => el.classList.toggle('hit', !!z && el.dataset.zProv === z.province));
     if (!z) { res.hidden = true; return; }
     res.hidden = false; res.dataset.tier = z.tier;
     res.innerHTML = '';
-    res.append(h('strong', {}, TIER_TH[z.tier].th), h('span', {}, ` ${z.match}${z.province && z.match !== z.province ? ' · ' + z.province : ''}`), h('p', {}, TIER_TH[z.tier].note));
-    if (z.tier === 'extended') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. จากสำนักงานใหญ่ · ${travelNote(z)} (${baht(z.fee)} ก่อน VAT)`));
-    if (z.tier === 'out') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. เกิน ${TRAVEL.maxKm} กม. — รับเป็นงานโครงการหรือสัญญา คิดค่าทีมต่อวัน + ทางด่วน + ที่พักตามจริง`));
+    res.append(h('strong', {}, (TIER_TH[z.tier] || TIER_TH.unknown).th), h('span', {}, ` ${z.match || ''}`), h('p', {}, (TIER_TH[z.tier] || TIER_TH.unknown).note));
+    if (z.tier === 'core') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. จากสำนักงานใหญ่ · ไม่มีค่าเดินทางเมื่อยอดงานล้างถึง ${baht(DATA.minBill)} (ต่ำกว่านั้น ${baht(TRAVEL.baseFee)} ต่อการเข้างาน)`));
+    if (z.tier === 'extended') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. จากสำนักงานใหญ่ · ค่าเดินทาง ${baht(z.fee)} ต่อเที่ยว (ก่อน VAT)`));
+    if (z.tier === 'out' && z.km != null) res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. เกิน ${TRAVEL.maxKm} กม. — รับเป็นงานโครงการหรือสัญญา ทีมแจ้งค่าเดินทางในใบเสนอราคา`));
     cfg.onResult && cfg.onResult(z);
   }
-  inp.addEventListener('input', run);
-  $$('[data-z-try]', root).forEach(b => b.addEventListener('click', () => { inp.value = b.dataset.zTry; run(); }));
-  $$('[data-z-prov]', root).forEach(el => el.addEventListener('click', () => { inp.value = el.dataset.zProv; run(); }));
+  const run = text => { ap.input.value = text; ap.input.dispatchEvent(new Event('input')); };
+  $$('[data-z-try]', root).forEach(b => b.addEventListener('click', () => run(b.dataset.zTry)));
+  $$('[data-z-prov]', root).forEach(el => el.addEventListener('click', () => run(el.dataset.zProv)));
+  return { pick: z => ap.set(z), input: ap.input };
 }
 
 /* ---------------- FAQ ---------------- */
@@ -490,7 +496,6 @@ export function productDrawerContent(m, skuIndex, { onPick, on3D, onQuote } = {}
       h('button', { type: 'button', class: 'btn-primary', onclick: () => onQuote && onQuote(m, sku) }, 'ขอราคาพร้อมติดตั้ง'),
       h('button', { type: 'button', class: 'btn-ghost', onclick: () => on3D && on3D(m, sku) }, 'ดูข้างในแบบ 3 มิติ'),
     ),
-    h('p', { class: 'pd-note' }, 'ข้อมูลรุ่นและราคาในต้นแบบนี้สร้างขึ้นเพื่อทดสอบหน้าจอ ใช้ข้อมูลจริงจาก Catalog เมื่อพัฒนา'),
   );
   return wrap;
 }

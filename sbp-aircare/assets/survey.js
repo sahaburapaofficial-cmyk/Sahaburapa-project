@@ -65,7 +65,7 @@ export function mountRemoteSurvey(root, { job = 'install' } = {}) {
       h('div', { class: 'sv2-act' },
         h('a', { class: 's-btn primary', href: lineLink(message(cur, r)), target: '_blank', rel: 'noopener' }, `ส่งรูปทาง LINE ${COMPANY.line}`),
         h('span', { class: 'sv2-ref' }, `เลขอ้างอิง ${r}`)),
-      h('p', { class: 's-note' }, 'กดแล้วจะเปิดแชต LINE ของบริษัทพร้อมข้อความรายการนี้ แนบรูปและวิดีโอต่อในแชตได้เลย · เว็บไซต์ไม่ได้เก็บรูปของคุณ · ถ้าข้อมูลยังไม่พอประเมิน ทีมจะแจ้งขอนัดดูหน้างาน'));
+      h('p', { class: 's-note' }, 'กดแล้วจะเปิดแชต LINE ของบริษัทพร้อมข้อความรายการนี้ แนบรูปและวิดีโอต่อในแชตได้ · เว็บไซต์ไม่ได้เก็บรูปของคุณ · ถ้าข้อมูลยังไม่พอประเมิน ทีมจะแจ้งขอนัดดูหน้างาน'));
   }
   root.append(h('div', { class: 'sv2' },
     h('div', { class: 'sv2-head' }, h('p', { class: 'sv2-eyebrow' }, 'ลดการนัดสำรวจ'), h('h3', {}, 'ส่งรูปหน้างานให้ทีมประเมินก่อน'),

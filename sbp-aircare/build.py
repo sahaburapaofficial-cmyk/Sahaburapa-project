@@ -47,6 +47,9 @@ DATA = read(os.path.join(A, 'sbp-data.json'))
 DATA_TAG = '<script>globalThis.__SBP_DATA=' + DATA.replace('</', '<\\/') + '</script>'
 THGEO = read(os.path.join(A, 'thai-provinces.json'))
 DATA_TAG += '<script>globalThis.__SBP_TH=' + THGEO.replace('</', '<\\/') + '</script>'
+# Rev.20 address book for the area picker + travel rule (assets/th-address.json, tools/build-address.py)
+ADDRJ = read(os.path.join(A, 'th-address.json'))
+DATA_TAG += '<script>globalThis.__SBP_ADDR=' + ADDRJ.replace('</', '<\\/') + '</script>'
 # official brand logo files (only when supplied with the brand owner's permission): assets/logos/<key>.png → globalThis.__SBP_LOGOS
 LOGO_DIR = os.path.join(A, 'logos')
 if os.path.isdir(LOGO_DIR):
