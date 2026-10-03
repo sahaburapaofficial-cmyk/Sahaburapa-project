@@ -7,7 +7,7 @@ import {
 } from './sbp-core.js';
 import { typeArt, toast } from './proto-ui.js';
 import { askTeam, copyText, lineLink, handoffBox } from './contact.js';
-import { deliver, canSend, privacyNote, honeypot } from './submit.js';
+import { deliver, canSend, privacyNote, honeypot, newRid, withRef } from './submit.js';
 import { productVisual } from './product-media.js';
 import { judge, bkkNow, dateTh, addDays, isOpen, LEAD_DAYS, RUSH_FEE_EX, SLOTS, fetchSlots, slotFree } from './queue.js';
 import { ticketPanel, ticketText, sendTicket, photoLine, jobsIn } from './ticket.js';
@@ -16,11 +16,22 @@ import { breakdown, packageParts, pipeBundle, optionNote, pipeItemFor } from './
 import { addrPicker } from './addrpick.js';
 
 // Rev.16: what the crew will do on the visit, for the queue rules (visit time → slots)
-const QC_KEY = /^QC-[^-]+(?: [^-]+)?-(C1|C2)-(wall|ceiling|cassette|floor)-/;
+// ★Rev.21.1 (review BUG-05): every cleaning line says its type and level — quick booking (QC-), price centre (C-) and the
+// service / crew sections (CL-) alike; a line whose time is not published (AHU, coil-only, duct …) is on the visit with
+// "unknown" time (the team confirms), never quietly a wall unit C1; add-ons (heavy dirt, height) are not extra units
+const CLEAN_KEY = /^(?:QC|CL|C)-.+-(C1|C2)-(wall|ceiling|cassette|floor|duct)-/;
 export function visitLines(items) {
   const J = jobsIn(items), out = [];
-  items.forEach(i => { if (i.group === 'clean' && i.unitEx != null) { const m = QC_KEY.exec(i.key || ''); out.push({ t: m ? m[2] : 'wall', level: m ? m[1] : 'C1', qty: i.qty }); } });
-  if (J.install) out.push({ t: J.type, level: 'install', qty: J.install });
+  items.forEach(i => {
+    if (i.group !== 'clean' || i.unitEx == null) return;
+    const m = CLEAN_KEY.exec(i.key || '');
+    if (m) { out.push({ t: m[2], level: m[1], qty: i.qty }); return; }
+    const r = /^CX-/.test(i.key || '') ? DATA.clean.find(r => r.name === i.key.slice(3)) : null;
+    if (r && /^(งานเพิ่ม|Access)/.test(r.ty || '')) return;
+    out.push({ t: null, level: 'C1', qty: i.qty, unknown: true });
+  });
+  (J.units || []).forEach(u => out.push({ t: u.type, level: 'install', qty: u.qty }));   // each installation line with its own type
+  if (J.surveys) out.push({ t: null, level: 'install', qty: J.surveys, unknown: true });
   if (J.repair) out.push({ t: 'wall', level: 'repair', qty: J.repair });   // no published time for repair — half-day slot, no time estimate
   return out;
 }
@@ -106,7 +117,7 @@ export const cart = {
   prefDate: '',   // Rev.11: preferred date carried in from the quick booking (kept in memory; the form shows it whenever it renders)
   load() { try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) { this.items = (j.items || []).map(l => (j.pv || 0) < PRICE_V ? repriceLine(l) : l); this.zoneInput = j.zoneInput || ''; this.addr = j.addr || null; this.zone = this.addr ? zoneOf(this.addr) : this.zoneInput ? checkZone(this.zoneInput) : null; } } catch (e) {}
     try { const d = JSON.parse(localStorage.getItem(DKEY) || 'null'); if (d) { Object.assign(this.draft, d.draft || {}, { photos: [] }); if (d.date && d.date >= bkkNow().date) { this.prefDate = d.date; this.prefSlot = d.slot || ''; } } } catch (e) {} },
-  saveDraft() { try { const { photos, scope, ...rest } = this.draft; localStorage.setItem(DKEY, JSON.stringify({ draft: rest, date: this.prefDate, slot: this.prefSlot })); } catch (e) {} },
+  saveDraft() { try { const { photos, scope, units, ...rest } = this.draft; localStorage.setItem(DKEY, JSON.stringify({ draft: rest, date: this.prefDate, slot: this.prefSlot })); } catch (e) {} },
   clearDraft() { this.draft = { name: this.draft.name, tel: this.draft.tel, line: this.draft.line, tax: this.draft.tax, ans: {}, photos: [], note: '', scope: [], addr: '', map: '', when: this.draft.when }; this.prefDate = ''; this.prefSlot = ''; this.saveDraft(); },
   save() { try { localStorage.setItem(KEY, JSON.stringify({ pv: PRICE_V, items: this.items, zoneInput: this.zoneInput, addr: this.addr })); } catch (e) {} this.subs.forEach(f => f(this)); },
   add(line) {
@@ -144,19 +155,31 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     if (sent) {
       // Rev.10: send to the team once (submit.js); without an endpoint (or inside an artifact) this is the honest hand-off box
       if (!sent.box) { sent.box = h('div'); const variant = ((location.pathname.match(/([abc])\.html/) || [])[1] || '').toUpperCase();
-        const viaMail = () => deliver(sent.box, sent.isJob ? 'booking' : 'quote', { ref: sent.ref, variant: ((location.pathname.match(/([abc])\.html/) || [])[1] || '').toUpperCase(), fields: sent.fields, hp: sent.hp, text: sent.text, title: sent.isJob ? 'ใบจองงานของคุณ' : 'ใบเสนอราคาเบื้องต้นของคุณ', subject: sent.isJob ? 'ใบจองงาน SBP AirCare' : 'ขอใบเสนอราคา SBP AirCare' }).then(() => { if (sent && sent.isJob) sent.box.append(photoLine(sent.ref, sent.photos.length)); });
+        // ★Rev.21.1 (review BUG-03): the reference the team's sheet gives back replaces ours everywhere — summary, copy, LINE, calendar
+        const finalRef = (s, r) => { if (!r || r === s.ref) return; s.text = withRef(s.text, s.ref, r); s.ref = r; if (sent === s) render(); };
+        const viaMail = () => { const s1 = sent; return deliver(s1.box, s1.isJob ? 'booking' : 'quote', { ref: s1.ref, variant: ((location.pathname.match(/([abc])\.html/) || [])[1] || '').toUpperCase(), fields: s1.fields, hp: s1.hp, text: s1.text, title: s1.isJob ? 'ใบจองงานของคุณ' : 'ใบเสนอราคาเบื้องต้นของคุณ', subject: s1.isJob ? 'ใบจองงาน SBP AirCare' : 'ขอใบเสนอราคา SBP AirCare', onRef: r => finalRef(s1, r) }).then(() => { if (sent === s1 && s1.isJob) s1.box.append(photoLine(s1.ref, s1.photos.length)); }); };
         // Rev.16: the job ticket goes to the back office with its photos when it is connected; otherwise (or if it fails) the e-mail path
         if (sent.isJob && canReach()) {
-          sent.box.append(h('div', { class: 's-hand', role: 'status' }, h('p', {}, `กำลังส่งใบจองงาน${sent.photos.length ? ` พร้อมรูป ${sent.photos.length} รูป` : ''} · เลขอ้างอิง ${sent.ref}`)));
           const s0 = sent;
-          sendTicket({ ref: s0.ref, variant, page: location.pathname + location.hash, fields: s0.fields, text: s0.text, hp: s0.hp, photos: s0.photos, scope: (cart.draft.scope || []).map(x => ({ job: x.k, lines: x.r.lines, est: x.r.est })), answers: cart.draft.ans })
-            .then(r => { if (sent !== s0) return; s0.box.innerHTML = '';
-              if (!r.ok) {   // Rev.19: when every form already goes to the back office, never post the same ticket there twice — hand it over instead
-                if (ENDPOINT !== BACKEND) { viaMail(); return; }
-                s0.box.append(handoffBox({ ref: s0.ref, title: 'ใบจองงานของคุณ', text: s0.text, subject: 'ใบจองงาน SBP AirCare', note: 'ส่งอัตโนมัติไม่สำเร็จ (การเชื่อมต่อขัดข้อง) — ใบจองนี้ยังไม่ถึงทีม กรุณาส่งสรุปนี้ทาง LINE หรืออีเมล หรือโทรแจ้งเลขอ้างอิง' }), photoLine(s0.ref, s0.photos.length)); return; }
-              s0.box.append(h('div', { class: 's-hand s-hand-ok', role: 'status' }, h('p', { class: 's-hand-b' }, 'ส่งถึงทีมแล้ว'), h('h3', {}, 'ใบจองงานของคุณ', h('small', {}, ` · เลขอ้างอิง ${r.ref}`)),
-                h('p', {}, `ทีมได้รับรายละเอียด${r.photos ? `และรูป ${r.photos} รูป` : ''}แล้ว จะตรวจขอบเขตงาน แจ้งราคาส่วนเพิ่ม (ถ้ามี) และยืนยันคิวกับคุณก่อนวันนัด · ตรวจสถานะได้ด้วยเลขอ้างอิงในหน้าติดต่อเรา`),
-                h('textarea', { class: 's-hand-t', readonly: true, rows: 8, 'aria-label': 'สรุปใบจองงาน' }, s0.text))); });
+          // ★Rev.21.1: "ลองส่งอีกครั้ง" sends the SAME request id — if the first try did reach the sheet (time-out after saving),
+          // the back office answers with that ticket instead of making a second one (review AT-12)
+          const go = () => {
+            s0.box.innerHTML = '';
+            s0.box.append(h('div', { class: 's-hand', role: 'status' }, h('p', {}, `กำลังส่งใบจองงาน${s0.photos.length ? ` พร้อมรูป ${s0.photos.length} รูป` : ''} · เลขอ้างอิง ${s0.ref}`)));
+            sendTicket({ ref: s0.ref, rid: s0.rid, variant, page: location.pathname + location.hash, fields: s0.fields, text: s0.text, hp: s0.hp, photos: s0.photos, scope: (cart.draft.scope || []).map(x => ({ job: x.k, lines: x.r.lines, est: x.r.est })), answers: cart.draft.ans })
+              .then(r => { if (sent !== s0) return; s0.box.innerHTML = '';
+                if (!r.ok) {   // Rev.19: when every form already goes to the back office, never post the same ticket there under a new id — hand it over or retry
+                  if (ENDPOINT !== BACKEND) { viaMail(); return; }
+                  s0.box.append(handoffBox({ ref: s0.ref, title: 'ใบจองงานของคุณ', text: s0.text, subject: 'ใบจองงาน SBP AirCare', note: 'ส่งอัตโนมัติไม่สำเร็จ (การเชื่อมต่อขัดข้อง) — ยังไม่ได้รับการยืนยันจากระบบ กดลองส่งอีกครั้ง (ไม่เกิดใบจองซ้ำ) หรือส่งสรุปนี้ทาง LINE / อีเมล / โทรแจ้งเลขอ้างอิง' }),
+                    h('button', { type: 'button', class: 's-btn primary s-retry', onclick: go }, 'ลองส่งอีกครั้ง'), photoLine(s0.ref, s0.photos.length)); return; }
+                if (r.ref && r.ref !== s0.ref) { s0.text = withRef(s0.text, s0.ref, r.ref); s0.ref = r.ref; }   // review BUG-03: one number everywhere
+                s0.box.append(h('div', { class: 's-hand s-hand-ok', role: 'status' }, h('p', { class: 's-hand-b' }, 'ส่งถึงทีมแล้ว'), h('h3', {}, 'ใบจองงานของคุณ', h('small', {}, ` · เลขอ้างอิง ${s0.ref}`)),
+                  h('p', {}, `ทีมได้รับรายละเอียด${r.photos ? `และรูป ${r.photos} รูป` : ''}แล้ว จะตรวจขอบเขตงาน แจ้งราคาส่วนเพิ่ม (ถ้ามี) และยืนยันคิวกับคุณก่อนวันนัด · ตรวจสถานะได้ด้วยเลขอ้างอิงในหน้าติดต่อเรา`),
+                  h('textarea', { class: 's-hand-t', readonly: true, rows: 8, 'aria-label': 'สรุปใบจองงาน' }, s0.text)));
+                if ((r.photos || 0) < s0.photos.length) s0.box.append(photoLine(s0.ref, s0.photos.length - (r.photos || 0)));   // review BUG-06: say which photos did not arrive
+                render(); });   // the reference tools below follow the final number
+          };
+          go();
         } else viaMail(); }
       body.append(sent.box,
         h('div', { class: 's-hand-act' }, h('button', { type: 'button', class: 's-btn ghost', onclick: () => { sent = null; render(); } }, 'กลับไปแก้รายการ'), h('button', { type: 'button', class: 's-btn ghost', onclick: () => { sent = null; cart.clear(); cart.clearDraft(); render(); } }, 'เริ่มใบใหม่')),
@@ -214,7 +237,8 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       : slotFree(liveQ, cart.prefDate, J.slots.find(id => thOf(id) === cart.prefSlot)) === true ? h('p', { class: 's-note' }, 'มีคิวว่างตามตารางคิวของทีม ณ ตอนนี้ (ทีมยืนยันอีกครั้ง)') : null;
     const whenBox = h('div', { class: 's-when' }, step(visit.length ? 2 : 1, 'วันเข้างาน', visit.length ? `จองปกติล่วงหน้า ${LEAD_DAYS} วัน` : null),
       h('label', { class: 's-field' }, visit.length && cart.prefSlot ? `วันที่สะดวก · ${cart.prefSlot}` : 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', min: bkkNow().date, value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; syncRush(cart.prefDate); cart.saveDraft(); render(); } })),
-      dh, slotRow, liveNote, visit.length && cart.prefDate && J.kind !== 'past' && J.time[1] > 0 ? h('p', { class: 's-note' }, `เวลาหน้างานโดยประมาณ ${timeTh(J.time)} · ${J.fit.kind === 'half' ? 'ไม่เกินครึ่งวัน' : J.fit.kind === 'day' ? 'ประมาณ 1 วันทำการ' : `ประมาณ ${J.fit.days} วันทำการ (ช่าง 1 ทีม)`}`, h('small', { class: 's-tnote' }, TIME_NOTE)) : null);   // rule 22: always with TIME_NOTE
+      dh, slotRow, liveNote, visit.length && cart.prefDate && J.kind !== 'past' && J.time[1] > 0 ? h('p', { class: 's-note' }, `เวลาหน้างานโดยประมาณ ${timeTh(J.time)} · ${J.fit.kind === 'half' ? 'ไม่เกินครึ่งวัน' : J.fit.kind === 'day' ? 'ประมาณ 1 วันทำการ' : `ประมาณ ${J.fit.days} วันทำการ (ช่าง 1 ทีม)`}${J.time[2] ? ' · บางรายการทีมยืนยันเวลาหน้างาน' : ''}`, h('small', { class: 's-tnote' }, TIME_NOTE))
+        : visit.length && cart.prefDate && J.kind !== 'past' && J.time[2] ? h('p', { class: 's-note' }, 'เวลาหน้างานของรายการนี้ ทีมประเมินและยืนยันก่อนนัด') : null);   // rule 22: always with TIME_NOTE
     body.append(whenBox);
     if (jobs.clean || jobs.install || jobs.repair) body.append(step(3, 'สภาพหน้างาน + รูป', 'ให้ทีมประเมินงานนอกมาตรฐานก่อนนัด'), ticketPanel(D, jobs, { onChange: () => cart.saveDraft() }));
     const keep = () => cart.saveDraft();
@@ -248,9 +272,9 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       }
       const t = cart.totals(), sc = (D.scope || []).flatMap(x => x.r.lines), scEx = (D.scope || []).reduce((n, x) => n + x.r.est, 0);
       const tk = isJob ? ticketText(D) : '';
-      sent = { ref, isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
+      sent = { ref, rid: newRid(), isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
         fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'แขวง/ตำบล': cart.addr?.s || '', 'เขต/อำเภอ': cart.addr?.d || cart.zone?.district || '', 'จังหวัด': cart.addr?.p || cart.zone?.province || '', 'รหัสไปรษณีย์': cart.addr?.z || '', 'ระยะถนนประมาณ (กม.)': cart.zone?.km ?? '', 'ค่าเดินทาง (ก่อน VAT)': t.travel, 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc),
-          ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : '', jobs.repair ? `ซ่อม / ตรวจเช็ก ${jobs.repair} รายการ` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'รูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ผลประเมินเบื้องต้น (ผู้ช่วย)': (jobs.repair && D.diag && D.diag.text) || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
+          ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : '', jobs.repair ? `ซ่อม / ตรวจเช็ก ${jobs.repair} รายการ` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'จำนวนรูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ผลประเมินเบื้องต้น (ผู้ช่วย)': (jobs.repair && D.diag && D.diag.text) || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
         text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${visit.length && cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null].filter(x => x != null).join('\n') };
       render();
     });

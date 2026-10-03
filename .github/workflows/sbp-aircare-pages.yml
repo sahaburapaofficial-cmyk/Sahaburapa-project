@@ -18,7 +18,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Rev.21.1 (independent review GATE-02): the same checks as pull requests — nothing is deployed when one fails
+  checks:
+    uses: ./.github/workflows/sbp-aircare-checks.yml
+
   build:
+    needs: checks
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,6 +38,9 @@ jobs:
           node-version: '22'
       # Rev.11: build.py writes dist/site — the split, cacheable version for hosting (dist/offline + dist/art stay single-file)
       - run: python3 build.py
+      # release identity: which commit is online (not Last-Modified, not the PR title)
+      - name: Release version file
+        run: printf '{"sha":"%s","ref":"%s","built":"%s"}\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > dist/site/version.json && cat dist/site/version.json
       - name: Site files
         run: ls -la dist/site dist/site/js
       - uses: actions/upload-pages-artifact@v3

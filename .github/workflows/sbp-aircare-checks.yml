@@ -1,0 +1,36 @@
+# SBP AirCare — fast checks on every pull request and push (no browser): Apps Script syntax, symptom triage, review regressions.
+# Rev.21.1 (independent review GATE-02): the Pages deploy runs the same checks first, so a red check never reaches the site.
+# Browser suites (smoke / booking / submit / backend:test) need the dev server + Chromium — run them locally before merging (HANDOFF.md).
+name: SBP AirCare · checks
+
+on:
+  pull_request:
+    paths: ['sbp-aircare/**', '.github/workflows/sbp-aircare-*.yml']
+  push:
+    branches-ignore: [main]
+    paths: ['sbp-aircare/**', '.github/workflows/sbp-aircare-*.yml']
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sbp-aircare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apps Script parses (Code.gs)
+        run: cp backend/apps-script/Code.gs /tmp/code.js && node --check /tmp/code.js
+      - name: Apps Script public functions = the reviewed list
+        run: |
+          node -e "import('./backend/test/gas-emulator.mjs').then(m => { const f = m.createGas().publicFns().sort().join(','); const want = 'boardData,boardUpdate,doGet,doPost,newBoardKey,selfTest,setup'; if (f !== want) { console.error('public functions changed: ' + f); process.exit(1); } console.log('public: ' + f); })"
+      - name: Symptom triage
+        run: node tests/acdiag.mjs
+      - name: Review regressions (install extras per unit · visit time · reference)
+        run: node tests/review-fixes.mjs

@@ -55,13 +55,25 @@ export const DEFAULTS = { clean: { height: 'lo', access: 'ok', cdu: 'floor', las
 
 /* ---------- which jobs the quotation holds ---------- */
 const INS_T = { W: 'wall', C: 'ceiling', K: 'cassette', FS: 'floor' };
+export const INS_KEY = /^I[NV]?-INS-(W|C|K|FS)-(\d+)-(\d+)/;
+// ★Rev.21.1 (review BUG-02): every installation line keeps its own type / BTU / quantity — extras that depend on the unit
+// (pipe per metre, removal) are priced per line and added up, never from the first unit times all units.
+// Add-on lines already in the quotation (pipe, removal, power, drain …) are machines of nobody: they are not counted as units,
+// and the ticket does not add the same Pricebook item again (codes).
 export function jobsIn(items) {
   const clean = items.filter(i => i.group === 'clean' && i.unitEx != null);
   const inst = items.filter(i => i.group === 'install');
-  const m = inst.map(i => /^I[NV]?-INS-(W|C|K|FS)-(\d+)-(\d+)/.exec(i.key || '')).find(Boolean);
-  return { clean: clean.reduce((n, i) => n + i.qty, 0), repair: items.filter(i => i.group === 'repair').reduce((n, i) => n + (i.unitEx == null ? 1 : i.qty), 0), install: inst.reduce((n, i) => n + (i.kind === 'survey' ? 1 : i.qty), 0),
-    type: m ? INS_T[m[1]] : 'wall', btu: m ? +m[3] : 12000 };
+  const units = []; inst.forEach(i => { const m = INS_KEY.exec(i.key || ''); if (m) units.push({ key: i.key, name: i.name, type: INS_T[m[1]], btu: +m[3], qty: i.qty }); });
+  const surveys = inst.filter(i => i.kind === 'survey').length, addOns = inst.filter(i => i.kind !== 'survey' && !INS_KEY.test(i.key || ''));
+  const codes = new Set(addOns.map(i => (/^I[NV]?-(.+)$/.exec(i.key || '') || [])[1]).filter(Boolean));
+  const nUnits = units.reduce((n, u) => n + u.qty, 0) + surveys;
+  return { clean: clean.reduce((n, i) => n + i.qty, 0), repair: items.filter(i => i.group === 'repair').reduce((n, i) => n + (i.unitEx == null ? 1 : i.qty), 0), install: nUnits || (addOns.length ? 1 : 0),
+    units, surveys, codes, type: units[0] ? units[0].type : 'wall', btu: units[0] ? units[0].btu : 12000 };
 }
+const TYPE_TH = { wall: 'ติดผนัง', ceiling: 'แขวน', cassette: 'สี่ทิศทาง', floor: 'ตู้ตั้ง' };
+export const unitLabel = u => `${TYPE_TH[u.type] || u.type} ${Math.round(u.btu / 1000)}k BTU${u.qty > 1 ? ` × ${u.qty}` : ''}`;
+// pipe length of one installation line (metres): its own answer, else the shared one
+export const pipeOf = (a, u) => +((a.pipeBy || {})[u.key] ?? a.pipe) || 0;
 
 /* ---------- scope: answers outside the standard package → Pricebook lines ---------- */
 const cleanAdd = re => DATA.clean.find(r => !r.type && re.test(r.name));
@@ -71,7 +83,7 @@ const diag = () => DATA.rep.find(r => r.cat === 'ตรวจวินิจฉ�
 // src missing (or not in the Pricebook) → still listed, as "ประเมินจากรูป"
 const L = (th, src, qty, why) => ({ th, ex: !src ? null : src.ex !== undefined ? src.ex : src.rate ? src.rate.s : null, qty, unit: (src && src.unit) || '', why });
 export function scope(kind, a, ctx = {}) {
-  const out = [], push = x => x && out.push(x), n = Math.max(1, ctx.units || 1);
+  const out = [], push = x => x && out.push(x), n = Math.max(1, ctx.units || 1), held = [];
   if (kind === 'clean') {
     if (a.height === 'hi') push(L('งานสูงเกิน 3 เมตร', cleanAdd(/ความสูงเกิน 3/), 1, 'ต้องใช้บันไดสูงและอุปกรณ์กันตก'));
     if (a.height === 'lift' || a.cdu === 'high') push(L('บันไดพิเศษ / นั่งร้าน / รถกระเช้า', cleanAdd(/นั่งร้าน|รถกระเช้า/), 1, a.height === 'lift' ? 'ตัวเครื่องสูงมาก' : 'คอยล์ร้อนอยู่ที่สูง'));
@@ -88,19 +100,27 @@ export function scope(kind, a, ctx = {}) {
     if (a.site === 'ctrl') push(L('พื้นที่ควบคุม (Server / รพ. / Cleanroom)', cleanAdd(/Server|พื้นที่ควบคุม/), 1, 'ต้องวางแผนวิธีทำงานและป้องกันพื้นที่'));
   }
   if (kind === 'install') {
-    const ad = addonsFor(ctx.type || 'wall', ctx.btu || 12000), pipeItem = ad[0].items[0].item;
-    const extra = Math.max(0, Math.ceil((+a.pipe || 0) - 4));
-    if (extra) push(L(`ท่อน้ำยาส่วนเกิน ${extra} ม. (ราคาติดตั้งรวม 4 ม. แรก)`, pipeItem, extra * n, `ระยะประมาณ ${a.pipe} ม.`));
-    if (a.job !== 'new') push(L('รื้อเครื่องเดิม', inst({ wall: 'REM-W', ceiling: 'REM-C', cassette: 'REM-K', floor: 'REM-FS' }[ctx.type] || 'REM-W'), n, a.job === 'move' ? 'ย้ายจากจุดเดิม' : 'เปลี่ยนแทนเครื่องเดิม'));
-    if (a.wall === 'conc' || a.wall === 'glass') push(L('เจาะ Core Drill / ทางผ่านพิเศษ', inst('CIV-CORE'), n, a.wall === 'conc' ? 'ผนังคอนกรีต / หนา' : 'ผนังกระจก'));
-    if (a.cdu === 'high') push(L('งานที่สูง (นั่งร้าน / โรยตัว)', inst('ACC-SCAFF') || inst('ACC-HEIGHT'), 1, 'วางคอยล์ร้อนที่สูง'));
-    if (a.cdu === 'roof') push(L('ฐานรองบนหลังคาพร้อมกันซึม', inst('SUP-ROOF'), n, 'วางบนดาดฟ้า / หลังคา'));
-    if (a.power === 'new') { const m = Math.max(1, +a.powerM || 0); push(L(`เดินเมนไฟจากตู้ไฟ ${m} ม.`, inst('ELE-MAIN-1P-2.5'), m * n, 'ขนาดสายจริงตามกระแสของรุ่น ช่างยืนยันก่อนติดตั้ง · เบรกเกอร์ 1 ตัวรวมในแพ็กเกจแล้ว')); }   // Rev.17: the package already has the breaker — no RCBO line
+    // one entry per installation line (type / BTU / qty); a quotation with only a survey line behaves like one wall unit as before
+    const lines = ctx.lines && ctx.lines.length ? ctx.lines : [{ key: '', type: ctx.type || 'wall', btu: ctx.btu || 12000, qty: n }];
+    const many = lines.length > 1, codes = ctx.codes || new Set();
+    const pushOnce = (x, src) => { if (src && src.code && codes.has(src.code)) { held.push(x.th); return; } push(x); };   // already a line in the quotation
+    lines.forEach(u => {
+      const pipeItem = addonsFor(u.type, u.btu)[0].items[0].item, m = pipeOf(a, u), extra = Math.max(0, Math.ceil(m - 4)), tag = many ? ` · ${unitLabel(u)}` : '';
+      if (extra) pushOnce(L(`ท่อน้ำยาส่วนเกิน ${extra} ม.${tag} (ราคาติดตั้งรวม 4 ม. แรก)`, pipeItem, extra * u.qty, `ระยะประมาณ ${m} ม.${u.qty > 1 ? ' ต่อเครื่อง' : ''} · ${baht(pipeItem.ex)}/ม.`), pipeItem);
+      const rem = inst({ wall: 'REM-W', ceiling: 'REM-C', cassette: 'REM-K', floor: 'REM-FS' }[u.type] || 'REM-W');
+      if (a.job !== 'new') pushOnce(L('รื้อเครื่องเดิม' + tag, rem, u.qty, a.job === 'move' ? 'ย้ายจากจุดเดิม' : 'เปลี่ยนแทนเครื่องเดิม'), rem);
+    });
+    // the same for every unit (wall, roof stand, power run, drain, permit): counted per unit or once per visit, as before
+    const I = c => inst(c);
+    if (a.wall === 'conc' || a.wall === 'glass') pushOnce(L('เจาะ Core Drill / ทางผ่านพิเศษ', I('CIV-CORE'), n, a.wall === 'conc' ? 'ผนังคอนกรีต / หนา' : 'ผนังกระจก'), I('CIV-CORE'));
+    if (a.cdu === 'high') { const x = I('ACC-SCAFF') || I('ACC-HEIGHT'); pushOnce(L('งานที่สูง (นั่งร้าน / โรยตัว)', x, 1, 'วางคอยล์ร้อนที่สูง'), x); }
+    if (a.cdu === 'roof') pushOnce(L('ฐานรองบนหลังคาพร้อมกันซึม', I('SUP-ROOF'), n, 'วางบนดาดฟ้า / หลังคา'), I('SUP-ROOF'));
+    if (a.power === 'new') { const m = Math.max(1, +a.powerM || 0); pushOnce(L(`เดินเมนไฟจากตู้ไฟ ${m} ม.`, I('ELE-MAIN-1P-2.5'), m * n, 'ขนาดสายจริงตามกระแสของรุ่น ช่างยืนยันก่อนติดตั้ง · เบรกเกอร์ 1 ตัวรวมในแพ็กเกจแล้ว'), I('ELE-MAIN-1P-2.5')); }   // Rev.17: the package already has the breaker — no RCBO line
     if (a.power === 'na') push(L('ตรวจระบบไฟก่อนติดตั้ง', null, 1, 'ส่งรูปตู้ไฟให้ทีมดู'));
-    if (a.drain === 'far') { const m = Math.max(0, Math.ceil((+a.drainM || 0) - 4)); if (m) push(L(`ท่อน้ำทิ้งเพิ่ม ${m} ม.`, inst('MAT-SCG-DRAIN-34'), m * n, `ยาวประมาณ ${a.drainM} ม. · แพ็กเกจรวม 4 ม. แรก`)); }   // Rev.17: 4 m are in the package (was 3)
-    if (a.drain === 'pump') push(L('ชุดปั๊มน้ำทิ้ง', inst('DRAIN-PUMP-15'), n, 'ไม่มีทางลาดให้น้ำไหล'));
-    if (a.hide === 'chase') push(L('กรีดผนังฝังท่อ / คืนสภาพ', inst('CIV-CHASE'), 1, 'ซ่อนท่อในผนัง'));
-    if (a.site === 'ctrl') push(L('ประสาน Permit / ควบคุมพื้นที่', inst('ACC-PERMIT'), 1, 'พื้นที่ควบคุม'));
+    if (a.drain === 'far') { const m = Math.max(0, Math.ceil((+a.drainM || 0) - 4)); if (m) pushOnce(L(`ท่อน้ำทิ้งเพิ่ม ${m} ม.`, I('MAT-SCG-DRAIN-34'), m * n, `ยาวประมาณ ${a.drainM} ม. · แพ็กเกจรวม 4 ม. แรก`), I('MAT-SCG-DRAIN-34')); }   // Rev.17: 4 m are in the package (was 3)
+    if (a.drain === 'pump') pushOnce(L('ชุดปั๊มน้ำทิ้ง', I('DRAIN-PUMP-15'), n, 'ไม่มีทางลาดให้น้ำไหล'), I('DRAIN-PUMP-15'));
+    if (a.hide === 'chase') pushOnce(L('กรีดผนังฝังท่อ / คืนสภาพ', I('CIV-CHASE'), 1, 'ซ่อนท่อในผนัง'), I('CIV-CHASE'));
+    if (a.site === 'ctrl') pushOnce(L('ประสาน Permit / ควบคุมพื้นที่', I('ACC-PERMIT'), 1, 'พื้นที่ควบคุม'), I('ACC-PERMIT'));
   }
   const lines = out;
   const priced = lines.filter(l => l.ex != null), est = priced.reduce((s, l) => s + l.ex * l.qty, 0);
@@ -112,6 +132,8 @@ export function scope(kind, a, ctx = {}) {
   if (a.site === 'condo') notes.push('คอนโด / อาคาร: แจ้งนิติและจองลิฟต์ขนของล่วงหน้า ทีมส่งรายชื่อช่างให้ได้');
   if (kind === 'clean' && (a.last === '24' || a.last === 'na')) notes.push('ไม่ได้ล้างเกิน 1 ปี หรือไม่ทราบ — ถ้ามีคราบดำที่ใบพัด ทีมอาจแนะนำล้างใหญ่ (C2) จากรูป');
   if (kind === 'install' && a.power === 'ready') notes.push('ใช้สายเดิมได้เมื่อขนาดสายและเบรกเกอร์พอกับรุ่นใหม่ — ช่างตรวจก่อนต่อไฟ');
+  if (held.length) notes.push(`อยู่ในรายการด้านบนแล้ว ไม่คิดซ้ำ: ${held.join(' · ')}`);
+  if (kind === 'install' && (ctx.lines || []).length > 1) notes.push('คิดส่วนเพิ่มแยกตามชนิดและขนาดของแต่ละรายการ แล้วรวมกัน');
   return { lines, est, review: lines.length > 0, assess: lines.filter(l => l.ex == null).length, notes };
 }
 
@@ -139,8 +161,8 @@ export function ticketPanel(draft, jobs, { onChange = () => {} } = {}) {
   const drawScope = () => {
     res.innerHTML = '';
     kinds.slice(1).forEach(k => { draft.ans[k].site = draft.ans[kinds[0]].site; });
-    const all = kinds.map(k => ({ k, r: scope(k, draft.ans[k], { units: jobs[k], type: jobs.type, btu: jobs.btu }) }));
-    draft.scope = all;
+    const all = kinds.map(k => ({ k, r: scope(k, draft.ans[k], { units: jobs[k], type: jobs.type, btu: jobs.btu, lines: jobs.units, codes: jobs.codes }) }));
+    draft.scope = all; draft.units = jobs.units || [];
     const lines = all.flatMap(x => x.r.lines), est = all.reduce((s, x) => s + x.r.est, 0), notes = all.flatMap(x => x.r.notes);
     if (!lines.length) res.append(h('p', { class: 'tk-ok' }, h('b', {}, 'อยู่ในขอบเขตงานมาตรฐาน'), ' · ราคาตามรายการด้านบน ทีมยืนยันจากรูปอีกครั้ง'));
     else res.append(h('p', { class: 'tk-warn' }, h('b', {}, `มี ${lines.length} จุดที่อาจเกินงานมาตรฐาน`), est ? ` · ประมาณ ${baht(est)} ก่อน VAT` : '', lines.some(l => l.ex == null) ? ' + รายการที่ทีมประเมินจากรูป' : ''),
@@ -166,7 +188,14 @@ export function ticketPanel(draft, jobs, { onChange = () => {} } = {}) {
         if (q.when && !q.when(A)) return;
         if (q.id === 'site' && k !== kinds[0]) return;   // asked once (cleaning section) when both jobs are booked
         const row = h('div', { class: 'tk-row' }, h('p', { class: 'tk-l', id: `tk-${k}-${q.id}` }, q.th, q.multi ? h('small', {}, ' (เลือกได้หลายข้อ)') : null));
-        if (q.num) {
+        if (q.id === 'pipe' && k === 'install' && (jobs.units || []).length > 1) {   // ★Rev.21.1 BUG-02: pipe length per installation line
+          A.pipeBy = A.pipeBy || {};
+          const [mn, mx] = q.num;
+          row.append(h('div', { class: 'tk-per' }, jobs.units.map((u, ui) => { const id = `tk-pipe-${ui}`;
+            return h('label', { class: 'tk-per-r', for: id }, h('span', {}, unitLabel(u), u.qty > 1 ? h('small', {}, ' (ระยะเดียวกันทุกเครื่องในรายการนี้)') : null),
+              h('input', { id, type: 'number', min: mn, max: mx, step: 1, inputmode: 'numeric', class: 'tk-num', value: pipeOf(A, u),
+                onchange: e => { A.pipeBy[u.key] = Math.max(mn, Math.min(mx, +e.target.value || mn)); e.target.value = A.pipeBy[u.key]; drawScope(); } })); })));
+        } else if (q.num) {
           const [mn, mx] = q.num;
           row.append(h('input', { type: 'number', min: mn, max: mx, step: 1, inputmode: 'numeric', value: A[q.id], 'aria-labelledby': `tk-${k}-${q.id}`, class: 'tk-num',
             onchange: e => { A[q.id] = Math.max(mn, Math.min(mx, +e.target.value || mn)); e.target.value = A[q.id]; drawScope(); } }));
@@ -211,7 +240,10 @@ export function ticketText(draft) {
   (draft.scope || []).forEach(({ k, r }) => {
     const A = draft.ans[k];
     out.push(`— สภาพหน้างาน${k === 'clean' ? 'ล้าง' : k === 'repair' ? 'ซ่อม / ตรวจเช็ก' : 'ติดตั้ง'} —`);
-    QUESTIONS[k].forEach(q => { if (q.when && !q.when(A)) return; const v = A[q.id]; out.push(`${q.th}: ${q.num ? v : [].concat(v).map(x => (q.opts.find(o => o[0] === x) || [, x])[1]).join(', ')}`); });
+    const U = k === 'install' ? (draft.units || []) : [];
+    QUESTIONS[k].forEach(q => { if (q.when && !q.when(A)) return; const v = A[q.id];
+      if (q.id === 'pipe' && U.length > 1) { U.forEach(u => out.push(`${q.th} · ${unitLabel(u)}: ${pipeOf(A, u)}`)); return; }
+      out.push(`${q.th}: ${q.num ? v : [].concat(v).map(x => (q.opts.find(o => o[0] === x) || [, x])[1]).join(', ')}`); });
     out.push(r.lines.length ? `เกินมาตรฐาน ${r.lines.length} จุด${r.est ? ` · ประมาณ ${baht(r.est)} ก่อน VAT` : ''}:` : 'อยู่ในขอบเขตงานมาตรฐาน');
     r.lines.forEach(l => out.push(`  • ${l.th} — ${l.ex == null ? 'ประเมินจากรูป' : baht(l.ex * l.qty)} (${l.why})`));
   });

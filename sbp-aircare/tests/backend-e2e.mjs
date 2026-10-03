@@ -18,10 +18,23 @@ const gas = createGas(); gas.setServiceUrl(EXEC);
 const srv = await serve(gas, PORT);
 const out = [], ok = (name, cond, info = '') => { out.push(`${cond ? 'PASS' : 'FAIL'} ${name}${info ? ' · ' + info : ''}`); console.log(out.at(-1)); };
 
-const su = gas.call('setup'); ok('setup(): แท็บ + โฟลเดอร์รูป + BOARD_KEY', !!su.boardKey && ['ใบเสนอราคา', 'ติดต่อ', 'ความเห็น', 'งานจอง', 'คิว'].every(t => gas.state.sheets.has(t)));
+const su = gas.call('setup'); ok('setup(): แท็บ + โฟลเดอร์รูป + BOARD_KEY', su.board === true && ['ใบเสนอราคา', 'ติดต่อ', 'ความเห็น', 'งานจอง', 'คิว'].every(t => gas.state.sheets.has(t)));
+ok('setup() ไม่คืน BOARD_KEY (มีเฉพาะใน log ของเจ้าของ)', !JSON.stringify(su).includes(gas.state.props.BOARD_KEY));
 const st = gas.call('selfTest'); ok('selfTest(): ' + st.filter(l => l.startsWith('PASS')).length + ' PASS', st.every(l => !l.startsWith('FAIL')), st.filter(l => l.startsWith('FAIL')).join(' | '));
-const KEY = su.boardKey;
+const KEY = gas.state.props.BOARD_KEY;
 const j = async q => (await fetch(`${LOCAL}/exec?${q}`)).json();
+
+// ★Rev.21.1 BUG-01 negative authorization: what a visitor can reach from any page of the web app (google.script.run)
+const rpc = async (fn, ...args) => (await fetch(`${LOCAL}/rpc`, { method: 'POST', body: JSON.stringify({ fn, args }) })).json();
+ok('ฟังก์ชันที่หน้าเว็บเรียกได้มีเฉพาะที่ตั้งใจ', JSON.stringify(gas.publicFns().sort()) === JSON.stringify(['boardData', 'boardUpdate', 'doGet', 'doPost', 'newBoardKey', 'selfTest', 'setup']), gas.publicFns().join(','));
+for (const fn of ['setup', 'selfTest', 'newBoardKey']) { const r = await rpc(fn); ok(`ผู้เยี่ยมชมเรียก ${fn}() ไม่ได้`, !r.ok && /owner only/.test(r.error) && !JSON.stringify(r).includes(KEY), r.error); }
+for (const fn of ['markQueue_', 'releaseQueue_', 'boardUpdate_', 'status_', 'keyOk_', 'markQueue', 'releaseQueue']) { const r = await rpc(fn, '2026-12-01', 'ทั้งวัน'); ok(`เรียก helper ${fn} จากหน้าเว็บไม่ได้`, !r.ok, r.error); }
+for (const [k, why] of [[undefined, 'ไม่มีรหัส'], ['wrong-key', 'รหัสผิด']]) { const a = await rpc('boardData', k), b2 = await rpc('boardUpdate', k, 'X', { 'สถานะ': 'ยกเลิก' }); ok(`บอร์ด${why} ถูกปฏิเสธ (อ่าน/แก้ไม่ได้)`, !a.ok && !b2.ok); }
+ok('บอร์ดรหัสถูกยังอ่านได้', (await rpc('boardData', KEY)).ok);
+const pingRaw = await (await fetch(`${LOCAL}/exec?q=ping`)).text();
+ok('ping ไม่มีรหัสหรือข้อมูลลูกค้า', !pingRaw.includes(KEY) && !/ทดสอบ|08\d{8}/.test(pingRaw), pingRaw);
+const nokey = await fetch(`${LOCAL}/exec?view=board`);
+ok('ลิงก์บอร์ดไม่มีรหัส = ข้อความธรรมดา ไม่ใช่หน้า HTML', /text\/plain/.test(nokey.headers.get('content-type')) && !/<script/.test(await nokey.text()));
 
 const b = await launch();
 const tabRows = name => (gas.dump().tabs[name] || []);
@@ -127,7 +140,7 @@ for (const page of pages) {
   const chosen = await p.locator('.s-cart .qc-slot button.on').allInnerTexts();
   ok(`${V} เว็บแสดง "${slotTh}" วันนั้นเต็ม และไม่เลือกช่วงที่เต็ม`, fullBtns.some(t => t.includes(slotTh) && t.includes('คิวเต็มแล้ว')) && !chosen.some(t => t.includes(slotTh)), `full=${fullBtns.map(t => t.split('\n')[0]).join('/')} on=${chosen.map(t => t.split('\n')[0]).join('/')}`);
   // a fully booked day: both halves full → the booking asks for another day and offers the nearest free one
-  gas.call('markQueue', date, 'ทั้งวัน');
+  gas.call('markQueue_', date, 'ทั้งวัน');
   await p.goto('about:blank'); await p.goto(`${BASE}/${page}#prices`); await p.waitForTimeout(2500);
   await p.evaluate(() => document.querySelector('[data-cart-btn]')?.click()); await p.waitForTimeout(1500);
   await p.fill('#s-q-date', date); await p.dispatchEvent('#s-q-date', 'change'); await p.waitForTimeout(800);
@@ -145,6 +158,79 @@ for (const page of pages) {
   // only the cancelled job's half comes back — the half marked by hand above (markQueue ทั้งวัน) is not a booking, so it stays as the team set it
   ok(`${V} บอร์ดยกเลิกงาน → ช่วง "${slotTh}" ว่างคืน`, Object.keys(want).every(k => !sl3.days[date] || sl3.days[date][k] === true), JSON.stringify(sl3.days[date] || {}));
   ok(`${V} ไม่มี JS error`, !errs.length, errs.slice(0, 3).join(' | '));
+  await ctx.close();
+}
+
+/* ---------- ★Rev.21.1 independent review (base 4b7f938): BUG-03 · BUG-06 · BUG-04 · retry without a second row ---------- */
+{
+  const ctx = await b.newContext({ viewport: { width: 1100, height: 900 } });
+  await ctx.route('https://script.google.com/**', forward);
+  const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('dialog', d => d.accept());
+  await p.route('**/a.html', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('<head>', `<head><meta name="sbp-backend" content="${EXEC}">`) }); });
+  const FIXED = 1791001234567, taken = 'B' + String(FIXED).slice(-7);
+  // a ticket with that reference is already in the sheet (the website numbers from the clock, 7 digits repeat)
+  const pre = await (await fetch(`${LOCAL}/exec`, { method: 'POST', body: JSON.stringify({ kind: 'booking', ref: taken, fields: { 'ชื่อ / บริษัท': 'ใบเดิม', 'โทร': '0811111111' }, text: `ใบเดิม · เลขอ้างอิง ${taken}` }) })).json();
+  ok('R ใบเดิมได้เลข ' + taken, pre.ok && pre.ref === taken, JSON.stringify(pre));
+  await p.goto(`${BASE}/a.html#prices`); await p.waitForTimeout(2500);
+  await p.evaluate(() => localStorage.clear());
+  await p.locator('#prices button:has-text("เพิ่ม")').first().click(); await p.waitForTimeout(400);
+  await p.evaluate(() => document.querySelector('[data-cart-btn]')?.click()); await p.waitForTimeout(800);
+  const date = await p.evaluate(() => { const d = new Date(Date.now() + 16 * 864e5); if (d.getUTCDay() === 0) d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); });
+  await p.fill('#s-q-date', date); await p.dispatchEvent('#s-q-date', 'change'); await p.waitForTimeout(500);
+  await p.fill('#s-cart-zone', 'บางขุนเทียน'); await p.waitForTimeout(400);
+  await p.fill('#s-q-addr', '1 ถนนทดสอบ'); await p.fill('#s-q-name', 'ทดสอบเลขซ้ำ'); await p.fill('#s-q-tel', '0822222222');
+  // the submit handler reads the clock once: give it the taken number
+  await p.evaluate(F => document.addEventListener('submit', () => { const real = Date.now; Date.now = () => F; setTimeout(() => { Date.now = real; }, 0); }, { capture: true, once: true }), FIXED);
+  await p.locator('.s-form button[type="submit"]').click();
+  await p.waitForSelector('.s-cart .s-hand-ok', { timeout: 20000 }).catch(() => {}); await p.waitForTimeout(600);
+  const want = taken + '-2';
+  const head = await p.locator('.s-cart .s-hand-ok h3').innerText().catch(() => ''), summ = await p.locator('.s-cart .s-hand-ok textarea').inputValue().catch(() => '');
+  const copyBtn = await p.locator('.s-after button').first().innerText().catch(() => ''), lineHref = await p.locator('.s-after a').first().getAttribute('href').catch(() => '');
+  ok('R BUG-03 หัวข้อใช้เลขใหม่ ' + want, head.includes(want), head);
+  ok('R BUG-03 สรุปบนจอใช้เลขใหม่', summ.includes(want) && !new RegExp(taken + '(?!-2)').test(summ), summ.split('\n')[0]);
+  ok('R BUG-03 ปุ่มคัดลอก + LINE ใช้เลขใหม่', copyBtn.includes(want) && decodeURIComponent(lineHref || '').includes(want), `${copyBtn} · ${decodeURIComponent(lineHref || '').slice(-40)}`);
+  const rows = tabRows('งานจอง'), H = rows[0], row = rows.find(r => r[H.indexOf('เลขอ้างอิง')] === want) || [];
+  ok('R BUG-03 แถวใน Sheet + สรุป + อีเมลใช้เลขเดียวกัน', !!row.length && row[H.indexOf('สรุป')].includes(want) && !new RegExp(taken + '(?!-2)').test(row[H.indexOf('สรุป')]) && gas.state.mail.some(m => m.subject.includes(want) && m.body.includes(want)));
+  ok('R BUG-03 ใบเดิมไม่ถูกแก้', rows.filter(r => r[H.indexOf('เลขอ้างอิง')] === taken).length === 1);
+  const st = await j(`q=status&ref=${encodeURIComponent(want)}&tel=2222`), stBad = await j(`q=status&ref=${encodeURIComponent(want)}&tel=1111`);
+  ok('R BUG-03 ตรวจสถานะด้วยเลขใหม่ได้ เบอร์ผิดไม่ได้', st.ok && !stBad.ok, JSON.stringify(st));
+  // BUG-06: no photo → no folder link, count 0
+  ok('R BUG-06 ไม่มีรูป → ช่อง "รูป" ว่าง · "จำนวนรูป" 0', row[H.indexOf('รูป')] === '' && String(row[H.indexOf('จำนวนรูป')]) === '0', `รูป="${row[H.indexOf('รูป')]}" จำนวนรูป="${row[H.indexOf('จำนวนรูป')]}"`);
+  // retry with the same request id (time-out after the sheet saved it) → the first answer, no second row
+  const body = { kind: 'booking', ref: 'B7770001', rid: 'retry-test-1', fields: { 'ชื่อ / บริษัท': 'ลองซ้ำ', 'โทร': '0833333333' }, text: 'ลองซ้ำ' };
+  const n0 = tabRows('งานจอง').length;
+  const r1 = await (await fetch(`${LOCAL}/exec`, { method: 'POST', body: JSON.stringify(body) })).json(), r2 = await (await fetch(`${LOCAL}/exec`, { method: 'POST', body: JSON.stringify(body) })).json();
+  ok('R ส่งซ้ำด้วย request id เดิม → ได้เลขเดิม ไม่เพิ่มแถว', r1.ok && r2.ok && r2.again && r1.ref === r2.ref && tabRows('งานจอง').length === n0 + 1, `${r1.ref} / ${r2.ref} again=${r2.again}`);
+  // an old row that stored the photo COUNT in "รูป" (before Rev.21.1) must not become a link either
+  const bk = gas.state.sheets.get('งานจอง'), hb = bk.rows[0]; const legacy = hb.map(k => k === 'เลขอ้างอิง' ? 'B0000LEG' : k === 'รูป' ? '0' : k === 'ชื่อ / บริษัท' ? 'แถวเก่า' : k === 'สถานะ' ? 'ใหม่' : ''); bk.rows.push(legacy);
+
+  // BUG-04: the board keeps an unsaved edit through two refreshes, still shows new tickets, conflict + failed save keep the draft
+  const bp = await ctx.newPage(); bp.on('pageerror', e => errs.push('board: ' + e.message)); bp.on('dialog', d => d.accept());
+  await bp.goto(`${EXEC}?view=board&key=${KEY}`); await bp.waitForTimeout(1200);
+  await bp.locator('[data-f="ทั้งหมด"]').click(); await bp.waitForTimeout(200);
+  const links = await bp.locator('article a[href]').evaluateAll(a => a.map(x => x.getAttribute('href')));
+  ok('R BUG-06 บอร์ดไม่มีลิงก์ href=0 (ทั้งแถวใหม่และแถวเก่า)', !links.some(h => h === '0' || h === "'0"), links.filter(h => !/^tel:/.test(h)).join(' '));
+  const card = () => bp.locator(`article[data-ref="${want}"]`);
+  await card().locator('textarea[name="หมายเหตุทีม"]').fill('กำลังพิมพ์ ยังไม่บันทึก');
+  await card().locator('input[name="ราคาเพิ่มที่แจ้ง (ก่อน VAT)"]').fill('1500');
+  await card().locator('select[name="นัดช่วง"]').selectOption('ช่วงบ่าย');
+  await (await fetch(`${LOCAL}/exec`, { method: 'POST', body: JSON.stringify({ kind: 'booking', ref: 'B7770002', fields: { 'ชื่อ / บริษัท': 'งานใหม่ระหว่างแก้', 'โทร': '0844444444' }, text: 'x' }) })).json();
+  await bp.evaluate(() => load()); await bp.waitForTimeout(700); await bp.evaluate(() => load()); await bp.waitForTimeout(700);
+  ok('R BUG-04 ข้อความที่ยังไม่บันทึกอยู่หลัง refresh 2 รอบ', await card().locator('textarea[name="หมายเหตุทีม"]').inputValue() === 'กำลังพิมพ์ ยังไม่บันทึก' && await card().locator('input[name="ราคาเพิ่มที่แจ้ง (ก่อน VAT)"]').inputValue() === '1500' && await card().locator('select[name="นัดช่วง"]').inputValue() === 'ช่วงบ่าย');
+  ok('R BUG-04 งานใหม่ยังเข้าบอร์ดระหว่างแก้', await bp.locator('article[data-ref="B7770002"]').count() === 1);
+  // another screen saves the same field → this screen keeps its draft and says the sheet changed
+  gas.call('boardUpdate', KEY, want, { 'หมายเหตุทีม': 'อีกจอบันทึก' });
+  await bp.evaluate(() => load()); await bp.waitForTimeout(700);
+  ok('R BUG-04 อีกจอแก้ช่องเดียวกัน → แจ้งว่าในระบบเปลี่ยน', /ในระบบเปลี่ยนเป็น "อีกจอบันทึก"/.test(await card().locator('.dirty-n').innerText().catch(() => '')) && await card().locator('textarea[name="หมายเหตุทีม"]').inputValue() === 'กำลังพิมพ์ ยังไม่บันทึก');
+  // a failed save keeps the draft and never says "saved"
+  await bp.route('**/rpc', async r => { const b0 = JSON.parse(r.request().postData() || '{}'); if (b0.fn === 'boardUpdate') return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: false, error: 'ทดสอบเน็ตหลุด' }) }); return r.fallback(); });
+  await card().locator('.save').click(); await bp.waitForTimeout(800);
+  ok('R BUG-04 บันทึกไม่สำเร็จ → ข้อมูลที่แก้ยังอยู่ ไม่ขึ้น "บันทึกแล้ว"', await card().locator('textarea[name="หมายเหตุทีม"]').inputValue() === 'กำลังพิมพ์ ยังไม่บันทึก' && (await card().locator('.save').innerText()) === 'บันทึก');
+  await bp.unroute('**/rpc');
+  await card().locator('.save').click(); await bp.waitForTimeout(1500);
+  const saved = tabRows('งานจอง').find(r => r[H.indexOf('เลขอ้างอิง')] === want);
+  ok('R BUG-04 บันทึกสำเร็จ → อ่านกลับตรง และไม่ค้างสถานะแก้', saved[H.indexOf('หมายเหตุทีม')] === 'กำลังพิมพ์ ยังไม่บันทึก' && saved[H.indexOf('ราคาเพิ่มที่แจ้ง (ก่อน VAT)')] === '1500' && await card().locator('.dirty-n').count() === 0);
+  ok('R ไม่มี JS error', !errs.length, errs.slice(0, 3).join(' | '));
   await ctx.close();
 }
 await b.close(); srv.close();

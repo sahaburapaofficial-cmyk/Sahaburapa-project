@@ -1,4 +1,4 @@
-# ระบบรับคำขอจากเว็บไซต์ (Google Apps Script + Google Sheet) — Rev.19
+# ระบบรับคำขอจากเว็บไซต์ (Google Apps Script + Google Sheet) — Rev.21.1
 
 > ★**Rev.19 — พร้อม deploy + test run แล้ว** คู่มือทีละคลิก (มีปุ่มคัดลอกโค้ด): https://claude.ai/artifact/SJhUTVmE8S3VhSgbhYbCFA
 > ตอนนี้เว็บยังส่งเป็นอีเมลผ่าน **FormSubmit** — เมื่อใส่ URL `/exec` ที่ `assets/submit.js` → `BACKEND_URL` **ที่เดียว** ทุกฟอร์มของทั้ง 3 แบบ (ติดต่อ · ใบเสนอราคา · ใบจองงานพร้อมรูป · ความเห็น) เข้า Sheet เดียวกัน (`ENDPOINT = BACKEND || FormSubmit`) + เปิดตารางคิวสด + ตรวจสถานะ
@@ -11,17 +11,32 @@
 2. **ส่วนขยาย → Apps Script** → วาง `apps-script/Code.gs` แทนโค้ดเดิม → **ไฟล์ + → HTML** ชื่อ `Board` → วาง `apps-script/Board.html` → บันทึก
 3. เลือกฟังก์ชัน **`setup`** → เรียกใช้ → อนุญาตสิทธิ์ (Sheet · Drive · อีเมล · เชื่อมต่อภายนอก) — สร้างทุกแท็บพร้อมหัวคอลัมน์ + แท็บ **คิว** + โฟลเดอร์รูป "SBP AirCare งานจอง" + `BOARD_KEY` อัตโนมัติ (รันซ้ำได้ ไม่ทับของเดิม)
 4. เลือก **`selfTest`** → เรียกใช้ → ต้องเห็น **PASS 11 บรรทัด** + "ลบข้อมูลทดสอบแล้ว" (ไม่ส่งอีเมล/LINE, ลบข้อมูลทดสอบเอง และคืนค่าช่องคิวเดิม)
-5. **Deploy → New deployment → Web app** · Execute as: **Me** · Who has access: **Anyone** → คัดลอก URL `/exec` (เปิดดูต้องได้ `{"ok":true,…,"version":"Rev.19"}`)
-6. รัน `setup` อีกครั้ง → log พิมพ์ลิงก์บอร์ด `…/exec?view=board&key=…` → บันทึกในมือถือทีม (อย่าแชร์นอกทีม — เปลี่ยนรหัส: ลบ `BOARD_KEY` ใน Script properties แล้วรัน setup)
+5. **Deploy → New deployment → Web app** · Execute as: **Me** · Who has access: **Anyone** → คัดลอก URL `/exec` (เปิดดูต้องได้ `{"ok":true,…,"version":"Rev.21.1"}`)
+6. รัน `setup` อีกครั้ง → log พิมพ์ลิงก์บอร์ด `…/exec?view=board&key=…` → บันทึกในมือถือทีม (อย่าแชร์นอกทีม — เปลี่ยนรหัส: รัน **`newBoardKey`** ลิงก์เดิมใช้ไม่ได้ทันที · ★ถ้าเคย deploy ก่อน Rev.21.1 ให้รัน `newBoardKey` 1 ครั้งหลังอัปเดตโค้ด)
 7. (ไม่บังคับ) Script properties: `LINE_TOKEN` + `LINE_TO` (LINE Messaging API) — แจ้งงานใหม่เข้า LINE
 8. ใส่ URL ที่ `assets/submit.js` → `const BACKEND_URL = '…/exec';` → `npm run backend:check -- <url>` (อ่านอย่างเดียว) หรือ `-- <url> --write` (ส่งใบจองทดสอบจริง 1 ใบ) → build → publish
 
 แก้โค้ดภายหลัง: วางโค้ดใหม่ → **Manage deployments → ✎ → Version: New version** (URL เดิมใช้ต่อ — อย่าสร้าง deployment ใหม่)
 
+## ★Rev.21.1 สิทธิ์การเรียกฟังก์ชัน (แก้ตามผลตรวจอิสระ BUG-01)
+
+หน้าเว็บของ Apps Script เรียกได้ **ทุกฟังก์ชันระดับบนสุดที่ชื่อไม่ลงท้ายด้วย `_`** (`google.script.run`) จึงกำหนดให้:
+
+| ฟังก์ชันที่เรียกจากภายนอกได้ | การตรวจสิทธิ์ |
+|---|---|
+| `doGet` · `doPost` | ทางเข้าเว็บ — คืนเฉพาะข้อมูลที่ตั้งใจ (ping ไม่มีรหัส · status ต้องเบอร์ 4 ตัวท้ายตรง · slots ไม่มีข้อมูลลูกค้า) · ลิงก์บอร์ดที่ไม่มีรหัสได้ข้อความธรรมดา ไม่ใช่หน้า HTML |
+| `boardData` · `boardUpdate` | ตรวจ `BOARD_KEY` ฝั่ง server ทุกครั้ง |
+| `setup` · `selfTest` · `newBoardKey` | เฉพาะเจ้าของบัญชีกดเรียกใช้จาก editor (`Session.getActiveUser()` ต้องเป็นเจ้าของ) · ไม่คืนรหัสบอร์ด (พิมพ์ใน log เท่านั้น) |
+| ที่เหลือทั้งหมด (`markQueue_` `releaseQueue_` `status_` `keyOk_` …) | ลงท้าย `_` = private เรียกจากหน้าเว็บไม่ได้ |
+
+ตัวจำลองใช้กฎเดียวกับ Google (ไม่ใช่ allowlist) และ `npm run backend:test` มีชุดทดสอบเชิงลบ (เรียก setup/selfTest/helper/บอร์ดรหัสผิด → ถูกปฏิเสธ) — **ยังต้องทดสอบซ้ำบน Apps Script staging จริงก่อนเปิดใช้** (ตัวจำลองไม่ใช่การรับรอง production)
+
+อื่น ๆ ใน Rev.21.1: เลขอ้างอิงที่ระบบเติม `-2` ใช้ตรงกันทุกที่ (สรุป · อีเมล · LINE · ปุ่มคัดลอก · ปฏิทิน · ตรวจสถานะ) · ส่งซ้ำด้วย request id เดิม (`rid`) ได้คำตอบเดิม ไม่เพิ่มแถว · คอลัมน์ `รูป` = ลิงก์โฟลเดอร์หรือว่าง และ `จำนวนรูป` = ไฟล์ที่บันทึกได้จริง · บอร์ดเก็บข้อมูลที่กำลังแก้ไว้ข้าม refresh และแจ้งเมื่ออีกจอบันทึกช่องเดียวกัน
+
 ## ทดสอบในเครื่องก่อน deploy (ไม่ต้องมีบัญชี Google)
 
 - `backend/test/gas-emulator.mjs` — รัน `Code.gs` ตัวจริงใน node:vm พร้อมตัวแทน SpreadsheetApp / DriveApp / MailApp / Cache / Properties / Content / Html / Script / UrlFetch / Utilities · เลียนแบบ Sheets ที่สำคัญ: ค่าที่ไม่มี `'` นำหน้าถูกแปลงแบบพิมพ์เอง (0812… → ตัวเลข, 2026-10-08 → วันที่) · `npm run backend:emu` เปิดเซิร์ฟเวอร์ `/exec` + บอร์ด (`google.script.run` ผ่าน `/rpc`)
-- `npm run backend:test` (`tests/backend-e2e.mjs`, dev server :8765) — setup → selfTest → ต่อแบบ A/B/C: ฟอร์มติดต่อ · ใบจองพร้อมรูป → Drive · ความเห็น · ตรวจสถานะบนเว็บ · บอร์ดยืนยันคิว → แท็บคิวเต็ม → เว็บแสดง "คิวเต็มแล้ว" · วันเต็มทั้งวันส่งไม่ได้ + เสนอวันว่าง — **Rev.19: 62/62 PASS**
+- `npm run backend:test` (`tests/backend-e2e.mjs`, dev server :8765) — setup → selfTest → ต่อแบบ A/B/C: ฟอร์มติดต่อ · ใบจองพร้อมรูป → Drive · ความเห็น · ตรวจสถานะบนเว็บ · บอร์ดยืนยันคิว → แท็บคิวเต็ม → เว็บแสดง "คิวเต็มแล้ว" · วันเต็มทั้งวันส่งไม่ได้ + เสนอวันว่าง · Rev.21.1: สิทธิ์ฟังก์ชัน · เลขอ้างอิงซ้ำ · ส่งซ้ำ · รูปว่าง · บอร์ดกำลังแก้ — **95/95 PASS**
 - หน้าเว็บชี้ไป backend ได้ด้วย `<meta name="sbp-backend" content="https://script.google.com/macros/s/…/exec">` (รับเฉพาะ URL Apps Script — ไม่รับจาก query string)
 
 ## ★Rev.16 ใบจองงาน + บอร์ดหลังบ้าน

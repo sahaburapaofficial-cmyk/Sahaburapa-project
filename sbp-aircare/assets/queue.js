@@ -37,9 +37,10 @@ export const dateTh = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('th
 /** first date a normal (non-rush) booking can take */
 export const earliestNormal = (now = bkkNow()) => nextOpen(addDays(now.date, LEAD_DAYS));
 
-/** on-site time of one crew for the cleaning lines [{t, qty}] at level C1/C2 → [min, max] minutes */
+/** on-site time of one crew for the lines [{t, level, qty}] → [min, max, unknown] minutes; unknown = units without a published time
+ *  (★Rev.21.1: an unknown type is counted as unknown, never as a wall unit) */
 export function visitTime(lines, level = 'C1') {
-  return lines.reduce(([a, b], l) => { const T = JOB_TIME[l.level || level]; if (!T) return [a, b]; const r = T[l.t] || T.wall; return [a + r[0] * l.qty, b + r[1] * l.qty]; }, [0, 0]);
+  return lines.reduce(([a, b, u], l) => { const T = JOB_TIME[l.level || level], r = T && l.t ? T[l.t] : null; if (!T) return [a, b, u]; if (!r || l.unknown) return [a, b, u + l.qty]; return [a + r[0] * l.qty, b + r[1] * l.qty, u]; }, [0, 0, 0]);
 }
 /** how the visit fits the working day: 'half' (a morning or an afternoon), 'day', or several working days */
 export function fitOf([, max]) {

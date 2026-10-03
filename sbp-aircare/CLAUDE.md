@@ -946,6 +946,19 @@ body: `400 16px/1.7` · self-hosted woff2 แยก subset Thai/Latin (`fonts.cs
 - ✅ ทดสอบ: `node tests/acdiag.mjs` (คำที่ลูกค้าพิมพ์ 30 แบบ · ทุก regex เจอรายการ Pricebook · ลำดับจุดเสีย) · `node tests/acbot.mjs a.html` (e2e ผู้ช่วย → ใบจอง)
 - แหล่งอ้างอิง: Daikin Troubleshooting · Q-Chang (แอร์เปิดไม่ติด / แอร์เป็นน้ำแข็ง) · Carrier Thailand (แอร์ไม่เย็น) · Siam Charoen Air (เปิดไม่ติด / คอมเพรสเซอร์) · Kacha (เบรกเกอร์ตัด)
 
+### 7.1p ทำเสร็จ Rev.21.1 (3 ต.ค. 2569 — เจ้าของส่งผลตรวจอิสระ "01_FULL_DEVELOPER_HANDOFF.md" ฐาน 4b7f938: "ตรวจเช็คว่าถูกต้องไหม ต้องใช้สิ่งที่ตรวจมาพัฒนาหรือแก้ไขอะไร")
+
+ตรวจซ้ำทุกข้อกับโค้ดจริง — **ถูกต้องทั้ง 6 ข้อ** แก้แล้วพร้อม regression test (ใน branch · ยังไม่ merge · ยังไม่ deploy · ยังไม่ทดสอบบน Apps Script จริง)
+- ✅ **BUG-01 (P1) สิทธิ์ Apps Script:** helper ทุกตัวลงท้าย `_` (private) · public เหลือ `doGet` `doPost` `boardData` `boardUpdate` (ตรวจ key) และ `setup` `selfTest` `newBoardKey` (เจ้าของเท่านั้น `ownerOnly_()` ด้วย `Session`) · `setup()` ไม่คืน BOARD_KEY · ลิงก์บอร์ดไม่มีรหัส = ข้อความธรรมดา (ไม่มี google.script.run) · `newBoardKey()` หมุนรหัส · ตัวจำลองใช้กฎจริงของ Google (`publicFns()`, `/rpc` = visitor) แทน allowlist
+- ✅ **BUG-02 (P1) ค่าเพิ่มงานติดตั้งรายเครื่อง:** `jobsIn().units` (type/BTU/qty ต่อรายการ) · `scope('install')` คิดท่อส่วนเกินและรื้อเครื่องตามชนิด/ขนาดของแต่ละรายการแล้วรวม · ถามระยะท่อแยกต่อรายการ (`A.pipeBy`) · รายการเสริมที่อยู่ในใบแล้ว (`codes`) ไม่คิดซ้ำและไม่นับเป็นเครื่อง · ติดผนัง 12k + สี่ทิศทาง 48k ท่อ 8 ม. = 11,200 ทั้งสองลำดับ (เดิม 8,000 / 14,400)
+- ✅ **BUG-03 เลขอ้างอิง:** backend แทนเลขในสรุป/อีเมล/LINE ด้วยเลขจริง · หน้าเว็บใช้เลขที่ backend ตอบทุกที่ (หัวข้อ สรุป คัดลอก LINE ปฏิทิน) · `rid` ต่อคำขอ + ปุ่ม "ลองส่งอีกครั้ง" ส่ง rid เดิม → ไม่เกิดแถวซ้ำ (Cache 6 ชม.) · status รับเลขยาวถึง 24
+- ✅ **BUG-04 บอร์ดทับข้อมูลที่กำลังแก้:** `drafts` ต่อ ref/ช่อง คงอยู่ข้าม refresh · คืน focus · แจ้งเมื่อในระบบเปลี่ยนระหว่างแก้ · บันทึกไม่สำเร็จไม่ล้างข้อมูล · คำตอบ refresh เก่ากว่าถูกทิ้ง (`seq`)
+- ✅ **BUG-05 เวลางานล้าง:** `visitLines` อ่านทุก key (`QC-` `CL-` `C-`) · AHU / ล้างเฉพาะส่วน / duct = "ทีมยืนยันเวลา" ไม่แปลงเป็นติดผนัง C1 · งานเพิ่ม (คราบ ความสูง) ไม่นับเป็นเครื่อง · เวลาติดตั้งตามชนิดของแต่ละรายการ · `visitTime()` คืน `[min, max, unknown]`
+- ✅ **BUG-06 ลิงก์รูป:** backend เขียน `รูป` = ลิงก์โฟลเดอร์หรือว่าง + `จำนวนรูป` = ไฟล์ที่บันทึกได้จริง · บอร์ดลิงก์เฉพาะ `https://drive.google.com/` (แถวเก่าที่เป็น 0 ไม่เป็นลิงก์) · หน้าเว็บบอกจำนวนรูปที่ยังไม่ถึงทีม
+- ทดสอบ: `npm run review` (tests/review-fixes.mjs) · `npm run backend:test` 95/95 (รวมชุดสิทธิ์เชิงลบ + R BUG-03/04/06)
+- ✅ **GATE-02 (บางส่วน):** `.github/workflows/sbp-aircare-checks.yml` (PR + push ที่ไม่ใช่ main: Code.gs parse · รายชื่อฟังก์ชัน public ต้องตรงที่ทบทวน · acdiag · review-fixes) และ Pages deploy ต้องผ่าน checks ก่อน build · `dist/site/version.json` = SHA ที่ออนไลน์ · ชุดเบราว์เซอร์ (smoke/booking/submit/backend:test) ยังรันในเครื่องก่อน merge
+- ยังไม่ทำ (นอกขอบเขตแก้บั๊ก ต้องให้เจ้าของเลือก/ให้สิทธิ์): GATE-01 staging Apps Script จริง (ต้องใช้บัญชีบริษัท) · rollback ที่ซ้อมแล้ว · GATE-03 รูปสินค้าตรงรุ่น (manifest ยังว่าง) · GATE-05 ยืนยัน Pricebook/ค่าเดินทาง · backlog C–E
+
 ### 7.2 บั๊ก / ปัญหาที่ยังค้าง (เรียงตามความสำคัญ)
 
 | # | ปัญหา | ผลกระทบ | หลักฐาน / จุดที่ต้องดู |

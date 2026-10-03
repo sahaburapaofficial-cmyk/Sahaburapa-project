@@ -8,13 +8,17 @@
  * sets the extra price (before VAT), confirms the date / slot (marks the "คิว" tab) and moves the status.
  * Script properties (Project settings → Script properties): BOARD_KEY (long random text, required for the board),
  * LINE_TOKEN + LINE_TO (optional: LINE Messaging API channel access token + group / user id to push new tickets to).
+ * ★Rev.21.1 security (independent review BUG-01): a web app page can call EVERY top-level function whose name does not end
+ * with "_" (google.script.run). So: every helper ends with "_"; the only public functions are doGet / doPost (web entry
+ * points), boardData / boardUpdate (check BOARD_KEY on the server every call) and setup / selfTest / newBoardKey (owner only:
+ * refused unless run by the script owner from the editor, and they never return the key — it is printed in the execution log).
  */
 const NOTIFY_TO = 'Sahaburapa.official@gmail.com';   // comma-separated list allowed; consumer Gmail: 100 recipients / day
 const TABS = { quote: 'ใบเสนอราคา', contact: 'ติดต่อ', feedback: 'ความเห็น', booking: 'งานจอง' };
 const BOARD_COLS = ['ราคาเพิ่มที่แจ้ง (ก่อน VAT)', 'นัดวัน', 'นัดช่วง', 'หมายเหตุทีม', 'รูป'];   // filled by the team on the board
 const MAX_PHOTOS = 8, MAX_PHOTO_B64 = 1500000;
 const MAX_TEXT = 8000;
-const VERSION = 'Rev.21';
+const VERSION = 'Rev.21.1';
 let SILENT = false;   // selfTest(): no e-mail / LINE for the test request
 
 // the company sheet: the one this script is bound to, or SHEET_ID (set by setup() for a standalone script)
@@ -28,39 +32,46 @@ function ss_() {
 function doPost(e) {
   try {
     const raw = (e && e.postData && e.postData.contents) || '';
-    if (raw.length > 12000000) return reply({ ok: false, error: 'too large' });
+    if (raw.length > 12000000) return reply_({ ok: false, error: 'too large' });
     const d = JSON.parse(raw);
-    if (d.kind !== 'booking' && raw.length > 20000) return reply({ ok: false, error: 'too large' });
+    if (d.kind !== 'booking' && raw.length > 20000) return reply_({ ok: false, error: 'too large' });
     const kind = TABS[d.kind] ? d.kind : null;
-    if (!kind) return reply({ ok: false, error: 'bad kind' });
-    if (d.hp) return reply({ ok: true, ref: String(d.ref || '') });        // bot filled the hidden field: accept silently, store nothing
-    if (!rateOk()) return reply({ ok: false, error: 'busy' });
+    if (!kind) return reply_({ ok: false, error: 'bad kind' });
+    if (d.hp) return reply_({ ok: true, ref: String(d.ref || '') });        // bot filled the hidden field: accept silently, store nothing
+    if (!rateOk_()) return reply_({ ok: false, error: 'busy' });
     const lock = LockService.getScriptLock(); lock.waitLock(20000);   // Rev.19: two requests at once never overwrite a new column or share a reference
     try {
-    const ref = uniqueRef(clean(d.ref, 20) || ('W' + Date.now()));
-    const fields = safeFields(d.fields);
-    const text = clean(d.text, MAX_TEXT);
-    const photos = kind === 'booking' ? savePhotos(ref, d.photos) : null;
-    if (photos) fields['รูป'] = photos.url;
-    const sheet = tab(kind, Object.keys(fields).concat(kind === 'booking' ? BOARD_COLS : []));
+    // ★Rev.21.1 (review BUG-03): the same request sent again (retry after a time-out) returns the first answer, no second row
+    const rid = clean_(d.rid, 40), seen = rid && CacheService.getScriptCache().get('rid:' + rid);
+    if (seen) return reply_(Object.assign({ ok: true, again: true }, JSON.parse(seen)));
+    const asked = clean_(d.ref, 20) || ('W' + Date.now()), ref = uniqueRef_(asked);
+    const fields = safeFields_(d.fields);
+    // the reference this request really got is the one in the summary, the e-mail and LINE too (not only the subject)
+    const text = ref === asked ? clean_(d.text, MAX_TEXT) : clean_(d.text, MAX_TEXT).split(asked).join(ref);
+    const photos = kind === 'booking' ? savePhotos_(ref, d.photos) : null;
+    // ★Rev.21.1 (review BUG-06): "รูป" = the Drive folder link or empty, "จำนวนรูป" = files actually saved — never the count in the link column
+    if (kind === 'booking') { fields['รูป'] = photos ? photos.url : ''; fields['จำนวนรูป'] = photos ? photos.n : 0; }
+    const sheet = tab_(kind, Object.keys(fields).concat(kind === 'booking' ? BOARD_COLS : []));
     const head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     const row = head.map(k => {
       if (k === 'เวลา') return new Date();
       if (k === 'เลขอ้างอิง') return ref;
-      if (k === 'แบบ') return clean(d.variant, 4);
-      if (k === 'หน้า') return clean(d.page, 200);
+      if (k === 'แบบ') return clean_(d.variant, 4);
+      if (k === 'หน้า') return clean_(d.page, 200);
       if (k === 'สรุป') return text;
       if (k === 'สถานะ') return 'ใหม่';
-      return k in fields ? safeCell(clean(fields[k], 1000)) : '';
+      return k in fields ? safeCell_(clean_(fields[k], 1000)) : '';
     });
     sheet.appendRow(row);
-    notify(kind, ref, d.variant, text + (photos ? `\n\nรูปหน้างาน ${photos.n} รูป: ${photos.url}` : ''));
-    if (kind === 'booking') pushLine(`ใบจองงานใหม่ ${ref}\n${String(fields['งาน'] || '')} · ${String(fields['ขอบเขต'] || '')}\nวัน ${String(fields['วันที่สะดวก'] || '-')} ${String(fields['ช่วงเวลา'] || '')}\nโทร ${String(fields['โทร'] || '')}${photos ? `\nรูป ${photos.n} รูป` : ''}`);
-    return reply({ ok: true, ref, photos: photos ? photos.n : 0 });
+    notify_(kind, ref, d.variant, text + (photos ? `\n\nรูปหน้างาน ${photos.n} รูป: ${photos.url}` : ''));
+    if (kind === 'booking') pushLine_(`ใบจองงานใหม่ ${ref}\n${String(fields['งาน'] || '')} · ${String(fields['ขอบเขต'] || '')}\nวัน ${String(fields['วันที่สะดวก'] || '-')} ${String(fields['ช่วงเวลา'] || '')}\nโทร ${String(fields['โทร'] || '')}${photos ? `\nรูป ${photos.n} รูป` : ''}`);
+    const ans = { ref, photos: photos ? photos.n : 0 };
+    if (rid) CacheService.getScriptCache().put('rid:' + rid, JSON.stringify(ans), 21600);
+    return reply_(Object.assign({ ok: true }, ans));
     } finally { lock.releaseLock(); }
   } catch (err) {
     console.error(err);
-    return reply({ ok: false, error: 'server' });
+    return reply_({ ok: false, error: 'server' });
   }
 }
 
@@ -71,19 +82,19 @@ function doPost(e) {
 function doGet(e) {
   const q = (e && e.parameter) || {};
   try {
-    if (q.q === 'ping') return reply({ ok: true, service: 'SBP AirCare requests', version: VERSION, sheet: !!ss_(), board: !!PropertiesService.getScriptProperties().getProperty('BOARD_KEY') });
-    if (q.q === 'slots') return reply({ ok: true, days: slots() });
-    if (q.q === 'status') return reply(rateOk('s', 60) ? status(clean(q.ref, 22), clean(q.tel, 4)) : { ok: false, error: 'busy' });   // Rev.19: no guessing at speed
+    if (q.q === 'ping') return reply_({ ok: true, service: 'SBP AirCare requests', version: VERSION, sheet: !!ss_(), board: !!PropertiesService.getScriptProperties().getProperty('BOARD_KEY') });
+    if (q.q === 'slots') return reply_({ ok: true, days: slots_() });
+    if (q.q === 'status') return reply_(rateOk_('s', 60) ? status_(clean_(q.ref, 24), clean_(q.tel, 4)) : { ok: false, error: 'busy' });   // Rev.19: no guessing at speed
     if (q.view === 'board') {
-      if (!keyOk(q.key)) return HtmlService.createHtmlOutput('<p style="font:16px sans-serif;padding:24px">ต้องใช้ลิงก์บอร์ดที่มีรหัส (BOARD_KEY)</p>');
+      if (!keyOk_(q.key)) return ContentService.createTextOutput('ต้องใช้ลิงก์บอร์ดที่มีรหัส (BOARD_KEY)').setMimeType(ContentService.MimeType.TEXT);   // Rev.21.1: no HTML page = no google.script.run
       const t = HtmlService.createTemplateFromFile('Board'); t.key = q.key;
       return t.evaluate().setTitle('SBP AirCare · งานจอง').addMetaTag('viewport', 'width=device-width, initial-scale=1');
     }
-  } catch (err) { console.error(err); return reply({ ok: false, error: 'server' }); }
-  return reply({ ok: true, service: 'SBP AirCare requests', version: VERSION });
+  } catch (err) { console.error(err); return reply_({ ok: false, error: 'server' }); }
+  return reply_({ ok: true, service: 'SBP AirCare requests', version: VERSION });
 }
 
-function slots() {
+function slots_() {
   const sh = ss_().getSheetByName('คิว');
   if (!sh || sh.getLastRow() < 2) return {};
   const tz = 'Asia/Bangkok', today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'), until = Utilities.formatDate(new Date(Date.now() + 21 * 864e5), tz, 'yyyy-MM-dd');
@@ -96,7 +107,7 @@ function slots() {
   return out;
 }
 
-function status(ref, tel4) {
+function status_(ref, tel4) {
   if (!ref || !/^\d{4}$/.test(tel4)) return { ok: false, error: 'missing' };
   const ss = ss_();
   for (const name of [TABS.booking, TABS.quote, TABS.contact]) {
@@ -112,7 +123,7 @@ function status(ref, tel4) {
   return { ok: false, error: 'not found' };
 }
 
-function tab(kind, keys) {
+function tab_(kind, keys) {
   const ss = ss_();
   let sh = ss.getSheetByName(TABS[kind]);
   const base = ['เวลา', 'เลขอ้างอิง', 'สถานะ', 'แบบ', 'หน้า'];
@@ -123,7 +134,7 @@ function tab(kind, keys) {
   return sh;
 }
 
-function notify(kind, ref, variant, text) {
+function notify_(kind, ref, variant, text) {
   if (SILENT) return;
   const subject = `[SBP AirCare] ${TABS[kind]} ใหม่ · ${ref}`;
   const url = ss_().getUrl();
@@ -132,34 +143,34 @@ function notify(kind, ref, variant, text) {
 }
 
 // at most 30 requests per minute for the whole site — slows down floods without blocking real customers
-function rateOk(tag, max) {
+function rateOk_(tag, max) {
   const c = CacheService.getScriptCache(), k = (tag || 'n') + Math.floor(Date.now() / 60000), n = Number(c.get(k) || 0);
   if (n >= (max || 30)) return false;
   c.put(k, String(n + 1), 120);
   return true;
 }
-function clean(v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, n); }
+function clean_(v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, n); }
 // ★Rev.19 every customer value is stored as text ("'" prefix, hidden by Sheets): never a formula, and a phone 0812345678 keeps its 0,
 // a date stays as written
-function safeCell(v) { return v === '' || v == null ? '' : "'" + v; }
+function safeCell_(v) { return v === '' || v == null ? '' : "'" + v; }
 // Rev.19: field names become column headers — keep them short, plain text, and at most 40 per request
-function safeFields(f) {
+function safeFields_(f) {
   const out = {}; if (!f || typeof f !== 'object') return out;
-  Object.keys(f).slice(0, 40).forEach(k => { const key = clean(k, 60).trim(); if (key && !/^[=+\-@']/.test(key)) out[key] = f[k]; });
+  Object.keys(f).slice(0, 40).forEach(k => { const key = clean_(k, 60).trim(); if (key && !/^[=+\-@']/.test(key)) out[key] = f[k]; });
   return out;
 }
 // the website numbers requests from the clock (7 digits repeat about every 3 hours): a reference already in the sheet gets a suffix
-function uniqueRef(ref) {
+function uniqueRef_(ref) {
   const ss = ss_(), used = {};
   Object.keys(TABS).forEach(k => { const sh = ss.getSheetByName(TABS[k]); if (!sh || sh.getLastRow() < 2) return; const h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0], c = h.indexOf('เลขอ้างอิง'); if (c < 0) return; sh.getRange(2, c + 1, sh.getLastRow() - 1, 1).getDisplayValues().forEach(r => { used[r[0]] = 1; }); });
   if (!used[ref]) return ref;
   for (let i = 2; ; i++) if (!used[ref + '-' + i]) return ref + '-' + i;
 }
-function reply(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+function reply_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
 
 /* ---------- ★Rev.16 job tickets: photos, LINE push, back-office board ---------- */
-function savePhotos(ref, list) {
+function savePhotos_(ref, list) {
   if (!Array.isArray(list) || !list.length) return null;
   const root = folder_('SBP AirCare งานจอง'), dir = root.createFolder(ref);
   let n = 0;
@@ -173,7 +184,7 @@ function savePhotos(ref, list) {
 function folder_(name) { const it = DriveApp.getFoldersByName(name); return it.hasNext() ? it.next() : DriveApp.createFolder(name); }
 
 // LINE Messaging API push (LINE Notify ended in 2025) — only when LINE_TOKEN and LINE_TO are set
-function pushLine(text) {
+function pushLine_(text) {
   if (SILENT) return;
   const P = PropertiesService.getScriptProperties(), token = P.getProperty('LINE_TOKEN'), to = P.getProperty('LINE_TO');
   if (!token || !to) return;
@@ -181,11 +192,11 @@ function pushLine(text) {
   catch (err) { console.error('line push', err); }
 }
 
-function keyOk(k) { const want = PropertiesService.getScriptProperties().getProperty('BOARD_KEY'); return !!want && String(k || '') === want; }
+function keyOk_(k) { const want = PropertiesService.getScriptProperties().getProperty('BOARD_KEY'); return !!want && String(k || '') === want; }
 
 // board: newest first, last 200 tickets
 function boardData(key) {
-  if (!keyOk(key)) throw new Error('key');
+  if (!keyOk_(key)) throw new Error('key');
   const sh = ss_().getSheetByName(TABS.booking);
   if (!sh || sh.getLastRow() < 2) return { head: [], rows: [] };
   const v = sh.getDataRange().getDisplayValues(), head = v[0];
@@ -193,7 +204,7 @@ function boardData(key) {
 }
 const BOARD_EDIT = ['สถานะ', 'ราคาเพิ่มที่แจ้ง (ก่อน VAT)', 'นัดวัน', 'นัดช่วง', 'หมายเหตุทีม'];
 function boardUpdate(key, ref, patch) {
-  if (!keyOk(key)) throw new Error('key');
+  if (!keyOk_(key)) throw new Error('key');
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try { return boardUpdate_(ref, patch || {}); } finally { lock.releaseLock(); }
 }
@@ -204,21 +215,21 @@ function boardUpdate_(ref, patch) {
   for (let r = v.length - 1; r > 0; r--) {
     if (String(v[r][iRef]) !== String(ref)) continue;
     const was = { st: v[r][at('สถานะ')], date: v[r][at('นัดวัน')], slot: v[r][at('นัดช่วง')] };
-    Object.keys(patch || {}).forEach(k => { const c = head.indexOf(k); if (c >= 0 && BOARD_EDIT.indexOf(k) >= 0) sh.getRange(r + 1, c + 1).setValue(k === 'นัดวัน' && patch[k] ? "'" + clean(patch[k], 10) : safeCell(clean(patch[k], 500))); });   // keep dates as yyyy-mm-dd text
+    Object.keys(patch || {}).forEach(k => { const c = head.indexOf(k); if (c >= 0 && BOARD_EDIT.indexOf(k) >= 0) sh.getRange(r + 1, c + 1).setValue(k === 'นัดวัน' && patch[k] ? "'" + clean_(patch[k], 10) : safeCell_(clean_(patch[k], 500))); });   // keep dates as yyyy-mm-dd text
     const now = { st: 'สถานะ' in patch ? String(patch['สถานะ']) : was.st, date: 'นัดวัน' in patch ? String(patch['นัดวัน']) : was.date, slot: 'นัดช่วง' in patch ? String(patch['นัดช่วง']) : was.slot };
     // Rev.19: cancelled, back to an earlier status, or moved to another day / half → the old slot is free again (unless another confirmed job holds it)
-    if (HOLDS.indexOf(was.st) >= 0 && was.date && (HOLDS.indexOf(now.st) < 0 || now.date !== was.date || now.slot !== was.slot)) releaseQueue(was.date, was.slot, ref);
-    if (now.st === 'ยืนยันคิว' && now.date) markQueue(now.date, now.slot);
+    if (HOLDS.indexOf(was.st) >= 0 && was.date && (HOLDS.indexOf(now.st) < 0 || now.date !== was.date || now.slot !== was.slot)) releaseQueue_(was.date, was.slot, ref);
+    if (now.st === 'ยืนยันคิว' && now.date) markQueue_(now.date, now.slot);
     return true;
   }
   return false;
 }
-const halves = slot => ({ am: /เช้า|ทั้งวัน/.test(slot) || !slot, pm: /บ่าย|ทั้งวัน/.test(slot) || !slot });
-function releaseQueue(date, slot, exceptRef) {
+const halves_ = slot => ({ am: /เช้า|ทั้งวัน/.test(slot) || !slot, pm: /บ่าย|ทั้งวัน/.test(slot) || !slot });
+function releaseQueue_(date, slot, exceptRef) {
   const sh = ss_().getSheetByName(TABS.booking), v = sh.getDataRange().getDisplayValues(), head = v[0];
   const iRef = head.indexOf('เลขอ้างอิง'), iSt = head.indexOf('สถานะ'), iD = head.indexOf('นัดวัน'), iS = head.indexOf('นัดช่วง');
-  const free = halves(slot);
-  v.slice(1).forEach(x => { if (x[iRef] === exceptRef || HOLDS.indexOf(x[iSt]) < 0 || x[iD] !== date) return; const o = halves(x[iS]); if (o.am) free.am = false; if (o.pm) free.pm = false; });
+  const free = halves_(slot);
+  v.slice(1).forEach(x => { if (x[iRef] === exceptRef || HOLDS.indexOf(x[iSt]) < 0 || x[iD] !== date) return; const o = halves_(x[iS]); if (o.am) free.am = false; if (o.pm) free.pm = false; });
   const q = ss_().getSheetByName('คิว'); if (!q) return;
   const qv = q.getDataRange().getDisplayValues(), i = qv.findIndex((x, k) => k > 0 && x[0] === date);
   if (i < 0) return;
@@ -226,43 +237,61 @@ function releaseQueue(date, slot, exceptRef) {
   if (free.pm) q.getRange(i + 1, 3).setValue('');
 }
 // a confirmed visit fills its slot in "คิว" (ทั้งวัน = both)
-function markQueue(date, slot) {
+function markQueue_(date, slot) {
   const ss = ss_(); let sh = ss.getSheetByName('คิว');
   if (!sh) { sh = ss.insertSheet('คิว'); sh.appendRow(['วันที่', 'เช้า', 'บ่าย']); sh.setFrozenRows(1); }
   const v = sh.getDataRange().getDisplayValues(); let r = v.findIndex((x, i) => i > 0 && x[0] === date);
   if (r < 0) { sh.appendRow(["'" + date, '', '']); r = sh.getLastRow() - 1; }
-  const H = halves(slot);
+  const H = halves_(slot);
   if (H.am) sh.getRange(r + 1, 2).setValue('เต็ม');
   if (H.pm) sh.getRange(r + 1, 3).setValue('เต็ม');
 }
 
 
 /* ---------- ★Rev.19 one-time set-up and a self test (run from the Apps Script editor: choose the function → Run) ---------- */
+// ★Rev.21.1 owner only: from a web page (anyone, even with the board key) Session.getActiveUser() is empty or another account
+function ownerOnly_() {
+  let me = '', owner = '';
+  try { me = Session.getActiveUser().getEmail(); owner = Session.getEffectiveUser().getEmail(); } catch (e) {}
+  if (!me || me !== owner) throw new Error('owner only: run this from the Apps Script editor');
+}
 // setup(): creates every tab with its headers, the photo folder, a board key; prints what to do next. Safe to run again.
 function setup() {
+  ownerOnly_();
   const P = PropertiesService.getScriptProperties();
   const ss = SpreadsheetApp.getActiveSpreadsheet() || (P.getProperty('SHEET_ID') ? SpreadsheetApp.openById(P.getProperty('SHEET_ID')) : SpreadsheetApp.create('SBP AirCare – คำขอจากเว็บ'));
   P.setProperty('SHEET_ID', ss.getId());
   const base = ['เวลา', 'เลขอ้างอิง', 'สถานะ', 'แบบ', 'หน้า'];
   const cols = {
     quote: ['ชื่อ / บริษัท', 'โทร', 'วันที่สะดวก', 'ช่วงเวลา', 'ใบกำกับภาษีในนาม', 'พื้นที่', 'แขวง/ตำบล', 'เขต/อำเภอ', 'จังหวัด', 'รหัสไปรษณีย์', 'ค่าเดินทาง (ก่อน VAT)', 'จำนวนรายการ', 'ยอดประมาณการรวม VAT'],
-    booking: ['ชื่อ / บริษัท', 'โทร', 'LINE ID', 'สะดวกให้ติดต่อ', 'วันที่สะดวก', 'ช่วงเวลา', 'พื้นที่', 'แขวง/ตำบล', 'เขต/อำเภอ', 'จังหวัด', 'รหัสไปรษณีย์', 'ระยะถนนประมาณ (กม.)', 'ค่าเดินทาง (ก่อน VAT)', 'ที่อยู่หน้างาน', 'แผนที่', 'งาน', 'ขอบเขต', 'ส่วนเพิ่มประมาณ (ก่อน VAT)', 'ยอดประมาณการรวม VAT', 'หมายเหตุหน้างาน', 'ผลประเมินเบื้องต้น (ผู้ช่วย)', 'ใบกำกับภาษีในนาม', 'จำนวนรายการ'].concat(BOARD_COLS),
+    booking: ['ชื่อ / บริษัท', 'โทร', 'LINE ID', 'สะดวกให้ติดต่อ', 'วันที่สะดวก', 'ช่วงเวลา', 'พื้นที่', 'แขวง/ตำบล', 'เขต/อำเภอ', 'จังหวัด', 'รหัสไปรษณีย์', 'ระยะถนนประมาณ (กม.)', 'ค่าเดินทาง (ก่อน VAT)', 'ที่อยู่หน้างาน', 'แผนที่', 'งาน', 'ขอบเขต', 'ส่วนเพิ่มประมาณ (ก่อน VAT)', 'ยอดประมาณการรวม VAT', 'หมายเหตุหน้างาน', 'ผลประเมินเบื้องต้น (ผู้ช่วย)', 'ใบกำกับภาษีในนาม', 'จำนวนรายการ', 'จำนวนรูป'].concat(BOARD_COLS),
     contact: ['ชื่อ', 'โทร'], feedback: [],
   };
   Object.keys(TABS).forEach(k => { let sh = ss.getSheetByName(TABS[k]); if (!sh) { sh = ss.insertSheet(TABS[k]); sh.appendRow(base.concat(cols[k], ['สรุป'])); sh.setFrozenRows(1); } });
   if (!ss.getSheetByName('คิว')) { const q = ss.insertSheet('คิว'); q.appendRow(['วันที่', 'เช้า', 'บ่าย']); q.setFrozenRows(1); }
   folder_('SBP AirCare งานจอง');
-  if (!P.getProperty('BOARD_KEY')) P.setProperty('BOARD_KEY', (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 40));
+  if (!P.getProperty('BOARD_KEY')) P.setProperty('BOARD_KEY', newKey_());
   const url = ScriptApp.getService().getUrl();
   console.log('SET-UP DONE · sheet: ' + ss.getUrl());
   console.log('BOARD_KEY: ' + P.getProperty('BOARD_KEY'));
   console.log(url ? 'board: ' + url + '?view=board&key=' + P.getProperty('BOARD_KEY') : 'next: Deploy → New deployment → Web app (Execute as: Me · Who has access: Anyone), then run setup() again to print the board link');
-  return { sheet: ss.getUrl(), boardKey: P.getProperty('BOARD_KEY'), webApp: url || '' };
+  return { sheet: ss.getUrl(), webApp: url || '', board: !!P.getProperty('BOARD_KEY') };   // Rev.21.1: the key only in the log, never returned
+}
+const newKey_ = () => (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 40);
+// newBoardKey(): a new board link (old links stop working) — when a link was shared too widely or a staff member leaves
+function newBoardKey() {
+  ownerOnly_();
+  const P = PropertiesService.getScriptProperties(); P.setProperty('BOARD_KEY', newKey_());
+  const url = ScriptApp.getService().getUrl();
+  console.log('NEW BOARD_KEY: ' + P.getProperty('BOARD_KEY'));
+  if (url) console.log('board: ' + url + '?view=board&key=' + P.getProperty('BOARD_KEY'));
+  return { ok: true };
 }
 
 // selfTest(): a full ticket round trip without e-mail / LINE — booking + photo → row + Drive file → status lookup →
 // board confirm → queue slot full → slots API; then removes everything it created. Every line says PASS or FAIL.
 function selfTest() {
+  ownerOnly_();
   SILENT = true;
   const out = [], ok = (name, cond, info) => out.push((cond ? 'PASS ' : 'FAIL ') + name + (info ? ' · ' + info : ''));
   const ref = 'TEST' + Date.now().toString().slice(-6), date = Utilities.formatDate(new Date(Date.now() + 5 * 864e5), 'Asia/Bangkok', 'yyyy-MM-dd');

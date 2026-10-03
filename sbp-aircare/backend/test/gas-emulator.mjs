@@ -7,6 +7,8 @@
 //   node backend/test/gas-emulator.mjs [port=8790]
 //     GET/POST /exec           → doGet / doPost (CORS like a deployed web app)
 //     GET  /exec?view=board&key=… → Board.html with a google.script.run bridge (POST /rpc)
+//     ★Rev.21.1 /rpc follows the real rule: ANY top-level function whose name does not end with "_" can be called from a page
+//     (not an allowlist) and runs as an anonymous visitor (Session.getActiveUser() = '') — so negative tests mean something
 //     GET  /__run?fn=setup|selfTest → run a function, return its result + console log
 //     GET  /__state            → every tab, Drive files, e-mails and LINE pushes (for test assertions)
 import vm from 'node:vm';
@@ -114,7 +116,10 @@ export function createGas({ bound = true } = {}) {
     },
   };
   let serviceUrl = '';
+  const OWNER = 'sahaburapa.official@gmail.com';
+  let activeUser = OWNER;   // the editor (owner) by default; web requests and page RPC run as an anonymous visitor
   const ctx = {
+    Session: { getActiveUser: () => ({ getEmail: () => activeUser }), getEffectiveUser: () => ({ getEmail: () => OWNER }) },
     SpreadsheetApp, DriveApp, Utilities,
     PropertiesService: { getScriptProperties: () => props },
     CacheService: { getScriptCache: () => cache },
@@ -133,7 +138,10 @@ export function createGas({ bound = true } = {}) {
   return {
     state, ctx,
     setServiceUrl: u => { serviceUrl = u; },
-    call(fn, ...args) { if (typeof ctx[fn] !== 'function') throw new Error('no function ' + fn); return ctx[fn](...args); },
+    call(fn, ...args) { if (typeof ctx[fn] !== 'function') throw new Error('no function ' + fn); return ctx[fn](...args); },   // as the owner (editor)
+    web(fn, ...args) { const was = activeUser; activeUser = ''; try { return this.call(fn, ...args); } finally { activeUser = was; } },   // as a web visitor
+    // what google.script.run can reach: every top-level function not ending with "_"
+    publicFns() { return Object.keys(ctx).filter(k => typeof ctx[k] === 'function' && !k.endsWith('_') && vm.runInContext(`typeof ${k} === 'function'`, ctx) && !(k in BUILTIN)); },
     dump() {
       const tabs = {};
       for (const [n, s] of state.sheets) tabs[n] = s.rows.map(r => r.map(display));
@@ -141,6 +149,8 @@ export function createGas({ bound = true } = {}) {
     },
   };
 }
+
+const BUILTIN = Object.fromEntries(['SpreadsheetApp', 'DriveApp', 'Utilities', 'Buffer', 'crypto', 'Date', 'Session', 'PropertiesService', 'CacheService', 'ContentService', 'HtmlService', 'LockService', 'MailApp', 'UrlFetchApp', 'ScriptApp', 'console'].map(k => [k, 1]));
 
 /* ---------- HTTP server ---------- */
 const BRIDGE = `<script>
@@ -151,7 +161,6 @@ window.google = { script: { get run() { let ok = () => {}, bad = () => {};
   return p; } } };
 </script>`;
 export function serve(gas, port = 8790) {
-  const RPC = new Set(['boardData', 'boardUpdate']);
   const cors = { 'Access-Control-Allow-Origin': '*' };
   const srv = http.createServer(async (req, res) => {
     const u = new URL(req.url, 'http://x'), body = await new Promise(r => { let b = ''; req.on('data', c => b += c); req.on('end', () => r(b)); });
@@ -160,14 +169,14 @@ export function serve(gas, port = 8790) {
       if (req.method === 'OPTIONS') return send(405, 'text/plain', 'Apps Script web apps do not answer preflight');   // like the real thing
       if (u.pathname === '/exec') {
         const e = { parameter: Object.fromEntries(u.searchParams), postData: req.method === 'POST' ? { contents: body, type: req.headers['content-type'] } : undefined };
-        const out = gas.call(req.method === 'POST' ? 'doPost' : 'doGet', e);
+        const out = gas.web(req.method === 'POST' ? 'doPost' : 'doGet', e);
         if (out.mime) return send(200, out.mime + '; charset=utf-8', out.content);
         return send(200, 'text/html; charset=utf-8', out.content.replace('</head>', BRIDGE + '</head>'));
       }
       if (u.pathname === '/rpc' && req.method === 'POST') {
         const { fn, args } = JSON.parse(body);
-        if (!RPC.has(fn)) return send(200, 'application/json', JSON.stringify({ ok: false, error: 'not callable' }));
-        try { return send(200, 'application/json', JSON.stringify({ ok: true, value: gas.call(fn, ...args) })); }
+        if (!gas.publicFns().includes(fn)) return send(200, 'application/json', JSON.stringify({ ok: false, error: 'Script function not found: ' + fn }));
+        try { return send(200, 'application/json', JSON.stringify({ ok: true, value: gas.web(fn, ...args) })); }
         catch (err) { return send(200, 'application/json', JSON.stringify({ ok: false, error: String(err.message || err) })); }
       }
       if (u.pathname === '/__run') {
