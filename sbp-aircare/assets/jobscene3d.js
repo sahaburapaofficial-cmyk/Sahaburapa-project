@@ -16,7 +16,8 @@ import { mats as roomMats, rbox, F, TEX, windowUnit } from './roomkit3d.js';
 import { buildTrunk, bentPath } from './trunk3d.js';
 import { createAirflow } from './airflow3d.js';
 import { createCrew, buildLadder } from './crew3d.js';
-import { matTex, bagTex, boxTex, chestTex, decal, drawSbp } from './brand3d.js';
+import { matTex, bagTex, boxTex, decal, drawSbp, drawFujiva, brandTex } from './brand3d.js';
+import { OU_HIGH } from './services.js';
 import { hqFor } from './quality3d.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -31,9 +32,43 @@ const DIRT_C = { filter: 0x8a7a62, coil: 0x7d6b52, blower: 0x2e2a24, fan: 0x2e2a
 // laid on the table: tilt about x so the part rests flat (per type / part); long parts also turn to lie along the table
 const FLATX = { wall: { front: -1.35, filter: -1.4 }, floor: { front: -Math.PI / 2, grille: -Math.PI / 2, filter: -Math.PI / 2 } };
 // act aliases: overhead cassette work; floor-standing unit = standing / kneeling at chest height (no ladder)
-const ACT = { cassette: { work: 'up', spray: 'sprayUp', reach: 'up' }, floor: { work: 'table', spray: 'sprayLow', reach: 'kneel', handDown: 'present', measure: 'table', pour: 'table', drill: 'kneel' } };
+const ACT = { cassette: { work: 'up', spray: 'sprayUp', reach: 'up', blow: 'sprayUp', checkTime: 'up' }, floor: { work: 'table', spray: 'sprayLow', blow: 'sprayLow', checkTime: 'table', reach: 'kneel', handDown: 'present', measure: 'table', pour: 'table', drill: 'kneel' } };
 // customers per venue
 const CUST = { wall: { female: true, colors: { shirt: 0xd8d2c4, pants: 0x3b3f46 } }, ceiling: { female: false, colors: { shirt: 0x2f6d5a, pants: 0x3b3f46, longSleeve: false } }, cassette: { female: true, colors: { shirt: 0x5a4636, pants: 0x2b3440 } }, floor: { female: false, colors: { shirt: 0xf2f2ee, pants: 0x2c3b52, longSleeve: true } } };
+
+/** Rev.23 the crew's pressure-washer pump (owner's reference, 3 ต.ค. 2569) — userData.out = brass outlet (hose start), local frame */
+export function buildPump() {
+  const washer = new THREE.Group(), WOUT = V(0.15, 0.11, 0.185); washer.userData.out = WOUT;
+  const std = (c, x = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...x });
+  const box = (w, h, d, m, x = 0, y = 0, z = 0) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); b.castShadow = b.receiveShadow = true; return b; };
+  const cyl = (r, h, m, x = 0, y = 0, z = 0, seg = 20) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m); c.position.set(x, y, z); c.castShadow = true; return c; };
+  {
+    const red = new THREE.MeshPhysicalMaterial({ color: 0xb00e16, roughness: 0.26, clearcoat: 0.85, clearcoatRoughness: 0.12 }), blk = std(0x16181b, { roughness: 0.55 }), slot = std(0x060708, { roughness: 0.9 }), gry = std(0x8f969d, { roughness: 0.45 }), brass = std(0xc9a144, { metalness: 0.9, roughness: 0.28 });
+    const W = 0.3, sh = new THREE.Shape();   // side profile (x: front +, y: up), extruded across z — low front, tall rear
+    sh.moveTo(-0.2, 0.04); sh.lineTo(0.19, 0.04); sh.quadraticCurveTo(0.215, 0.04, 0.215, 0.07); sh.lineTo(0.205, 0.19); sh.quadraticCurveTo(0.2, 0.225, 0.165, 0.232); sh.lineTo(-0.03, 0.285); sh.lineTo(-0.18, 0.3); sh.quadraticCurveTo(-0.215, 0.3, -0.215, 0.27); sh.lineTo(-0.215, 0.07); sh.quadraticCurveTo(-0.215, 0.04, -0.2, 0.04);
+    const bg = new THREE.ExtrudeGeometry(sh, { depth: W - 0.024, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.012, bevelSegments: 3, curveSegments: 10 }); bg.translate(0, 0, -(W - 0.024) / 2);
+    const body = new THREE.Mesh(bg, red); body.castShadow = body.receiveShadow = true; washer.add(body);
+    // black nose panel with vent slots
+    washer.add(rbox(0.035, 0.16, W - 0.05, 0.01, blk, 0.218, 0.135, 0)); for (let i = 0; i < 6; i++) washer.add(box(0.006, 0.009, W - 0.11, slot, 0.237, 0.08 + i * 0.022, 0));
+    // carry handle (grey grip) between two red posts
+    [0.12, -0.08].forEach(x => washer.add(rbox(0.05, x > 0 ? 0.13 : 0.1, 0.06, 0.012, red, x, x > 0 ? 0.31 : 0.33, 0)));
+    { const g = cyl(0.017, 0.24, gry, 0.02, 0.37, 0, 16); g.rotation.z = Math.PI / 2; washer.add(g); }
+    // ribbed black rear deck + hose-hook frame with the coiled hose
+    for (let i = 0; i < 6; i++) washer.add(box(0.016, 0.014, W - 0.07, blk, -0.2 + i * 0.022, 0.305 - i * 0.0015, 0));
+    [-1, 1].forEach(sz => washer.add(cyl(0.009, 0.16, blk, -0.235, 0.36, sz * 0.11, 10)));
+    { const b = cyl(0.009, 0.24, blk, -0.235, 0.44, 0, 10); b.rotation.x = Math.PI / 2; washer.add(b); [-1, 1].forEach(sz => washer.add(box(0.05, 0.012, 0.012, blk, -0.215, 0.44, sz * 0.11))); }
+    { const coil = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.011, 8, 40), blk); coil.position.set(-0.262, 0.33, 0); coil.rotation.y = Math.PI / 2; coil.castShadow = true; washer.add(coil); const c2 = coil.clone(); c2.position.x = -0.274; c2.scale.setScalar(0.94); washer.add(c2); }
+    // side vents (both sides), brass outlet + inlet, grey feet
+    [-1, 1].forEach(sz => { for (let i = 0; i < 5; i++) { const v = box(0.075, 0.009, 0.006, slot, -0.11, 0.1 + i * 0.03, sz * (W / 2 + 0.001)); v.rotation.z = 0.35; washer.add(v); } });
+    { const o1 = cyl(0.014, 0.05, brass, WOUT.x, WOUT.y, W / 2 + 0.02, 12); o1.rotation.x = Math.PI / 2; const nut = cyl(0.02, 0.016, brass, WOUT.x, WOUT.y, W / 2 + 0.012, 6); nut.rotation.x = Math.PI / 2; washer.add(o1, nut);
+      const i1 = cyl(0.016, 0.04, brass, WOUT.x, 0.08, -W / 2 - 0.015, 12); i1.rotation.x = Math.PI / 2; washer.add(i1); }
+    [[0.16, 1], [0.16, -1], [-0.16, 1], [-0.16, -1]].forEach(([x, sz]) => washer.add(rbox(0.07, 0.04, 0.05, 0.01, gry, x, 0.02, sz * (W / 2 - 0.04))));
+    // FUJIVA mark on both sides (official artwork when supplied) + a small company line
+    const fj = brandTex('pumpFujiva', 320, 80, (g, w, h) => { g.clearRect(0, 0, w, h); drawFujiva(g, w / 2, h / 2, 46, '#ffffff'); });
+    [-1, 1].forEach(sz => { const d = decal(fj, 0.2, 0.05, { rough: 0.3 }); d.position.set(-0.01, 0.215, sz * (W / 2 + 0.0025)); d.rotation.y = sz > 0 ? 0 : Math.PI; washer.add(d); });
+  }
+  return washer;
+}
 
 /**
  * createJobScene(container, { theme, type, job, onFrame }) →
@@ -86,11 +121,9 @@ export function createJobScene(container, o = {}) {
   const tbox = new THREE.Group(); world.add(tbox);
   tbox.add(box(0.5, 0.24, 0.26, std(0xe2711d, { roughness: 0.45 }), 0, 0.12, 0), box(0.51, 0.03, 0.27, std(0x2b3037), 0, 0.255, 0), box(0.24, 0.025, 0.03, std(0x2b3037), 0, 0.29, 0));
   { const d = decal(boxTex(), 0.38, 0.15, { rough: 0.5 }); d.position.set(0, 0.12, 0.131); tbox.add(d); }
-  // pressure-washer pump with a small company sticker
-  const washer = new THREE.Group(); world.add(washer);
-  washer.add(box(0.3, 0.24, 0.22, std(0xc8282e, { roughness: 0.4 }), 0, 0.18, 0), box(0.26, 0.05, 0.18, std(0x1d2126), 0, 0.325, 0), cyl(0.012, 0.4, std(0x1d2126), -0.14, 0.38, 0));
-  [-0.11, 0.11].forEach(z => { const w = cyl(0.055, 0.035, std(0x1d2126), 0.11, 0.055, z); w.rotation.x = Math.PI / 2; washer.add(w); });
-  { const d = decal(chestTex(), 0.16, 0.08); d.position.set(0, 0.19, 0.111); washer.add(d); }
+  // Rev.23 pressure-washer pump, as the owner's reference (3 ต.ค. 2569): glossy red sloped body, black vented nose, grey carry
+  // handle between two red posts, black ribbed rear deck with the hose-hook frame, brass outlet, side vents, grey feet, FUJIVA mark
+  const washer = buildPump(); world.add(washer); const WOUT = washer.userData.out;
   // bucket under the bag hose
   const bucket = new THREE.Group(); world.add(bucket);
   bucket.add(cyl(0.17, 0.32, std(0x2f6fd1, { roughness: 0.45 }), 0, 0.16, 0, 28, 0.14)); const bucketW = new THREE.Mesh(new THREE.CircleGeometry(0.15, 28), std(0x8a7a62, { roughness: 0.1, transparent: true, opacity: 0.85 })); bucketW.rotation.x = -Math.PI / 2; bucket.add(bucketW);
@@ -120,7 +153,7 @@ export function createJobScene(container, o = {}) {
   const testHoses = new THREE.Group(); world.add(testHoses);
 
   /* ---------------------------------------------------------------- spray (water droplets + mist) */
-  const NS = 520, sg = new THREE.BufferGeometry(), sPos = new Float32Array(NS * 3), sVel = new Float32Array(NS * 3), sLife = new Float32Array(NS), sAl = new Float32Array(NS);
+  const NS = 520, sg = new THREE.BufferGeometry(), sPos = new Float32Array(NS * 3), sVel = new Float32Array(NS * 3), sLife = new Float32Array(NS), sAl = new Float32Array(NS), sIn = new Uint8Array(NS);
   sg.setAttribute('position', new THREE.BufferAttribute(sPos, 3)); sg.setAttribute('aA', new THREE.BufferAttribute(sAl, 1));
   const dropTex = canvasTex(32, 32, (g, w, h) => { const r = g.createRadialGradient(16, 16, 0, 16, 16, 16); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.5, 'rgba(255,255,255,.6)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h); });
   const sMat = new THREE.PointsMaterial({ size: 0.026, map: dropTex, color: dark ? 0xd8f1ff : 0x5d9fd0, transparent: true, depthWrite: false, opacity: 0.95 });
@@ -128,22 +161,58 @@ export function createJobScene(container, o = {}) {
   const spray = new THREE.Points(sg, sMat); spray.frustumCulled = false; spray.renderOrder = 9; scene.add(spray);
   const mist = new THREE.Sprite(new THREE.SpriteMaterial({ map: dropTex, color: dark ? 0xcfeaff : 0xa9cde8, transparent: true, opacity: 0, depthWrite: false })); mist.renderOrder = 9; scene.add(mist);
   for (let i = 0; i < NS; i++) { sLife[i] = -Math.random(); sPos[i * 3 + 1] = -9; }
-  let sprayOn = false, sprayChem = false; const sprayTip = V(0, 2, 1), sprayTarget = V(0, 2, 0);
+  // Rev.23 chemical dwell timer: 5–15 min by how dirty the coil is (scene time is compressed; the dial shows the minutes)
+  const tmC = document.createElement('canvas'); tmC.width = 320; tmC.height = 320; const tmG = tmC.getContext('2d'), tmT = new THREE.CanvasTexture(tmC); tmT.colorSpace = THREE.SRGBColorSpace;
+  const timerS = new THREE.Sprite(new THREE.SpriteMaterial({ map: tmT, transparent: true, depthTest: false, depthWrite: false })); timerS.renderOrder = 12; timerS.scale.set(0.55, 0.55, 1); timerS.visible = false; scene.add(timerS);
+  const TM = { t: 0, t0: 0, last: -1, goal: 10 };
+  function drawTimer(min) {
+    const g = tmG, W = 320, cx = 160, cy = 150, R = 112, a0 = Math.PI * 0.75, span = Math.PI * 1.5, ang = m => a0 + span * clamp(m / 20, 0, 1);
+    g.clearRect(0, 0, W, W); g.fillStyle = 'rgba(255,255,255,.94)'; g.beginPath(); if (g.roundRect) g.roundRect(6, 6, W - 12, W - 12, 34); else g.rect(6, 6, W - 12, W - 12); g.fill(); g.strokeStyle = '#1f4f8a'; g.lineWidth = 4; g.stroke();
+    g.lineCap = 'round'; g.lineWidth = 20; g.strokeStyle = '#e4e9ef'; g.beginPath(); g.arc(cx, cy, R, a0, a0 + span); g.stroke();
+    g.strokeStyle = '#9fd8b0'; g.beginPath(); g.arc(cx, cy, R, ang(5), ang(15)); g.stroke();                         // the 5–15 min band
+    g.strokeStyle = '#1f9d55'; g.beginPath(); g.arc(cx, cy, R, a0, ang(min)); g.stroke();                              // elapsed
+    g.fillStyle = '#5b6672'; g.font = '600 18px "Anuphan","Kanit",system-ui,sans-serif'; g.textAlign = 'center'; [0, 5, 10, 15, 20].forEach(m => { const a = ang(m); g.fillText(String(m), cx + Math.cos(a) * (R - 34), cy + Math.sin(a) * (R - 34) + 6); });
+    const mm = Math.floor(min), ss = Math.floor((min - mm) * 60); g.fillStyle = '#16212c'; g.font = '700 50px "Anuphan","Kanit",system-ui,sans-serif'; g.fillText(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`, cx, cy + 12);
+    g.font = '600 20px "Anuphan","Kanit",system-ui,sans-serif'; g.fillStyle = min >= TM.goal - 0.01 ? '#1f9d55' : '#1f4f8a'; g.fillText(min >= TM.goal - 0.01 ? 'ครบเวลา · พร้อมฉีดล้าง' : 'น้ำยากำลังทำงาน', cx, cy + 46);
+    g.fillStyle = '#5b6672'; g.font = '500 17px "Anuphan","Kanit",system-ui,sans-serif'; g.fillText(`ทิ้งไว้ 5–15 นาที ตามความสกปรก · รอบนี้ ~${TM.goal} นาที`, cx, W - 26);
+    tmT.needsUpdate = true;
+  }
+  function stepTimer(dt) {
+    const on = !!T.dwell && job === 'clean'; timerS.visible = on && !!U; if (!on) { TM.t = 0; TM.t0 = 0; TM.last = -1; return; }
+    TM.goal = Math.round(5 + 10 * clamp((DIRT0.coil - 0.3) / 0.6, 0, 1));   // heavier dirt → longer, inside 5–15
+    const now = performance.now(); if (!TM.t0) TM.t0 = now; TM.t = RM() ? 99 : Math.max(TM.t + dt, (now - TM.t0) / 1000);
+    const min = Math.min(TM.goal, TM.goal * TM.t / 7);   // wall time above, so slow frames still finish the dial
+    const key = Math.round(min * 12); if (key !== TM.last) { TM.last = key; drawTimer(min); }
+    const p = U0.p; timerS.position.set(type === 'floor' ? 0.62 : p.x + U0.w / 2 + 0.32, type === 'floor' ? 1.35 : type === 'cassette' ? p.y - 0.45 : p.y + 0.02, type === 'floor' ? 0.5 : (U0.front || 0.3) + 0.2);
+  }
+  let sprayOn = false, sprayChem = false, sprayAir = false; const sprayTip = V(0, 2, 1), sprayTarget = V(0, 2, 0);
+  // Rev.23: the cleaning canvas wraps the unit — water that hits the unit stays inside it and runs down the funnel to the spout
+  const CB = { on: false, x0: 0, x1: 0, z0: 0, z1: 0, top: 0, by: 0, sp: V(0, 0, 0) }, LAND = { on: false, y: 0 };
   function emitSpray(dt) {
     const dir = sprayTarget.clone().sub(sprayTip).normalize();
     for (let i = 0; i < NS; i++) {
       sLife[i] -= dt;
       if (sLife[i] <= 0) {
         if (!sprayOn) { sAl[i] = 0; sPos[i * 3 + 1] = -9; continue; }
-        const s = sprayChem ? 0.3 : 0.08, d2 = dir.clone().add(V((Math.random() - 0.5) * s, (Math.random() - 0.5) * s, (Math.random() - 0.5) * s)).normalize(), v = sprayChem ? 2.2 + Math.random() : 7 + Math.random() * 3;
+        const s = sprayAir ? 0.22 : sprayChem ? 0.3 : 0.08, d2 = dir.clone().add(V((Math.random() - 0.5) * s, (Math.random() - 0.5) * s, (Math.random() - 0.5) * s)).normalize(), v = sprayAir ? 4.5 + Math.random() * 2 : sprayChem ? 2.2 + Math.random() : 7 + Math.random() * 3;
         sPos[i * 3] = sprayTip.x; sPos[i * 3 + 1] = sprayTip.y; sPos[i * 3 + 2] = sprayTip.z; sVel[i * 3] = d2.x * v; sVel[i * 3 + 1] = d2.y * v; sVel[i * 3 + 2] = d2.z * v;
-        sLife[i] = (sprayChem ? 0.35 : 0.25) + Math.random() * 0.35; sAl[i] = 1; continue;
+        sLife[i] = (sprayAir ? 0.18 : sprayChem ? 0.35 : 0.25) + Math.random() * 0.35; sAl[i] = 1; sIn[i] = 0; continue;
       }
       let x = sPos[i * 3], y = sPos[i * 3 + 1], z = sPos[i * 3 + 2], vx = sVel[i * 3], vy = sVel[i * 3 + 1], vz = sVel[i * 3 + 2];
-      vy -= (sprayChem ? 2.5 : 9.8) * dt; x += vx * dt; y += vy * dt; z += vz * dt;
+      if (sIn[i]) {   // inside the canvas: slides down, then the funnel gathers it to the spout
+        vy = Math.max(vy - 4 * dt, -1.6); y += vy * dt; x = clamp(x + vx * dt, CB.x0, CB.x1); z = clamp(z + vz * dt, CB.z0, CB.z1);
+        if (y < CB.by) { const f = clamp((CB.by - y) / Math.max(0.05, CB.by - CB.sp.y), 0, 1), k = clamp(dt * (2 + f * 8), 0, 1); x += (CB.sp.x - x) * k * f; z += (CB.sp.z - z) * k * f; }
+        if (y <= CB.sp.y) sLife[i] = 0;
+        sAl[i] = 0.75; sPos[i * 3] = x; sPos[i * 3 + 1] = y; sPos[i * 3 + 2] = z; sVel[i * 3 + 1] = vy; continue;
+      }
+      vy -= (sprayAir ? 0 : sprayChem ? 2.5 : 9.8) * dt; x += vx * dt; y += vy * dt; z += vz * dt;
       const tx = sprayTarget.x - x, ty = sprayTarget.y - y, tz = sprayTarget.z - z;
-      if (tx * dir.x + ty * dir.y + tz * dir.z < 0.02 && vy > -6) { vx = (Math.random() - 0.5) * 0.8 - dir.x * 0.6; vz = (Math.random() - 0.5) * 0.8 - dir.z * 0.6; vy = -0.5 - Math.random(); sLife[i] = Math.min(sLife[i], 0.35); }
-      sAl[i] = clamp(sLife[i] * 4, 0, 1) * 0.9;
+      if (tx * dir.x + ty * dir.y + tz * dir.z < 0.02 && vy > -6) {
+        if (CB.on) { sIn[i] = 1; vx = (Math.random() - 0.5) * 0.12; vz = (Math.random() - 0.5) * 0.12; vy = -0.2 - Math.random() * 0.4; sLife[i] = 3; }   // caught by the canvas — no splash out
+        else { vx = (Math.random() - 0.5) * 0.2 - dir.x * 0.15; vz = (Math.random() - 0.5) * 0.2 - dir.z * 0.15; vy = -0.8 - Math.random() * 0.6; sLife[i] = Math.min(sLife[i], LAND.on ? 0.6 : 0.3); }   // runs off the coil / into the tub, close by
+      }
+      if (LAND.on && y < LAND.y) sLife[i] = 0;
+      sAl[i] = clamp(sLife[i] * 4, 0, 1) * (sprayAir ? 0.35 : 0.9);
       sPos[i * 3] = x; sPos[i * 3 + 1] = y; sPos[i * 3 + 2] = z; sVel[i * 3] = vx; sVel[i * 3 + 1] = vy; sVel[i * 3 + 2] = vz;
     }
     sg.attributes.position.needsUpdate = true; sg.attributes.aA.needsUpdate = true;
@@ -157,15 +226,15 @@ export function createJobScene(container, o = {}) {
   function washerHose(to) {
     const key = to ? to.toArray().map(v => v.toFixed(2)).join() : ''; if (key === hoseKey) return; hoseKey = key;
     if (hoseMesh) { hoseMesh.geometry.dispose(); world.remove(hoseMesh); hoseMesh = null; } if (!to) return;
-    const from = washer.localToWorld(V(-0.14, 0.2, 0.08)), mid = from.clone().lerp(to, 0.5); mid.y = 0.03;
-    hoseMesh = tube([from, V(from.x, 0.03, from.z + 0.12), mid, V(to.x, Math.max(0.05, to.y - 0.6), to.z + 0.08), to], 0.008, hoseM, 60, 6); world.add(hoseMesh);
+    const from = washer.localToWorld(WOUT.clone().add(V(0, 0, 0.03))), out = washer.localToWorld(WOUT.clone().add(V(0, -0.04, 0.12))), mid = from.clone().lerp(to, 0.5); mid.y = 0.03;
+    hoseMesh = tube([from, out, V(out.x, 0.03, out.z + 0.06), mid, V(to.x, Math.max(0.05, to.y - 0.6), to.z + 0.08), to], 0.008, hoseM, 60, 6); world.add(hoseMesh);
   }
 
   /* ---------------------------------------------------------------- per type: venue, unit, routes, spots */
   let type = null, job = o.job || 'clean', U = null, OU = null, air = null, crew = null;
   const unitG = new THREE.Group(); scene.add(unitG);
   let bag = null, hose = null, pcbCover = null, foam = null, probes = null, marks = null, mount = null, patch = null, brk = null, lever = null, led = null;
-  let pipes = null, trunk = null, drainP = null, wire = null, tailOut = null;
+  let pipes = null, trunk = null, drainP = null, wire = null, tailOut = null, ouRack = null;
   const SP = {}, CAMS = {}, U0 = {};           // spots, camera presets, unit placement
   const LOCAL = {};                              // spray targets in the unit frame
   const SLOTZ = [-0.55, 0, 0.55];
@@ -193,6 +262,25 @@ export function createJobScene(container, o = {}) {
     const ow = new THREE.Mesh(new THREE.BoxGeometry(1.84, H, 0.12), K.wallAlt); ow.position.set(3.1, H / 2, -0.06); ow.receiveShadow = true; venue.add(ow);
     if (!commercial) { venue.add(box(0.04, 0.04, 3.6, railM, 3.98, 1.0, 1.8)); for (let i = 0; i < 10; i++) venue.add(box(0.02, 1.0, 0.02, railM, 3.98, 0.5, 0.1 + i * 0.38)); }
     else { venue.add(box(0.14, 0.95, 3.6, K.wallAlt, 3.97, 0.475, 1.8)); venue.add(box(0.18, 0.04, 3.6, K.base, 3.97, 0.97, 1.8)); }
+    // Rev.23 the view beyond the balcony / service yard: sky, the city (from a high floor at home; street level for shops) + greenery
+    { const view = canvasTex(1024, 512, (g, W2, H2) => {
+        const sky = g.createLinearGradient(0, 0, 0, H2); sky.addColorStop(0, dark ? '#0d1828' : '#9fcdf0'); sky.addColorStop(0.62, dark ? '#24364d' : '#e4f1fa'); sky.addColorStop(1, dark ? '#2c3d52' : '#f4f1ea'); g.fillStyle = sky; g.fillRect(0, 0, W2, H2);
+        if (!dark) { g.fillStyle = 'rgba(255,255,255,.75)'; [[160, 90, 70], [560, 60, 90], [820, 120, 60]].forEach(([x, y, r]) => { for (let k = 0; k < 5; k++) { g.beginPath(); g.ellipse(x + k * r * 0.45, y + Math.sin(k) * 8, r * 0.5, r * 0.22, 0, 0, 7); g.fill(); } }); }
+        const hz = commercial ? H2 * 0.78 : H2 * 0.6; let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+        [[0.55, dark ? '#33465e' : '#b9c7d4', 0.5], [0.8, dark ? '#24364a' : '#93a5b6', 0.75], [1, dark ? '#1a2838' : '#71859a', 1]].forEach(([k, col, near]) => {
+          for (let x = -20; x < W2; ) { const bw = 40 + rnd() * 90 * near, bh = (commercial ? 60 : 110) * (0.4 + rnd()) * (1.4 - k * 0.5) * (commercial ? 1 : 1.6); g.fillStyle = col; g.fillRect(x, hz - bh, bw, bh + H2);
+            g.fillStyle = dark ? 'rgba(255,214,140,.55)' : 'rgba(255,255,255,.35)'; for (let wy = hz - bh + 8; wy < hz - 6; wy += 12) for (let wx = x + 6; wx < x + bw - 8; wx += 11) if (rnd() > (dark ? 0.55 : 0.35)) g.fillRect(wx, wy, 5, 6);
+            x += bw + 4 + rnd() * 18; } });
+        g.fillStyle = dark ? '#1e3326' : '#7ea06c'; for (let x = 0; x < W2; x += 22 + rnd() * 30) { const r = 14 + rnd() * 22; g.beginPath(); g.arc(x, hz + 6 - r * 0.3, r, 0, 7); g.fill(); }   // tree line
+        g.fillStyle = dark ? '#16212c' : '#c7cdd3'; g.fillRect(0, hz + 10, W2, H2); });
+      const bd = new THREE.Mesh(new THREE.PlaneGeometry(14, 7), new THREE.MeshBasicMaterial({ map: view, fog: false })); bd.position.set(7.2, 1.2, 1.5); bd.rotation.y = -Math.PI / 2; venue.add(bd);
+      const bd2 = bd.clone(); bd2.position.set(7.0, 1.2, -3.0); bd2.rotation.y = 0; bd2.scale.set(0.5, 1, 1); venue.add(bd2); }   // seen past the rail from the outdoor camera
+    if (!commercial) {   // balcony life: glass under the rail, potted plants, floor drain
+      const gl = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.86, 3.5), new THREE.MeshPhysicalMaterial({ color: 0xcfe6f2, roughness: 0.05, transmission: 0.6, transparent: true, opacity: 0.32, depthWrite: false })); gl.position.set(3.96, 0.47, 1.8); venue.add(gl);
+      add2(F.plant(K, 0.85), 3.72, 3.25); add2(F.plant(K, 0.6), 3.78, 2.75); add2(F.plant(K, 0.7), 2.45, 3.32);
+      venue.add(box(0.14, 0.004, 0.14, railM, 3.75, -0.032, 1.6));
+    } else { add2(F.plant(K, 0.8), 3.72, 3.25); venue.add(box(0.5, 0.8, 0.3, std(0x9aa3ad, { metalness: 0.4, roughness: 0.5 }), 2.55, 0.4, 3.4)); }
+    function add2(o3, x, z) { o3.position.set(x, -0.035, z); venue.add(o3); return o3; }
     // ceiling (shops, cafés, offices): board with downlights; the cassette sits in an opening (patch = before the cut)
     if (commercial) {
       const cm = K.ceiling.clone(); cm.side = THREE.DoubleSide; const cz = U0.cz ?? 1.25, hw = 0.43;
@@ -208,6 +296,9 @@ export function createJobScene(container, o = {}) {
       add(F.bed(K, 1.6, 2.0), -2.52, 1.07); add(F.wardrobe(K, 1.2, 0.6, 2.0), -3.0, 2.9, Math.PI / 2); add(F.art(K, 28), -2.52, 0, 0, 1.55).position.z = 0.03;
       const win = windowUnit(K, 0.66, 1.15); win.position.set(-1.18, 1.5, 0.0); venue.add(win);
       add(F.curtain(K, 0.3, 2.05), -1.72, 0.09, 0, 0.32); add(F.curtain(K, 0.3, 2.05), -0.66, 0.09, 0, 0.32); add(F.plant(K, 1.0), 1.85, 0.32);
+      // Rev.23 a lived-in bedroom: rug at the foot of the bed, a nightstand with a lamp, a slipper pair
+      add(F.rug(K, 1.25, 0.8), -1.9, 2.72); { const ns = add(F.side(K), -1.98, 0.24); void ns; const lp = new THREE.Group(); lp.add(cyl(0.05, 0.02, K.black, 0, 0.56, 0, 16), cyl(0.008, 0.18, K.black, 0, 0.66, 0, 8)); const sh = cyl(0.08, 0.12, new THREE.MeshStandardMaterial({ color: 0xf3e6cf, emissive: 0xffe2b0, emissiveIntensity: dark ? 0.8 : 0.25, roughness: 0.8 }), 0, 0.78, 0, 20, 0.1); lp.add(sh); add(lp, -2.03, 0.22); }
+      [-0.06, 0.06].forEach(dx => add(rbox(0.09, 0.025, 0.24, 0.01, std(0x8fa7bf, { roughness: 0.9 }), 0, 0.012, 0), -1.95 + dx, 2.3, 0.15));
     } else if (t === 'ceiling') {   // shop
       add(F.rack(K, 1.8, 0.5, 1.8), -2.35, 0.3); add(F.rack(K, 1.6, 0.5, 1.8), -3.02, 2.25, Math.PI / 2); add(F.counter(K, 1.4, 0.6), -2.2, 3.15, Math.PI);
       add(F.art(K, 200), 1.72, 0, 0, 1.75).position.z = 0.03; add(F.plant(K, 1.1), 1.85, 0.32); add(F.plant(K, 0.9), -0.2, 3.3);
@@ -233,6 +324,9 @@ export function createJobScene(container, o = {}) {
     venue.traverse(m => { if (m.isMesh && m.castShadow === undefined) m.castShadow = true; });
   }
 
+  // Rev.23: shops / cafés — the condensing unit hangs on wall brackets up high (cleaning: ladder + a second man holding it)
+  const ouHigh = t => job === 'clean' && !!OU_HIGH[t];
+  const ouBase = t => (ouHigh(t) ? V(3.05, 1.72, 0.32) : V(3.05, 0.55 * 0.85 / 2 + 0.07, 0.32));
   function placeUnit(t) {
     unitG.clear(); Object.keys(HP).forEach(k => delete HP[k]); slotTop = [TT, TT, TT];
     if (t === 'wall') { U = buildPremiumIndoor(M, { logo: false }); U0.p = V(0, 2.18, 0.135); U0.bot = 2.03; U0.front = 0.26; U0.w = 0.9; }
@@ -252,12 +346,12 @@ export function createJobScene(container, o = {}) {
     }[t]);
     // the condensing unit (balcony / service yard) — no brand mark
     if (OU) { world.remove(OU.root); OU.root.traverse(x => x.geometry && x.geometry.dispose()); }
-    OU = buildOutdoor(M, { logo: false }); OU.root.scale.setScalar(0.85); OU.base = V(3.05, 0.55 * 0.85 / 2 + 0.07, 0.32);
+    OU = buildOutdoor(M, { logo: false }); OU.root.scale.setScalar(0.85); OU.base = ouBase(t);
     OU.root.traverse(m => { if (m.isMesh) { m.castShadow = true; if (m.material && !m.material.isMeshBasicMaterial) { m.material = m.material.clone(); m.userData.base = m.material.color.clone(); } } }); world.add(OU.root);
   }
 
   function propsFor(t) {
-    [bag, hose, pcbCover, probes, marks, mount, brk, pipes, trunk, drainP, wire, tailOut].forEach(x => { if (x) { x.parent && x.parent.remove(x); disposeTree(x); } });
+    [bag, hose, pcbCover, probes, marks, mount, brk, pipes, trunk, drainP, wire, tailOut, ouRack].forEach(x => { if (x) { x.parent && x.parent.remove(x); disposeTree(x); } });
     if (foam) { foam.parent && foam.parent.remove(foam); foam = null; }
     const u = U0.p, w = U0.w;
     // ---- positions: mat, table, tub, tool box, washer, bucket, ladders, sign
@@ -272,7 +366,7 @@ export function createJobScene(container, o = {}) {
     tbox.position.set(P.box[0], 0.009, P.box[1]); washer.position.set(P.washer[0], 0.009, P.washer[1]); washer.rotation.y = -0.4; bucket.position.set(P.bucket[0], 0.009, P.bucket[1]);
     signG.visible = !!P.sign; if (P.sign) { signG.position.set(P.sign[0], 0, P.sign[1]); signG.rotation.y = -0.5; }
     // ladders (lead: at the unit; second: two-man lifts on overhead units)
-    lad.forEach(l => { if (l && l.L) { world.remove(l.L); disposeTree(l.L); } }); lad = [null, null];   // Rev.13 fix: entries are { L, h, spec } — removing the entry itself threw and left the venue half built on every type switch
+    lad.forEach(l => { if (l && l.L) { world.remove(l.L); disposeTree(l.L); } }); lad = [null, null, null];   // Rev.13 fix: entries are { L, h, spec } — removing the entry itself threw and left the venue half built on every type switch
     const mkLad = (at, face, h) => { const L = buildLadder(h), sp = h * 0.36, ry = face + Math.PI; L.rotation.y = ry; // climber faces `face`; the tread face of the ladder points back at him
       const tread = at, back = V(Math.sin(face), 0, Math.cos(face));   // unit direction
       L.position.set(tread[0] - back.x * -L.userData.z, 0, tread[1] - back.z * -L.userData.z);   // tread under the feet
@@ -281,24 +375,45 @@ export function createJobScene(container, o = {}) {
       world.add(L); L.visible = false; return { L, h, spec: { at: foot, face, top: L.userData.top + 0.014, lean: sp + 0.38 - L.userData.z } }; };
     if (P.lad0) lad[0] = mkLad(P.lad0, Math.PI, P.h0);
     if (P.lad1) lad[1] = mkLad(P.lad1, t === 'cassette' ? Math.PI / 2 : Math.PI, P.h0);
+    // high condensing unit: wall brackets under it + a ladder in front of it
+    const hi = ouHigh(t), ob = OU.base; ouRack = new THREE.Group(); world.add(ouRack);
+    if (hi) { lad[2] = mkLad([3.0, 0.98], Math.PI, 0.75); const bm = std(0x8a929b, { metalness: 0.7, roughness: 0.4 }), yb = ob.y - 0.234 - 0.02;
+      [2.8, 3.3].forEach(x => { ouRack.add(box(0.04, 0.04, 0.44, bm, x, yb, 0.22), box(0.04, 0.34, 0.04, bm, x, yb - 0.15, 0.02)); const br = box(0.025, 0.5, 0.025, bm, x, yb - 0.15, 0.15); br.rotation.x = -0.72; ouRack.add(br); ouRack.add(box(0.07, 0.02, 0.06, std(0x1d2126, { roughness: 0.9 }), x, yb + 0.03, 0.32)); }); }
     // ---- cleaning bag (wall / ceiling / cassette: funnel bag; floor: tray in front of the cabinet) + hose to the bucket + PCB cover
+    // Rev.23 cleaning canvas (ผ้าใบล้างแอร์): PVC-coated canvas wrapped over the top and both ends of the unit (back too under a
+    // ceiling), a clear front window so the work stays visible, and the funnel to the spout — the water stays inside it
     const bagM = new THREE.MeshPhysicalMaterial({ color: 0xbfe0ff, roughness: 0.25, transparent: true, opacity: 0.42, side: THREE.DoubleSide, depthWrite: false });
-    bag = new THREE.Group(); world.add(bag); bag.userData.m = bagM;
+    const canvM = new THREE.MeshStandardMaterial({ roughness: 0.82, side: THREE.DoubleSide, transparent: true, map: canvasTex(256, 256, (g, W2, H2) => { g.fillStyle = '#2c64a8'; g.fillRect(0, 0, W2, H2); g.globalAlpha = 0.16; g.fillStyle = '#ffffff'; for (let i = 0; i < W2; i += 4) g.fillRect(i, 0, 1, H2); for (let j = 0; j < H2; j += 4) g.fillRect(0, j, W2, 1); g.globalAlpha = 1; g.strokeStyle = '#173b66'; g.lineWidth = 10; g.strokeRect(0, 0, W2, H2); g.setLineDash([8, 6]); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; g.strokeRect(12, 12, W2 - 24, H2 - 24); }) });
+    bag = new THREE.Group(); world.add(bag); bag.userData.m = bagM; bag.userData.c = canvM;
+    const quads = (list, m, order = 3) => { const pos = []; list.forEach(([a, b2, c2, d]) => pos.push(...a.toArray(), ...b2.toArray(), ...c2.toArray(), ...a.toArray(), ...c2.toArray(), ...d.toArray()));
+      const uv = []; list.forEach(() => uv.push(0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1)); const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.computeVertexNormals();
+      const me = new THREE.Mesh(g, m); me.renderOrder = order; me.castShadow = m === canvM; bag.add(me); return me; };
     let spout;
     if (t === 'floor') {
       const tr = new THREE.Group(); tr.position.set(0, 0.009, U0.front + 0.2); bag.add(tr); const tm = std(0x9bb3c9, { roughness: 0.5 });
-      tr.add(box(0.66, 0.012, 0.36, tm, 0, 0.006, 0)); [[0.66, 0.06, 0.012, 0, 0.18], [0.66, 0.06, 0.012, 0, -0.18], [0.012, 0.06, 0.36, 0.33, 0], [0.012, 0.06, 0.36, -0.33, 0]].forEach(([a, b, c, x, z]) => tr.add(box(a, b, c, tm, x, 0.03, z)));
+      tr.add(box(0.66, 0.012, 0.36, tm, 0, 0.006, 0)); [[0.66, 0.06, 0.012, 0, 0.18], [0.66, 0.06, 0.012, 0, -0.18], [0.012, 0.06, 0.36, 0.33, 0], [0.012, 0.06, 0.36, -0.33, 0]].forEach(([a, b2, c2, x, z]) => tr.add(box(a, b2, c2, tm, x, 0.03, z)));
       spout = V(0.3, 0.05, U0.front + 0.2);
+      const zf = U0.front + 0.38, yt = 1.3; [-1, 1].forEach(sx => quads([[V(sx * 0.34, 0.02, 0.02), V(sx * 0.34, 0.02, zf), V(sx * 0.34, yt, zf), V(sx * 0.34, yt, 0.02)]], canvM));
+      quads([[V(-0.34, 0.06, zf), V(0.34, 0.06, zf), V(0.34, 0.62, zf), V(-0.34, 0.62, zf)]], bagM, 4);   // clear apron low on the front
+      bag.userData.cb = { x0: -0.3, x1: 0.3, z0: 0.05, z1: zf - 0.03, top: yt, by: 0.09, sp: spout.clone() };
     } else {
       const by = U0.bot, fz = t === 'wall' ? U0.front : u.z + (t === 'ceiling' ? 0.32 : 0.5), bz0 = t === 'wall' ? 0.02 : u.z - (t === 'ceiling' ? 0.33 : 0.5), hw = t === 'cassette' ? 0.5 : w / 2 + 0.02;
+      const topY = t === 'wall' ? U0.p.y + 0.18 : H - 0.004, zf = fz + 0.04;
       spout = V(t === 'cassette' ? 0.3 : w * 0.22, by - (t === 'wall' ? 0.55 : 0.5), (bz0 + fz) / 2 + 0.03);
-      const top = [V(-hw, by, bz0), V(hw, by, bz0), V(hw, by, fz + 0.04), V(-hw, by, fz + 0.04)], sp = [V(-0.05, 0, -0.04), V(0.05, 0, -0.04), V(0.05, 0, 0.04), V(-0.05, 0, 0.04)].map(p => p.add(spout));
-      const pos = []; for (let i = 0; i < 4; i++) { const a = top[i], b = top[(i + 1) % 4], c = sp[(i + 1) % 4], d = sp[i]; pos.push(...a.toArray(), ...b.toArray(), ...c.toArray(), ...a.toArray(), ...c.toArray(), ...d.toArray()); }
-      const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); bg.computeVertexNormals();
-      const bm = new THREE.Mesh(bg, bagM); bm.renderOrder = 3; bag.add(bm);
-      // print on the front panel of the bag (FUJIVA · SBP AirCare), facing the room
+      const top = [V(-hw, by, bz0), V(hw, by, bz0), V(hw, by, zf), V(-hw, by, zf)], sp = [V(-0.05, 0, -0.04), V(0.05, 0, -0.04), V(0.05, 0, 0.04), V(-0.05, 0, 0.04)].map(p => p.add(spout));
+      const face = i => [top[i], top[(i + 1) % 4], sp[(i + 1) % 4], sp[i]];
+      quads([face(0), face(1), face(3)], canvM);            // funnel: back + both sides in canvas
+      quads([face(2)], bagM, 4);                            // clear front window
+      // hood: both ends up over the unit, the back (ceiling / cassette), the top (wall) — wrapped, no gap for splash
+      [-1, 1].forEach(sx => quads([[V(sx * hw, by, bz0), V(sx * hw, by, zf), V(sx * hw, topY, zf), V(sx * hw, topY, bz0)]], canvM));
+      if (t !== 'wall') quads([[V(-hw, by, bz0), V(hw, by, bz0), V(hw, topY, bz0), V(-hw, topY, bz0)]], canvM);
+      if (t === 'cassette') quads([[V(-hw, by, zf), V(hw, by, zf), V(hw, topY, zf), V(-hw, topY, zf)]], canvM);
+      if (t === 'wall') { quads([[V(-hw, topY, bz0), V(hw, topY, bz0), V(hw, topY, zf), V(-hw, topY, zf)]], canvM); bag.add(box(2 * hw + 0.01, 0.035, 0.012, std(0x173b66, { roughness: 0.7 }), 0, topY - 0.015, zf)); }   // top + the elastic hem on the front edge
+      bag.add(box(2 * hw + 0.01, 0.02, 0.012, std(0x173b66, { roughness: 0.7 }), 0, by + 0.01, zf));   // hem along the window top
+      // print on the front window (FUJIVA · SBP AirCare), facing the room
       const c = top[2].clone().add(top[3]).add(sp[2]).add(sp[3]).multiplyScalar(0.25), n = top[3].clone().sub(sp[3]).cross(top[2].clone().sub(top[3])).normalize();
-      const d = decal(bagTex(), Math.min(0.42, hw * 0.9), Math.min(0.21, hw * 0.45), { rough: 0.6 }); d.position.copy(c).addScaledVector(n, 0.004); d.lookAt(c.clone().add(n)); d.renderOrder = 4; bag.add(d);
+      const d = decal(bagTex(), Math.min(0.42, hw * 0.9), Math.min(0.21, hw * 0.45), { rough: 0.6 }); d.position.copy(c).addScaledVector(n, 0.004); d.lookAt(c.clone().add(n)); d.renderOrder = 5; bag.add(d);
+      bag.userData.cb = { x0: -hw + 0.03, x1: hw - 0.03, z0: bz0 + 0.02, z1: zf - 0.02, top: topY, by, sp: spout.clone() };
     }
     const bp = bucket.position;
     hose = tube([spout.clone(), spout.clone().add(V(0.05, -0.25, 0.08)), V(bp.x - 0.05, 0.62, bp.z - 0.02), V(bp.x - 0.04, 0.34, bp.z)], 0.018, bagM, 40, 10); bag.add(hose); hose = null;
@@ -329,15 +444,15 @@ export function createJobScene(container, o = {}) {
     else if (t === 'cassette') [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([sx, sz]) => mount.add(cyl(0.006, 0.6, mm, sx * 0.46, H + 0.3, u.z + sz * 0.29, 8)));
     else mount.add(box(0.2, 0.04, 0.03, mm, 0, 1.75, 0.02), box(0.04, 0.04, 0.2, mm, 0, 1.75, 0.1));
     // ---- refrigerant pipes in the trunking to the condensing unit, drain (blue PVC), power cable — drawn as they are installed
-    const valve = V(3.405, 0.21, 0.36), zW = 0.04;
+    const valve = V(3.405, OU.base.y - 0.094, 0.36), zW = 0.04, runEnd = hi ? OU.base.y + 0.24 : 0.62;
     const run = {
-      wall: [[0.5, 2.06, zW], [2.4, 2.06, zW], [3.58, 2.06, zW], [3.58, 0.62, zW]],
-      ceiling: [[0.72, 2.6, zW], [2.4, 2.6, zW], [3.58, 2.6, zW], [3.58, 0.62, zW]],
-      cassette: [[0.32, 2.63, zW], [2.4, 2.63, zW], [3.58, 2.63, zW], [3.58, 0.62, zW]],
+      wall: [[0.5, 2.06, zW], [2.4, 2.06, zW], [3.58, 2.06, zW], [3.58, runEnd, zW]],
+      ceiling: [[0.72, 2.6, zW], [2.4, 2.6, zW], [3.58, 2.6, zW], [3.58, runEnd, zW]],
+      cassette: [[0.32, 2.63, zW], [2.4, 2.63, zW], [3.58, 2.63, zW], [3.58, runEnd, zW]],
       floor: [[0.36, 0.34, zW], [2.4, 0.34, zW], [3.58, 0.34, zW]],
     }[t];
     const head = { wall: [[0.3, 2.06, 0.02]], ceiling: [[0.5, 2.6, 0.12]], cassette: [[0.32, 2.8, 1.25], [0.32, 2.8, zW]], floor: [[0.2, 0.34, 0.02]] }[t];
-    const tail = t === 'floor' ? [[3.5, 0.3, 0.2], [valve.x + 0.02, valve.y + 0.06, valve.z]] : [[3.58, 0.4, 0.2], [valve.x + 0.02, valve.y + 0.06, valve.z]];
+    const tail = t === 'floor' ? [[3.5, 0.3, 0.2], [valve.x + 0.02, valve.y + 0.06, valve.z]] : [[3.58, valve.y + 0.19, 0.2], [valve.x + 0.02, valve.y + 0.06, valve.z]];
     const pipePts = [...head, ...run, ...tail].map(p => V(...p));
     const insM = std(0x15181c, { roughness: 0.85 }), pvcM = std(0x2f8fe0, { roughness: 0.45 }), cabM = std(0xf4f4f0, { roughness: 0.5 });
     pipes = tube(bentPath(pipePts, 0.06), 0.022, insM, 160, 10); world.add(pipes);
@@ -379,11 +494,11 @@ export function createJobScene(container, o = {}) {
       uf2: t === 'floor' ? S(-0.55, U0.front + 0.38, 2.2) : S(u.x - 0.32, Math.min(U0.front + 0.5, 2.3), Math.PI),
       foot: t === 'floor' ? S(-0.62, U0.front + 0.5, 2.3) : S(P.lad0[0] + 0.68, P.lad0[1] + 0.32, 0),
       table: S(tP[0] + 0.62, tP[1], -Math.PI / 2), tub: S(tb[0] + 0.62, tb[1], -Math.PI / 2),
-      breaker: S(1.15, 0.6, Math.PI), box: S(P.box[0] + 0.15, P.box[1] + 0.62, Math.PI - 0.3), washer: S(P.washer[0] + 0.1, P.washer[1] + 0.55, Math.PI),
+      breaker: S(1.15, 0.6, Math.PI), box: S(P.box[0] + 0.15, P.box[1] + 0.62, Math.PI - 0.3), washer: S(P.washer[0] + 0.5, P.washer[1] + 0.12, -Math.PI / 2),
       carton: S(P.carton[0] + 0.1, P.carton[1] + 0.62, Math.PI), ocarton: S(3.0, 2.55, Math.PI),
       cartonR: S(P.carton[0] + 0.5, P.carton[1] + 0.05, -Math.PI / 2), cartonL: S(P.carton[0] - 0.5, P.carton[1] + 0.05, Math.PI / 2), sideR: S(u.x + 0.52, u.z + 0.06, -Math.PI / 2), sideL: S(u.x - 0.52, u.z + 0.06, Math.PI / 2),
       table2: S(tP[0] + 0.5, tP[1] + 1.2, faceTo([tP[0] + 0.5, tP[1] + 1.2], tP)), out2: S(2.62, 0.95, faceTo([2.62, 0.95], [3.05, 0.32])),
-      out: S(2.72, 0.98, faceTo([2.72, 0.98], [3.0, 0.3])), valve: S(3.72, 0.8, faceTo([3.72, 0.8], [3.41, 0.36])), outDrain: S(3.45, 0.75, 2.2), n2: S(2.75, 1.25, Math.PI),
+      out: hi ? { x: lad[2].spec.at[0], z: lad[2].spec.at[1], face: Math.PI, ladder: lad[2].spec } : S(2.72, 0.98, faceTo([2.72, 0.98], [3.0, 0.3])), outFoot: S(2.5, 1.3, faceTo([2.5, 1.3], [3.0, 1.05])), valve: S(3.72, 0.8, faceTo([3.72, 0.8], [3.41, 0.36])), outDrain: S(3.45, 0.75, 2.2), n2: S(2.75, 1.25, Math.PI),
       door: S(1.85, 2.2, Math.PI / 2), idle0: S(0.85, 2.35, Math.PI), idle1: S(0.3, 2.55, Math.PI),
       cust: S(1.72, 1.4, 0), custMeet: S(1.25, 2.45, 0), leadMeet: S(0.62, 2.0, 0), asstMeet: S(0.15, 2.5, 0),
     });
@@ -399,12 +514,13 @@ export function createJobScene(container, o = {}) {
     Object.assign(CAMS, {
       wide: t === 'wall' ? c(V(2.35, 3.05, 5.7), V(-0.6, 1.25, 1.1)) : c(V(2.3, 2.2, 5.5), V(-0.5, t === 'cassette' ? 1.55 : 1.3, 1.1)), team: t === 'wall' ? c(V(1.9, 2.55, 4.85), V(-0.45, 1.15, 1.0)) : c(V(1.85, 2.2, 4.7), V(-0.45, t === 'cassette' ? 1.6 : 1.35, 1.0)),
       table: c(V(tP[0] + 1.5, 1.85, tP[1] + 1.75), V(tP[0], 0.8, tP[1])), tub: c(V(tb[0] + 1.45, 1.55, tb[1] + 1.25), V(tb[0], 0.3, tb[1])),
-      breaker: c(V(1.55, 1.7, 1.7), V(1.0, 1.4, 0.1)), outdoor: c(V(3.75, 2.55, 3.55), V(3.0, 0.35, 0.45)), door: c(V(-0.3, 1.8, 3.7), V(1.4, 0.75, 1.8)), meet: c(V(-1.25, 1.95, 4.65), V(0.85, 1.1, 2.15)),
+      breaker: c(V(1.55, 1.7, 1.7), V(1.0, 1.4, 0.1)), outdoor: hi ? c(V(3.95, 2.4, 3.7), V(3.0, 1.15, 0.5)) : c(V(3.75, 2.55, 3.55), V(3.0, 0.35, 0.45)), door: c(V(-0.3, 1.8, 3.7), V(1.4, 0.75, 1.8)), meet: c(V(-1.25, 1.95, 4.65), V(0.85, 1.1, 2.15)),
       unit: { wall: c(up(-0.85, 0.0, 1.9), up(0, -0.08, 0)), ceiling: c(up(-0.95, -0.5, 2.0), up(0, -0.12, 0.1)), cassette: c(up(-0.95, -1.15, 1.9), up(0, -0.18, 0)), floor: c(up(-0.9, 1.45, 2.0), up(0, 0.9, 0.1)) }[t],
       under: { wall: c(V(-0.95, 1.45, 1.75), V(0.05, 2.08, 0.15)), ceiling: c(up(-1.0, -1.15, 1.6), up(0, -0.1, 0.1)), cassette: c(up(-0.75, -1.4, 1.55), up(0, -0.05, 0)), floor: c(up(-0.75, 0.85, 1.5), up(0, 0.62, 0.1)) }[t],
       back: { wall: c(V(-1.6, 1.5, 1.6), V(0.05, 2.02, 0.2)), ceiling: c(up(-0.9, -0.8, 1.55), up(0, -0.15, -0.1)), cassette: c(up(-0.8, -1.3, 1.25), up(0, -0.05, 0)), floor: c(up(-0.8, 1.5, 1.35), up(0, 0.95, 0)) }[t],
       bag: { wall: c(V(1.5, 1.95, 3.15), V(0.15, 1.35, 0.5)), ceiling: c(V(1.4, 1.35, 2.9), V(0.2, 1.5, 0.7)), cassette: c(V(1.45, 1.25, 3.4), V(0.2, 1.6, 1.4)), floor: c(V(1.3, 1.2, 2.6), V(0.1, 0.4, 0.6)) }[t],
       ceil: c(V(1.0, 1.15, 3.6), V(0, 2.55, 1.0)),
+      pump: c(V(P.washer[0] + 0.75, 0.95, P.washer[1] + 1.25), V(P.washer[0] - 0.05, 0.25, P.washer[1])),
     });
   }
   const OBST = [];
@@ -545,7 +661,7 @@ export function createJobScene(container, o = {}) {
     Object.keys(st.dirt).forEach(n => { const tg = T.dirt[n] ?? st.dirt[n]; st.dirt[n] += (tg - st.dirt[n]) * (snap ? 1 : 1 - Math.pow(0.3, dt)); });
     // props
     const inst = job === 'install';
-    bag.visible = st.bag > 0.02; bag.userData.m.opacity = 0.42 * st.bag; bag.userData.m.color.set(0xbfe0ff).lerp(new THREE.Color(0x8a7a62), st.bagWater * 0.75);
+    bag.visible = st.bag > 0.02; bag.userData.m.opacity = 0.42 * st.bag; bag.userData.c.opacity = clamp(st.bag * 1.4, 0, 1); bag.userData.m.color.set(0xbfe0ff).lerp(new THREE.Color(0x8a7a62), st.bagWater * 0.75);
     bucket.visible = st.bag > 0.02; bucketW.position.y = 0.05 + st.bagWater * 0.22; bucketW.visible = st.bagWater > 0.05;
     pcbCover.visible = st.pcb > 0.02; pcbCover.material.opacity = 0.38 * st.pcb; foam.material.opacity = st.foam * 0.95; probes.visible = st.probes > 0.5;
     tubW.material.color.set(0x9fb8c9).lerp(new THREE.Color(0x8a7a62), clamp(Object.values(HP).filter(P => P.loc === 'table').reduce((a2, P) => a2 + (st.dirt[P.id] ?? 0), 0) / 3, 0, 1) * 0.6);
@@ -559,6 +675,7 @@ export function createJobScene(container, o = {}) {
     drawK(pipes, st.pipeK); drawK(drainP, st.drainK); drawK(wire, st.wireK);
     trunk.visible = st.trunkK > 0.01; trunk.traverse(m => { if (m.isMesh) m.material.opacity = clamp(st.trunkK, 0, 1); });
     if (lad[0]) lad[0].L.visible = st.lad0 > 0.5 || (crew && crew.members[0].ladder === lad[0].spec); if (lad[1]) lad[1].L.visible = st.lad1 > 0.5;
+    if (lad[2]) lad[2].L.visible = T.cam === 'outdoor' || (!!crew && crew.members.some(m => m.ladder === lad[2].spec));
     // unit: mounted / lifted from the carton / hidden in the carton; C2 wall unit swings out on its top hooks (pipes stay connected)
     if (U) {
       U.root.visible = st.unbox > 0.5 || st.unitK > 0.01;
@@ -570,20 +687,23 @@ export function createJobScene(container, o = {}) {
       else { U.root.position.copy(U0.p); U.root.rotation.set(0, 0, 0); }
       // condensing unit: from its carton to the stand
       const ob = OU.base, oc = ocarton.position, ok = clamp(st.outK, 0, 1); OU.root.visible = st.oUnbox > 0.5 || ok > 0.01;
-      OU.root.position.set(oc.x + (ob.x - oc.x) * ease(ok), ob.y + Math.sin(ok * Math.PI) * 0.18, oc.z + (ob.z - oc.z) * ease(ok)); OU.root.rotation.y = 0.15 * (1 - ok);
+      OU.root.position.set(oc.x + (ob.x - oc.x) * ease(ok), Math.min(ob.y, 0.304) + (ob.y - Math.min(ob.y, 0.304)) * ease(ok) + Math.sin(ok * Math.PI) * 0.18, oc.z + (ob.z - oc.z) * ease(ok)); OU.root.rotation.y = 0.15 * (1 - ok);
     }
     tintParts();
     // spray from the gun in the sprayer's hand
     const sp = T.spray; let tip = null;
-    if (sp && !RM() && crew && !trip) tip = crew.toolTip(sp.by ?? 0, sp.chem ? 'sprayer' : 'gun');
+    if (sp && !RM() && crew && !trip) tip = crew.toolTip(sp.by ?? 0, sp.chem ? 'sprayer' : sp.air ? 'blower' : 'gun');
     if (tip) {
-      sprayOn = true; sprayChem = !!sp.chem; sweep += dt; sprayTip.copy(tip);
-      const tgt = sp.at === 'tub' ? tub.position.clone().add(V(Math.sin(sweep * 1.4) * 0.15, 0.2, Math.cos(sweep * 1.1) * 0.1)) : sp.at === 'outdoor' ? V(3.05 + Math.sin(sweep * 1.2) * 0.28, 0.42, 0.5) : U.root.localToWorld((LOCAL[sp.at] || LOCAL.coil).clone()).add(V(Math.sin(sweep * 1.3) * U0.w * (type === 'cassette' ? 0.2 : 0.32), 0, 0));
+      sprayOn = true; sprayChem = !!sp.chem; sprayAir = !!sp.air; sweep += dt; sprayTip.copy(tip);
+      const cb = bag.userData.cb; CB.on = st.bag > 0.5 && !!cb && sp.at !== 'tub' && sp.at !== 'outdoor'; if (CB.on) Object.assign(CB, cb);
+      LAND.on = sp.at === 'tub' || sp.at === 'outdoor'; LAND.y = sp.at === 'tub' ? 0.17 : 0.03;
+      const tgt = sp.at === 'tub' ? tub.position.clone().add(V(Math.sin(sweep * 1.4) * 0.15, 0.2, Math.cos(sweep * 1.1) * 0.1)) : sp.at === 'outdoor' ? V(OU.base.x + Math.sin(sweep * 1.2) * 0.28, OU.base.y + 0.12, 0.5) : U.root.localToWorld((LOCAL[sp.at] || LOCAL.coil).clone()).add(V(Math.sin(sweep * 1.3) * U0.w * (type === 'cassette' ? 0.2 : 0.32), 0, 0));
       sprayTarget.lerp(tgt, 1 - Math.pow(0.02, dt));
-      sMat.color.setHex(sp.chem ? (dark ? 0xf4f7fb : 0xc9d6e2) : dark ? 0xd8f1ff : 0x5d9fd0);
-      mist.position.copy(sprayTarget); const ms = (sp.chem ? 0.22 : 0.3) + 0.06 * Math.sin(clock * 9); mist.scale.set(ms, ms, 1); mist.material.opacity = 0.5;
-      washerHose(sp.chem ? null : crew.hand(sp.by ?? 0, 0));
+      sMat.color.setHex(sp.air ? 0xeef6ff : sp.chem ? (dark ? 0xf4f7fb : 0xc9d6e2) : dark ? 0xd8f1ff : 0x5d9fd0); sMat.size = sp.air ? 0.05 : 0.026;
+      mist.position.copy(sprayTarget); const ms = (sp.air ? 0.4 : sp.chem ? 0.22 : 0.3) + 0.06 * Math.sin(clock * 9); mist.scale.set(ms, ms, 1); mist.material.opacity = sp.air ? 0.28 : CB.on ? 0.3 : 0.5;
+      washerHose(sp.chem || sp.air ? null : crew.hand(sp.by ?? 0, 0));
     } else { sprayOn = false; mist.material.opacity = Math.max(0, mist.material.opacity - dt * 2); washerHose(null); }
+    stepTimer(dt);
     emitSpray(RM() ? 0.016 : dt);
     // drain test: water along the pan to its outlet, and out of the drain pipe at the end of the run
     drops.visible = st.drain > 0.5;
@@ -640,7 +760,7 @@ export function createJobScene(container, o = {}) {
     renderer.render(scene, cam);
     o.onFrame && o.onFrame(cam, renderer.domElement.clientWidth, renderer.domElement.clientHeight);
     // the crew keeps moving (idle sway, work motion): keep rendering while visible, slower when nothing happens
-    idle = isBusy() || sprayOn || st.run > 0.5 || look.down || Math.abs(look.yaw) + Math.abs(look.pitch) > 0.002 ? 0 : idle + dt;
+    idle = isBusy() || sprayOn || (timerS.visible && TM.t < 7.5) || st.run > 0.5 || look.down || Math.abs(look.yaw) + Math.abs(look.pitch) > 0.002 ? 0 : idle + dt;
     // idle: slower frames (~4 fps; ~30 fps while the cinematic sway runs on capable computers)
     if (idle < 6) raf = requestAnimationFrame(tick); else { raf = 0; setTimeout(() => { if (vis && !raf) { last = performance.now(); raf = requestAnimationFrame(tick); } }, DRIFT ? 33 : 250); idle = 5.5; }
   }
@@ -668,14 +788,14 @@ export function createJobScene(container, o = {}) {
 
   return {
     setType(t) { setType(t); kick(); },
-    setJob(j) { if (j === job) return; job = j; finishAll(); Object.values(HP).forEach(toUnit); T = base(job); snap = true; kick(); },
+    setJob(j) { if (j === job) return; job = j; finishAll(); Object.values(HP).forEach(toUnit); if (type && OU) { const hb = ouBase(type); if (!hb.equals(OU.base)) { OU.base = hb; propsFor(type); } } T = base(job); snap = true; kick(); },
     show,
     reset() { finishAll(); Object.values(HP).forEach(P => { P.want = 'unit'; toUnit(P); }); slotTop = [TT, TT, TT]; T = base(job); snap = true; kick(); },
     busy: isBusy,
     project(p) { return p.clone().project(cam); },
     anchors: () => {
       const heads = crew ? crew.crowd.heads() : [], A = U0.p.clone();
-      return { unit: type === 'floor' ? A.clone().add(V(0, 1.2, 0.2)) : A, pipes: type === 'wall' ? V(0.42, 2.05, 0.06) : type === 'ceiling' ? V(0.75, 2.6, 0.06) : type === 'cassette' ? V(0.35, 2.62, 0.06) : V(0.4, 0.36, 0.06), table: V(table.position.x, 0.95, table.position.z), tub: tub.position.clone().add(V(0, 0.4, 0)), breaker: V(1.15, 1.7, 0.05), bag: bag && bucket.position.clone().add(V(0, 0.5, 0)), outdoor: V(3.05, 0.85, 0.32), mat: matG.position.clone().add(V(0, 0.05, 0.4)), lead: heads[0] && heads[0].clone().add(V(0, 0.25, 0)), asst: heads[1] && heads[1].clone().add(V(0, 0.25, 0)), cust: heads[2] && heads[2].clone().add(V(0, 0.25, 0)), carton: cartons.position.clone().add(V(0, 0.6, 0)), ocarton: ocarton.position.clone().add(V(0, 0.8, 0)), trunk: V(1.6, type === 'floor' ? 0.4 : type === 'wall' ? 2.12 : 2.66, 0.05), drain: drainP ? drainP.userData.end.clone().add(V(0, 0.2, 0)) : null, gauges: gauges.position.clone().add(V(0, 0.15, 0)), sign: signG.position.clone().add(V(0, 0.75, 0)) };
+      return { unit: type === 'floor' ? A.clone().add(V(0, 1.2, 0.2)) : A, pipes: type === 'wall' ? V(0.42, 2.05, 0.06) : type === 'ceiling' ? V(0.75, 2.6, 0.06) : type === 'cassette' ? V(0.35, 2.62, 0.06) : V(0.4, 0.36, 0.06), table: V(table.position.x, 0.95, table.position.z), tub: tub.position.clone().add(V(0, 0.4, 0)), breaker: V(1.15, 1.7, 0.05), bag: bag && bucket.position.clone().add(V(0, 0.5, 0)), outdoor: OU.base.clone().add(V(0, 0.55, 0)), washer: washer.position.clone().add(V(0, 0.55, 0)), mat: matG.position.clone().add(V(0, 0.05, 0.4)), lead: heads[0] && heads[0].clone().add(V(0, 0.25, 0)), asst: heads[1] && heads[1].clone().add(V(0, 0.25, 0)), cust: heads[2] && heads[2].clone().add(V(0, 0.25, 0)), carton: cartons.position.clone().add(V(0, 0.6, 0)), ocarton: ocarton.position.clone().add(V(0, 0.8, 0)), trunk: V(1.6, type === 'floor' ? 0.4 : type === 'wall' ? 2.12 : 2.66, 0.05), drain: drainP ? drainP.userData.end.clone().add(V(0, 0.2, 0)) : null, gauges: gauges.position.clone().add(V(0, 0.15, 0)), sign: signG.position.clone().add(V(0, 0.75, 0)) };
     },
     advance(sec) { for (let t = 0; t < sec; t += 0.05) { clock += 0.05; step(0.05); } camStep(1); renderer.render(scene, cam); },
     dispose() { gl.release(); cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); air && air.dispose(); crew && crew.dispose(); scene.traverse(x => { if ((x.isMesh || x.isPoints) && x.geometry) x.geometry.dispose(); }); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); },

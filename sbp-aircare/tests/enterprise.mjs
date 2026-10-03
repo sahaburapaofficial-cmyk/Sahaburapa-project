@@ -24,6 +24,16 @@ for (const s of E.SECTORS) {
   ok(s.pains.length >= 4 && s.pains.every(p => p[0] && p[1] && ['pkg', 'deal'].includes(p[2])), `${s.id}: ${s.pains.length} pain points, each answered and tagged`);
   ok(c.unitsAll < core.VOLUME_HINT || /อาจได้อัตราพิเศษ/.test(txt), `${s.id}: ${c.unitsAll} units → special-rate hint without a figure`);
 }
+// Rev.23 volume benefits: only published rules (minimum + travel fee, crew productivity, package terms) — no discount
+for (const s of E.SECTORS) {
+  const c = E.sampleContract(s), b = E.volumeBenefits(s, c);
+  const per = c.lines.reduce((a, l) => a + l.n * c.x.visits * ((l.c1 < core.DATA.minBill ? core.TRAVEL.baseFee : 0) * (c.x.visits - 1) / c.x.visits + (l.c2 < core.DATA.minBill ? core.TRAVEL.baseFee : 0) / c.x.visits), 0) * c.branches;
+  ok(Math.abs(b.splitTravel - per) < 1 && b.travelAvoided === Math.max(0, b.splitTravel - b.contractTravel), `${s.id}: travel avoided ${b.travelAvoided} = split ${b.splitTravel} − contract ${b.contractTravel}`);
+  ok(b.splitJobs === c.unitsAll * c.x.visits && b.contractVisits === c.x.visits * c.branches, `${s.id}: ${b.contractVisits} visits a year instead of ${b.splitJobs}`);
+  ok(b.rounds.length === c.x.visits && b.rounds.filter(r => r.deep).length === 1 && b.rounds.every(r => r.m >= 1 && r.m <= 12), `${s.id}: 12-month calendar with ${c.x.visits} rounds, one deep clean`);
+  ok(b.reports === c.unitsAll * c.x.visits && b.perUnitMonth > 0 && b.special === (c.unitsAll >= core.VOLUME_HINT), `${s.id}: reports ${b.reports}, per unit-month, special-rate hint at ${core.VOLUME_HINT}+`);
+  ok(!FORBID.test(JSON.stringify(b)), `${s.id}: benefits carry no forbidden / discount words`);
+}
 const chain = E.SECTORS.find(s => s.id === 'chain'), cc = E.sampleContract(chain);
 ok(cc.branches === 12 && cc.unitsAll === 72 && cc.perVisitC1 >= core.DATA.minBill, `chain: 6 × 12 branches = 72 units, each branch visit ≥ minimum (${cc.perVisitC1})`);
 const office = E.SECTORS.find(s => s.id === 'office');

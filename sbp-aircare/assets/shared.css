@@ -1538,5 +1538,29 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 :root[data-theme="dark"] .en-tabs [role=tab][aria-selected=true]{background:#2f6fd0;border-color:#2f6fd0}
 :root[data-theme="dark"] .en-big b,:root[data-theme="dark"] .en-pk b{color:#8db4ff}
 :root[data-theme="dark"] .en-hd .en-ico{color:#8db4ff}
+.en-bfw{grid-column:1/-1;display:grid;gap:12px;padding:18px;border-radius:16px;background:var(--s-card);border:1px solid var(--s-line);min-width:0}
+.en-bfw h4{margin:0;font-size:18px}
+.en-bf-sub{margin:-4px 0 0;font-size:13.5px;color:var(--s-ink-2)}
+.en-bfs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.en-bf{display:grid;gap:3px;align-content:start;padding:12px 14px;border-radius:12px;background:var(--s-card-2);border:1px solid var(--s-line);min-width:0}
+.en-bf span{font-size:13px;color:var(--s-ink-2)}
+.en-bf b{font-size:20px;line-height:1.3;color:var(--s-ink);font-variant-numeric:tabular-nums}
+.en-bf small{font-size:12.5px;line-height:1.5;color:var(--s-ink-2)}
+.en-cal{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px}
+.en-cal li{display:grid;gap:2px;justify-items:center;padding:6px 2px;border-radius:8px;border:1px dashed var(--s-line);font-size:11.5px;color:var(--s-ink-2);text-align:center;min-height:44px}
+.en-cal li.on{border:1px solid var(--s-accent);background:var(--s-accent-soft);color:var(--s-ink)}
+.en-cal li.deep{border:2px solid var(--s-ok);color:var(--s-ink)}
+.en-cal li b{font-size:11px;font-weight:600}
+@media (max-width:980px){.en-bfs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.en-bfs{grid-template-columns:1fr}.en-cal{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media (max-width:980px){.en-panel{grid-template-columns:1fr}}
 @media (max-width:640px){.en-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.en-tabs [role=tab]{flex:none}.en-pkgs{grid-template-columns:1fr}.en-big b{font-size:26px}.en-tag{margin-left:0;margin-top:4px}}
+
+/* Rev.23 how-it-works: wall paint swatches + trunk lid toggle */
+.hw-wall{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 2px;font-size:13.5px;color:var(--s-ink-2)}
+.hw-sw{width:30px;height:30px;border-radius:50%;border:2px solid var(--s-line);background:var(--sw);cursor:pointer;padding:0}
+.hw-sw[aria-pressed="true"]{border-color:var(--s-accent);box-shadow:0 0 0 3px var(--s-accent-soft)}
+.hw-sw:focus-visible{outline:2px solid var(--s-accent);outline-offset:2px}
+.hw-wall .hw-tg{margin-left:6px}
+.hw-wall-tip{margin:2px 0 8px;font-size:12.5px;color:var(--s-ink-2)}
+@media (pointer:coarse){.hw-sw{width:44px;height:44px}}

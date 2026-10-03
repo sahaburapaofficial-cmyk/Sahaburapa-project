@@ -6,7 +6,7 @@
 // (jobscene3d.js, lazy: two technicians + the customer on a real site per unit type) and a parts tray / install checklist.
 // Who does what in each step (lead / assistant) is written out too, so the teamwork reads without the 3D view.
 import { DATA, SIZE_BANDS, cleanRate, installOptions, incVat, baht, h, $$ } from './sbp-core.js';
-import { cleanSteps, installSteps, CLEAN_HOW, INSTALL_HOW, PH, PHC } from './services.js';
+import { cleanSteps, installSteps, CLEAN_HOW, INSTALL_HOW, PH, PHC, OU_HIGH } from './services.js';
 import { METHOD_INFO, cart } from './commerce.js';
 import { toast } from './proto-ui.js';
 
@@ -53,7 +53,7 @@ const WHO_CLEAN = {
   precheck: ['เปิดเครื่องทดสอบด้วยรีโมต', 'ถ่ายภาพก่อนงาน'],
   premeasure: ['วัดอุณหภูมิลมกลับ / ลมจ่ายที่ตัวเครื่อง', 'จดค่าลงรายงาน'],
   power: ['ปิดเบรกเกอร์วงจรแอร์', 'วัดยืนยันว่าไม่มีไฟเข้าเครื่อง'],
-  cover: ['ครอบถุงล้างที่ตัวเครื่อง คลุมแผงวงจร', 'จับสายถุงลงถัง วางถังรับน้ำ'],
+  cover: ['ครอบผ้าใบล้างแอร์ให้มิดตัวเครื่อง รัดขอบ คลุมแผงวงจร', 'จับสายผ้าใบลงถัง วางถังรับน้ำ ตรวจขอบไม่มีช่อง'],
   parts: ['ถอดชิ้นส่วนทีละชิ้น ส่งลงมา', 'รับชิ้นส่วน นำไปวางเรียงบนโต๊ะ แล้วล้างแยก'],
   lower: ['ปลดตัวเครื่อง / แผงปิดตามแบบเครื่อง', 'ประคองและรับแผงที่ถอด'],
   nocut: ['ชี้ให้ลูกค้าเห็นว่าท่อยังต่ออยู่', 'ถ่ายภาพจุดต่อท่อ'],
@@ -62,12 +62,13 @@ const WHO_CLEAN = {
   coilBack: ['ฉีดล้างคอยล์ด้านหลัง', 'จับปลายถุงล้าง ดูน้ำลงถัง'],
   washParts: ['เช็ดและตรวจชิ้นส่วนที่ล้างแล้ว', 'ล้างชิ้นส่วนทีละชิ้นในอ่าง'],
   register: ['ถ่ายภาพลงทะเบียนชิ้นส่วน', 'เรียงชิ้นส่วนบนโต๊ะตามลำดับ'],
-  chem: ['พ่นน้ำยาล้างคอยล์ให้ทั่ว', 'เตรียมเครื่องฉีดน้ำ จับถุงล้าง'],
+  chem: ['พ่นน้ำยาล้างคอยล์ให้ทั่ว', 'จับปลายผ้าใบ ดูน้ำยาไหลลงถัง'],
+  dwell: ['ดูเวลาและสภาพคราบ ทิ้งน้ำยาไว้ 5–15 นาที', 'เตรียมปั๊มน้ำแรงดัน ต่อสายฉีด ตรวจหัวฉีด'],
   coilFront: ['ฉีดล้างคอยล์ตามแนวครีบ', 'จับปลายถุงล้าง ดูน้ำลงถัง'],
   fanWash: ['ฉีดใบพัด หมุนด้วยมือทีละช่วง', 'จับปลายถุงล้าง'],
   drain: ['เทน้ำทดสอบลงถาด', 'ดูน้ำที่ปลายท่อ'],
-  outdoor: ['ตรวจยางกันสั่นและจุดต่อที่คอยล์ร้อน', 'ฉีดล้างครีบคอยล์ร้อน'],
-  dry: ['เป่าและเช็ดตัวเครื่องให้แห้ง', 'เช็ดชิ้นส่วนบนโต๊ะให้แห้ง'],
+  outdoor: ['ตรวจยางกันสั่นและจุดต่อที่คอยล์ร้อน (ติดที่สูง: จับบันไดให้ผู้ช่วย)', 'ฉีดล้างครีบคอยล์ร้อน (ติดที่สูง: ขึ้นบันได)'],
+  dry: ['เป่าไล่น้ำในคอยล์และใบพัดด้วย Blower', 'เช็ดชิ้นส่วนบนโต๊ะให้แห้ง'],
   assemble: ['ประกอบชิ้นส่วนกลับเข้าตัวเครื่อง', 'ยื่นชิ้นส่วนขึ้นไปตามลำดับ'],
   cleanup: ['ถอดถุงล้าง เก็บอุปกรณ์ที่ตัวเครื่อง', 'กวาดและเช็ดพื้นที่'],
   testDrain: ['เทน้ำทดสอบหลังประกอบ', 'ดูน้ำออกปลายท่อ'],
@@ -108,7 +109,7 @@ export function cleanTimeline(type, level, pkg) {
       case 'precheck': x.run = 1; x.flash = true; x.cam = 'unit'; x.crew = [c('uf', 'remote', 'remote'), c('uf2', 'photo', 'tablet'), CUSTW]; x.tags = [{ at: 'unit', th: 'เปิดทดสอบ · ถ่ายภาพก่อนงาน' }]; break;
       case 'premeasure': x.run = 1; x.probes = 1; x.cam = 'unit'; x.crew = [c('L', 'measure', 'probe'), c('foot', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'unit', th: 'วัดลมกลับ / ลมจ่าย · กระแสไฟ' }]; break;
       case 'power': P.power = 0; x.cam = 'breaker'; x.crew = [c('breaker', 'switch'), c('uf', 'measure', 'meter'), CUSTW]; x.tags = [{ at: 'breaker', th: 'ปิดเบรกเกอร์ · ยืนยันไม่มีไฟ', kind: 'ok' }]; break;
-      case 'cover': P.bag = 1; P.pcb = 1; x.cam = 'bag'; x.crew = [c('L', 'work'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'bag', th: type === 'floor' ? 'ถาดรองน้ำ + ถัง · คลุมแผงวงจร' : 'ถุงล้าง + ถัง · คลุมแผงวงจร' }, { at: 'mat', th: 'เสื่อยางกันน้ำกันรอย' }]; break;
+      case 'cover': P.bag = 1; P.pcb = 1; x.cam = 'bag'; x.crew = [c('L', 'work'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'bag', th: type === 'floor' ? 'ถาดรองน้ำ + ผ้าใบรอบตู้ · คลุมแผงวงจร' : 'ผ้าใบล้างแอร์ครอบมิดทุกด้าน · คลุมแผงวงจร' }, { at: 'mat', th: 'เสื่อยางกันน้ำกันรอย' }]; break;
       case 'parts': off(T.parts); x.cam = 'team';
         if (!c2) { clean(T.parts, 0.06); x.spray = { by: 1, at: 'tub' }; x.crew = [c('L', 'work'), c('tub', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'table', th: 'ผู้ช่วยรับชิ้นส่วน · ล้างแยกนอกตัวเครื่อง' }]; }
         else { x.crew = [c('L', 'work'), c('table', 'table'), CUSTW]; x.tags = [{ at: 'table', th: 'วางเรียงตามลำดับ · บันทึกจุดยึด' }]; }
@@ -121,18 +122,19 @@ export function cleanTimeline(type, level, pkg) {
       case 'washParts': clean(Object.keys(P.off), 0.05); x.spray = { by: 1, at: 'tub' }; x.cam = 'tub'; x.crew = [c('table2', 'table', 'cloth'), c('tub', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'tub', th: 'ล้างทีละชิ้น' }]; break;
       case 'register': x.flash = true; x.cam = 'table'; x.crew = [c('table2', 'photo', 'tablet'), c('table', 'table'), CUSTW]; x.tags = [{ at: 'table', th: 'ทะเบียนชิ้นส่วน + ภาพ (บังคับ)', kind: 'ok' }]; break;
       case 'chem': P.foam = 1; x.spray = { by: 0, at: 'coil', chem: true }; x.cam = 'under'; x.crew = [c('L', 'spray', 'sprayer'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: 'น้ำยาล้างคอยล์ · ทิ้งให้คราบหลุด' }]; break;
+      case 'dwell': P.foam = 1; P.dirt.coil = Math.max(0.2, P.dirt.coil - 0.2); x.dwell = s.dwell; x.cam = 'pump'; x.crew = [c('L', 'checkTime'), c('washer', 'crouch'), CUSTW]; x.beats = [{ t: 3.4, set: { cam: 'team' }, crew: [c('L', 'work'), null, null] }]; x.tags = [{ at: 'unit', th: `น้ำยาทำงาน ${s.dwell[0]}–${s.dwell[1]} นาที ตามความสกปรก` }, { at: 'washer', th: 'เตรียมปั๊มน้ำแรงดัน' }]; break;
       case 'coilFront': P.foam = 0; clean(['coil'], c2 ? 0.05 : 0.28); P.bagWater = Math.min(1, P.bagWater + 0.4); x.spray = { by: 0, at: 'coil' }; x.cam = 'under'; x.crew = [c('L', 'spray', 'gun'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'bag', th: 'น้ำสกปรกลงถุงและถัง' }]; break;
       case 'fanWash': clean([T.fanW], 0.4); P.bagWater = Math.min(1, P.bagWater + 0.2); x.spray = { by: 0, at: 'fan' }; x.cam = 'under'; x.crew = [c('L', 'spray', 'gun'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: 'ใบพัดล้างในตำแหน่ง · เท่าที่หัวฉีดเข้าถึง', kind: 'warn' }]; break;
       case 'drain': if (c2) { clean(T.pan, 0.05); x.spray = { by: 1, at: 'tub' }; x.cam = 'tub'; x.crew = [c('table2', 'table', 'cloth'), c('tub', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'tub', th: 'ถาดและจุดต่อทางน้ำทิ้ง ล้างนอกตัวเครื่อง' }]; } else { clean([T.panW], 0.3); x.drain = 1; x.cam = 'under'; x.crew = [c('L', 'pour', 'jug'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: 'ทะลวงทางน้ำ · เทน้ำทดสอบ' }]; } break;
-      case 'outdoor': clean(['outdoor'], 0.1); x.spray = { by: 1, at: 'outdoor' }; x.cam = 'outdoor'; x.crew = [c('valve', 'crouch', 'torch'), c('out', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'outdoor', th: 'ล้างครีบคอยล์ร้อน · ตรวจยางรองกันสั่น' }]; break;
-      case 'dry': x.cam = 'team'; x.crew = [c('L', 'work', 'blower'), c('table', 'table', 'cloth'), CUSTW]; x.tags = [{ at: 'unit', th: 'เป่า · เช็ดแห้ง · ตรวจฉนวน' }]; break;
+      case 'outdoor': clean(['outdoor'], 0.1); x.spray = { by: 1, at: 'outdoor' }; x.cam = 'outdoor'; x.crew = OU_HIGH[type] ? [c('outFoot', 'hold'), c('out', 'sprayLow', 'gun'), CUSTW] : [c('valve', 'crouch', 'torch'), c('out', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'outdoor', th: OU_HIGH[type] ? 'คอยล์ร้อนติดผนังที่สูง · ตั้งบันได จับบันไดตลอดเวลาที่ฉีด' : 'ล้างครีบคอยล์ร้อน · ตรวจยางรองกันสั่น', kind: OU_HIGH[type] ? 'warn' : undefined }]; break;
+      case 'dry': x.cam = 'bag'; x.spray = { by: 0, at: 'coil', air: true }; x.crew = [c('L', 'blow', 'blower'), c('table', 'table', 'cloth'), CUSTW]; x.tags = [{ at: 'unit', th: 'Blower เป่าไล่น้ำในครีบ · เช็ดแห้ง · ตรวจฉนวน' }]; break;
       case 'assemble': P.off = {}; P.lower = 0; x.cam = 'team'; x.crew = [c('L', 'work'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: c2 ? 'ประกอบตามทะเบียนชิ้นส่วน · ล็อกขายึดครบ' : 'ประกอบกลับครบ · ไม่มีชิ้นส่วนเหลือ', kind: 'ok' }]; break;
       case 'cleanup': P.bag = 0; P.pcb = 0; P.bagWater = 0; x.flash = true; x.crew = [c('L', 'work'), c('uf2', 'sweep', 'broom'), CUSTW]; x.tags = [{ at: 'unit', th: 'คืนพื้นที่ · ถ่ายภาพหลังงาน' }]; break;
       case 'testDrain': x.drain = 1; x.cam = 'under'; x.crew = [c('L', 'pour', 'jug'), c('foot', 'watch'), CUSTW]; x.tags = [{ at: 'unit', th: 'น้ำไหลออกปกติ ไม่ย้อน ไม่ซึม', kind: 'ok' }]; break;
       case 'testRun': P.power = 1; x.run = 1; x.crew = [c('uf', 'remote', 'remote'), c('breaker', 'measure', 'meter'), CUSTW]; x.tags = [{ at: 'unit', th: 'เดินเครื่องทุกโหมด · ลมออกสม่ำเสมอ', kind: 'ok' }]; break;
       case 'postmeasure': P.power = 1; x.run = 1; x.probes = 1; x.cam = 'unit'; x.crew = [c('L', 'measure', 'probe'), c('foot', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'unit', th: 'วัดค่าหลังงาน ที่จุดเดิม' }]; break;
       case 'basicCheck': P.power = 1; x.run = 1; x.crew = [c('uf', 'remote', 'remote'), c('uf2', 'tablet', 'tablet'), CUSTW]; break;
-      case 'a4': x.cam = 'outdoor'; x.crew = [c('valve', 'crouch', 'torch'), c('out', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'outdoor', th: 'เมื่ออนุมัติ / พบผิดปกติเท่านั้น', kind: 'warn' }]; break;
+      case 'a4': x.cam = 'outdoor'; x.crew = OU_HIGH[type] ? [c('out', 'measure', 'torch'), c('outFoot', 'hold'), CUSTW] : [c('valve', 'crouch', 'torch'), c('out', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'outdoor', th: 'เมื่ออนุมัติ / พบผิดปกติเท่านั้น', kind: 'warn' }]; break;
       case 'grade': x.cam = 'meet'; x.crew = [c('leadMeet', 'tablet', 'tablet'), c('box', 'crouch'), CUSTW]; break;
       case 'next': x.cam = 'meet'; x.crew = [c('leadMeet', 'explain'), c('box', 'carryBox', 'box'), c('custMeet', 'explain')]; break;
       case 'sign': x.cam = 'meet'; x.crew = [c('leadMeet', 'present', 'tablet'), c('asstMeet', 'idle'), c('custMeet', 'sign')]; break;

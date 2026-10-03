@@ -120,8 +120,8 @@ export async function mountStudio(root, cfg = {}) {
     const rec = recommendUnits(need, area, state.type, sizes);
     if (state.auto) { state.n = rec.n; state.per = rec.per; }
     if (!sizes.includes(state.per)) state.per = sizes.find(x => x >= state.per) || sizes[sizes.length - 1];
-    th = thermal(p, s, state.n * state.per, dirt()); thClean = thermal(p, s, state.n * state.per, 0);
-    if (resetSim) { state.T = T_START; state.sim = 0; state.reached = null; }
+    th = thermal(p, s, state.n * state.per, dirt(), { inverter: state.inv ?? true }); thClean = thermal(p, s, state.n * state.per, 0, { inverter: state.inv ?? true });
+    if (resetSim) { state.T = th.tStart; state.sim = 0; state.reached = null; }
     state.need = need; state.rec = rec;
     V && V.setCap(Math.min(1.4, th.cap / Math.max(1, th.Qset)));
     V && V.setDirt(dirt());
@@ -133,7 +133,7 @@ export async function mountStudio(root, cfg = {}) {
     for (let k = 0; k < 6; k++) state.T = stepT(state.T, th, dtSim / 6);
     state.sim += dtSim / 60;
     if (state.reached == null && state.T <= T_SET + 0.1) state.reached = state.sim;
-    if (state.sim > 240) { state.T = T_START; state.sim = 0; state.reached = null; }
+    if (state.sim > 240) { state.T = th.tStart; state.sim = 0; state.reached = null; }
     V && V.setTemp(state.T);
     hudT(); if (state.view === 'inside') drawInside();
   }
@@ -142,7 +142,7 @@ export async function mountStudio(root, cfg = {}) {
     if ((hudAcc += 1) % 6) return;
     hud.innerHTML = '';
     const ss = steadyT(th);
-    hud.append(h('div', { class: 'st-temp' }, h('b', {}, state.T.toFixed(1) + '°C'), h('small', {}, `ตั้งไว้ ${T_SET}°C · นอกห้อง 34°C`)),
+    hud.append(h('div', { class: 'st-temp' }, h('b', {}, state.T.toFixed(1) + '°C'), h('small', {}, `ตั้งไว้ ${T_SET}°C · นอกห้อง ${th.tout}°C (${th.time === 'night' ? 'ใช้กลางคืน' : 'กลางวันหน้าร้อน'}) · ${th.inv ? 'Inverter' : 'Fixed speed ตัด-ต่อ ±0.75°C'}`)),
       h('div', { class: 'st-clock' }, h('span', {}, `นาทีที่ ${Math.floor(state.sim)}`), state.reached != null ? h('em', { class: 'ok' }, `ถึง ${T_SET}°C ใน ${Math.round(state.reached)} นาที`) : ss > T_SET + 0.1 ? h('em', { class: 'bad' }, `คาดว่าไม่ถึง ${T_SET}°C · ค้างที่ ~${ss.toFixed(1)}°C`) : h('em', {}, 'กำลังทำความเย็น…')));
   }
 
@@ -207,7 +207,7 @@ export async function mountStudio(root, cfg = {}) {
     const card = (lbl, big, sub, cls = '') => h('div', { class: 'st-kpi ' + cls }, h('span', { class: 'st-lbl' }, lbl), h('b', {}, big), sub ? h('small', {}, sub) : null);
     kpis.append(
       card('ห้องนี้ต้องการประมาณ', btuFmt(state.need), `เลือกไว้ ${state.n} × ${btuFmt(state.per)}${state.n > 1 ? ` = ${btuFmt(total)}` : ''} · ${fit[1]}`, fit[0]),
-      card(`เย็นถึง ${T_SET}°C (จาก 32°C)`, tn != null ? `${Math.round(tn)} นาที` : `ไม่ถึง`, tc != null ? (tn != null ? `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที${tn - tc >= 1 ? ` · ช้าลง ${Math.round(tn - tc)} นาที` : ''}` : `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที · ตอนนี้ค้างที่ ~${ss.toFixed(1)}°C`) : 'เครื่องเล็กเกินห้อง แม้สะอาดก็ไม่ถึง', tn == null ? 'bad' : tn - (tc || tn) > 8 ? 'warn' : 'ok'),
+      card(`เย็นถึง ${T_SET}°C (จาก ${th.tStart}°C · นอก ${th.tout}°C)`, tn != null ? `${Math.round(tn)} นาที` : `ไม่ถึง`, tc != null ? (tn != null ? `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที${tn - tc >= 1 ? ` · ช้าลง ${Math.round(tn - tc)} นาที` : ''}` : `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที · ตอนนี้ค้างที่ ~${ss.toFixed(1)}°C`) : 'เครื่องเล็กเกินห้อง แม้สะอาดก็ไม่ถึง', tn == null ? 'bad' : tn - (tc || tn) > 8 ? 'warn' : 'ok'),
       card('ผลของฝุ่นสะสม (แบบจำลอง)', `ลม −${Math.round((1 - e.air) * 100)}%`, `ความเย็นที่ได้ −${Math.round((1 - e.cap) * 100)}% · ไฟฟ้าต่อความเย็น +${Math.round((e.power - 1) * 100)}%`, d > 0.6 ? 'bad' : d > 0.35 ? 'warn' : 'ok'),
       card('รอบล้างที่แนะนำสำหรับห้องนี้', `ทุก ${ci.months} เดือน`, `${ci.visits} ครั้ง/ปี · ปรับตามสภาพจริงหลังตรวจครั้งแรก`),
     );
@@ -336,7 +336,7 @@ export async function mountStudio(root, cfg = {}) {
     const setIn = h('input', { type: 'range', min: String(SET_RANGE[0]), max: String(SET_RANGE[1]), step: '1', value: state.setT, 'aria-label': 'อุณหภูมิที่ตั้งเฉลี่ย' });
     setIn.addEventListener('input', () => { state.setT = +setIn.value; renderEnergy(); });
     const setRng = h('label', { class: 'st-rng' }, h('span', {}, 'ตั้งเฉลี่ย', h('b', {}, `${state.setT}°C`), h('small', {}, state.setT >= 26 ? 'ช่วงที่ กฟผ. แนะนำ' : 'ต่ำกว่าคำแนะนำ')), setIn);
-    const sys = h('div', { class: 'st-seg', role: 'radiogroup', 'aria-label': 'ระบบคอมเพรสเซอร์' }, [['inv', 'Inverter'], ['fix', 'Fixed speed']].map(([k, t]) => h('button', { type: 'button', role: 'radio', 'aria-checked': (k === 'inv') === inv, onclick: () => { state.inv = k === 'inv'; renderEnergy(); } }, t)));
+    const sys = h('div', { class: 'st-seg', role: 'radiogroup', 'aria-label': 'ระบบคอมเพรสเซอร์' }, [['inv', 'Inverter'], ['fix', 'Fixed speed']].map(([k, t]) => h('button', { type: 'button', role: 'radio', 'aria-checked': (k === 'inv') === inv, onclick: () => { state.inv = k === 'inv'; recompute(true); } }, t)));
     const rows = [{ th: `ห้องนี้: ${state.n} × ${btuFmt(state.per)}`, btu: state.n * state.per, n: state.n, per: state.per, me: true }, ...SIZES_SHOW[type].map(b => ({ th: `1 × ${btuFmt(b)}`, btu: b, n: 1, per: b }))];
     const tb = h('tbody');
     rows.forEach(r => {

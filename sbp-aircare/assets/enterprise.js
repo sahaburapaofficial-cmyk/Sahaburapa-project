@@ -8,7 +8,7 @@
 //     no discount or special rate on the page (rule 3: "may qualify — confirmed in the quotation" from VOLUME_HINT units);
 //     out-of-hours work = "มีค่าใช้จ่ายเพิ่มเติม" with no amount (rule 22); terms the company has not set (response time,
 //     invoice format …) are left blank in the draft — "ตกลงในสัญญา", never guessed; VRV / VRF are separate projects (rule 16)
-import { h, baht, DATA, CLEAN_PKGS, SIZE_BANDS, TYPE_BY_ID, VOLUME_HINT, estimateContract, incVat, up100, COMPANY, TRAVEL } from './sbp-core.js';
+import { h, baht, DATA, CLEAN_PKGS, SIZE_BANDS, TYPE_BY_ID, VOLUME_HINT, estimateContract, incVat, up100, COMPANY, TRAVEL, jobTravel } from './sbp-core.js';
 // {min} / {fee} in sector texts = the cleaning minimum and the travel fee from the Pricebook data (never typed twice)
 const fill = t => t.replace('{min}', baht(DATA.minBill)).replace('{fee}', baht(TRAVEL.baseFee));
 import { cart } from './commerce.js';
@@ -124,6 +124,45 @@ export function sampleContract(s, over = {}) {
   return { ...e, x, branches: n, perSite: e.annualEx, annualEx, annualInc: incVat(annualEx), unitsAll: e.count * n, every: months(x.visits) };
 }
 
+/** Rev.23 (owner 3 ต.ค. 2569: "ใช้บริการจำนวนเยอะจะได้สิทธิประโยชน์อะไร ช่วยอะไรได้บ้าง") — what volume under one contract changes,
+ *  computed only from published rules (standard rates, the cleaning minimum + travel fee, crew productivity, package terms):
+ *  no discount, no special-rate figure (rule 3), no energy promise (rule 11). Compared with booking every unit on its own. */
+export function volumeBenefits(s, c) {
+  const n = c.branches, V = c.x.visits, deep = 1;
+  // booked one unit at a time: each job is priced alone → under the cleaning minimum it carries the travel fee (core area)
+  let splitJobs = 0, splitTravel = 0;
+  c.lines.forEach(l => { splitJobs += l.n * V; splitTravel += l.n * ((V - deep) * jobTravel(null, l.c1).fee + deep * jobTravel(null, l.c2).fee); });
+  splitJobs *= n; splitTravel *= n;
+  const sum1 = c.lines.reduce((a, l) => a + l.c1 * l.n, 0), sum2 = c.lines.reduce((a, l) => a + l.c2 * l.n, 0);
+  const contractTravel = n * ((V - deep) * jobTravel(null, sum1).fee + deep * jobTravel(null, sum2).fee);
+  const td = c.teamDaysPerVisit, td2 = Math.ceil(td) <= 1 ? td : Math.ceil(td) / 2;   // two crews share a round
+  const pk = CLEAN_PKGS.find(p => p.id === c.x.pkg), basic = c.x.pkg === 'Basic Clean';
+  const gap = 12 / V, rounds = Array.from({ length: V }, (_, i) => ({ m: Math.round(i * gap) + 1, deep: i === 0 }));   // example order: the deep clean first, then every `gap` months
+  return {
+    splitJobs, contractVisits: V * n, splitTravel, contractTravel, travelAvoided: Math.max(0, splitTravel - contractTravel),
+    teamDays: td, teamDays2: td2, reports: c.unitsAll * V, reportKind: basic ? 'ใบรับมอบงานแบบย่อ' : c.x.pkg === 'Corporate Control' ? 'Asset Report รายเครื่อง' : 'Service Report พร้อมภาพก่อน–หลัง',
+    perUnitMonth: c.annualEx / c.unitsAll / 12, terms: pk.sub, special: c.unitsAll >= VOLUME_HINT, rounds,
+  };
+}
+
+function benefitsBlock(s, c) {
+  const b = volumeBenefits(s, c), br = c.branches > 1;
+  const tile = (k, v, d) => h('div', { class: 'en-bf' }, h('span', {}, k), h('b', {}, v), h('small', {}, d));
+  return h('section', { class: 'en-bfw', 'aria-label': 'ใช้บริการจำนวนมากได้อะไร' },
+    h('h4', {}, `ใช้บริการ ${c.unitsAll} เครื่องในสัญญาเดียว ได้อะไรบ้าง`),
+    h('p', { class: 'en-bf-sub' }, 'คำนวณจากตัวอย่างนี้ด้วยกฎที่ประกาศบนเว็บ เทียบกับการเรียกช่างแยกทีละเครื่อง · ไม่ใช่ส่วนลด'),
+    h('div', { class: 'en-bfs' },
+      tile('ค่าเดินทางที่ไม่เกิดขึ้น', `≈ ${baht(b.travelAvoided)} / ปี`, `เรียกแยกทีละเครื่อง ${b.splitJobs.toLocaleString('th-TH')} ครั้ง/ปี แต่ละงานต่ำกว่าขั้นต่ำ ${baht(DATA.minBill)} จึงมีค่าเดินทาง ${baht(TRAVEL.baseFee)} ทุกครั้ง · ในสัญญายอดต่อรอบถึงขั้นต่ำ (พื้นที่หลักกรุงเทพฯ)`),
+      tile('เปิดพื้นที่ให้ช่าง', `${b.contractVisits} รอบ / ปี`, `แทนการนัดช่าง ${b.splitJobs.toLocaleString('th-TH')} ครั้ง${br ? ` · ${c.branches} สาขา สาขาละ ${c.x.visits} รอบ` : ''} · รู้วันเข้างานล่วงหน้าทั้งปี`),
+      tile('กำลังคนต่อรอบ', `≈ ${b.teamDays} ทีม-วัน${br ? ' / สาขา' : ''}`, b.teamDays > 1 ? `จัด 2 ทีมพร้อมกันเหลือ ≈ ${b.teamDays2} วัน · ทำทีละโซนให้พื้นที่อื่นใช้งานต่อได้` : 'จบในวันเดียว · ทำทีละโซนให้พื้นที่อื่นใช้งานต่อได้'),
+      tile('หลักฐานการทำงาน', `${b.reports.toLocaleString('th-TH')} ฉบับ / ปี`, `${b.reportKind} ทุกเครื่องทุกรอบ ลงนามรับงาน 3 ฝ่าย · ใช้ตรวจรับงานและตอบฝ่ายจัดซื้อ / ผู้ตรวจสอบได้`),
+      tile('งบต่อเครื่อง', `≈ ${baht(Math.ceil(b.perUnitMonth))} / เดือน`, `ราคามาตรฐานก่อน VAT ตั้งงบรายปีได้ล่วงหน้า · งานซ่อมแจ้งราคาให้อนุมัติก่อนทุกครั้ง`),
+      tile('เงื่อนไขในแพ็กเกจ', c.x.pkg, b.terms)),
+    h('ol', { class: 'en-cal', 'aria-label': 'ปฏิทินรอบล้างตัวอย่าง 12 เดือน' }, Array.from({ length: 12 }, (_, i) => { const r = b.rounds.find(x => x.m === i + 1);
+      return h('li', { class: r ? (r.deep ? 'deep' : 'on') : '' }, h('span', {}, `เดือน ${i + 1}`), r ? h('b', {}, r.deep ? 'ล้างใหญ่' : 'ล้างปกติ') : null); })),
+    h('p', { class: 'en-note' }, `ลำดับเป็นตัวอย่าง ปรับตามฤดูและแผนงานของลูกค้า${b.special ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไข ทีมขายยืนยันในใบเสนอราคา' : ''}`));
+}
+
 /** a draft scope of work to copy into an RFQ / TOR — blanks stay blank (agreed per customer) */
 export function scopeText(s, c) {
   const pk = CLEAN_PKGS.find(p => p.id === c.x.pkg), band = SIZE_BANDS[c.x.size];
@@ -210,7 +249,8 @@ export function mountEnterprise(root, { openCart, builder } = {}) {
         h('div', { class: 'en-side' },
           h('div', {}, h('b', {}, 'ช่วงเวลาเข้างาน'), h('p', {}, s.window)),
           adds.length ? h('div', {}, h('b', {}, 'รายการเพิ่มที่มักใช้กับสถานที่ประเภทนี้'), h('ul', {}, adds.map(a => h('li', {}, h('span', {}, a.name), h('em', {}, a.price))))) : null)),
-      contractCard(s));
+      contractCard(s),
+      benefitsBlock(s, sampleContract(s, pkgOver ? { pkg: pkgOver } : {})));
   }
   function pick(id, user) {
     const s = SECTORS.find(x => x.id === id); if (!s) return;
