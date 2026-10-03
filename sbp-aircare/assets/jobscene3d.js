@@ -13,7 +13,7 @@ import { RoomEnvironment } from './RoomEnvironment.js';
 import { materialSet, buildPremiumIndoor, buildOutdoor, canvasTex } from './ac3d.js';
 import { buildCeilingUnit, buildCassetteUnit, buildFloorUnit, animateUnit } from './units3d.js';
 import { mats as roomMats, rbox, F, TEX, windowUnit } from './roomkit3d.js';
-import { buildTrunk, bentPath } from './trunk3d.js';
+import { buildTrunk, bentPath, outlineTrunk, tapeMaterial } from './trunk3d.js';
 import { createAirflow } from './airflow3d.js';
 import { createCrew, buildLadder } from './crew3d.js';
 import { matTex, bagTex, boxTex, decal, drawSbp, drawFujiva, brandTex } from './brand3d.js';
@@ -249,7 +249,10 @@ export function createJobScene(container, o = {}) {
     const fl = t === 'ceiling' ? K.tile.clone() : t === 'floor' ? new THREE.MeshStandardMaterial({ map: TEX.fabric(dark ? '#3e4652' : '#7d8794'), roughness: 1 }) : K.floor.clone();
     if (fl.map) { fl.map = fl.map.clone(); fl.map.wrapS = fl.map.wrapT = THREE.RepeatWrapping; fl.map.repeat.set(t === 'ceiling' ? 7 : t === 'floor' ? 12 : 3, t === 'ceiling' ? 5 : t === 'floor' ? 8 : 2.4); fl.map.needsUpdate = true; }
     if (t === 'cassette') fl.color.setHex(dark ? 0x9a7a62 : 0xb48e6c);
-    const wallM = t === 'wall' ? K.wall : t === 'cassette' ? std(0xffffff, { map: TEX.plaster(dark ? '#5a4f45' : '#eadcc9'), roughness: 0.95 }) : std(dark ? 0x3d444d : 0xf1f2ef, { roughness: 0.9 });
+    // Rev.25 painted walls in tones the white trunking stands out on (owner: "รางครอบท่อ สีต้องตัดกับกำแพง") — bedroom warm greige,
+    // café clay plaster, shop cool grey-blue, meeting room soft slate; dark theme keeps its own tones
+    const wallM = t === 'wall' ? (dark ? K.wall : std(0xffffff, { map: TEX.plaster('#d9c8ad'), roughness: 0.95 })) : t === 'cassette' ? std(0xffffff, { map: TEX.plaster(dark ? '#5a4f45' : '#d8bf9e'), roughness: 0.95 }) : std(dark ? 0x3d444d : t === 'ceiling' ? 0xc9d4de : 0xc5cbd3, { roughness: 0.9 });
+    const outM = commercial ? std(0xffffff, { map: TEX.concrete(), roughness: 0.92 }) : std(dark ? 0x3a3530 : 0xc9b79c, { map: dark ? null : TEX.plaster('#c9b79c'), roughness: 0.95 });   // exterior: sand render (home) / fair-faced concrete (service yard)
     const floor = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.05, 3.6), fl); floor.position.set(-0.6, -0.025, 1.8); floor.receiveShadow = true; venue.add(floor);
     const back = new THREE.Mesh(new THREE.BoxGeometry(5.52, H, 0.12), wallM); back.position.set(-0.6, H / 2, -0.06); back.receiveShadow = true; venue.add(back);
     const left = new THREE.Mesh(new THREE.BoxGeometry(0.12, H, 3.6), wallM); left.position.set(-3.36, H / 2, 1.8); left.receiveShadow = true; venue.add(left);
@@ -259,7 +262,7 @@ export function createJobScene(container, o = {}) {
     venue.add(box(0.12, H - 2.1, 0.9, wallM, 2.16, (H + 2.1) / 2, 2.2)); [1.77, 2.63].forEach(z => venue.add(box(0.16, 2.1, 0.04, K.white, 2.16, 1.05, z))); venue.add(box(0.16, 0.04, 0.9, K.white, 2.16, 2.1, 2.2));
     // outside: balcony (home) / service yard (others)
     const ofl = new THREE.Mesh(new THREE.BoxGeometry(1.84, 0.05, 3.6), commercial ? K.concrete : K.tile); ofl.position.set(3.1, -0.06, 1.8); ofl.receiveShadow = true; venue.add(ofl);
-    const ow = new THREE.Mesh(new THREE.BoxGeometry(1.84, H, 0.12), K.wallAlt); ow.position.set(3.1, H / 2, -0.06); ow.receiveShadow = true; venue.add(ow);
+    const ow = new THREE.Mesh(new THREE.BoxGeometry(1.84, H, 0.12), outM); ow.position.set(3.1, H / 2, -0.06); ow.receiveShadow = true; venue.add(ow);
     if (!commercial) { venue.add(box(0.04, 0.04, 3.6, railM, 3.98, 1.0, 1.8)); for (let i = 0; i < 10; i++) venue.add(box(0.02, 1.0, 0.02, railM, 3.98, 0.5, 0.1 + i * 0.38)); }
     else { venue.add(box(0.14, 0.95, 3.6, K.wallAlt, 3.97, 0.475, 1.8)); venue.add(box(0.18, 0.04, 3.6, K.base, 3.97, 0.97, 1.8)); }
     // Rev.23 the view beyond the balcony / service yard: sky, the city (from a high floor at home; street level for shops) + greenery
@@ -444,25 +447,32 @@ export function createJobScene(container, o = {}) {
     else if (t === 'cassette') [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([sx, sz]) => mount.add(cyl(0.006, 0.6, mm, sx * 0.46, H + 0.3, u.z + sz * 0.29, 8)));
     else mount.add(box(0.2, 0.04, 0.03, mm, 0, 1.75, 0.02), box(0.04, 0.04, 0.2, mm, 0, 1.75, 0.1));
     // ---- refrigerant pipes in the trunking to the condensing unit, drain (blue PVC), power cable — drawn as they are installed
-    const valve = V(3.405, OU.base.y - 0.094, 0.36), zW = 0.04, runEnd = hi ? OU.base.y + 0.24 : 0.62;
+    // Rev.25 tidy finish: the trunking runs down to just above the service valves and ends in an end cap; only a short taped
+    // stretch (white PVC tape over the insulation) reaches the valves · power cable in its own small raceway · drain clipped to the wall
+    const valve = V(3.405, OU.base.y - 0.094, 0.36), zW = 0.04, runEnd = valve.y + 0.1;
     const run = {
       wall: [[0.5, 2.06, zW], [2.4, 2.06, zW], [3.58, 2.06, zW], [3.58, runEnd, zW]],
-      ceiling: [[0.72, 2.6, zW], [2.4, 2.6, zW], [3.58, 2.6, zW], [3.58, runEnd, zW]],
-      cassette: [[0.32, 2.63, zW], [2.4, 2.63, zW], [3.58, 2.63, zW], [3.58, runEnd, zW]],
-      floor: [[0.36, 0.34, zW], [2.4, 0.34, zW], [3.58, 0.34, zW]],
+      ceiling: [[0.66, 2.6, zW], [2.4, 2.6, zW], [3.58, 2.6, zW], [3.58, runEnd, zW]],
+      cassette: [[0.32, 2.66, zW], [2.4, 2.66, zW], [3.58, 2.66, zW], [3.58, runEnd, zW]],
+      floor: [[0.32, 0.34, zW], [2.4, 0.34, zW], [3.52, 0.34, zW]],
     }[t];
-    const head = { wall: [[0.3, 2.06, 0.02]], ceiling: [[0.5, 2.6, 0.12]], cassette: [[0.32, 2.8, 1.25], [0.32, 2.8, zW]], floor: [[0.2, 0.34, 0.02]] }[t];
-    const tail = t === 'floor' ? [[3.5, 0.3, 0.2], [valve.x + 0.02, valve.y + 0.06, valve.z]] : [[3.58, valve.y + 0.19, 0.2], [valve.x + 0.02, valve.y + 0.06, valve.z]];
-    const pipePts = [...head, ...run, ...tail].map(p => V(...p));
+    const head = { wall: [[0.3, 2.06, 0.02]], ceiling: [[0.5, 2.6, 0.12]], cassette: [[0.32, 2.8, 1.25], [0.32, 2.8, zW], [0.32, 2.7, zW]], floor: [[0.2, 0.34, 0.02]] }[t];
+    const R0 = run[run.length - 1], tail = t === 'floor' ? [[R0[0] - 0.02, valve.y + 0.06, 0.16], [valve.x + 0.02, valve.y + 0.06, valve.z]] : [[R0[0], R0[1] - 0.06, zW + 0.03], [R0[0] - 0.04, valve.y + 0.06, 0.2], [valve.x + 0.02, valve.y + 0.06, valve.z]];
+    const pipePts = [...head, ...run].map(p => V(...p));
     const insM = std(0x15181c, { roughness: 0.85 }), pvcM = std(0x2f8fe0, { roughness: 0.45 }), cabM = std(0xf4f4f0, { roughness: 0.5 });
     pipes = tube(bentPath(pipePts, 0.06), 0.022, insM, 160, 10); world.add(pipes);
+    tailOut = tube(bentPath([R0, ...tail].map(p => V(...p)), 0.04), 0.024, tapeMaterial(dark), 40, 10); world.add(tailOut);
     const lids = run.slice(1).map(() => V(0, 0, 1));
-    trunk = buildTrunk(run, lids, { caps: [{ at: [2.16, run[1][1], zW], n: [1, 0, 0] }] }).group; trunk.traverse(m => { if (m.isMesh) { m.castShadow = true; m.material = m.material.clone(); m.material.transparent = true; } }); world.add(trunk);
-    const dEnd = t === 'floor' ? [[3.7, 0.3, zW], [3.7, 0.05, zW], [3.7, 0.02, 0.18]] : [[3.68, 0.62, zW], [3.68, 0.05, zW], [3.68, 0.02, 0.18]];
+    trunk = buildTrunk(run, lids, { caps: [{ at: [2.16, run[1][1], zW], n: [1, 0, 0] }] }).group; trunk.traverse(m => { if (m.isMesh) { m.castShadow = true; m.material = m.material.clone(); m.material.transparent = true; } }); world.add(trunk); trunk.userData.edge = outlineTrunk(trunk, { color: dark ? 0x9fb3c8 : 0x7d8a98 });
+    const dEnd = t === 'floor' ? [[3.6, 0.3, zW], [3.6, 0.05, zW], [3.6, 0.02, 0.18]] : [[R0[0] + 0.02, R0[1] - 0.05, zW], [3.64, R0[1] - 0.12, zW], [3.64, 0.05, zW], [3.64, 0.02, 0.18]];
     const dPts = [...head.map(p => [p[0] - 0.05, p[1] - 0.03, p[2]]), ...run.map(p => [p[0], p[1] - 0.012, p[2]]), ...dEnd].map(p => V(...p));
-    drainP = tube(bentPath(dPts, 0.05), 0.011, pvcM, 160, 8); world.add(drainP); drainP.userData.end = V(3.68, 0.03, 0.18);
+    drainP = tube(bentPath(dPts, 0.05), 0.011, pvcM, 160, 8); world.add(drainP); drainP.userData.end = V(t === 'floor' ? 3.6 : 3.64, 0.03, 0.18);
+    // drain clips on the wall every ~35 cm (white saddle clips)
+    { const clipM = std(0xf2f2ef, { roughness: 0.5 }), x = t === 'floor' ? 3.6 : 3.64, top = (t === 'floor' ? 0.3 : R0[1] - 0.12) - 0.08; for (let y = top; y > 0.1; y -= 0.35) { const c = box(0.034, 0.016, 0.028, clipM, x, y, zW); c.userData.noEdge = true; drainP.add(c); } }
     const wPts = { wall: [[1.15, 1.6, 0.02], [1.15, 1.95, 0.02], [0.45, 1.95, 0.02]], ceiling: [[1.15, 1.6, 0.02], [1.15, 2.55, 0.02], [0.6, 2.55, 0.02]], cassette: [[1.15, 1.6, 0.02], [1.15, 2.68, 0.02]], floor: [[1.15, 1.3, 0.02], [1.15, 0.5, 0.02], [0.3, 0.5, 0.02]] }[t].map(p => V(...p));
     wire = tube(bentPath(wPts, 0.04), 0.009, cabM, 60, 6); world.add(wire);
+    // the cable from the breaker runs in a small white raceway (ราง Airpro เล็ก) — no loose cable on the wall
+    { const wr = buildTrunk(wPts.map(p => [p.x, p.y, 0.012 + 0.01]), wPts.slice(1).map(() => V(0, 0, 1)), { W: 0.032, D: 0.02, endCap: true }).group; wr.traverse(m => { if (m.isMesh) m.castShadow = true; }); outlineTrunk(wr, { color: dark ? 0x9fb3c8 : 0x7d8a98, opacity: 0.6 }); wire.add(wr); wire.userData.raceway = wr; }
     // test hoses from the gauges (hung on the condensing unit) to the service valve, the vacuum pump and the nitrogen cylinder
     disposeTree(testHoses); testHoses.clear();
     gauges.position.set(3.32, 0.62, 0.52); gauges.rotation.y = -0.35; vac.position.set(3.55, 0, 1.0); n2.position.set(2.62, 0, 0.75);
@@ -672,8 +682,8 @@ export function createJobScene(container, o = {}) {
     cartons.visible = st.cartons > 0.5; ocarton.visible = st.ocarton > 0.5;
     gauges.visible = st.gauges > 0.5; n2.visible = st.n2 > 0.5; vac.visible = st.vac > 0.5; testHoses.visible = gauges.visible; testHoses.userData.vac.visible = vac.visible; testHoses.userData.n2.visible = n2.visible;
     needles.forEach((nd, i) => { nd.rotation.z = -clamp(st.needle, -1, 1) * (i ? 1.6 : 2.0) + (vac.visible ? Math.sin(clock * 40) * 0.01 : 0); });
-    drawK(pipes, st.pipeK); drawK(drainP, st.drainK); drawK(wire, st.wireK);
-    trunk.visible = st.trunkK > 0.01; trunk.traverse(m => { if (m.isMesh) m.material.opacity = clamp(st.trunkK, 0, 1); });
+    drawK(pipes, st.pipeK); drawK(drainP, st.drainK); drawK(wire, st.wireK); if (tailOut) tailOut.visible = st.pipeK > 0.97; if (wire.userData.raceway) wire.userData.raceway.visible = st.wireK > 0.97;
+    trunk.visible = st.trunkK > 0.01; trunk.traverse(m => { if (m.isMesh) m.material.opacity = clamp(st.trunkK, 0, 1); }); if (trunk.userData.edge) trunk.userData.edge.opacity = 0.75 * clamp(st.trunkK, 0, 1);
     if (lad[0]) lad[0].L.visible = st.lad0 > 0.5 || (crew && crew.members[0].ladder === lad[0].spec); if (lad[1]) lad[1].L.visible = st.lad1 > 0.5;
     if (lad[2]) lad[2].L.visible = T.cam === 'outdoor' || (!!crew && crew.members.some(m => m.ladder === lad[2].spec));
     // unit: mounted / lifted from the carton / hidden in the carton; C2 wall unit swings out on its top hooks (pipes stay connected)
