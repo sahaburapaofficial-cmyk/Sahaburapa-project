@@ -7,7 +7,7 @@
 // "next step" cards at the bottom, an intent picker on the home view that starts a guided journey (a step strip that follows the
 // customer across views and remembers progress), the company / contact block, the beta notice + feedback form, and the footer.
 // Hidden views do not boot their 3D (scenes start on IntersectionObserver), so each view is lighter than the old page.
-import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS, DATA } from './sbp-core.js';
+import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS, DATA, TRAVEL } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
@@ -391,6 +391,8 @@ export function mountSite(cfg) {
   try { mountPalette({ variant, views, viewTh: Object.fromEntries(Object.entries(VIEWS).map(([k, v]) => [k, v.th])), secTh: { ...SEC_TH, ...labels, 'photo-survey': 'ส่งรูปหน้างานให้ทีมประเมิน' }, go, openCart, openProduct: cfg.openProduct, openFeedback }); } catch (e) { console.warn('palette unavailable', e); }
   try { mountFx(variant); } catch (e) { /* decorative only */ }
   // Rev.20 "ถามอาการแอร์" automatic assistant (rule based, in the page)
+  // ★Rev.22.1 travel figures written in the page markup come from TRAVEL (one place — the owner still has to confirm them)
+  $$('[data-travel]').forEach(el => { const v = TRAVEL[el.dataset.travel]; if (v != null) el.textContent = Number(v).toLocaleString('en-US'); });
   let BOT = null; try { BOT = mountAcBot({ openCart, go }); } catch (e) { /* optional */ }
   return { go, view: () => cur, startJourney, openFeedback, bot: BOT };
 }

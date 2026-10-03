@@ -8,7 +8,9 @@
 //     no discount or special rate on the page (rule 3: "may qualify — confirmed in the quotation" from VOLUME_HINT units);
 //     out-of-hours work = "มีค่าใช้จ่ายเพิ่มเติม" with no amount (rule 22); terms the company has not set (response time,
 //     invoice format …) are left blank in the draft — "ตกลงในสัญญา", never guessed; VRV / VRF are separate projects (rule 16)
-import { h, baht, DATA, CLEAN_PKGS, SIZE_BANDS, TYPE_BY_ID, VOLUME_HINT, estimateContract, incVat, up100, COMPANY } from './sbp-core.js';
+import { h, baht, DATA, CLEAN_PKGS, SIZE_BANDS, TYPE_BY_ID, VOLUME_HINT, estimateContract, incVat, up100, COMPANY, TRAVEL } from './sbp-core.js';
+// {min} / {fee} in sector texts = the cleaning minimum and the travel fee from the Pricebook data (never typed twice)
+const fill = t => t.replace('{min}', baht(DATA.minBill)).replace('{fee}', baht(TRAVEL.baseFee));
 import { cart } from './commerce.js';
 import { askTeam, copyText } from './contact.js';
 import { toast } from './proto-ui.js';
@@ -54,7 +56,7 @@ export const SECTORS = [
     pains: [
       ['แต่ละสาขาจ้างช่างเอง ราคาและมาตรฐานไม่เท่ากัน', 'สัญญาเดียว ราคามาตรฐานเดียวกันทุกสาขาตาม Pricebook และขั้นตอนงานตามแบบฟอร์มเดียวกัน', P],
       ['สำนักงานใหญ่ไม่เห็นภาพรวมว่าสาขาไหนทำแล้ว', 'Asset Report รายเครื่องแยกตามสาขา (แพ็กเกจ Corporate Control) ใช้ติดตามรอบล้างและสภาพเครื่องทุกสาขา', P],
-      ['สาขาเล็กมีแอร์ไม่กี่เครื่อง ยอดต่อรอบต่ำ', 'สาขาในพื้นที่หลักที่ยอดงานล้างถึง ฿4,500 ไม่มีค่าเดินทาง ต่ำกว่านั้นคิดค่าเดินทาง ฿300 ต่อการเข้างาน แสดงให้เห็นในใบเสนอราคา', P],
+      ['สาขาเล็กมีแอร์ไม่กี่เครื่อง ยอดต่อรอบต่ำ', 'สาขาในพื้นที่หลักที่ยอดงานล้างถึง {min} ไม่มีค่าเดินทาง ต่ำกว่านั้นคิดค่าเดินทาง {fee} ต่อการเข้างาน แสดงให้เห็นในใบเสนอราคา', P],
       ['สาขาต่างจังหวัด ค่าเดินทางไม่ชัด', 'คิดตามระยะถนนจริงจากสำนักงานใหญ่ตามอัตราที่ประกาศบนเว็บ ทุกสาขาเห็นตัวเลขเดียวกัน', P],
       ['ร้านเปิดทุกวัน ปิดร้านไม่ได้', 'จัดเวลาเข้างานก่อนร้านเปิดหรือหลังปิดตามที่ตกลงในสัญญา (นอกเวลามีค่าใช้จ่ายเพิ่มเติม)', D],
     ],
@@ -204,7 +206,7 @@ export function mountEnterprise(root, { openCart, builder } = {}) {
         h('div', { class: 'en-hd' }, icon(ICON[s.id]), h('div', {}, h('h3', {}, s.th), h('p', {}, s.who))),
         h('ol', { class: 'en-pains' }, s.pains.map(([pain, fix, kind]) => h('li', {},
           h('p', { class: 'en-pain' }, pain),
-          h('p', { class: 'en-fix' }, fix, h('span', { class: 'en-tag ' + kind }, kind === P ? 'มีในแพ็กเกจ / แบบฟอร์มบริษัท' : 'ตกลงในสัญญา'))))),
+          h('p', { class: 'en-fix' }, fill(fix), h('span', { class: 'en-tag ' + kind }, kind === P ? 'มีในแพ็กเกจ / แบบฟอร์มบริษัท' : 'ตกลงในสัญญา'))))),
         h('div', { class: 'en-side' },
           h('div', {}, h('b', {}, 'ช่วงเวลาเข้างาน'), h('p', {}, s.window)),
           adds.length ? h('div', {}, h('b', {}, 'รายการเพิ่มที่มักใช้กับสถานที่ประเภทนี้'), h('ul', {}, adds.map(a => h('li', {}, h('span', {}, a.name), h('em', {}, a.price))))) : null)),
