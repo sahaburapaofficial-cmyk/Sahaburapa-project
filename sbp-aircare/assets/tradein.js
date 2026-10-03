@@ -4,9 +4,13 @@
 //     repair the old unit (repair lines from the Pricebook — lines without a standard rate stay "ประเมินหน้างาน", the known
 //     part is shown as "อย่างน้อย") vs. trade it in for a new inverter unit (catalogue prices of that type and size + the
 //     standard installation; taking the old unit out = "ประเมินหน้างาน") + electricity old vs new (studio-model energy())
-//   · the trade-in value itself is not published: TRADE_IN.table stays null until the owner sets the table (by size / age /
-//     condition) — until then "ทีมประเมินจากรุ่น อายุ และสภาพจริง แล้วหักในใบเสนอราคา" (CLAUDE.md §6.6 rules 3–4: no discount
-//     figure or % on the page; "ช่องไหนว่างอย่าเดาใส่")
+//   · trade-in value — Rev.24.1 (owner 3 ต.ค. 2569: "ตารางมูลค่าหาได้จากราคามาตรฐานที่ HomePro หรือเว็บขายแอร์ออนไลน์รับเทิร์น
+//     ทุกอย่างและใช้ได้เลย"): TRADE_IN.table = the Bangkok 2569 market rates for old units by size and condition (working / not
+//     working) as published by AC buy-back / trade-in shops (banoldair.simdif.com 2569 cash table 9k 900 · 12k 1,200 · 18k 1,600 ·
+//     36k 3,200; the 2569 working / not-working ranges; hatyaiair.com trade-in 500–1,800) — shown as a range per unit, confirmed when
+//     the team inspects the unit · conditions follow common retail trade-in terms (HomePro: ≥ 9,000 BTU, indoor + outdoor units
+//     complete with front panel and covers, any brand, working or not). Fixed baht per unit, never a % (CLAUDE.md §6.6 rule 4);
+//     the site names no retailer.
 //   · verdict = rules of thumb technicians use (age, major fault, R22, repair ≥ 50 % of a new set, age × repair ≥ new set) —
 //     shown as reasons, never as a promise (rule 11: no "ประหยัดไฟแน่นอน")
 import { h, baht, DATA, DEMO, TYPES, TYPE_BY_ID, VOLUME_HINT, installOptions, btuFmt } from './sbp-core.js';
@@ -16,7 +20,29 @@ import { askTeam } from './contact.js';
 import { toast } from './proto-ui.js';
 
 /** owner-set trade-in values: null = not published yet (the page then says the team assesses it) */
-export const TRADE_IN = { table: null, minAge: 7 };
+export const TRADE_IN = {
+  minAge: 7, minBtu: 9000,
+  // per unit, baht: working (ok) / not working or for repair (bad) — size bands by the old unit's BTU
+  table: [
+    { max: 12000, th: 'ไม่เกิน 12,000 BTU', ok: [900, 1300], bad: [300, 700] },
+    { max: 24000, th: '12,001–24,000 BTU', ok: [1400, 2200], bad: [500, 1200] },
+    { max: Infinity, th: '24,001 BTU ขึ้นไป', ok: [2400, 3500], bad: [800, 1800] },
+  ],
+  terms: [
+    'รับเครื่องเดิมทุกยี่ห้อ ไม่ว่าซื้อจากที่ไหน ใช้งานได้หรือเสียแล้ว ขนาด 9,000 BTU ขึ้นไป',
+    'ต้องมีครบทั้งคอยล์เย็นและคอยล์ร้อน พร้อมหน้ากากและฝาครอบ',
+    'ทีมช่างเก็บน้ำยาและรื้อเครื่องเดิมเอง ในวันติดตั้งเครื่องใหม่',
+    'มูลค่าเทิร์นหักจากใบเสนอราคาเครื่องใหม่พร้อมติดตั้งของบริษัท ไม่จ่ายเป็นเงินสด',
+    'มูลค่าจริงยืนยันเมื่อทีมตรวจเครื่อง ตามขนาด อายุ และสภาพ · ส่งมอบแล้วขอคืนไม่ได้',
+  ],
+};
+const WORKING = { reno: 1, weak: 1 };   // the problem picked says whether the old unit still runs
+/** trade-in value range for one old unit, or null when it does not qualify (smaller than 9,000 BTU) */
+export function tradeValue(x) {
+  if (!(x.btu >= TRADE_IN.minBtu)) return null;
+  const b = TRADE_IN.table.find(r => x.btu <= r.max), ok = !!WORKING[x.issue];
+  return { lo: (ok ? b.ok : b.bad)[0], hi: (ok ? b.ok : b.bad)[1], working: ok, band: b.th };
+}
 
 export const AGES = [
   { id: 'a3', th: 'ไม่ถึง 5 ปี', y: 3 }, { id: 'a6', th: '5–7 ปี', y: 6 }, { id: 'a8', th: '7–10 ปี', y: 8.5 },
@@ -110,7 +136,7 @@ export function tradeIn(x) {
   return {
     q, age: A, issue: I, repair: { lines: R, known, unknown }, set: N, setEx,
     energy: { old: oldYear, now: newYear, save, loss, oldInv, hrs },
-    tradeValue: TRADE_IN.table ? TRADE_IN.table(x) : null,
+    trade: tradeValue(x), net: setEx != null && tradeValue(x) ? [setEx - tradeValue(x).hi, setEx - tradeValue(x).lo] : null,
     verdict, title: VERD[0], sub: VERD[1], why, special: q >= VOLUME_HINT, eligible: A.y >= TRADE_IN.minAge || I.major,
   };
 }
@@ -156,27 +182,33 @@ export function mountTradeIn(root, { catalog, openCart } = {}) {
         h('li', {}, h('span', {}, `เครื่องใหม่ ${t.th} ${btuFmt(st.btu)} · ${S.n} รุ่นในเว็บ${S.n ? ` ช่วง ${baht(S.min)}–${baht(S.max)}` : ''}`), S.med != null ? h('b', {}, `กลาง ${baht(S.med)}`) : h('em', { class: 'ti-sv' }, 'สอบถามรุ่น')),
         S.install ? h('li', {}, h('span', {}, S.install.name), S.install.ex != null ? h('b', {}, baht(S.install.ex)) : h('em', { class: 'ti-sv' }, 'ประเมินหน้างาน')) : null,
         S.out.map(l => h('li', {}, h('span', {}, l.name), priceOf(l))),
-        h('li', { class: 'ti-trade' }, h('span', {}, 'มูลค่าเทิร์นเครื่องเดิม หักจากใบเสนอราคา'), R.tradeValue != null ? h('b', {}, '− ' + baht(R.tradeValue)) : h('em', { class: 'ti-sv' }, 'ทีมประเมินจากรุ่น อายุ สภาพ'))),
-      R.setEx != null ? h('p', { class: 'ti-sum' }, 'เครื่อง + ติดตั้งมาตรฐาน ', h('b', {}, baht(R.setEx * q)), q > 1 ? ` (${q} เครื่อง)` : '', h('small', {}, ' ก่อนหักมูลค่าเทิร์น · ราคากลางของรุ่นในเว็บ')) : null,
+        h('li', { class: 'ti-trade' }, h('span', {}, `มูลค่าเทิร์นเครื่องเดิม (${R.trade ? (R.trade.working ? 'ใช้งานได้' : 'เสีย / ต้องซ่อม') : '—'}) หักจากใบเสนอราคา`), R.trade ? h('b', {}, `− ${baht(R.trade.lo)}–${baht(R.trade.hi).replace('฿', '')}`) : h('em', { class: 'ti-sv' }, 'ทีมประเมินหน้างาน'))),
+      R.setEx != null ? h('p', { class: 'ti-sum' }, 'เครื่อง + ติดตั้งมาตรฐาน ', h('b', {}, baht(R.setEx * q)), q > 1 ? ` (${q} เครื่อง)` : '', h('small', {}, ' ราคากลางของรุ่นในเว็บ ก่อนหักมูลค่าเทิร์น')) : null,
+      R.net ? h('p', { class: 'ti-sum ti-net' }, 'หลังหักมูลค่าเทิร์น ≈ ', h('b', {}, `${baht(R.net[0] * q)}–${baht(R.net[1] * q).replace('฿', '')}`), h('small', {}, ' ไม่รวมงานที่ประเมินหน้างาน · มูลค่าเทิร์นยืนยันเมื่อทีมตรวจเครื่อง')) : null,
       h('p', { class: 'ti-mut' }, `ค่าไฟโดยประมาณ ≈ ${baht(Math.round(R.energy.now / 100) * 100)} / ปี / เครื่อง`, R.energy.save > 0 ? ` · ต่างจากเครื่องเดิมราว ${baht(Math.round(R.energy.save * q / 100) * 100)} / ปี${q > 1 ? ` (${q} เครื่อง)` : ''}` : ''));
     out.append(
       h('div', { class: 'ti-verdict ti-' + R.verdict }, h('b', {}, R.title), h('p', {}, R.sub),
         R.why.length ? h('ul', {}, R.why.map(w => h('li', {}, w))) : null),
       h('div', { class: 'ti-cmp' }, repCard, newCard),
+      h('details', { class: 'ti-terms' }, h('summary', {}, 'ตารางมูลค่าเทิร์นและเงื่อนไข'),
+        h('table', {}, h('caption', {}, 'มูลค่าเทิร์นต่อเครื่อง (บาท) ตามขนาดเครื่องเดิม'), h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, 'ขนาดเครื่องเดิม'), h('th', { scope: 'col' }, 'ใช้งานได้'), h('th', { scope: 'col' }, 'เสีย / ต้องซ่อม'))),
+          h('tbody', {}, TRADE_IN.table.map(r => h('tr', { class: R.trade && R.trade.band === r.th ? 'on' : '' }, h('th', { scope: 'row' }, r.th), h('td', {}, `${r.ok[0].toLocaleString('en-US')}–${r.ok[1].toLocaleString('en-US')}`), h('td', {}, `${r.bad[0].toLocaleString('en-US')}–${r.bad[1].toLocaleString('en-US')}`))))),
+        h('ul', {}, TRADE_IN.terms.map(t2 => h('li', {}, t2))),
+        h('p', { class: 'ti-mut' }, 'อ้างอิงราคารับซื้อและรับเทิร์นแอร์เก่าที่ร้านแอร์ประกาศในปี 2569 · มูลค่าจริงขึ้นกับยี่ห้อ อายุ และสภาพเครื่อง')),
       h('ol', { class: 'ti-steps', 'aria-label': 'ขั้นตอนเทิร์นแอร์เก่า' }, [
         ['ส่งข้อมูลเครื่องเดิม', 'รูปป้ายข้างเครื่อง (รุ่น ปีผลิต น้ำยา) และรูปคอยล์ร้อน'],
-        ['ทีมประเมินมูลค่าเทิร์น', 'จากรุ่น อายุ และสภาพจริง แจ้งในใบเสนอราคา'],
+        ['ทีมยืนยันมูลค่าเทิร์น', 'ตามตารางด้านบน จากขนาด อายุ และสภาพจริง แจ้งในใบเสนอราคา'],
         ['ใบเสนอราคาเดียว', 'เครื่องใหม่ + ติดตั้ง หักมูลค่าเทิร์นเครื่องเดิม'],
         ['วันติดตั้ง', 'เก็บน้ำยาเครื่องเดิมก่อนรื้อ ไม่ปล่อยทิ้งสู่อากาศ รื้อ ขนออก แล้วติดตั้งเครื่องใหม่'],
         ['ส่งมอบ', 'ทดสอบ วัดค่า ใบรับมอบงาน และรับประกันงานติดตั้ง'],
       ].map(([a, b], i) => h('li', {}, h('span', {}, String(i + 1)), h('b', {}, a), h('small', {}, b)))),
       h('div', { class: 'ti-acts' },
         h('button', { type: 'button', class: 's-btn primary', onclick: () => {
-          cart.add({ kind: 'survey', group: 'install', key: `TI-${st.type}-${st.btu}-${st.age}-${st.issue}`, name: `ประเมินเทิร์นแอร์เก่า ${q} เครื่อง → เครื่องใหม่ Inverter`, detail: `${t.th} ${btuFmt(st.btu)} · อายุ ${R.age.th} · ${R.issue.th}`, unitEx: null, qty: 1 });
+          cart.add({ kind: 'survey', group: 'install', key: `TI-${st.type}-${st.btu}-${st.age}-${st.issue}`, name: `ประเมินเทิร์นแอร์เก่า ${q} เครื่อง → เครื่องใหม่ Inverter`, detail: `${t.th} ${btuFmt(st.btu)} · อายุ ${R.age.th} · ${R.issue.th}${R.trade ? ` · มูลค่าเทิร์นโดยประมาณ ${baht(R.trade.lo)}–${baht(R.trade.hi)} ต่อเครื่อง` : ''}`, unitEx: null, qty: 1 });
           toast('เพิ่มคำขอประเมินเทิร์นในใบเสนอราคาแล้ว'); openCart && openCart(); } }, 'ขอประเมินมูลค่าเทิร์น'),
         catalog ? h('button', { type: 'button', class: 's-btn', onclick: () => {
           catalog.setType(st.type); catalog.setBtu(st.btu); const c = document.getElementById('catalog'); c && c.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } }, `ดูเครื่องใหม่ ${btuFmt(st.btu)}`) : null,
-        h('button', { type: 'button', class: 's-btn ghost', onclick: () => askTeam('เทิร์นแอร์เก่า', `เทิร์นแอร์เก่า ${q} เครื่อง · ${t.th} ${btuFmt(st.btu)} · อายุ ${R.age.th} · ${SYSTEMS.find(s => s.id === st.sys).th} · น้ำยา ${REFS.find(s => s.id === st.ref).th} · อาการ: ${R.issue.th} · จะส่งรูปป้ายเครื่องให้ทีม`) }, 'ส่งรูปป้ายเครื่องให้ทีม')),
+        h('button', { type: 'button', class: 's-btn ghost', onclick: () => askTeam('เทิร์นแอร์เก่า', `เทิร์นแอร์เก่า ${q} เครื่อง · ${t.th} ${btuFmt(st.btu)} · อายุ ${R.age.th} · ${SYSTEMS.find(s => s.id === st.sys).th} · น้ำยา ${REFS.find(s => s.id === st.ref).th} · อาการ: ${R.issue.th}${R.trade ? ` · มูลค่าเทิร์นโดยประมาณ ${baht(R.trade.lo)}–${baht(R.trade.hi)} ต่อเครื่อง` : ''} · จะส่งรูปป้ายเครื่องให้ทีม`) }, 'ส่งรูปป้ายเครื่องให้ทีม')),
       h('p', { class: 'ti-note' }, `ราคาก่อน VAT ตาม Pricebook อัตรามาตรฐาน · ราคาเครื่องใหม่ = ราคากลางของรุ่น Inverter ขนาดใกล้เคียงในเว็บ · ค่าไฟเป็นประมาณการ (เปิดวันละ ${R.energy.hrs} ชม. · ${RATE.home} บาท/หน่วย · สมมติประสิทธิภาพลดลงราว 1% ต่อปีหลังปีที่ 3) ไม่ใช่การรับประกันค่าไฟ · ซ่อมทุกครั้งแจ้งราคาให้อนุมัติก่อน${R.special ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไข ทีมขายยืนยันในใบเสนอราคา' : ''}`));
   }
   function draw() { save(); drawForm(); drawOut(); }

@@ -33,7 +33,13 @@ const px = core.DEMO.models.filter(m => m.type === 'wall' && m.inverter).flatMap
 ok(R.set.n === px.length && R.set.min === Math.min(...px) && R.set.max === Math.max(...px), `new wall 12k inverter: ${R.set.n} catalogue SKUs ${R.set.min}–${R.set.max}, median ${R.set.med}`);
 ok(R.set.install && R.set.install.ex === core.installOptions('wall', 12000).find(o => o.key === 'STANDARD').item.ex && R.setEx === R.set.med + R.set.install.ex, `set = median + standard install ${R.set.install.ex}`);
 ok(R.set.out.length === 3 && R.set.out.every(l => l.ex == null), 'pump-down / removal / take-away of the old unit stay "ประเมินหน้างาน"');
-ok(R.tradeValue === null && T.TRADE_IN.table === null, 'trade-in value not published until the owner sets the table');
+ok(R.trade && R.trade.lo === 300 && R.trade.hi === 700 && !R.trade.working, `12k unit with a dead compressor: trade-in ${R.trade && R.trade.lo}–${R.trade && R.trade.hi} (not working)`);
+ok(R.net && R.net[0] === R.setEx - 700 && R.net[1] === R.setEx - 300, `net after trade-in ${R.net && R.net.join('–')}`);
+const W = T.tradeValue({ ...base, issue: 'reno', btu: 24000 }), B = T.tradeValue({ ...base, issue: 'comp', btu: 36000 });
+ok(W.working && W.lo === 1400 && W.hi === 2200 && !B.working && B.lo === 800 && B.hi === 1800, 'table: 24k working 1,400–2,200 · 36k not working 800–1,800');
+ok(T.tradeValue({ ...base, btu: 7000 }) === null, 'below 9,000 BTU does not qualify');
+ok(T.TRADE_IN.table.every((r, i, a) => r.ok[0] > r.bad[0] && r.ok[1] > r.bad[1] && (!i || r.ok[0] > a[i - 1].ok[0])), 'working > not working · bigger units worth more');
+ok(T.TRADE_IN.terms.length >= 4 && !T.TRADE_IN.terms.some(t => /%/.test(t)), 'terms listed, no percentage');
 ok(R.verdict === 'replace' && R.why.length >= 3, `12-yr R22 fixed-speed with a dead compressor → ${R.verdict} (${R.why.length} reasons)`);
 ok(R.energy.save > 0 && !R.energy.oldInv && R.energy.old > R.energy.now, `electricity old ${Math.round(R.energy.old)} > new ${Math.round(R.energy.now)} a year`);
 ok(T.tradeIn({ ...base, age: 'a3', issue: 'fanIn', ref: 'r32' }).verdict === 'repair', '3-yr unit with a fan motor fault → repair');
