@@ -16,7 +16,10 @@
     "smoke:site": "BASE=http://localhost:8767 node tests/smoke.mjs a.html && BASE=http://localhost:8767 node tests/smoke.mjs b.html 390 844 && BASE=http://localhost:8767 node tests/smoke.mjs c.html",
     "serve:site": "cd dist/site && python3 -m http.server 8767",
     "og": "node tools/og-image.mjs",
-    "build:preview": "python3 build.py --urls urls.preview.json"
+    "build:preview": "python3 build.py --urls urls.preview.json",
+    "backend:emu": "node backend/test/gas-emulator.mjs",
+    "backend:test": "node tests/backend-e2e.mjs",
+    "backend:check": "node tools/backend-check.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.0",

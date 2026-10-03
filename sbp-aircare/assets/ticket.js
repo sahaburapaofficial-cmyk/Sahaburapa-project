@@ -222,5 +222,5 @@ export async function sendTicket(payload) {
 }
 // LINE hand-off for photos when they could not travel with the ticket
 export const photoLine = (ref, n) => h('div', { class: 's-hand tk-line' },
-  h('p', {}, n ? `รูป ${n} รูปยังไม่ได้ส่งถึงทีม (ระบบรับรูปยังไม่เปิดใช้) กรุณาส่งทาง LINE พร้อมเลขอ้างอิง ${ref}` : `ส่งรูปหน้างานทาง LINE พร้อมเลขอ้างอิง ${ref} ทีมจะประเมินได้เร็วขึ้น`),
+  h('p', {}, n ? `รูป ${n} รูปยังไม่ได้ส่งถึงทีม (${BACKEND && canReach() ? 'ส่งอัตโนมัติไม่สำเร็จ' : 'ระบบรับรูปยังไม่เปิดใช้'}) กรุณาส่งทาง LINE พร้อมเลขอ้างอิง ${ref}` : `ส่งรูปหน้างานทาง LINE พร้อมเลขอ้างอิง ${ref} ทีมจะประเมินได้เร็วขึ้น`),
   h('a', { class: 's-btn primary', href: lineLink(`เลขอ้างอิง ${ref} · ส่งรูปหน้างานเพื่อประเมิน`), target: '_blank', rel: 'noopener' }, `ส่งรูปทาง LINE ${COMPANY.line || ''}`.trim()));

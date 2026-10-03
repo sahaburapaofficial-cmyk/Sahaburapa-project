@@ -1084,6 +1084,7 @@ html.sx-on .mbar:has(.s-mmenu):has(>a~a){grid-template-columns:.85fr .9fr .85fr 
 .qc-seg button{display:grid;gap:2px;align-content:start;text-align:left;padding:10px 12px;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .7);background:var(--s-card-2);color:var(--s-ink);font:inherit;cursor:pointer;transition:border-color .2s,background .2s}
 .qc-seg button b{font-size:15px}.qc-seg button small{font-size:12.5px;line-height:1.45;color:var(--s-ink-2)}
 .qc-seg button.on{border-color:var(--s-accent);background:var(--s-card);box-shadow:0 0 0 1px var(--s-accent) inset}
+.qc-seg button:disabled,.qc-seg button.full{cursor:not-allowed;opacity:.6;background:transparent;border-style:dashed}.qc-seg button.full b{text-decoration:line-through}
 .qc-where{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px 12px;align-items:start}
 .qc-where input{width:100%;min-height:44px;border:1px solid var(--s-line);border-radius:calc(var(--s-r) * .6);background:var(--s-card);color:var(--s-ink);font:inherit;padding:0 12px}
 .qc-zout{grid-column:1/-1;margin:-4px 0 0;font-size:13px;color:var(--s-ink-2)}

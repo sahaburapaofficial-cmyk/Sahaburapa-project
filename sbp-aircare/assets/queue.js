@@ -71,16 +71,16 @@ export function judge(date, lines, level, now = bkkNow()) {
 }
 
 /** optional live availability: { 'YYYY-MM-DD': { am: bool, pm: bool } } (true = free) or null when not configured / unreachable */
-let cache = null;
+let cache = null, cacheAt = 0;   // Rev.19: kept 60 s — the team confirms visits all day, a long-open page must not show an old queue
 export async function fetchSlots(url = QUEUE_URL) {
   if (!url) return null;
   try { if (/(^|\.)claude(usercontent)?\.(ai|com)$/.test(location.hostname)) return null; } catch (e) { return null; }
-  if (cache) return cache;
+  if (cache && Date.now() - cacheAt < 60000) return cache;
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 8000);
   try {
     const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'q=slots', { signal: ctl.signal });
     const j = await r.json();
-    return (cache = j && j.ok && j.days && typeof j.days === 'object' ? j.days : null);
+    cacheAt = Date.now(); return (cache = j && j.ok && j.days && typeof j.days === 'object' ? j.days : null);
   } catch (e) { return null; } finally { clearTimeout(t); }
 }
 /** true / false when the sheet says so, null when unknown (the team confirms) */

@@ -6,12 +6,12 @@ import {
   checkZone, TIER_TH, TRAVEL, h, $, $$, stockTh, travelCharge, travelNote, SIZE_BANDS, isVRF, VRF_NOTE, COMPANY,
 } from './sbp-core.js';
 import { typeArt, toast } from './proto-ui.js';
-import { askTeam, copyText, lineLink } from './contact.js';
+import { askTeam, copyText, lineLink, handoffBox } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
 import { productVisual } from './product-media.js';
-import { judge, bkkNow, dateTh, LEAD_DAYS, RUSH_FEE_EX, SLOTS } from './queue.js';
+import { judge, bkkNow, dateTh, addDays, isOpen, LEAD_DAYS, RUSH_FEE_EX, SLOTS, fetchSlots, slotFree } from './queue.js';
 import { ticketPanel, ticketText, sendTicket, photoLine, jobsIn } from './ticket.js';
-import { canReach } from './submit.js';
+import { canReach, ENDPOINT, BACKEND } from './submit.js';
 import { breakdown, packageParts, pipeBundle, optionNote, pipeItemFor } from './costs.js';
 
 // Rev.16: what the crew will do on the visit, for the queue rules (visit time → slots)
@@ -45,6 +45,7 @@ function afterTools(s) {
     h('a', { class: 's-btn ghost', href: lineLink(`เลขอ้างอิง ${s.ref} · สอบถามใบจองงาน`), target: '_blank', rel: 'noopener' }, 'แชทกับทีมทาง LINE'));
 }
 
+let liveQ = null, liveAsked = false;   // Rev.19 live queue, fetched once per page when a visit is in the cart
 // Rev.15: one line under the quotation date field — what the chosen date means under the queue rules (queue.js)
 function dateHint(date, hasRush) {
   const J = judge(date, [], 'C1'), fee = baht(RUSH_FEE_EX);
@@ -127,7 +128,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
   const panel = h('div', { class: 's-cart-panel' });
   dr.append(panel); document.body.append(dr);
   const close = () => { dr.classList.remove('open'); document.body.classList.remove('lock'); setTimeout(() => dr.hidden = true, 250); };
-  const open = () => { render(); dr.hidden = false; requestAnimationFrame(() => dr.classList.add('open')); document.body.classList.add('lock'); };
+  const open = () => { liveAsked = false; render(); dr.hidden = false; requestAnimationFrame(() => dr.classList.add('open')); document.body.classList.add('lock'); };
   dr.addEventListener('click', e => { if (e.target === dr) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !dr.hidden) close(); });
   let sent = null;
@@ -148,7 +149,9 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
           const s0 = sent;
           sendTicket({ ref: s0.ref, variant, page: location.pathname + location.hash, fields: s0.fields, text: s0.text, hp: s0.hp, photos: s0.photos, scope: (cart.draft.scope || []).map(x => ({ job: x.k, lines: x.r.lines, est: x.r.est })), answers: cart.draft.ans })
             .then(r => { if (sent !== s0) return; s0.box.innerHTML = '';
-              if (!r.ok) { viaMail(); return; }
+              if (!r.ok) {   // Rev.19: when every form already goes to the back office, never post the same ticket there twice — hand it over instead
+                if (ENDPOINT !== BACKEND) { viaMail(); return; }
+                s0.box.append(handoffBox({ ref: s0.ref, title: 'ใบจองงานของคุณ', text: s0.text, subject: 'ใบจองงาน SBP AirCare', note: 'ส่งอัตโนมัติไม่สำเร็จ (การเชื่อมต่อขัดข้อง) — ใบจองนี้ยังไม่ถึงทีม กรุณาส่งสรุปนี้ทาง LINE หรืออีเมล หรือโทรแจ้งเลขอ้างอิง' }), photoLine(s0.ref, s0.photos.length)); return; }
               s0.box.append(h('div', { class: 's-hand s-hand-ok', role: 'status' }, h('p', { class: 's-hand-b' }, 'ส่งถึงทีมแล้ว'), h('h3', {}, 'ใบจองงานของคุณ', h('small', {}, ` · เลขอ้างอิง ${r.ref}`)),
                 h('p', {}, `ทีมได้รับรายละเอียด${r.photos ? `และรูป ${r.photos} รูป` : ''}แล้ว จะตรวจขอบเขตงาน แจ้งราคาส่วนเพิ่ม (ถ้ามี) และยืนยันคิวกับคุณก่อนวันนัด · ตรวจสถานะได้ด้วยเลขอ้างอิงในหน้าติดต่อเรา`),
                 h('textarea', { class: 's-hand-t', readonly: true, rows: 8, 'aria-label': 'สรุปใบจองงาน' }, s0.text))); });
@@ -200,12 +203,20 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     const step = (n, t, sub) => h('p', { class: 's-step' }, h('span', {}, String(n)), t, sub ? h('small', {}, sub) : null);
     let dh = dateHint(cart.prefDate, cart.items.some(i => i.group === 'rush'));
     const J = judge(cart.prefDate, visit, 'C1');
-    if (cart.prefDate && J.slots.length && !J.slots.map(id => SLOTS[id].th).includes(cart.prefSlot)) cart.prefSlot = SLOTS[J.slots[0]].th;
-    const slotRow = visit.length && J.slots.length ? h('div', { class: 'qc-seg qc-slot', role: 'radiogroup', 'aria-label': 'ช่วงเวลา' }, J.slots.map(id => h('button', { type: 'button', role: 'radio', 'aria-checked': String(cart.prefSlot === SLOTS[id].th), class: cart.prefSlot === SLOTS[id].th ? 'on' : '',
-      onclick: () => { cart.prefSlot = SLOTS[id].th; cart.saveDraft(); render(); } }, h('b', {}, SLOTS[id].th), h('small', {}, SLOTS[id].sub)))) : null;
+    // ★Rev.19 live queue (back office "คิว" tab, queue.js): a full slot shows as full; unknown = the team confirms (never a made-up free slot)
+    if (visit.length && !liveAsked) { liveAsked = true; fetchSlots().then(d => { liveQ = d; if (d && !dr.hidden) render(); }); }
+    const full = id => slotFree(liveQ, cart.prefDate, id) === false, thOf = id => SLOTS[id].th;
+    if (cart.prefDate && J.slots.length && (!J.slots.map(thOf).includes(cart.prefSlot) || full(J.slots.find(id => thOf(id) === cart.prefSlot)))) cart.prefSlot = thOf(J.slots.find(id => !full(id)) || J.slots[0]);
+    const slotRow = visit.length && J.slots.length ? h('div', { class: 'qc-seg qc-slot', role: 'radiogroup', 'aria-label': 'ช่วงเวลา' }, J.slots.map(id => h('button', { type: 'button', role: 'radio', 'aria-checked': String(cart.prefSlot === thOf(id)), class: (cart.prefSlot === thOf(id) ? 'on' : '') + (full(id) ? ' full' : ''), disabled: full(id) || null,
+      onclick: () => { cart.prefSlot = thOf(id); cart.saveDraft(); render(); } }, h('b', {}, thOf(id)), h('small', {}, full(id) ? 'คิวเต็มแล้ว' : SLOTS[id].sub)))) : null;
+    const allFull = visit.length && cart.prefDate && J.slots.length && J.slots.every(full);
+    let altDay = ''; if (allFull) for (let i = 1, d = addDays(cart.prefDate, 1); i <= 21 && !altDay; i++, d = addDays(d, 1)) if (isOpen(d) && J.slots.some(id => slotFree(liveQ, d, id) !== false)) altDay = d;
+    const liveNote = !visit.length || !cart.prefDate || !liveQ ? null : allFull
+      ? h('p', { class: 's-note bad' }, 'ตารางคิวของทีมแสดงว่าวันนี้เต็มแล้ว', altDay ? [' · ', h('button', { type: 'button', class: 'qc-alt', onclick: () => { cart.prefDate = altDay; syncRush(altDay); cart.saveDraft(); render(); } }, `ว่างใกล้สุด ${dateTh(altDay)}`)] : null)
+      : slotFree(liveQ, cart.prefDate, J.slots.find(id => thOf(id) === cart.prefSlot)) === true ? h('p', { class: 's-note' }, 'มีคิวว่างตามตารางคิวของทีม ณ ตอนนี้ (ทีมยืนยันอีกครั้ง)') : null;
     const whenBox = h('div', { class: 's-when' }, step(visit.length ? 2 : 1, 'วันเข้างาน', visit.length ? `จองปกติล่วงหน้า ${LEAD_DAYS} วัน` : null),
       h('label', { class: 's-field' }, visit.length && cart.prefSlot ? `วันที่สะดวก · ${cart.prefSlot}` : 'วันที่สะดวก', h('input', { id: 's-q-date', type: 'date', min: bkkNow().date, value: cart.prefDate || null, onchange: e => { cart.prefDate = e.target.value; syncRush(cart.prefDate); cart.saveDraft(); render(); } })),
-      dh, slotRow, visit.length && cart.prefDate && J.kind !== 'past' && J.time[1] > 0 ? h('p', { class: 's-note' }, `เวลาหน้างานโดยประมาณ ${timeTh(J.time)} · ${J.fit.kind === 'half' ? 'ไม่เกินครึ่งวัน' : J.fit.kind === 'day' ? 'ประมาณ 1 วันทำการ' : `ประมาณ ${J.fit.days} วันทำการ (ช่าง 1 ทีม)`}`, h('small', { class: 's-tnote' }, TIME_NOTE)) : null);   // rule 22: always with TIME_NOTE
+      dh, slotRow, liveNote, visit.length && cart.prefDate && J.kind !== 'past' && J.time[1] > 0 ? h('p', { class: 's-note' }, `เวลาหน้างานโดยประมาณ ${timeTh(J.time)} · ${J.fit.kind === 'half' ? 'ไม่เกินครึ่งวัน' : J.fit.kind === 'day' ? 'ประมาณ 1 วันทำการ' : `ประมาณ ${J.fit.days} วันทำการ (ช่าง 1 ทีม)`}`, h('small', { class: 's-tnote' }, TIME_NOTE)) : null);   // rule 22: always with TIME_NOTE
     body.append(whenBox);
     if (jobs.clean || jobs.install || jobs.repair) body.append(step(3, 'สภาพหน้างาน + รูป', 'ให้ทีมประเมินงานนอกมาตรฐานก่อนนัด'), ticketPanel(D, jobs, { onChange: () => cart.saveDraft() }));
     const keep = () => cart.saveDraft();
@@ -234,7 +245,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     f.addEventListener('submit', e => {
       e.preventDefault(); const v = id => (f.querySelector('#' + id)?.value || '').trim(), isJob = !!(jobs.clean || jobs.install || jobs.repair), ref = (isJob ? 'B' : 'Q') + Date.now().toString().slice(-7);
       if (isJob) {   // Rev.16.1: a job ticket needs a date and where it is (zone for travel, address for the crew)
-        const miss = !cart.prefDate ? ['s-q-date', 'เลือกวันเข้างาน'] : judge(cart.prefDate, [], 'C1').kind === 'past' ? ['s-q-date', 'วันที่เลือกผ่านมาแล้ว'] : !cart.zoneInput ? ['s-cart-zone', 'กรอกพื้นที่ปฏิบัติงาน (เขต / อำเภอ) ด้านบน'] : !v('s-q-addr') ? ['s-q-addr', 'กรอกที่อยู่หน้างาน'] : null;
+        const miss = !cart.prefDate ? ['s-q-date', 'เลือกวันเข้างาน'] : judge(cart.prefDate, [], 'C1').kind === 'past' ? ['s-q-date', 'วันที่เลือกผ่านมาแล้ว'] : !cart.zoneInput ? ['s-cart-zone', 'กรอกพื้นที่ปฏิบัติงาน (เขต / อำเภอ) ด้านบน'] : !v('s-q-addr') ? ['s-q-addr', 'กรอกที่อยู่หน้างาน'] : allFull ? ['s-q-date', 'วันที่เลือกคิวเต็มแล้ว เลือกวันอื่น'] : null;
         if (miss) { err.textContent = miss[1]; const el = document.getElementById(miss[0]); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } return; }
       }
       const t = cart.totals(), sc = (D.scope || []).flatMap(x => x.r.lines), scEx = (D.scope || []).reduce((n, x) => n + x.r.est, 0);

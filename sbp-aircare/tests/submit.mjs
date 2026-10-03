@@ -6,6 +6,10 @@ import { readFileSync } from 'node:fs';
 const page = process.argv[2] || 'a.html';
 const FAKES = { ok: 'https://script.google.com/macros/s/TEST/exec', fail: 'https://script.google.com/macros/s/TEST/exec', fs: 'https://formsubmit.co/ajax/TEST' };
 const SRC = readFileSync(new URL('../assets/submit.js', import.meta.url), 'utf8');
+// Rev.19: ENDPOINT = BACKEND || FormSubmit — ok/fail point the back office (Apps Script) at the fake, fs the FormSubmit address, off empties both
+const patchSrc = (mode, FAKE) => SRC.replace(/const BACKEND_URL = '[^']*';/, `const BACKEND_URL = '${mode === 'ok' || mode === 'fail' ? FAKE : ''}';`)
+  .replace(/const FORMSUBMIT = '[^']*';/, `const FORMSUBMIT = '${mode === 'fs' ? FAKE : ''}';`);
+if (patchSrc('ok', FAKES.ok) === SRC) throw new Error('submit.js layout changed — update patchSrc');
 const b = await launch();
 const results = [];
 for (const mode of ['ok', 'fail', 'off', 'fs']) {
@@ -13,7 +17,7 @@ for (const mode of ['ok', 'fail', 'off', 'fs']) {
   const p = await b.newPage({ viewport: { width: 390, height: 844 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   const posts = [];
-  await p.route('**/assets/submit.js', r => r.fulfill({ contentType: 'text/javascript', body: SRC.replace(/export const ENDPOINT = '[^']*';/, `export const ENDPOINT = '${mode === 'off' ? '' : FAKE}';`) }));
+  await p.route('**/assets/submit.js', r => r.fulfill({ contentType: 'text/javascript', body: patchSrc(mode, FAKE) }));
   await p.route(FAKE, async r => {
     const d = JSON.parse(r.request().postData() || '{}'); posts.push(mode === 'fs' ? { kind: d['ประเภท'], ref: d['เลขอ้างอิง'], fields: d, ct: r.request().headers()['content-type'] } : d);
     if (mode === 'fs') return r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"success":"true","message":"The form was submitted successfully."}' });

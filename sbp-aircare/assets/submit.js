@@ -8,14 +8,21 @@
 import { h } from './sbp-core.js';
 import { handoffBox } from './contact.js';
 
-export const ENDPOINT = 'https://formsubmit.co/ajax/Sahaburapa.official@gmail.com';   // or https://script.google.com/macros/s/<deployment id>/exec
 const TIMEOUT = 15000;
 const inArtifact = () => { try { return /(^|\.)claude(usercontent)?\.(ai|com)$/.test(location.hostname); } catch (e) { return false; } };
 export const canSend = () => !!ENDPOINT && !inArtifact() && navigator.onLine !== false;
 // ★Rev.16 the company back office (Google Apps Script web app, backend/apps-script/Code.gs + Board.html): job tickets with
 // photos, the live queue (?q=slots) and request status (?q=status). Empty until the company deploys it — then paste the
 // /exec URL here (ENDPOINT may point at the same URL so every form lands in the same Sheet).
-export const BACKEND = '';
+// ★Rev.19 one switch for every model: BACKEND_URL below, or <meta name="sbp-backend" content="…/exec"> in a page (test runs,
+// a staging copy). Only an Apps Script /exec URL is accepted — never a URL from the address bar.
+// When the back office is on, ENDPOINT points at it too, so quotes / contact / feedback land in the same Sheet as the jobs.
+const BACKEND_URL = '';
+const FORMSUBMIT = 'https://formsubmit.co/ajax/Sahaburapa.official@gmail.com';
+const okUrl = u => /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u);
+const metaUrl = () => { try { const m = document.querySelector('meta[name="sbp-backend"]'); const u = m ? m.content.trim() : ''; return okUrl(u) ? u : ''; } catch (e) { return ''; } };
+export const BACKEND = metaUrl() || BACKEND_URL;
+export const ENDPOINT = BACKEND || FORMSUBMIT;
 export const canReach = () => !!BACKEND && !inArtifact() && navigator.onLine !== false;
 
 // kind: 'quote' | 'contact' | 'feedback' · fields: flat {label: value} for the sheet · text: the same summary the customer sees

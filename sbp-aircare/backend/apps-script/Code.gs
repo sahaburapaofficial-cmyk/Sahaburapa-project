@@ -14,6 +14,16 @@ const TABS = { quote: 'ใบเสนอราคา', contact: 'ติดต�
 const BOARD_COLS = ['ราคาเพิ่มที่แจ้ง (ก่อน VAT)', 'นัดวัน', 'นัดช่วง', 'หมายเหตุทีม', 'รูป'];   // filled by the team on the board
 const MAX_PHOTOS = 8, MAX_PHOTO_B64 = 1500000;
 const MAX_TEXT = 8000;
+const VERSION = 'Rev.19';
+let SILENT = false;   // selfTest(): no e-mail / LINE for the test request
+
+// the company sheet: the one this script is bound to, or SHEET_ID (set by setup() for a standalone script)
+function ss_() {
+  const a = SpreadsheetApp.getActiveSpreadsheet(); if (a) return a;
+  const id = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
+  if (!id) throw new Error('run setup() first');
+  return SpreadsheetApp.openById(id);
+}
 
 function doPost(e) {
   try {
@@ -58,6 +68,7 @@ function doPost(e) {
 function doGet(e) {
   const q = (e && e.parameter) || {};
   try {
+    if (q.q === 'ping') return reply({ ok: true, service: 'SBP AirCare requests', version: VERSION, sheet: !!ss_(), board: !!PropertiesService.getScriptProperties().getProperty('BOARD_KEY') });
     if (q.q === 'slots') return reply({ ok: true, days: slots() });
     if (q.q === 'status') return reply(status(clean(q.ref, 20), clean(q.tel, 4)));
     if (q.view === 'board') {
@@ -66,11 +77,11 @@ function doGet(e) {
       return t.evaluate().setTitle('SBP AirCare · งานจอง').addMetaTag('viewport', 'width=device-width, initial-scale=1');
     }
   } catch (err) { console.error(err); return reply({ ok: false, error: 'server' }); }
-  return reply({ ok: true, service: 'SBP AirCare requests' });
+  return reply({ ok: true, service: 'SBP AirCare requests', version: VERSION });
 }
 
 function slots() {
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('คิว');
+  const sh = ss_().getSheetByName('คิว');
   if (!sh || sh.getLastRow() < 2) return {};
   const tz = 'Asia/Bangkok', today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'), until = Utilities.formatDate(new Date(Date.now() + 21 * 864e5), tz, 'yyyy-MM-dd');
   const out = {};
@@ -84,7 +95,7 @@ function slots() {
 
 function status(ref, tel4) {
   if (!ref || !/^\d{4}$/.test(tel4)) return { ok: false, error: 'missing' };
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = ss_();
   for (const name of [TABS.booking, TABS.quote, TABS.contact]) {
     const sh = ss.getSheetByName(name);
     if (!sh || sh.getLastRow() < 2) continue;
@@ -99,7 +110,7 @@ function status(ref, tel4) {
 }
 
 function tab(kind, keys) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = ss_();
   let sh = ss.getSheetByName(TABS[kind]);
   const base = ['เวลา', 'เลขอ้างอิง', 'สถานะ', 'แบบ', 'หน้า'];
   if (!sh) { sh = ss.insertSheet(TABS[kind]); sh.appendRow(base.concat(keys, ['สรุป'])); sh.setFrozenRows(1); return sh; }
@@ -110,8 +121,9 @@ function tab(kind, keys) {
 }
 
 function notify(kind, ref, variant, text) {
+  if (SILENT) return;
   const subject = `[SBP AirCare] ${TABS[kind]} ใหม่ · ${ref}`;
-  const url = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+  const url = ss_().getUrl();
   try { MailApp.sendEmail({ to: NOTIFY_TO, subject, body: `${text}\n\nแบบเว็บไซต์: ${variant || '-'}\nเปิดตาราง: ${url}\n\n(ยอดเงินในคำขอเป็นยอดประมาณการจากหน้าเว็บ ยืนยันราคาในใบเสนอราคาอย่างเป็นทางการทุกครั้ง)` }); }
   catch (err) { console.error('mail quota or error', err); }   // the row is already saved, so the request is not lost
 }
@@ -124,7 +136,9 @@ function rateOk() {
   return true;
 }
 function clean(v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, n); }
-function safeCell(v) { return /^[=+\-@]/.test(v) ? "'" + v : v; }   // never let customer text become a spreadsheet formula
+// ★Rev.19 every customer value is stored as text ("'" prefix, hidden by Sheets): never a formula, and a phone 0812345678 keeps its 0,
+// a date stays as written
+function safeCell(v) { return v === '' || v == null ? '' : "'" + v; }
 function reply(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
 
@@ -144,6 +158,7 @@ function folder_(name) { const it = DriveApp.getFoldersByName(name); return it.h
 
 // LINE Messaging API push (LINE Notify ended in 2025) — only when LINE_TOKEN and LINE_TO are set
 function pushLine(text) {
+  if (SILENT) return;
   const P = PropertiesService.getScriptProperties(), token = P.getProperty('LINE_TOKEN'), to = P.getProperty('LINE_TO');
   if (!token || !to) return;
   try { UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', { method: 'post', contentType: 'application/json', headers: { Authorization: 'Bearer ' + token }, payload: JSON.stringify({ to, messages: [{ type: 'text', text: text.slice(0, 4900) }] }), muteHttpExceptions: true }); }
@@ -155,7 +170,7 @@ function keyOk(k) { const want = PropertiesService.getScriptProperties().getProp
 // board: newest first, last 200 tickets
 function boardData(key) {
   if (!keyOk(key)) throw new Error('key');
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TABS.booking);
+  const sh = ss_().getSheetByName(TABS.booking);
   if (!sh || sh.getLastRow() < 2) return { head: [], rows: [] };
   const v = sh.getDataRange().getDisplayValues(), head = v[0];
   return { head, rows: v.slice(1).slice(-200).reverse() };
@@ -163,10 +178,10 @@ function boardData(key) {
 const BOARD_EDIT = ['สถานะ', 'ราคาเพิ่มที่แจ้ง (ก่อน VAT)', 'นัดวัน', 'นัดช่วง', 'หมายเหตุทีม'];
 function boardUpdate(key, ref, patch) {
   if (!keyOk(key)) throw new Error('key');
-  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TABS.booking), v = sh.getDataRange().getValues(), head = v[0], iRef = head.indexOf('เลขอ้างอิง');
+  const sh = ss_().getSheetByName(TABS.booking), v = sh.getDataRange().getValues(), head = v[0], iRef = head.indexOf('เลขอ้างอิง');
   for (let r = v.length - 1; r > 0; r--) {
     if (String(v[r][iRef]) !== String(ref)) continue;
-    Object.keys(patch || {}).forEach(k => { const c = head.indexOf(k); if (c >= 0 && BOARD_EDIT.indexOf(k) >= 0) sh.getRange(r + 1, c + 1).setValue(k === 'นัดวัน' && patch[k] ? "'" + clean(patch[k], 10) : safeCell(clean(patch[k], 500)));   // keep dates as yyyy-mm-dd text });
+    Object.keys(patch || {}).forEach(k => { const c = head.indexOf(k); if (c >= 0 && BOARD_EDIT.indexOf(k) >= 0) sh.getRange(r + 1, c + 1).setValue(k === 'นัดวัน' && patch[k] ? "'" + clean(patch[k], 10) : safeCell(clean(patch[k], 500))); });   // keep dates as yyyy-mm-dd text
     if (patch && patch['สถานะ'] === 'ยืนยันคิว' && patch['นัดวัน']) markQueue(String(patch['นัดวัน']), String(patch['นัดช่วง'] || ''));
     return true;
   }
@@ -174,10 +189,79 @@ function boardUpdate(key, ref, patch) {
 }
 // a confirmed visit fills its slot in "คิว" (ทั้งวัน = both)
 function markQueue(date, slot) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet(); let sh = ss.getSheetByName('คิว');
+  const ss = ss_(); let sh = ss.getSheetByName('คิว');
   if (!sh) { sh = ss.insertSheet('คิว'); sh.appendRow(['วันที่', 'เช้า', 'บ่าย']); sh.setFrozenRows(1); }
   const v = sh.getDataRange().getDisplayValues(); let r = v.findIndex((x, i) => i > 0 && x[0] === date);
   if (r < 0) { sh.appendRow(["'" + date, '', '']); r = sh.getLastRow() - 1; }
   if (/เช้า|ทั้งวัน/.test(slot) || !slot) sh.getRange(r + 1, 2).setValue('เต็ม');
   if (/บ่าย|ทั้งวัน/.test(slot) || !slot) sh.getRange(r + 1, 3).setValue('เต็ม');
+}
+
+
+/* ---------- ★Rev.19 one-time set-up and a self test (run from the Apps Script editor: choose the function → Run) ---------- */
+// setup(): creates every tab with its headers, the photo folder, a board key; prints what to do next. Safe to run again.
+function setup() {
+  const P = PropertiesService.getScriptProperties();
+  const ss = SpreadsheetApp.getActiveSpreadsheet() || (P.getProperty('SHEET_ID') ? SpreadsheetApp.openById(P.getProperty('SHEET_ID')) : SpreadsheetApp.create('SBP AirCare – คำขอจากเว็บ'));
+  P.setProperty('SHEET_ID', ss.getId());
+  const base = ['เวลา', 'เลขอ้างอิง', 'สถานะ', 'แบบ', 'หน้า'];
+  const cols = {
+    quote: ['ชื่อ / บริษัท', 'โทร', 'วันที่สะดวก', 'ช่วงเวลา', 'ใบกำกับภาษีในนาม', 'พื้นที่', 'จำนวนรายการ', 'ยอดประมาณการรวม VAT'],
+    booking: ['ชื่อ / บริษัท', 'โทร', 'LINE ID', 'สะดวกให้ติดต่อ', 'วันที่สะดวก', 'ช่วงเวลา', 'พื้นที่', 'ที่อยู่หน้างาน', 'แผนที่', 'งาน', 'ขอบเขต', 'ส่วนเพิ่มประมาณ (ก่อน VAT)', 'ยอดประมาณการรวม VAT', 'หมายเหตุหน้างาน', 'ใบกำกับภาษีในนาม', 'จำนวนรายการ'].concat(BOARD_COLS),
+    contact: ['ชื่อ', 'โทร'], feedback: [],
+  };
+  Object.keys(TABS).forEach(k => { let sh = ss.getSheetByName(TABS[k]); if (!sh) { sh = ss.insertSheet(TABS[k]); sh.appendRow(base.concat(cols[k], ['สรุป'])); sh.setFrozenRows(1); } });
+  if (!ss.getSheetByName('คิว')) { const q = ss.insertSheet('คิว'); q.appendRow(['วันที่', 'เช้า', 'บ่าย']); q.setFrozenRows(1); }
+  folder_('SBP AirCare งานจอง');
+  if (!P.getProperty('BOARD_KEY')) P.setProperty('BOARD_KEY', (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 40));
+  const url = ScriptApp.getService().getUrl();
+  console.log('SET-UP DONE · sheet: ' + ss.getUrl());
+  console.log('BOARD_KEY: ' + P.getProperty('BOARD_KEY'));
+  console.log(url ? 'board: ' + url + '?view=board&key=' + P.getProperty('BOARD_KEY') : 'next: Deploy → New deployment → Web app (Execute as: Me · Who has access: Anyone), then run setup() again to print the board link');
+  return { sheet: ss.getUrl(), boardKey: P.getProperty('BOARD_KEY'), webApp: url || '' };
+}
+
+// selfTest(): a full ticket round trip without e-mail / LINE — booking + photo → row + Drive file → status lookup →
+// board confirm → queue slot full → slots API; then removes everything it created. Every line says PASS or FAIL.
+function selfTest() {
+  SILENT = true;
+  const out = [], ok = (name, cond, info) => out.push((cond ? 'PASS ' : 'FAIL ') + name + (info ? ' · ' + info : ''));
+  const ref = 'TEST' + Date.now().toString().slice(-6), date = Utilities.formatDate(new Date(Date.now() + 5 * 864e5), 'Asia/Bangkok', 'yyyy-MM-dd');
+  const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  let created = null, prevQueue = null;
+  try {
+    const r = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'booking', ref, variant: 'T', page: 'selfTest', fields: { 'ชื่อ / บริษัท': 'ทดสอบระบบ', 'โทร': '0800001234', 'วันที่สะดวก': date, 'ช่วงเวลา': 'ช่วงเช้า', 'งาน': 'ล้าง 1 เครื่อง', 'ขอบเขต': 'มาตรฐาน' }, text: 'ทดสอบระบบหลังบ้าน (ลบเอง)', photos: [{ name: 'test.png', data: PNG }] }) } }).getContent());
+    ok('รับใบจองงาน', r.ok && r.ref === ref, JSON.stringify(r));
+    ok('บันทึกรูปลง Drive', r.photos === 1);
+    const sh = ss_().getSheetByName(TABS.booking), v = sh.getDataRange().getValues(), row = v.findIndex(x => String(x[v[0].indexOf('เลขอ้างอิง')]) === ref);
+    created = row;
+    ok('แถวในแท็บงานจอง', row > 0);
+    const st = JSON.parse(doGet({ parameter: { q: 'status', ref, tel: '1234' } }).getContent());
+    ok('ตรวจสถานะด้วยเลขอ้างอิง', st.ok && st.status === 'ใหม่', JSON.stringify(st));
+    const bad = JSON.parse(doGet({ parameter: { q: 'status', ref, tel: '9999' } }).getContent());
+    ok('เบอร์ไม่ตรง ไม่บอกสถานะ', !bad.ok);
+    const key = PropertiesService.getScriptProperties().getProperty('BOARD_KEY');
+    const q0 = ss_().getSheetByName('คิว'), q0v = q0 ? q0.getDataRange().getDisplayValues() : [], q0i = q0v.findIndex((x, k) => k > 0 && x[0] === date);
+    prevQueue = q0i > 0 ? q0v[q0i].slice(1, 3) : ['', ''];   // a real booking may already hold that day: restore it afterwards
+    ok('บอร์ดอ่านงาน', boardData(key).rows.some(x => x.indexOf(ref) >= 0));
+    ok('บอร์ดยืนยันคิว', boardUpdate(key, ref, { 'สถานะ': 'ยืนยันคิว', 'นัดวัน': date, 'นัดช่วง': 'ช่วงเช้า', 'ราคาเพิ่มที่แจ้ง (ก่อน VAT)': '0' }));
+    const sl = JSON.parse(doGet({ parameter: { q: 'slots' } }).getContent());
+    ok('คิวเช้าวันนั้นเต็ม', sl.ok && sl.days[date] && sl.days[date].am === false, JSON.stringify(sl.days[date] || {}));
+    const st2 = JSON.parse(doGet({ parameter: { q: 'status', ref, tel: '1234' } }).getContent());
+    ok('ลูกค้าเห็นสถานะใหม่', st2.status === 'ยืนยันคิว');
+    const pong = JSON.parse(doGet({ parameter: { q: 'ping' } }).getContent());
+    ok('ping', pong.ok && pong.version === VERSION);
+  } catch (e) { ok('ไม่มี error', false, String(e)); }
+  // clean up: the test row, its photo folder and the queue mark
+  try {
+    const sh = ss_().getSheetByName(TABS.booking), v = sh.getDataRange().getValues(), i = v.findIndex(x => String(x[v[0].indexOf('เลขอ้างอิง')]) === ref);
+    if (i > 0) sh.deleteRow(i + 1);
+    const it = folder_('SBP AirCare งานจอง').getFoldersByName(ref); while (it.hasNext()) it.next().setTrashed(true);
+    const q = ss_().getSheetByName('คิว'), qv = q.getDataRange().getDisplayValues(), qi = qv.findIndex((x, k) => k > 0 && x[0] === date);
+    if (qi > 0 && prevQueue) q.getRange(qi + 1, 2, 1, 2).setValues([prevQueue]);
+    out.push('ลบข้อมูลทดสอบแล้ว');
+  } catch (e) { out.push('ลบข้อมูลทดสอบไม่สำเร็จ: ' + e); }
+  SILENT = false;
+  out.forEach(l => console.log(l));
+  return out;
 }

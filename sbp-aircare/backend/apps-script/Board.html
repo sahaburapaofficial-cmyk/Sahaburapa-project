@@ -28,14 +28,15 @@
   a{color:var(--acc)}.empty{color:var(--ink3);text-align:center;padding:40px}
 </style>
 </head>
-<body>
+<body data-key="<?= key ?>">
 <header><h1>SBP AirCare · งานจอง <small id="upd"></small></h1>
   <div class="bar" id="flt"></div></header>
 <main id="list"><p class="empty">กำลังโหลด…</p></main>
 <script>
-  const KEY = <?= JSON.stringify(key) ?>;
+  const KEY = document.body.dataset.key;   // Rev.19: an HTML attribute — Apps Script's contextual escaping is unambiguous there
   const STATUS = ['ใหม่', 'กำลังประเมิน', 'แจ้งราคาแล้ว', 'ยืนยันคิว', 'เสร็จ', 'ยกเลิก'];
   let filter = 'เปิดอยู่', seen = null, data = { head: [], rows: [] };
+  const money = v => /^\d+(\.\d+)?$/.test(String(v).trim()) ? '฿' + Number(v).toLocaleString('th-TH') : v;   // Rev.19
   const $ = s => document.querySelector(s), esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   function bar() { $('#flt').innerHTML = ['เปิดอยู่', 'ทั้งหมด', ...STATUS].map(s => `<button class="${s === filter ? 'on' : ''}" data-f="${s}">${s}</button>`).join(''); }
   $('#flt').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; bar(); draw(); } });
@@ -50,7 +51,7 @@
           <span class="tag ${/เกิน/.test(sc) ? 'scope-x' : 'scope-ok'}">${esc(sc || '-')}</span><small>${esc(get(r, 'เวลา'))}</small></div>
         <div class="g"><span>งาน: <b>${esc(get(r, 'งาน'))}</b></span><span>ขอวัน: <b>${esc(get(r, 'วันที่สะดวก'))} ${esc(get(r, 'ช่วงเวลา'))}</b></span>
           <span>โทร: <b><a href="tel:${esc(String(tel).replace(/[^0-9+]/g, ''))}">${esc(tel)}</a></b></span><span>พื้นที่: <b>${esc(get(r, 'พื้นที่'))}</b></span>
-          <span>ยอดประมาณการ (รวม VAT): <b>${esc(get(r, 'ยอดประมาณการรวม VAT'))}</b></span><span>ส่วนเพิ่มประมาณ (ก่อน VAT): <b>${esc(get(r, 'ส่วนเพิ่มประมาณ (ก่อน VAT)'))}</b></span>
+          <span>ยอดประมาณการ (รวม VAT): <b>${esc(money(get(r, 'ยอดประมาณการรวม VAT')))}</b></span><span>ส่วนเพิ่มประมาณ (ก่อน VAT): <b>${esc(money(get(r, 'ส่วนเพิ่มประมาณ (ก่อน VAT)')))}</b></span>
           <span>รูป: <b>${get(r, 'รูป') ? `<a href="${esc(get(r, 'รูป'))}" target="_blank" rel="noopener">เปิดโฟลเดอร์รูป</a>` : 'ไม่มี (อาจส่งทาง LINE)'}</b></span></div>
         ${get(r, 'หมายเหตุหน้างาน') ? `<p style="margin:0">หมายเหตุลูกค้า: ${esc(get(r, 'หมายเหตุหน้างาน'))}</p>` : ''}
         <details><summary>รายละเอียดทั้งหมด (รายการ · สภาพหน้างาน · ขอบเขต)</summary><pre>${esc(get(r, 'สรุป'))}</pre></details>

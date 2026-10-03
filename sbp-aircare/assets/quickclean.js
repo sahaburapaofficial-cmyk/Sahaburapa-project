@@ -89,9 +89,10 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
     when.append(h('div', { class: 'qc-chips', role: 'group', 'aria-label': 'เลือกวันเร็ว' },
       chip(today, 'วันนี้', `คิวด่วน +${rushInc}`), chip(addDays(today, 1), 'พรุ่งนี้', `คิวด่วน +${rushInc}`), chip(J.earliest, dateTh(J.earliest), 'เร็วสุดแบบจองปกติ')));
     if (J.slots.length) {
-      if (!J.slots.includes(st.slot)) st.slot = J.slots[0];
-      when.append(h('div', { class: 'qc-seg qc-slot', role: 'radiogroup', 'aria-label': 'ช่วงเวลา' }, J.slots.map(id => h('button', { type: 'button', role: 'radio', 'aria-checked': String(st.slot === id), class: st.slot === id ? 'on' : '',
-        onclick: () => { st.slot = id; drawSum(); } }, h('b', {}, SLOTS[id].th), h('small', {}, SLOTS[id].sub)))));
+      const full = id => slotFree(live, st.date, id) === false;   // Rev.19: the live queue marks a full slot (still pickable: the message offers the nearest free day)
+      if (!J.slots.includes(st.slot)) st.slot = J.slots.find(id => !full(id)) || J.slots[0];
+      when.append(h('div', { class: 'qc-seg qc-slot', role: 'radiogroup', 'aria-label': 'ช่วงเวลา' }, J.slots.map(id => h('button', { type: 'button', role: 'radio', 'aria-checked': String(st.slot === id), class: (st.slot === id ? 'on' : '') + (full(id) ? ' full' : ''),
+        onclick: () => { st.slot = id; drawSum(); } }, h('b', {}, SLOTS[id].th), h('small', {}, full(id) ? 'คิวเต็มแล้ว' : SLOTS[id].sub)))));
     } else st.slot = '';
     const msg = [];
     const tag = (k, t) => h('span', { class: 'qc-tag qc-tag-' + k }, t);
