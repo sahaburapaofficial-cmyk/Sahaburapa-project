@@ -10,7 +10,7 @@
 1. สร้าง Google Sheet ชื่อ **SBP AirCare – คำขอจากเว็บ** (บัญชี Sahaburapa.official@gmail.com)
 2. **ส่วนขยาย → Apps Script** → วาง `apps-script/Code.gs` แทนโค้ดเดิม → **ไฟล์ + → HTML** ชื่อ `Board` → วาง `apps-script/Board.html` → บันทึก
 3. เลือกฟังก์ชัน **`setup`** → เรียกใช้ → อนุญาตสิทธิ์ (Sheet · Drive · อีเมล · เชื่อมต่อภายนอก) — สร้างทุกแท็บพร้อมหัวคอลัมน์ + แท็บ **คิว** + โฟลเดอร์รูป "SBP AirCare งานจอง" + `BOARD_KEY` อัตโนมัติ (รันซ้ำได้ ไม่ทับของเดิม)
-4. เลือก **`selfTest`** → เรียกใช้ → ต้องเห็น **PASS 10 บรรทัด** + "ลบข้อมูลทดสอบแล้ว" (ไม่ส่งอีเมล/LINE, ลบข้อมูลทดสอบเอง และคืนค่าช่องคิวเดิม)
+4. เลือก **`selfTest`** → เรียกใช้ → ต้องเห็น **PASS 11 บรรทัด** + "ลบข้อมูลทดสอบแล้ว" (ไม่ส่งอีเมล/LINE, ลบข้อมูลทดสอบเอง และคืนค่าช่องคิวเดิม)
 5. **Deploy → New deployment → Web app** · Execute as: **Me** · Who has access: **Anyone** → คัดลอก URL `/exec` (เปิดดูต้องได้ `{"ok":true,…,"version":"Rev.19"}`)
 6. รัน `setup` อีกครั้ง → log พิมพ์ลิงก์บอร์ด `…/exec?view=board&key=…` → บันทึกในมือถือทีม (อย่าแชร์นอกทีม — เปลี่ยนรหัส: ลบ `BOARD_KEY` ใน Script properties แล้วรัน setup)
 7. (ไม่บังคับ) Script properties: `LINE_TOKEN` + `LINE_TO` (LINE Messaging API) — แจ้งงานใหม่เข้า LINE
@@ -21,7 +21,7 @@
 ## ทดสอบในเครื่องก่อน deploy (ไม่ต้องมีบัญชี Google)
 
 - `backend/test/gas-emulator.mjs` — รัน `Code.gs` ตัวจริงใน node:vm พร้อมตัวแทน SpreadsheetApp / DriveApp / MailApp / Cache / Properties / Content / Html / Script / UrlFetch / Utilities · เลียนแบบ Sheets ที่สำคัญ: ค่าที่ไม่มี `'` นำหน้าถูกแปลงแบบพิมพ์เอง (0812… → ตัวเลข, 2026-10-08 → วันที่) · `npm run backend:emu` เปิดเซิร์ฟเวอร์ `/exec` + บอร์ด (`google.script.run` ผ่าน `/rpc`)
-- `npm run backend:test` (`tests/backend-e2e.mjs`, dev server :8765) — setup → selfTest → ต่อแบบ A/B/C: ฟอร์มติดต่อ · ใบจองพร้อมรูป → Drive · ความเห็น · ตรวจสถานะบนเว็บ · บอร์ดยืนยันคิว → แท็บคิวเต็ม → เว็บแสดง "คิวเต็มแล้ว" · วันเต็มทั้งวันส่งไม่ได้ + เสนอวันว่าง — **Rev.19: 59/59 PASS**
+- `npm run backend:test` (`tests/backend-e2e.mjs`, dev server :8765) — setup → selfTest → ต่อแบบ A/B/C: ฟอร์มติดต่อ · ใบจองพร้อมรูป → Drive · ความเห็น · ตรวจสถานะบนเว็บ · บอร์ดยืนยันคิว → แท็บคิวเต็ม → เว็บแสดง "คิวเต็มแล้ว" · วันเต็มทั้งวันส่งไม่ได้ + เสนอวันว่าง — **Rev.19: 62/62 PASS**
 - หน้าเว็บชี้ไป backend ได้ด้วย `<meta name="sbp-backend" content="https://script.google.com/macros/s/…/exec">` (รับเฉพาะ URL Apps Script — ไม่รับจาก query string)
 
 ## ★Rev.16 ใบจองงาน + บอร์ดหลังบ้าน

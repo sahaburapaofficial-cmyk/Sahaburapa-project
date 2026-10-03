@@ -14,7 +14,7 @@ const TABS = { quote: 'ใบเสนอราคา', contact: 'ติดต�
 const BOARD_COLS = ['ราคาเพิ่มที่แจ้ง (ก่อน VAT)', 'นัดวัน', 'นัดช่วง', 'หมายเหตุทีม', 'รูป'];   // filled by the team on the board
 const MAX_PHOTOS = 8, MAX_PHOTO_B64 = 1500000;
 const MAX_TEXT = 8000;
-const VERSION = 'Rev.19';
+const VERSION = 'Rev.19.1';
 let SILENT = false;   // selfTest(): no e-mail / LINE for the test request
 
 // the company sheet: the one this script is bound to, or SHEET_ID (set by setup() for a standalone script)
@@ -35,8 +35,10 @@ function doPost(e) {
     if (!kind) return reply({ ok: false, error: 'bad kind' });
     if (d.hp) return reply({ ok: true, ref: String(d.ref || '') });        // bot filled the hidden field: accept silently, store nothing
     if (!rateOk()) return reply({ ok: false, error: 'busy' });
-    const ref = clean(d.ref, 20) || ('W' + Date.now());
-    const fields = d.fields && typeof d.fields === 'object' ? d.fields : {};
+    const lock = LockService.getScriptLock(); lock.waitLock(20000);   // Rev.19: two requests at once never overwrite a new column or share a reference
+    try {
+    const ref = uniqueRef(clean(d.ref, 20) || ('W' + Date.now()));
+    const fields = safeFields(d.fields);
     const text = clean(d.text, MAX_TEXT);
     const photos = kind === 'booking' ? savePhotos(ref, d.photos) : null;
     if (photos) fields['รูป'] = photos.url;
@@ -55,6 +57,7 @@ function doPost(e) {
     notify(kind, ref, d.variant, text + (photos ? `\n\nรูปหน้างาน ${photos.n} รูป: ${photos.url}` : ''));
     if (kind === 'booking') pushLine(`ใบจองงานใหม่ ${ref}\n${String(fields['งาน'] || '')} · ${String(fields['ขอบเขต'] || '')}\nวัน ${String(fields['วันที่สะดวก'] || '-')} ${String(fields['ช่วงเวลา'] || '')}\nโทร ${String(fields['โทร'] || '')}${photos ? `\nรูป ${photos.n} รูป` : ''}`);
     return reply({ ok: true, ref, photos: photos ? photos.n : 0 });
+    } finally { lock.releaseLock(); }
   } catch (err) {
     console.error(err);
     return reply({ ok: false, error: 'server' });
@@ -70,7 +73,7 @@ function doGet(e) {
   try {
     if (q.q === 'ping') return reply({ ok: true, service: 'SBP AirCare requests', version: VERSION, sheet: !!ss_(), board: !!PropertiesService.getScriptProperties().getProperty('BOARD_KEY') });
     if (q.q === 'slots') return reply({ ok: true, days: slots() });
-    if (q.q === 'status') return reply(status(clean(q.ref, 20), clean(q.tel, 4)));
+    if (q.q === 'status') return reply(rateOk('s', 60) ? status(clean(q.ref, 22), clean(q.tel, 4)) : { ok: false, error: 'busy' });   // Rev.19: no guessing at speed
     if (q.view === 'board') {
       if (!keyOk(q.key)) return HtmlService.createHtmlOutput('<p style="font:16px sans-serif;padding:24px">ต้องใช้ลิงก์บอร์ดที่มีรหัส (BOARD_KEY)</p>');
       const t = HtmlService.createTemplateFromFile('Board'); t.key = q.key;
@@ -129,9 +132,9 @@ function notify(kind, ref, variant, text) {
 }
 
 // at most 30 requests per minute for the whole site — slows down floods without blocking real customers
-function rateOk() {
-  const c = CacheService.getScriptCache(), k = 'n' + Math.floor(Date.now() / 60000), n = Number(c.get(k) || 0);
-  if (n >= 30) return false;
+function rateOk(tag, max) {
+  const c = CacheService.getScriptCache(), k = (tag || 'n') + Math.floor(Date.now() / 60000), n = Number(c.get(k) || 0);
+  if (n >= (max || 30)) return false;
   c.put(k, String(n + 1), 120);
   return true;
 }
@@ -139,6 +142,19 @@ function clean(v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u0008
 // ★Rev.19 every customer value is stored as text ("'" prefix, hidden by Sheets): never a formula, and a phone 0812345678 keeps its 0,
 // a date stays as written
 function safeCell(v) { return v === '' || v == null ? '' : "'" + v; }
+// Rev.19: field names become column headers — keep them short, plain text, and at most 40 per request
+function safeFields(f) {
+  const out = {}; if (!f || typeof f !== 'object') return out;
+  Object.keys(f).slice(0, 40).forEach(k => { const key = clean(k, 60).trim(); if (key && !/^[=+\-@']/.test(key)) out[key] = f[k]; });
+  return out;
+}
+// the website numbers requests from the clock (7 digits repeat about every 3 hours): a reference already in the sheet gets a suffix
+function uniqueRef(ref) {
+  const ss = ss_(), used = {};
+  Object.keys(TABS).forEach(k => { const sh = ss.getSheetByName(TABS[k]); if (!sh || sh.getLastRow() < 2) return; const h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0], c = h.indexOf('เลขอ้างอิง'); if (c < 0) return; sh.getRange(2, c + 1, sh.getLastRow() - 1, 1).getDisplayValues().forEach(r => { used[r[0]] = 1; }); });
+  if (!used[ref]) return ref;
+  for (let i = 2; ; i++) if (!used[ref + '-' + i]) return ref + '-' + i;
+}
 function reply(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 
 
@@ -178,14 +194,36 @@ function boardData(key) {
 const BOARD_EDIT = ['สถานะ', 'ราคาเพิ่มที่แจ้ง (ก่อน VAT)', 'นัดวัน', 'นัดช่วง', 'หมายเหตุทีม'];
 function boardUpdate(key, ref, patch) {
   if (!keyOk(key)) throw new Error('key');
-  const sh = ss_().getSheetByName(TABS.booking), v = sh.getDataRange().getValues(), head = v[0], iRef = head.indexOf('เลขอ้างอิง');
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try { return boardUpdate_(ref, patch || {}); } finally { lock.releaseLock(); }
+}
+const HOLDS = ['ยืนยันคิว', 'เสร็จ'];   // statuses that keep their visit slot in "คิว"
+function boardUpdate_(ref, patch) {
+  const sh = ss_().getSheetByName(TABS.booking), v = sh.getDataRange().getDisplayValues(), head = v[0], iRef = head.indexOf('เลขอ้างอิง');
+  const at = k => head.indexOf(k);
   for (let r = v.length - 1; r > 0; r--) {
     if (String(v[r][iRef]) !== String(ref)) continue;
+    const was = { st: v[r][at('สถานะ')], date: v[r][at('นัดวัน')], slot: v[r][at('นัดช่วง')] };
     Object.keys(patch || {}).forEach(k => { const c = head.indexOf(k); if (c >= 0 && BOARD_EDIT.indexOf(k) >= 0) sh.getRange(r + 1, c + 1).setValue(k === 'นัดวัน' && patch[k] ? "'" + clean(patch[k], 10) : safeCell(clean(patch[k], 500))); });   // keep dates as yyyy-mm-dd text
-    if (patch && patch['สถานะ'] === 'ยืนยันคิว' && patch['นัดวัน']) markQueue(String(patch['นัดวัน']), String(patch['นัดช่วง'] || ''));
+    const now = { st: 'สถานะ' in patch ? String(patch['สถานะ']) : was.st, date: 'นัดวัน' in patch ? String(patch['นัดวัน']) : was.date, slot: 'นัดช่วง' in patch ? String(patch['นัดช่วง']) : was.slot };
+    // Rev.19: cancelled, back to an earlier status, or moved to another day / half → the old slot is free again (unless another confirmed job holds it)
+    if (HOLDS.indexOf(was.st) >= 0 && was.date && (HOLDS.indexOf(now.st) < 0 || now.date !== was.date || now.slot !== was.slot)) releaseQueue(was.date, was.slot, ref);
+    if (now.st === 'ยืนยันคิว' && now.date) markQueue(now.date, now.slot);
     return true;
   }
   return false;
+}
+const halves = slot => ({ am: /เช้า|ทั้งวัน/.test(slot) || !slot, pm: /บ่าย|ทั้งวัน/.test(slot) || !slot });
+function releaseQueue(date, slot, exceptRef) {
+  const sh = ss_().getSheetByName(TABS.booking), v = sh.getDataRange().getDisplayValues(), head = v[0];
+  const iRef = head.indexOf('เลขอ้างอิง'), iSt = head.indexOf('สถานะ'), iD = head.indexOf('นัดวัน'), iS = head.indexOf('นัดช่วง');
+  const free = halves(slot);
+  v.slice(1).forEach(x => { if (x[iRef] === exceptRef || HOLDS.indexOf(x[iSt]) < 0 || x[iD] !== date) return; const o = halves(x[iS]); if (o.am) free.am = false; if (o.pm) free.pm = false; });
+  const q = ss_().getSheetByName('คิว'); if (!q) return;
+  const qv = q.getDataRange().getDisplayValues(), i = qv.findIndex((x, k) => k > 0 && x[0] === date);
+  if (i < 0) return;
+  if (free.am) q.getRange(i + 1, 2).setValue('');
+  if (free.pm) q.getRange(i + 1, 3).setValue('');
 }
 // a confirmed visit fills its slot in "คิว" (ทั้งวัน = both)
 function markQueue(date, slot) {
@@ -193,8 +231,9 @@ function markQueue(date, slot) {
   if (!sh) { sh = ss.insertSheet('คิว'); sh.appendRow(['วันที่', 'เช้า', 'บ่าย']); sh.setFrozenRows(1); }
   const v = sh.getDataRange().getDisplayValues(); let r = v.findIndex((x, i) => i > 0 && x[0] === date);
   if (r < 0) { sh.appendRow(["'" + date, '', '']); r = sh.getLastRow() - 1; }
-  if (/เช้า|ทั้งวัน/.test(slot) || !slot) sh.getRange(r + 1, 2).setValue('เต็ม');
-  if (/บ่าย|ทั้งวัน/.test(slot) || !slot) sh.getRange(r + 1, 3).setValue('เต็ม');
+  const H = halves(slot);
+  if (H.am) sh.getRange(r + 1, 2).setValue('เต็ม');
+  if (H.pm) sh.getRange(r + 1, 3).setValue('เต็ม');
 }
 
 
@@ -249,6 +288,9 @@ function selfTest() {
     ok('คิวเช้าวันนั้นเต็ม', sl.ok && sl.days[date] && sl.days[date].am === false, JSON.stringify(sl.days[date] || {}));
     const st2 = JSON.parse(doGet({ parameter: { q: 'status', ref, tel: '1234' } }).getContent());
     ok('ลูกค้าเห็นสถานะใหม่', st2.status === 'ยืนยันคิว');
+    boardUpdate(key, ref, { 'สถานะ': 'ยกเลิก' });
+    const sl2 = JSON.parse(doGet({ parameter: { q: 'slots' } }).getContent());
+    ok('ยกเลิกแล้วคิวว่างคืน', !(sl2.days[date] && sl2.days[date].am === false) || prevQueue[0] === 'เต็ม', JSON.stringify(sl2.days[date] || {}));
     const pong = JSON.parse(doGet({ parameter: { q: 'ping' } }).getContent());
     ok('ping', pong.ok && pong.version === VERSION);
   } catch (e) { ok('ไม่มี error', false, String(e)); }

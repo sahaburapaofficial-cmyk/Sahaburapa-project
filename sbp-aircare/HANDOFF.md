@@ -21,7 +21,7 @@
 
 > ★**ลิงก์ทดลองล่าสุด (อัปเดตทุกครั้งหลังพัฒนา — เจ้าของ 2 ต.ค. 2569: "หลังทำทุกครั้งอัพเดทส่งเว็บตัวอย่างมาให้เปิดใช้งาน"):** `npm run build:preview` (`urls.preview.json`) แล้ว publish `dist/art/{a,b,c,index}.html` ทับลิงก์เดิม · แบบ A https://claude.ai/artifact/65KfVJBy5imrW1DGbkyPpk · แบบ B https://claude.ai/artifact/Fz5UMEs9RBLW19sLufhALD · แบบ C https://claude.ai/artifact/PqG73huACDWwNrrN2h2bBz · เทียบ 3 แบบ https://claude.ai/artifact/JeZMw4SjpNFrU9SxfqsDtb (Artifacts ส่งฟอร์มออกนอกเว็บไม่ได้ → แสดงกล่องสรุปแทน · เว็บจริงที่ส่งอีเมลได้คือ GitHub Pages หลัง merge)
 
-> ★**Rev.19 — ระบบหลังบ้านพร้อม deploy:** คู่มือทีละคลิก https://claude.ai/artifact/SJhUTVmE8S3VhSgbhYbCFA · `setup()` + `selfTest()` ใน Apps Script · ใส่ URL `/exec` ที่ `assets/submit.js` → `BACKEND_URL` ที่เดียว ทุกฟอร์มทั้ง 3 แบบเข้า Sheet + คิวสด + ตรวจสถานะ · ทดสอบในเครื่องด้วยตัวจำลอง `npm run backend:test` (59/59 PASS) · หลัง deploy `npm run backend:check -- <url>`
+> ★**Rev.19 — ระบบหลังบ้านพร้อม deploy:** คู่มือทีละคลิก https://claude.ai/artifact/SJhUTVmE8S3VhSgbhYbCFA · `setup()` + `selfTest()` ใน Apps Script · ใส่ URL `/exec` ที่ `assets/submit.js` → `BACKEND_URL` ที่เดียว ทุกฟอร์มทั้ง 3 แบบเข้า Sheet + คิวสด + ตรวจสถานะ · ทดสอบในเครื่องด้วยตัวจำลอง `npm run backend:test` (62/62 PASS) · หลัง deploy `npm run backend:check -- <url>`
 
 > ★**Rev.18 — ตรวจทั้งระบบ:** จองซ่อม/ตรวจเช็กผ่านใบจองงานได้แล้ว (อาการ · รูป · วัน · ค่าตรวจ · ซ่อมเมื่ออนุมัติ) — ครบ ล้าง · ติดตั้ง · ซ่อม · ใบเสนอราคาที่บันทึกไว้ปรับราคาให้ตรงปัจจุบันเอง · ตัวเลขใน FAQ ดึงจากค่าเดียวกับเครื่องคิดเงิน · ตรวจฉาก 3 มิติทุกฉาก 3 แบบ + มือถือ + โหมดลดการเคลื่อนไหว และ 4D ต้นถึงท้าย: 0 error
 
@@ -367,7 +367,7 @@ npm run build                       # dist/art/* ลิงก์ชุดที�
 2. **เปิด GitHub Pages (ผู้ดูแล repo ทำครั้งเดียว)** — Settings → Pages → Source = **GitHub Actions** → แล้ว merge PR ของ Rev.10 เข้า `main` (หรือ Actions → "SBP AirCare · GitHub Pages" → Run workflow) → เว็บขึ้นที่ลิงก์ใน §6.0
 3. ~~ยืนยันข้อมูลบริษัท~~ ✅ Rev.10 (ตรวจจากเว็บทางการ + ทะเบียนนิติบุคคล) — เวลาทำการ ✅ Rev.12 · เจ้าของตรวจซ้ำอีเมลที่ใช้รับลูกค้า (เว็บทางการใช้ sahaburapagroupsp@gmail.com · เว็บนี้ใช้ Sahaburapa.official@gmail.com ตามที่เจ้าของให้)
 4. **เปิดระบบรับคำขอ + ใบจองพร้อมรูปจริง (B4) — โค้ดและการทดสอบพร้อม (Rev.19) รอ deploy** (คู่มือ https://claude.ai/artifact/SJhUTVmE8S3VhSgbhYbCFA · `backend/README.md` ~15 นาที)
-   - Sheet → Apps Script → วาง `Code.gs` + `Board.html` → รัน `setup()` → `selfTest()` (PASS 10) → Deploy เว็บแอป (Me · Anyone) → รัน `setup()` อีกครั้งเอาลิงก์บอร์ด
+   - Sheet → Apps Script → วาง `Code.gs` + `Board.html` → รัน `setup()` → `selfTest()` (PASS 11) → Deploy เว็บแอป (Me · Anyone) → รัน `setup()` อีกครั้งเอาลิงก์บอร์ด
    - ใส่ URL `/exec` ที่ `assets/submit.js` → `BACKEND_URL` → `npm run backend:check -- <url>` → commit → Pages build ใหม่ → test run ตามตารางในคู่มือ
    - ข้อจำกัด: Gmail ทั่วไปส่งแจ้งเตือนได้ 100 ผู้รับ/วัน (เกินแล้วแถวยังบันทึก) · ยอดเงินเป็นยอดประมาณการ ทีมขายยืนยันในใบเสนอราคาจริง
 5. **ทดสอบมือถือจริง (B2)** — เช็กลิสต์ 16 ข้อ + แบบบันทึกผลใน `PROPOSAL_Rev10.md` §2 · ถ้าช้า เลือกวิธีจาก §3 (ระดับคุณภาพอัตโนมัติ, pixelRatio 1, ปิดเงา, ลดอนุภาค, จำกัด 30 fps …)

@@ -120,6 +120,7 @@ export function createGas({ bound = true } = {}) {
     CacheService: { getScriptCache: () => cache },
     ContentService: { createTextOutput: text, MimeType: { JSON: 'application/json', TEXT: 'text/plain' } },
     HtmlService,
+    LockService: { getScriptLock: () => ({ waitLock: () => { state.locks = (state.locks || 0) + 1; }, releaseLock: () => {}, tryLock: () => true }) },
     MailApp: { sendEmail: m => { state.mail.push(m); } },
     UrlFetchApp: { fetch: (url, o) => { state.line.push({ url, body: JSON.parse(o.payload) }); return { getResponseCode: () => 200 }; } },
     ScriptApp: { getService: () => ({ getUrl: () => serviceUrl }) },

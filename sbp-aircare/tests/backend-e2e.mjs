@@ -139,6 +139,11 @@ for (const page of pages) {
   ok(`${V} วันเต็มทั้งวัน → ไม่ส่ง + เสนอวันว่างใกล้สุด`, await alt.count() === 1 && /คิวเต็ม/.test(errTxt) && tabRows('งานจอง').length === n0, `${await alt.innerText().catch(() => '-')} · ${errTxt}`);
   await alt.click(); await p.waitForTimeout(600);
   ok(`${V} กดวันว่างใกล้สุด → เปลี่ยนวันให้`, (await p.inputValue('#s-q-date')) > date, await p.inputValue('#s-q-date'));
+  // cancel on the board → that day is open again on the site
+  gas.call('boardUpdate', KEY, ref, { 'สถานะ': 'ยกเลิก' });
+  const sl3 = await j('q=slots');
+  // only the cancelled job's half comes back — the half marked by hand above (markQueue ทั้งวัน) is not a booking, so it stays as the team set it
+  ok(`${V} บอร์ดยกเลิกงาน → ช่วง "${slotTh}" ว่างคืน`, Object.keys(want).every(k => !sl3.days[date] || sl3.days[date][k] === true), JSON.stringify(sl3.days[date] || {}));
   ok(`${V} ไม่มี JS error`, !errs.length, errs.slice(0, 3).join(' | '));
   await ctx.close();
 }
