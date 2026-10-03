@@ -449,6 +449,12 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
   </section>
 
   <!-- B2B -->
+  <!-- Rev.22 enterprise -->
+  <section class="sec" id="enterprise">
+    <div class="sec-h"><p class="eyebrow">ลูกค้าองค์กร</p><h2>สัญญาดูแลแอร์ตามประเภทองค์กร</h2><p>สำนักงาน องค์กรหลายสาขา คอนโด โรงพยาบาล โรงเรียน โรงแรม และโรงงาน มีปัญหาเรื่องแอร์ไม่เหมือนกัน เลือกประเภทของคุณ ดูปัญหาที่ลูกค้ากลุ่มนี้พบบ่อย สิ่งที่บริษัททำให้ และสัญญารายปีตัวอย่างที่คำนวณจาก Pricebook ทันที พร้อมร่างขอบเขตงานสำหรับฝ่ายจัดซื้อ</p></div>
+    <div class="panel" id="entRoot"></div>
+  </section>
+
   <section class="sec" id="b2b" data-reveal>
     <div class="sec-h"><p class="eyebrow">สัญญาล้างรายปี · B2B</p><h2>ทั้งองค์กร ทั้งปี ในสัญญาเดียว</h2><p>เลือกแบบอาคาร หรือกำหนดจำนวนเครื่องเอง แล้วเห็นช่วงงบต่อปีทันที</p></div>
     <div class="bld" data-builder>
@@ -541,6 +547,7 @@ import { mountTechStory } from './assets/techstory.js';
 import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
 import { mountSymptomGuide } from './assets/symptoms.js';
+import { mountEnterprise } from './assets/enterprise.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
 import { mountRoomFit } from './assets/roomfit.js';
@@ -586,6 +593,7 @@ PRESETS.forEach(p => $('#presets').append(h('button', { type: 'button', 'data-b-
 TYPES.forEach(t => $('#urows').append(h('div', { class: 'urow' }, h('div', { html: typeArt(t.id) }), h('div', {}, h('b', {}, t.th), h('div', { class: 'bar' }, h('i', { 'data-b-bar': t.id }))),
   h('div', { class: 'stp' }, h('button', { type: 'button', 'data-b-step': `${t.id}:-1`, 'aria-label': 'ลด' }, '−'), h('input', { type: 'number', min: '0', id: `vc-u-${t.id}`, 'data-b-unit': t.id, 'aria-label': `จำนวน ${t.th}`, inputmode: 'numeric' }), h('button', { type: 'button', 'data-b-step': `${t.id}:1`, 'aria-label': 'เพิ่ม' }, '+')))));
 const BLD = mountBuilder($('[data-builder]'));
+mountEnterprise($('#entRoot'), { openCart: CART.open, builder: BLD });   // Rev.22 enterprise: sector pain points + sample annual contracts
 mountPriceCenter($('#priceCenter'));
 
 // catalog
@@ -640,7 +648,7 @@ reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountSite({
   variant: 'C', openCart: CART.open, openProduct,
-  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], business: ['enterprise', 'b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'ช่างทำงานในบ้านจำลอง', cleanflow: 'ทีมช่างล้าง · ติดตั้ง' },
   hooks: {
     clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'),

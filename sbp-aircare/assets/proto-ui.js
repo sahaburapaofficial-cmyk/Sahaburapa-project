@@ -195,7 +195,16 @@ export function mountBuilder(root, cfg = {}) {
   const first = PRESETS[1]; setUnits(first.units); visits = first.visits; markPreset(first.id);
   $$('[data-b-visits]', root).forEach(r => r.checked = +r.value === visits);
   calc();
-  return { estimate: () => last, state: () => ({ units: { ...units }, visits, zone, high, pkg, size, deep }), zoneInput: () => zi ? zi.value : '' };
+  // ★Rev.22 load a sample (enterprise.js "ปรับจำนวนเครื่องเอง") — units, visits, package, size band, deep clean
+  function load(o = {}) {
+    if (o.units) setUnits(o.units);
+    if (o.visits) { visits = o.visits; $$('[data-b-visits]', root).forEach(r => r.checked = +r.value === visits); }
+    if (o.pkg) { pkg = o.pkg; $('[data-b-pkg]', root).value = pkg; }
+    if (o.size != null) { size = o.size; $('[data-b-size]', root).value = String(size); }
+    if (o.deep != null) { deep = !!o.deep; $('[data-b-deep]', root).checked = deep; }
+    markPreset(null); calc();
+  }
+  return { estimate: () => last, state: () => ({ units: { ...units }, visits, zone, high, pkg, size, deep }), zoneInput: () => zi ? zi.value : '', load };
 }
 
 /* ---------------- Service-area checker ---------------- */

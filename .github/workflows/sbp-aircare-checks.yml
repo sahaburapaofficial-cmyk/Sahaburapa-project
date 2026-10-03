@@ -34,3 +34,5 @@ jobs:
         run: node tests/acdiag.mjs
       - name: Review regressions (install extras per unit · visit time · reference)
         run: node tests/review-fixes.mjs
+      - name: Enterprise sample contracts (Pricebook · wording rules)
+        run: node tests/enterprise.mjs
