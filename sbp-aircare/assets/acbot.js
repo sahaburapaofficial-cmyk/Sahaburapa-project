@@ -76,6 +76,10 @@ export function triageCard(s, act = {}, { wide = false } = {}) {
     if (jobs.length && !isNormal) res.append(h('div', { class: 'ab-jobs' }, h('b', {}, 'รายการซ่อมที่อาจเกี่ยวข้อง · ราคามาตรฐาน (ก่อน VAT)'),
       h('ul', {}, jobs.slice(0, 5).map(j => h('li', {}, h('span', {}, j.name), h('b', {}, j.ex == null ? 'ประเมินหน้างาน' : baht(j.ex)))))));
     if (d && !isNormal) res.append(h('p', { class: 'ab-note' }, `ค่า${d.name} ${baht(d.rate.s)} ก่อน VAT · ช่างตรวจยืนยันจุดเสียก่อน แล้วแจ้งราคาให้อนุมัติ ไม่ซ่อมก่อนคุณอนุมัติ${r.type ? '' : ' · แอร์แขวน / สี่ทิศทาง / ฝังฝ้า เลือกประเภทด้านบน'}`));
+    // Rev.24: big-ticket faults on an older unit → compare with trading it in (#tradein, the issue preselected)
+    const big = !isNormal && r.causes.slice(0, 2).map(c => c.id).find(id => id === 'comp' || id === 'gas');
+    if (big && document.getElementById('tradein')) res.append(h('p', { class: 'ab-note ab-ti' }, 'แอร์อายุ 7–10 ปีขึ้นไป งานคอมเพรสเซอร์หรือน้ำยารั่วอาจใกล้เคียงราคาเครื่องใหม่ ',
+      h('button', { type: 'button', class: 's-btn ghost', onclick: () => { document.dispatchEvent(new CustomEvent('sbp:tradein', { detail: { issue: big === 'comp' ? 'comp' : 'leak' } })); document.getElementById('tradein').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } }, 'เทียบซ่อมกับเทิร์นเครื่องใหม่')));
     if (r.clean && !isNormal) res.append(h('p', { class: 'ab-cleanrec' }, h('b', {}, 'แนะนำล้างแอร์ก่อน'), ' อาการนี้มักเริ่มจากความสกปรกสะสม ถ้าล้างแล้วยังมีอาการ ช่างตรวจเพิ่มได้ในนัดเดียวกัน (แจ้งค่าตรวจก่อน)'));
     acts.append(...[
       act.book && h('button', { type: 'button', class: 's-btn primary ab-book', onclick: () => act.book(r) }, 'จองช่างตรวจซ่อม · ส่งผลประเมินไปด้วย'),

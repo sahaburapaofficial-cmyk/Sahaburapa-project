@@ -373,7 +373,7 @@ export const SERVICES = [
 export const isVRF = (...t) => /VRV|VRF/i.test(t.filter(Boolean).join(' '));
 export const VRF_NOTE = 'ระบบ VRV / VRF ออกแบบเฉพาะโครงการ ไม่มีราคาบนเว็บ ติดต่อทีมโครงการเพื่อสำรวจและออกแบบ';
 // topics offered in every page's contact form (askTeam() pre-selects one)
-export const CONTACT_TOPICS = ['ล้างแอร์', 'ติดตั้งแอร์', 'ซ่อม / ตรวจเช็ก', 'สัญญาล้างรายปี', 'ซื้อแอร์', 'FUJIVA', 'ระบบ VRV / VRF', 'งานโครงการอื่น', 'อื่น ๆ'];
+export const CONTACT_TOPICS = ['ล้างแอร์', 'ติดตั้งแอร์', 'ซ่อม / ตรวจเช็ก', 'เทิร์นแอร์เก่า', 'สัญญาล้างรายปี', 'ซื้อแอร์', 'FUJIVA', 'ระบบ VRV / VRF', 'งานโครงการอื่น', 'อื่น ๆ'];
 export const PROCESS = [
   { th: 'เลือกบริการหรือรุ่น', d: 'ดูราคาบนเว็บ ใส่ลงใบเสนอราคาเบื้องต้น ระบบรวมยอดและ VAT ให้' },
   { th: 'ยืนยันหน้างาน', d: 'ทีมโทรยืนยัน รายการที่ต้องประเมินหน้างานจะแจ้งราคาก่อนเริ่มงาน' },

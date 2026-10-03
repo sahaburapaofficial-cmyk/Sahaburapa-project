@@ -423,6 +423,12 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
     </div>
   </section>
 
+  <!-- Rev.24 trade-in -->
+  <section class="sec" id="tradein">
+    <div class="sec-h"><p class="eyebrow">เทิร์นแอร์เก่า · รีโนเวท</p><h2>แอร์เก่า ซ่อมหรือเปลี่ยนดี</h2><p>แอร์อายุ 7–10 ปีขึ้นไป ซ่อมครั้งหนึ่งอาจแพงพอ ๆ กับเครื่องใหม่ เลือกอายุ อาการ และขนาด ระบบเทียบค่าซ่อมตาม Pricebook กับเครื่อง Inverter ใหม่พร้อมติดตั้ง และค่าไฟต่อปี แล้วให้ทีมประเมินมูลค่าเทิร์นเครื่องเดิมหักในใบเสนอราคาเดียว เหมาะกับการรีโนเวทบ้าน ร้าน และสำนักงาน</p></div>
+    <div class="panel" id="tiRoot"></div>
+  </section>
+
   <!-- VIRTUAL ROOM -->
   <section class="sec" id="room" data-reveal>
     <div class="sec-h"><p class="eyebrow">ห้องจำลอง 48 ห้อง</p><h2>ลองแอร์ในห้องแบบของคุณ</h2><p>ห้องนอน ห้องนั่งเล่น ห้องน้ำ ออฟฟิศ ห้องผู้บริหาร ห้องประชุม ร้านค้า จนถึงสายการผลิต เลือกประเภทแอร์ ดูทิศทางลม พื้นห้องเย็นลง และฝุ่นที่สะสมเมื่อไม่ได้ล้าง</p></div>
@@ -548,6 +554,7 @@ import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
 import { mountSymptomGuide } from './assets/symptoms.js';
 import { mountEnterprise } from './assets/enterprise.js';
+import { mountTradeIn } from './assets/tradein.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
 import { mountRoomFit } from './assets/roomfit.js';
@@ -646,9 +653,10 @@ $$('[data-quote]').forEach(a => a.addEventListener('click', e => {
 
 reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
+mountTradeIn($('#tiRoot'), { catalog: cat, openCart: CART.open });   // Rev.24 trade-in old AC: repair vs replace + trade-in assessment
 mountSite({
   variant: 'C', openCart: CART.open, openProduct,
-  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], business: ['enterprise', 'b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'tradein', 'room', 'fit'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], business: ['enterprise', 'b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'ช่างทำงานในบ้านจำลอง', cleanflow: 'ทีมช่างล้าง · ติดตั้ง' },
   hooks: {
     clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'),

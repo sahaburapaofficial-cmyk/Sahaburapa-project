@@ -34,5 +34,7 @@ jobs:
         run: node tests/acdiag.mjs
       - name: Review regressions (install extras per unit · visit time · reference)
         run: node tests/review-fixes.mjs
+      - name: Trade-in old AC (repair vs replace, Pricebook lines, wording)
+        run: node tests/tradein.mjs
       - name: Enterprise sample contracts (Pricebook · wording rules)
         run: node tests/enterprise.mjs

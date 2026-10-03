@@ -562,6 +562,14 @@ footer .sx-foot{padding-block:24px 8px}
     </div>
   </section>
 
+  <!-- Rev.24 trade-in -->
+  <section class="s" id="tradein">
+    <div class="sheet">
+      <div class="sheet-h"><div><p class="lbl">Sheet 04A · เทิร์นแอร์เก่า</p><h2>แอร์เก่า ซ่อมหรือเปลี่ยนดี</h2><p>แอร์อายุ 7–10 ปีขึ้นไป ซ่อมครั้งหนึ่งอาจแพงพอ ๆ กับเครื่องใหม่ เลือกอายุ อาการ และขนาด ระบบเทียบค่าซ่อมตาม Pricebook กับเครื่อง Inverter ใหม่พร้อมติดตั้ง และค่าไฟต่อปี แล้วให้ทีมประเมินมูลค่าเทิร์นเครื่องเดิมหักในใบเสนอราคาเดียว เหมาะกับการรีโนเวทบ้าน ร้าน และสำนักงาน</p></div><span class="sheet-no">T-01</span></div>
+      <div id="tiRoot" style="padding:14px 20px 18px"></div>
+    </div>
+  </section>
+
   <!-- 03 INSIDE -->
   <section class="s" id="inside">
     <div class="sheet">
@@ -654,6 +662,7 @@ import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
 import { mountSymptomGuide } from './assets/symptoms.js';
 import { mountEnterprise } from './assets/enterprise.js';
+import { mountTradeIn } from './assets/tradein.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
 import { mountRoomFit } from './assets/roomfit.js';
@@ -761,11 +770,12 @@ $$('[data-quote]').forEach(a => a.addEventListener('click', e => {
 }));
 
 // Rev.09 r5: views by customer journey (site.js) — organisation first in this variant
+mountTradeIn($('#tiRoot'), { catalog: cat, openCart: CART.open });   // Rev.24 trade-in old AC: repair vs replace + trade-in assessment
 mountSite({
   variant: 'B', openCart: CART.open, openProduct,
   order: ['home', 'business', 'service', 'shop', 'knowledge', 'contact'],
   navFmt: (i, th) => `${String(i).padStart(2, '0')} ${th}`,
-  views: { home: ['hero', 'book', 'start', 'coverage', 'flow'], business: ['enterprise', 'b2b'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop: ['catalog', 'fit', 'studio'], knowledge: ['learn', 'inside'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['hero', 'book', 'start', 'coverage', 'flow'], business: ['enterprise', 'b2b'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop: ['catalog', 'tradein', 'fit', 'studio'], knowledge: ['learn', 'inside'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'SOP · ลำดับการทำงานของระบบ', cleanflow: 'ทีมช่าง · SOP ล้าง / ติดตั้ง', inside: 'ข้างในแอร์ · ล้างเสมือนจริง' },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });
