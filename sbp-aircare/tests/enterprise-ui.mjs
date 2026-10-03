@@ -38,7 +38,9 @@ await p.keyboard.press('Escape'); await p.waitForTimeout(400);
 // into the calculator
 await R.locator('[data-sector="factory"]').click(); await p.waitForTimeout(100);
 const fac = await R.locator('.en-big b').innerText();
-await R.locator('.en-acts button', { hasText: 'ปรับจำนวนเครื่องเอง' }).click(); await p.waitForTimeout(1500);
+await R.locator('.en-acts button', { hasText: 'ปรับจำนวนเครื่องเอง' }).click();
+// the total counts up (countUp, ~700 ms of animation frames — slower on software GL): wait for it to settle, not a fixed time
+await p.waitForFunction(v => (document.querySelector('[data-b-out="low"]')?.textContent || '').trim() === v, fac, { timeout: 20000 }).catch(() => {});
 const calc = (await p.locator('[data-b-out="low"]').first().innerText()).trim();
 ok(calc === fac, `calculator loaded with the factory sample (${calc} = ${fac})`);
 // keyboard
