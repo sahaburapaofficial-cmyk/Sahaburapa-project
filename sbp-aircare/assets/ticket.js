@@ -28,7 +28,8 @@ export const QUESTIONS = {
   ],
   // Rev.18: repair / check-up visits book the same way — symptoms and access decide what the technician brings
   repair: [
-    { id: 'sym', th: 'อาการ', multi: true, opts: [O('warm', 'ไม่เย็น / เย็นน้อย'), O('drip', 'น้ำหยด'), O('noise', 'เสียงดัง / สั่น'), O('smell', 'มีกลิ่น'), O('code', 'ไฟกะพริบ / ขึ้นรหัส'), O('dead', 'เปิดไม่ติด / ตัดบ่อย')] },
+    // Rev.21: the same symptom list as the triage assistant (acdiag.js) — ice / breaker / weak air / louver added
+    { id: 'sym', th: 'อาการ', multi: true, opts: [O('warm', 'ไม่เย็น / เย็นน้อย'), O('drip', 'น้ำหยด / น้ำไหล'), O('ice', 'น้ำแข็งเกาะ'), O('dead', 'เปิดไม่ติด / ตัดบ่อย'), O('trip', 'เบรกเกอร์ตัด'), O('code', 'ไฟกะพริบ / ขึ้นรหัส'), O('noise', 'เสียงดัง / สั่น'), O('smell', 'มีกลิ่น'), O('weak', 'ลมเบา'), O('swing', 'บานสวิง')] },
     { id: 'age', th: 'อายุเครื่อง', opts: [O('3', 'ไม่เกิน 3 ปี'), O('7', '3–7 ปี'), O('old', 'เกิน 7 ปี'), O('na', 'ไม่ทราบ')] },
     { id: 'last', th: 'ล้างครั้งล่าสุด', opts: [O('6', 'ไม่เกิน 6 เดือน'), O('12', '6–12 เดือน'), O('24', 'เกิน 1 ปี'), O('na', 'ไม่ทราบ')] },
     { id: 'height', th: 'ตัวเครื่องสูงจากพื้นประมาณ', opts: [O('lo', 'ไม่เกิน 3 ม.'), O('hi', 'เกิน 3 ม.'), O('lift', 'สูงมาก ต้องนั่งร้าน / รถกระเช้า')] },
@@ -106,7 +107,8 @@ export function scope(kind, a, ctx = {}) {
   const notes = [];
   if (kind === 'repair') notes.push('ค่าตรวจตามรายการในใบ · ค่าอะไหล่ / น้ำยา / ค่าซ่อม ช่างตรวจแล้วแจ้งราคาให้อนุมัติก่อนซ่อมทุกครั้ง ไม่ซ่อมก่อนคุณอนุมัติ');
   if (kind === 'repair' && (a.sym || []).includes('code')) notes.push('ถ่ายวิดีโอไฟกะพริบ / รหัสบนจอแนบมาด้วย ช่างเตรียมอะไหล่ได้ตรงขึ้น');
-  if (kind === 'repair' && (a.last === '24' || a.last === 'na') && (a.sym || []).some(x => x === 'warm' || x === 'drip' || x === 'smell')) notes.push('อาการนี้หลายครั้งหายด้วยการล้าง — ช่างตรวจแล้วแนะนำว่าควรล้างหรือซ่อม');
+  if (kind === 'repair' && (a.last === '24' || a.last === 'na') && (a.sym || []).some(x => ['warm', 'drip', 'smell', 'ice', 'weak'].includes(x))) notes.push('อาการนี้หลายครั้งหายด้วยการล้าง — ช่างตรวจแล้วแนะนำว่าควรล้างหรือซ่อม');
+  if (kind === 'repair' && (a.sym || []).includes('trip')) notes.push('เบรกเกอร์ตัดซ้ำ: ปิดเบรกเกอร์แอร์ทิ้งไว้และไม่เปิดใช้จนกว่าช่างตรวจ ถ้ามีกลิ่นไหม้หรือควัน โทรแจ้งทีมเพื่อเร่งคิว');
   if (a.site === 'condo') notes.push('คอนโด / อาคาร: แจ้งนิติและจองลิฟต์ขนของล่วงหน้า ทีมส่งรายชื่อช่างให้ได้');
   if (kind === 'clean' && (a.last === '24' || a.last === 'na')) notes.push('ไม่ได้ล้างเกิน 1 ปี หรือไม่ทราบ — ถ้ามีคราบดำที่ใบพัด ทีมอาจแนะนำล้างใหญ่ (C2) จากรูป');
   if (kind === 'install' && a.power === 'ready') notes.push('ใช้สายเดิมได้เมื่อขนาดสายและเบรกเกอร์พอกับรุ่นใหม่ — ช่างตรวจก่อนต่อไฟ');
@@ -150,6 +152,14 @@ export function ticketPanel(draft, jobs, { onChange = () => {} } = {}) {
   kinds.forEach(k => {
     const A = draft.ans[k];
     const sec = h('fieldset', { class: 'tk-q' }, h('legend', {}, k === 'clean' ? `สภาพหน้างานล้าง (${jobs.clean} เครื่อง)` : k === 'repair' ? `อาการและหน้างานซ่อม / ตรวจเช็ก (${jobs.repair} รายการ)` : `สภาพหน้างานติดตั้ง (${jobs.install} เครื่อง)`));
+    // Rev.21: the triage assistant's result travels with the booking so the technician prepares for the likely point
+    if (k === 'repair' && draft.diag && draft.diag.text) {
+      const dg = h('div', { class: 'tk-diag' + (draft.diag.urgent ? ' urgent' : '') },
+        h('p', { class: 'tk-l' }, 'ผลประเมินเบื้องต้นจากผู้ช่วยตรวจอาการ', h('small', {}, ' · ส่งไปกับใบจอง ช่างยืนยันหน้างานก่อนเสนอราคาซ่อม')),
+        h('ul', {}, draft.diag.text.split('\n').map(x => h('li', {}, x))),
+        h('button', { type: 'button', class: 'tk-diag-x', onclick: () => { delete draft.diag; dg.remove(); onChange(); } }, 'ไม่ส่งผลประเมินนี้'));
+      sec.append(dg);
+    }
     const draw = () => {
       [...sec.querySelectorAll('.tk-row')].forEach(x => x.remove());
       QUESTIONS[k].forEach(q => {
@@ -205,6 +215,7 @@ export function ticketText(draft) {
     out.push(r.lines.length ? `เกินมาตรฐาน ${r.lines.length} จุด${r.est ? ` · ประมาณ ${baht(r.est)} ก่อน VAT` : ''}:` : 'อยู่ในขอบเขตงานมาตรฐาน');
     r.lines.forEach(l => out.push(`  • ${l.th} — ${l.ex == null ? 'ประเมินจากรูป' : baht(l.ex * l.qty)} (${l.why})`));
   });
+  if (draft.diag && draft.diag.text && (draft.scope || []).some(x => x.k === 'repair')) out.push('— ผลประเมินเบื้องต้นจากผู้ช่วยตรวจอาการ (ช่างยืนยันหน้างาน) —', draft.diag.text);
   if (draft.note) out.push(`หมายเหตุ: ${draft.note}`);
   out.push(`รูปที่แนบ: ${draft.photos.length} รูป`);
   return out.join('\n');

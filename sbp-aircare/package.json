@@ -19,7 +19,8 @@
     "build:preview": "python3 build.py --urls urls.preview.json",
     "backend:emu": "node backend/test/gas-emulator.mjs",
     "backend:test": "node tests/backend-e2e.mjs",
-    "backend:check": "node tools/backend-check.mjs"
+    "backend:check": "node tools/backend-check.mjs",
+    "triage": "node tests/acdiag.mjs && node tests/acbot.mjs a.html && node tests/acbot.mjs b.html && node tests/acbot.mjs c.html 390"
   },
   "devDependencies": {
     "playwright": "1.56.0",

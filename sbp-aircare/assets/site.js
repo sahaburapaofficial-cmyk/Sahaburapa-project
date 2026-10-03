@@ -36,7 +36,7 @@ export const VIEWS = {
   contact: { th: 'ติดต่อเรา', lead: 'ข้อมูลบริษัท ช่องทางติดต่อ พื้นที่ให้บริการ และส่งคำขอให้ทีมติดต่อกลับ' },
 };
 const SEC_TH = {
-  hero: 'เริ่มต้น', book: 'จองล้างแอร์', coverage: 'พื้นที่ให้บริการ', standards: 'มาตรฐานงานของเรา', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
+  hero: 'เริ่มต้น', book: 'จองล้างแอร์', coverage: 'พื้นที่ให้บริการ', standards: 'มาตรฐานงานของเรา', symptoms: 'อาการแอร์ยอดฮิต', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
   catalog: 'เลือกรุ่นและราคา', studio: 'หาขนาด BTU ตามห้อง', room: 'หาขนาด BTU ตามห้อง', fit: 'ลองวางในห้องของคุณ',
   cleanflow: 'ทีมช่างทำงานทีละขั้น', prices: 'ราคาทุกบริการ', quality: 'วัสดุในแพ็กเกจ', story: 'ล้างถึงชิ้นไหน', inside: 'ข้างในแอร์',
   howto: 'แอร์ทำงานอย่างไร · ขั้นตอนบริการ', b2b: 'ประเมินงบสัญญารายปี', learn: 'คู่มือก่อนตัดสินใจ', journey: 'แอร์ทำงานอย่างไร',
@@ -51,7 +51,7 @@ export const JOURNEYS = {
   install: { th: 'ติดตั้ง / ย้ายแอร์', sub: 'มีเครื่องแล้ว · ติดตั้งมาตรฐาน หรือพรีเมียม', topic: 'ติดตั้งแอร์', ico: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z',
     steps: [['cleanflow', 'ดูขั้นตอนติดตั้งของทีม'], ['quality', 'วัสดุที่ใช้ในแต่ละแพ็กเกจ'], ['prices', 'ราคาติดตั้งตามขนาด'], ['quote', 'จองคิวติดตั้ง / ขอสำรวจ']] },
   repair: { th: 'แอร์มีปัญหา / ซ่อม', sub: 'ไม่เย็น น้ำหยด มีเสียง มีกลิ่น', topic: 'ซ่อม / ตรวจเช็ก', ico: 'M4.5 16a7.5 7.5 0 1 1 15 0M12 16l3.5-3.5M12 16h.01M7 16h1M16 16h1M12 9.5v1M8.6 11l.7.7M15.4 11l-.7.7M9 20h6',
-    steps: [['howto', 'เช็กอาการเบื้องต้นและขั้นตอนตรวจซ่อม'], ['prices', 'ค่าตรวจเช็กและค่าซ่อม'], ['quote', 'จองช่าง · แจ้งอาการ แนบรูป เลือกวัน']] },
+    steps: [['symptoms', 'เช็กอาการ · ชี้จุดที่ต้องซ่อม'], ['howto', 'ขั้นตอนตรวจซ่อมของทีม'], ['prices', 'ค่าตรวจเช็กและค่าซ่อม'], ['quote', 'จองช่าง · แจ้งอาการ แนบรูป เลือกวัน']] },
   business: { th: 'องค์กร / สัญญารายปี', sub: 'สำนักงาน ร้านค้า โรงงาน อาคาร', topic: 'สัญญาล้างรายปี', ico: 'M4 20V8l8-4 8 4v12M9 20v-6h6v6',
     steps: [['b2b', 'ประเมินงบล้างทั้งปี'], ['cleanflow', 'ดูมาตรฐานงานล้าง (SOP)'], ['area', 'พื้นที่และค่าเดินทาง'], ['quote', 'ขอใบเสนอราคาสัญญา']] },
 };
@@ -330,7 +330,7 @@ export function mountSite(cfg) {
     foot.append(h('div', { class: 'wrap sx-foot' },
       h('div', {}, h('b', { class: 'sx-fb-brand' }, logoImg('sbp', ''), COMPANY.brand), h('p', {}, COMPANY.th), h('p', {}, COMPANY.addr), COMPANY.hours ? h('p', {}, 'เวลาทำการ ', COMPANY.hours) : null, h('p', {}, 'โทร ', h('a', { href: COMPANY.telHref }, COMPANY.tel), ' · ', h('span', { class: 'sx-sel' }, COMPANY.email)), h('p', {}, 'LINE ', h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line), ' · เลขผู้เสียภาษี ', COMPANY.taxId)),
       h('div', {}, h('h4', {}, 'บริการและสินค้า'), h('ul', {}, live.filter(v => v !== 'home').map(v => h('li', {}, h('a', { href: '#' + v }, VIEWS[v].th))))),
-      h('div', {}, h('h4', {}, 'มาตรฐานบริการ'), h('ul', {}, h('li', {}, h('a', { href: '#standards' }, 'มาตรฐานงานล้างและติดตั้ง')), h('li', {}, h('a', { href: '#area' }, 'พื้นที่ให้บริการและค่าเดินทาง')), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))), h('p', {}, 'ราคามาตรฐานตาม Pricebook 2569 ก่อน VAT ยืนยันในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
+      h('div', {}, h('h4', {}, 'มาตรฐานบริการ'), h('ul', {}, h('li', {}, h('a', { href: '#standards' }, 'มาตรฐานงานล้างและติดตั้ง')), h('li', {}, h('a', { href: '#symptoms' }, 'เช็กอาการแอร์เสีย')), h('li', {}, h('a', { href: '#area' }, 'พื้นที่ให้บริการและค่าเดินทาง')), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))), h('p', {}, 'ราคามาตรฐานตาม Pricebook 2569 ก่อน VAT ยืนยันในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
       h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: COMPANY.fbUrl, target: '_blank', rel: 'noopener' }, 'Facebook'))))));
   }
   // Rev.11: business facts for search engines (schema.org), built from COMPANY so the page and the data never disagree

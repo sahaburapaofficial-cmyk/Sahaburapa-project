@@ -22,6 +22,7 @@
   .s-ใหม่{color:var(--or)}.s-ยืนยันคิว,.s-เสร็จ{color:var(--ok)}.s-ยกเลิก{color:var(--bad)}.scope-x{color:var(--warn)}.scope-ok{color:var(--ok)}
   .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 16px;font-size:14px;color:var(--ink2)}.g b{color:var(--ink)}
   details pre{white-space:pre-wrap;margin:6px 0 0;font:13px/1.5 ui-monospace,monospace;background:#F6F8FB;padding:10px;border-radius:8px}
+  .dg{margin:0;padding:8px 10px;border-left:4px solid var(--acc);background:#EEF6FC;border-radius:6px;font-size:13.5px;line-height:1.55}
   .ed{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;border-top:1px dashed var(--line);padding-top:10px}
   .ed label{display:grid;gap:3px;font-size:12.5px;color:var(--ink3)}.ed input,.ed select,.ed textarea{border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px;width:100%}
   .ed .save{background:var(--or);color:#fff;border:0;border-radius:8px;min-height:40px;cursor:pointer;font-weight:600}
@@ -54,6 +55,7 @@
           <span>ยอดประมาณการ (รวม VAT): <b>${esc(money(get(r, 'ยอดประมาณการรวม VAT')))}</b></span><span>ส่วนเพิ่มประมาณ (ก่อน VAT): <b>${esc(money(get(r, 'ส่วนเพิ่มประมาณ (ก่อน VAT)')))}</b></span>
           <span>รูป: <b>${get(r, 'รูป') ? `<a href="${esc(get(r, 'รูป'))}" target="_blank" rel="noopener">เปิดโฟลเดอร์รูป</a>` : 'ไม่มี (อาจส่งทาง LINE)'}</b></span></div>
         ${get(r, 'หมายเหตุหน้างาน') ? `<p style="margin:0">หมายเหตุลูกค้า: ${esc(get(r, 'หมายเหตุหน้างาน'))}</p>` : ''}
+        ${get(r, 'ผลประเมินเบื้องต้น (ผู้ช่วย)') ? `<p class="dg">ผลประเมินเบื้องต้นจากผู้ช่วย (ลูกค้าตอบ · ช่างยืนยันหน้างาน)<br>${esc(get(r, 'ผลประเมินเบื้องต้น (ผู้ช่วย)')).replace(/\n/g, '<br>')}</p>` : ''}
         <details><summary>รายละเอียดทั้งหมด (รายการ · สภาพหน้างาน · ขอบเขต)</summary><pre>${esc(get(r, 'สรุป'))}</pre></details>
         <div class="ed">
           <label>สถานะ<select name="สถานะ">${STATUS.map(s => `<option ${s === st ? 'selected' : ''}>${s}</option>`).join('')}</select></label>

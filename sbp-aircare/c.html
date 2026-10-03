@@ -474,6 +474,12 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
   </section>
 
   <!-- PRICE CENTRE -->
+  <!-- Rev.21 symptom guide -->
+  <section class="sec" id="symptoms">
+    <div class="sec-h"><p class="eyebrow">อาการแอร์ยอดฮิต</p><h2>เช็กอาการ แล้วเรียกช่างให้ถูกจุด</h2><p>เลือกอาการที่พบ ดูว่าเป็นการทำงานปกติหรือไม่ ตรวจเองเบื้องต้นอย่างปลอดภัย แล้วตอบคำถามสั้น ๆ ระบบชี้จุดที่น่าจะเสีย ประเภทงาน และราคามาตรฐานของรายการซ่อม ช่างจึงเตรียมเครื่องมือและอะไหล่ไปถูกจุดตั้งแต่ครั้งแรก</p></div>
+    <div class="panel" id="symRoot"></div>
+  </section>
+
   <!-- Rev.20 standards -->
   <section class="sec" id="standards">
     <div class="sec-h"><p class="eyebrow">มาตรฐานงานของเรา</p><h2>ล้าง ติดตั้ง ซ่อม ตามมาตรฐานที่ตรวจสอบได้</h2><p>งานล้างปกติและล้างใหญ่ทำอะไรบ้าง น้ำยาและสเปรย์โฟมที่ทีมเลือกใช้ งานติดตั้งตามแบบฟอร์มของบริษัทพร้อมวัสดุที่ระบุยี่ห้อ และสิ่งที่ลูกค้าได้รับทุกงาน</p></div>
@@ -534,6 +540,7 @@ import { mountHowItWorks } from './assets/howitworks3d.js';
 import { mountTechStory } from './assets/techstory.js';
 import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
+import { mountSymptomGuide } from './assets/symptoms.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
 import { mountRoomFit } from './assets/roomfit.js';
@@ -571,6 +578,7 @@ mountMaterials($('#qualityRoot'), { theme: dark() ? 'dark' : 'light' });
 const TSX = mountTechStory($('#storyRoot'), { theme: dark() ? 'dark' : 'light' });
 const SVX = mountServices($('#servicesRoot'), { how: false, onType: t => HWX.setType(t) });
 mountStandards($('#stdRoot'));   // Rev.20 standards: cleaning · chemicals · installation · repair · what every job includes
+mountSymptomGuide($('#symRoot'), { openCart: CART.open });   // Rev.21 symptom triage: likely faulty point → the right technician
 $('#travelTbl').append(travelTable());
 
 // builder
@@ -632,7 +640,7 @@ reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountSite({
   variant: 'C', openCart: CART.open, openProduct,
-  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'howto', 'standards', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'room', 'fit'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], business: ['b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'ช่างทำงานในบ้านจำลอง', cleanflow: 'ทีมช่างล้าง · ติดตั้ง' },
   hooks: {
     clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'),

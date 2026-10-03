@@ -1296,6 +1296,9 @@ html.fx-C .fx-spot::after{content:"";position:absolute;inset:0;border-radius:inh
 .tk-lines small{display:block;color:var(--s-ink-3);font-size:12px}.tk-lines b{white-space:nowrap;font-variant-numeric:tabular-nums}
 .tk-promise{font-size:12.5px;color:var(--s-ink-2)}
 .tk-notes{margin:0;padding-left:18px;font-size:12.5px;color:var(--s-ink-2)}
+.tk-diag{display:grid;gap:6px;padding:10px 12px;margin:2px 0 6px;border-radius:var(--s-r);background:var(--s-accent-soft);border-left:4px solid #0b74b5;font-size:13.5px}
+.tk-diag.urgent{border-left-color:var(--s-warn)}.tk-diag ul{margin:0;padding-left:18px;display:grid;gap:2px;line-height:1.55}
+.tk-diag-x{justify-self:start;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink-2);font:inherit;font-size:12.5px;cursor:pointer}
 .tk-ph{display:grid;gap:8px}
 .tk-hint{margin:0;padding-left:18px;font-size:12.5px;color:var(--s-ink-2);columns:2;column-gap:20px}
 @media (max-width:520px){.tk-hint{columns:1}}
@@ -1400,7 +1403,7 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 .ab-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:14px 16px;background:linear-gradient(135deg,#0b74b5,#13a3e0);color:#fff}
 .ab-h b{display:block;font-size:16px}.ab-h small{display:block;font-size:12px;opacity:.92;margin-top:2px}
 .ab-x{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:22px;line-height:1;cursor:pointer}
-.ab-log{overflow:auto;padding:14px;display:grid;gap:10px;align-content:start;background:var(--s-card-2)}
+.ab-log{position:relative;overflow:auto;padding:14px;display:grid;gap:10px;align-content:start;background:var(--s-card-2)}
 .ab-m{max-width:92%;font-size:14px;line-height:1.6}.ab-m p{margin:0}
 .ab-me{justify-self:end;padding:8px 12px;border-radius:14px 14px 4px 14px;background:#0b74b5;color:#fff}
 .ab-bot{justify-self:start;display:grid;gap:8px;padding:10px 12px;border-radius:14px 14px 14px 4px;background:var(--s-card);border:1px solid var(--s-line)}
@@ -1413,6 +1416,27 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 .ab-acts{display:flex;flex-wrap:wrap;gap:6px}.ab-acts .s-btn{min-height:38px;font-size:13.5px}
 .ab-safe{font-size:12.5px;color:var(--s-ink-3);padding-left:10px;border-left:3px solid var(--s-warn)}
 .ab-typing{flex-direction:row;display:flex!important;gap:4px;padding:12px 14px!important}.ab-typing span{width:6px;height:6px;border-radius:50%;background:var(--s-ink-3);animation:abdot 1s infinite}.ab-typing span:nth-child(2){animation-delay:.15s}.ab-typing span:nth-child(3){animation-delay:.3s}
+/* ★Rev.21 symptom triage card (acbot.js triageCard — also used by the symptom guide section) */
+.ab-bot:has(.ab-card){max-width:100%}
+.ab-sec.n b{color:var(--s-ink-2)}
+.ab-qs{display:grid;gap:10px;padding:10px 12px;border-radius:12px;background:var(--s-card-2);border:1px solid var(--s-line)}
+.ab-qs>b{font-size:13.5px}
+.ab-q{display:grid;gap:5px}.ab-ql{margin:0;font-size:13.5px;font-weight:600;color:var(--s-ink)}
+.ab-opts{display:flex;flex-wrap:wrap;gap:6px}
+.ab-o{min-height:38px;padding:4px 12px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);font:inherit;font-size:13.5px;cursor:pointer;text-align:left}
+.ab-o:hover{border-color:#0b74b5}.ab-o.on{border-color:#0b74b5;background:var(--s-accent-soft);box-shadow:inset 0 0 0 1px #0b74b5;font-weight:600}
+.ab-res{display:grid;gap:8px}.ab-res p{margin:0}
+.ab-rh{font-size:14px}
+.ab-causes{margin:0;padding-left:22px;display:grid;gap:7px}.ab-causes li{line-height:1.5}
+.ab-causes small{display:block;margin-top:2px;color:var(--s-ink-2);font-size:12.5px;line-height:1.55}
+.ab-jobs{display:grid;gap:4px}.ab-jobs>b{font-size:13px;color:var(--s-ink-2)}
+.ab-jobs ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ab-jobs li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px dashed var(--s-line);padding-top:4px;font-size:13px;line-height:1.45}
+.ab-jobs li b{white-space:nowrap;font-variant-numeric:tabular-nums}
+.ab-note{font-size:12.5px;color:var(--s-ink-2);line-height:1.55}
+.ab-urgent{padding:9px 11px;border-radius:10px;background:#FDECEA;color:#7A1A10;border-left:4px solid #C0392B;font-size:13.5px}
+.ab-cleanrec{padding:9px 11px;border-radius:10px;background:var(--s-accent-soft);font-size:13px;line-height:1.55}
+.ab-more{display:grid;gap:5px}.ab-more small{color:var(--s-ink-2);font-size:12.5px}
 @keyframes abdot{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .ab-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--s-line);background:var(--s-card)}
 .ab-in{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);padding:0 12px;font:inherit;font-size:15px}
@@ -1437,3 +1461,21 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 .sd-mat{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:8px 0 0}.sd-mat dt{color:var(--s-ink-3)}.sd-mat dd{margin:0;font-weight:600}
 .sd-note{margin:0;font-size:13.5px;color:var(--s-ink-3);line-height:1.6}
 @media (max-width:760px){.sd-2{grid-template-columns:1fr}.sd-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.sd-tabs button{flex:none}}
+/* ★Rev.21 "อาการแอร์ยอดฮิต · เรียกช่างให้ถูกจุด" (symptoms.js — the assistant's triage card in a wide layout) */
+.sg{display:grid;grid-template-columns:minmax(220px,290px) minmax(0,1fr);gap:20px;align-items:start;color:var(--s-ink);min-width:0}
+.sg-side{display:grid;gap:10px;min-width:0}
+.sg-search{display:grid;gap:4px;font-size:13px;color:var(--s-ink-2)}
+.sg-in{width:100%;height:46px;border-radius:12px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);padding:0 12px;font:inherit;font-size:15px}
+.sg-hint{margin:0;font-size:12.5px;color:var(--s-ink-2)}.sg-hint:empty{display:none}
+.sg-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sg-it{min-height:44px;padding:6px 10px;border-radius:10px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);font:inherit;font-size:14px;line-height:1.3;text-align:left;cursor:pointer}
+.sg-it:hover{border-color:#0b74b5}.sg-it[aria-pressed=true]{background:#0b74b5;border-color:#0b74b5;color:#fff;font-weight:600}
+.sg-urgent{padding:10px 12px;border-radius:12px;background:#FDECEA;color:#7A1A10;border-left:4px solid #C0392B;font-size:13px;line-height:1.55}
+.sg-urgent ul{margin:4px 0 0;padding-left:18px;display:grid;gap:2px}
+.sg-main{min-width:0}
+.sg-main .ab-card{padding:18px 20px;border-radius:var(--s-r);background:var(--s-card);border:1px solid var(--s-line);font-size:15px;line-height:1.65}
+.sg-main .ab-t{margin:0;font-size:19px}
+.ab-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.ab-col{display:grid;gap:12px;min-width:0}
+.ab-col-r{padding:14px 16px;border-radius:12px;background:var(--s-card-2);border:1px solid var(--s-line)}
+@media (max-width:900px){.sg{grid-template-columns:1fr}.sg-list{display:flex;flex-wrap:wrap}.sg-it{min-height:40px;border-radius:999px;padding:4px 12px}.ab-cols{grid-template-columns:1fr}.sg-main .ab-card{padding:14px}}
