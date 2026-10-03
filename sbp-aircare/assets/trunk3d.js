@@ -92,3 +92,20 @@ export function pipeHanger(at, up, len, mat) {
   const clamp = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.004, 6, 20, Math.PI), mat); clamp.position.set(at[0], at[1], at[2]); clamp.rotation.z = Math.PI; clamp.rotation.y = up; g.add(clamp);
   return g;
 }
+
+/** Rev.25 crisp edges on trunking / fittings / caps so every joint, elbow and end cap reads against the wall (owner 3 ต.ค. 2569:
+ *  "รางครอบท่อ สีต้องตัดกับกำแพง … เก็บงานให้เนียบ ปิดมุม") — fine lines, no extra lights; returns the line material */
+export function outlineTrunk(root, { color = 0x8a96a3, opacity = 0.75, angle = 28 } = {}) {
+  const lm = new THREE.LineBasicMaterial({ color, transparent: true, opacity });
+  const list = []; root.traverse(o => { if (o.isMesh && o.geometry && !o.userData.noEdge) list.push(o); });
+  list.forEach(o => { const e = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, angle), lm); e.raycast = () => {}; e.userData.edge = true; o.add(e); });
+  return lm;
+}
+/** white PVC tape wrapped over insulated pipes where they leave the trunk for the valves (neat finish, no bare insulation) */
+export function tapeMaterial(dark = false) {
+  const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d');
+  g.fillStyle = dark ? '#d9dde2' : '#f4f5f2'; g.fillRect(0, 0, 64, 256); g.strokeStyle = 'rgba(0,0,0,.10)'; g.lineWidth = 3;
+  for (let y = -64; y < 320; y += 22) { g.beginPath(); g.moveTo(0, y); g.lineTo(64, y + 26); g.stroke(); }   // spiral overlap of the wrap
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 6); t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.MeshStandardMaterial({ map: t, roughness: 0.4 });
+}

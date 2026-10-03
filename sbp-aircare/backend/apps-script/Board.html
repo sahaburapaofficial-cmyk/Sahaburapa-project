@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<!-- SBP AirCare — back-office board for job tickets — Rev.16. Served by Code.gs (?view=board&key=BOARD_KEY).
+     Reads the "งานจอง" tab, refreshes every 20 s, flags new tickets (and a desktop notification when allowed),
+     lets the team set status / extra price (before VAT) / visit date + slot / team note. "ยืนยันคิว" marks the slot full in "คิว". -->
+<style>
+  :root{--bg:#EEF2F6;--card:#fff;--ink:#15202C;--ink2:#4F5D6D;--ink3:#616C7A;--line:#D5DEE8;--acc:#123F7B;--or:#AD5110;--ok:#1B7A45;--warn:#B4560D;--bad:#B02A26}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;background:var(--acc);color:#fff}
+  header h1{margin:0;font-size:17px;flex:1}header small{opacity:.8}
+  select,input,textarea,button{font:inherit}
+  .bar{display:flex;flex-wrap:wrap;gap:6px}.bar button{border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;border-radius:999px;padding:4px 12px;cursor:pointer}
+  .bar button.on{background:#fff;color:var(--acc)}
+  main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:12px}
+  .t{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px}
+  .t.new{border-color:var(--or);box-shadow:0 0 0 2px rgba(173,81,16,.25)}
+  .h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}.h b{font-size:16px}.h .ref{font-family:ui-monospace,monospace;color:var(--ink3)}
+  .tag{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12.5px;font-weight:600;border:1px solid currentColor}
+  .s-ใหม่{color:var(--or)}.s-ยืนยันคิว,.s-เสร็จ{color:var(--ok)}.s-ยกเลิก{color:var(--bad)}.scope-x{color:var(--warn)}.scope-ok{color:var(--ok)}
+  .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 16px;font-size:14px;color:var(--ink2)}.g b{color:var(--ink)}
+  details pre{white-space:pre-wrap;margin:6px 0 0;font:13px/1.5 ui-monospace,monospace;background:#F6F8FB;padding:10px;border-radius:8px}
+  .t.dirty{border-color:var(--warn)}.dirty-n{color:var(--warn);font-size:13px}
+  .dg{margin:0;padding:8px 10px;border-left:4px solid var(--acc);background:#EEF6FC;border-radius:6px;font-size:13.5px;line-height:1.55}
+  .ed{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;border-top:1px dashed var(--line);padding-top:10px}
+  .ed label{display:grid;gap:3px;font-size:12.5px;color:var(--ink3)}.ed input,.ed select,.ed textarea{border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-height:38px;width:100%}
+  .ed .save{background:var(--or);color:#fff;border:0;border-radius:8px;min-height:40px;cursor:pointer;font-weight:600}
+  a{color:var(--acc)}.empty{color:var(--ink3);text-align:center;padding:40px}
+</style>
+</head>
+<body data-key="<?= key ?>">
+<header><h1>SBP AirCare · งานจอง <small id="upd"></small></h1>
+  <div class="bar" id="flt"></div></header>
+<main id="list"><p class="empty">กำลังโหลด…</p></main>
+<script>
+  const KEY = document.body.dataset.key;   // Rev.19: an HTML attribute — Apps Script's contextual escaping is unambiguous there
+  const STATUS = ['ใหม่', 'กำลังประเมิน', 'แจ้งราคาแล้ว', 'ยืนยันคิว', 'เสร็จ', 'ยกเลิก'];
+  let filter = 'เปิดอยู่', seen = null, data = { head: [], rows: [] };
+  // ★Rev.21.1 (review BUG-04): edits not saved yet survive the 20-second refresh — per reference and field, with the value the
+  // field had when the edit started; when the sheet changes under an edit (another screen saved) the field says so
+  const drafts = {};   // ref → { field: { v, base } }
+  let seq = 0;         // a refresh answer older than the last one asked is ignored
+  const money = v => /^\d+(\.\d+)?$/.test(String(v).trim()) ? '฿' + Number(v).toLocaleString('th-TH') : v;   // Rev.19
+  const $ = s => document.querySelector(s), esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  function bar() { $('#flt').innerHTML = ['เปิดอยู่', 'ทั้งหมด', ...STATUS].map(s => `<button class="${s === filter ? 'on' : ''}" data-f="${s}">${s}</button>`).join(''); }
+  $('#flt').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; bar(); draw(); } });
+  function draw() {
+    const H = data.head, at = k => H.indexOf(k), get = (r, k) => at(k) < 0 ? '' : r[at(k)];
+    const photoUrl = r => { const u = String(get(r, 'รูป') || '').trim(); return /^https:\/\/drive\.google\.com\//.test(u) ? u : ''; };   // Rev.21.1 BUG-06: 0 / '0' / empty = no link
+    const act = document.activeElement, keep = act && act.closest && act.closest('[data-ref]') && act.name ? { ref: act.closest('[data-ref]').dataset.ref, name: act.name, a: act.selectionStart, b: act.selectionEnd } : null;
+    const rows = data.rows.filter(r => { const s = get(r, 'สถานะ') || 'ใหม่'; return filter === 'ทั้งหมด' || (filter === 'เปิดอยู่' ? !['เสร็จ', 'ยกเลิก'].includes(s) : s === filter); });
+    if (!rows.length) { $('#list').innerHTML = '<p class="empty">ไม่มีงานในกลุ่มนี้</p>'; return; }
+    $('#list').innerHTML = rows.map(r => {
+      const ref = get(r, 'เลขอ้างอิง'), st = get(r, 'สถานะ') || 'ใหม่', sc = get(r, 'ขอบเขต'), tel = get(r, 'โทร');
+      return `<article class="t ${seen && !seen.has(ref) ? 'new' : ''}" data-ref="${esc(ref)}">
+        <div class="h"><b>${esc(get(r, 'ชื่อ / บริษัท'))}</b><span class="ref">${esc(ref)}</span><span class="tag s-${esc(st)}">${esc(st)}</span>
+          <span class="tag ${/เกิน/.test(sc) ? 'scope-x' : 'scope-ok'}">${esc(sc || '-')}</span><small>${esc(get(r, 'เวลา'))}</small></div>
+        <div class="g"><span>งาน: <b>${esc(get(r, 'งาน'))}</b></span><span>ขอวัน: <b>${esc(get(r, 'วันที่สะดวก'))} ${esc(get(r, 'ช่วงเวลา'))}</b></span>
+          <span>โทร: <b><a href="tel:${esc(String(tel).replace(/[^0-9+]/g, ''))}">${esc(tel)}</a></b></span><span>พื้นที่: <b>${esc(get(r, 'พื้นที่'))}</b>${get(r, 'ระยะถนนประมาณ (กม.)') ? ` · ~${esc(get(r, 'ระยะถนนประมาณ (กม.)'))} กม.` : ''}</span><span>ค่าเดินทาง (ก่อน VAT): <b>${esc(money(get(r, 'ค่าเดินทาง (ก่อน VAT)')) || '-')}</b></span>
+          <span>ยอดประมาณการ (รวม VAT): <b>${esc(money(get(r, 'ยอดประมาณการรวม VAT')))}</b></span><span>ส่วนเพิ่มประมาณ (ก่อน VAT): <b>${esc(money(get(r, 'ส่วนเพิ่มประมาณ (ก่อน VAT)')))}</b></span>
+          <span>รูป: <b>${photoUrl(r) ? `<a href="${esc(photoUrl(r))}" target="_blank" rel="noopener">เปิดโฟลเดอร์รูป${+get(r, 'จำนวนรูป') > 0 ? ` (${esc(get(r, 'จำนวนรูป'))} รูป)` : ''}</a>` : 'ไม่มี (อาจส่งทาง LINE)'}</b></span></div>
+        ${get(r, 'หมายเหตุหน้างาน') ? `<p style="margin:0">หมายเหตุลูกค้า: ${esc(get(r, 'หมายเหตุหน้างาน'))}</p>` : ''}
+        ${get(r, 'ผลประเมินเบื้องต้น (ผู้ช่วย)') ? `<p class="dg">ผลประเมินเบื้องต้นจากผู้ช่วย (ลูกค้าตอบ · ช่างยืนยันหน้างาน)<br>${esc(get(r, 'ผลประเมินเบื้องต้น (ผู้ช่วย)')).replace(/\n/g, '<br>')}</p>` : ''}
+        <details><summary>รายละเอียดทั้งหมด (รายการ · สภาพหน้างาน · ขอบเขต)</summary><pre>${esc(get(r, 'สรุป'))}</pre></details>
+        <div class="ed">
+          <label>สถานะ<select name="สถานะ">${STATUS.map(s => `<option ${s === st ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+          <label>ราคาเพิ่มที่แจ้ง (ก่อน VAT)<input name="ราคาเพิ่มที่แจ้ง (ก่อน VAT)" inputmode="numeric" value="${esc(get(r, 'ราคาเพิ่มที่แจ้ง (ก่อน VAT)'))}"></label>
+          <label>นัดวัน<input name="นัดวัน" type="date" value="${esc(get(r, 'นัดวัน'))}"></label>
+          <label>นัดช่วง<select name="นัดช่วง">${['', 'ช่วงเช้า', 'ช่วงบ่าย', 'ทั้งวัน'].map(s => `<option ${s === get(r, 'นัดช่วง') ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+          <label style="grid-column:1/-1">หมายเหตุทีม<textarea name="หมายเหตุทีม" rows="2">${esc(get(r, 'หมายเหตุทีม'))}</textarea></label>
+          <button class="save" type="button">บันทึก</button>
+        </div></article>`;
+    }).join('');
+    // put the unsaved edits back, mark them, and say when the sheet changed under one
+    document.querySelectorAll('#list [data-ref]').forEach(card => {
+      const d = drafts[card.dataset.ref]; if (!d) return;
+      const row = data.rows.find(r => get(r, 'เลขอ้างอิง') === card.dataset.ref);
+      const notes = [];
+      Object.keys(d).forEach(name => {
+        const el = card.querySelector(`[name="${name}"]`); if (!el) return;
+        el.value = d[name].v;
+        const now = row ? String(get(row, name) || '') : '';
+        if (now !== d[name].base) notes.push(`${name}: ในระบบเปลี่ยนเป็น "${now || '(ว่าง)'}" ระหว่างที่คุณแก้`);
+      });
+      card.classList.add('dirty');
+      card.querySelector('.ed').insertAdjacentHTML('afterbegin', `<p class="dirty-n" style="grid-column:1/-1;margin:0">มีการแก้ที่ยังไม่บันทึก${notes.length ? ' · ' + notes.map(esc).join(' · ') : ''}</p>`);
+    });
+    if (keep) { const el = document.querySelector(`#list [data-ref="${CSS.escape(keep.ref)}"] [name="${keep.name}"]`); if (el) { el.focus({ preventScroll: true }); try { if (keep.a != null) el.setSelectionRange(keep.a, keep.b); } catch (e) {} } }
+  }
+  // remember an edit the moment it happens (typing or choosing), with the value the sheet had then
+  $('#list').addEventListener('input', note); $('#list').addEventListener('change', note);
+  function note(e) {
+    const el = e.target, card = el.closest && el.closest('[data-ref]'); if (!card || !el.name) return;
+    const ref = card.dataset.ref, H = data.head, row = data.rows.find(r => r[H.indexOf('เลขอ้างอิง')] === ref);
+    const d = drafts[ref] || (drafts[ref] = {});
+    if (!d[el.name]) d[el.name] = { v: el.value, base: row && H.indexOf(el.name) >= 0 ? String(row[H.indexOf(el.name)] || '') : '' };
+    d[el.name].v = el.value;
+    card.classList.add('dirty');
+  }
+  $('#list').addEventListener('click', e => {
+    const b = e.target.closest('.save'); if (!b) return;
+    const card = b.closest('[data-ref]'), patch = {};
+    card.querySelectorAll('[name]').forEach(x => { patch[x.name] = x.value; });
+    const ref = card.dataset.ref;
+    if (patch['สถานะ'] === 'ยืนยันคิว' && !patch['นัดวัน']) { alert('ยืนยันคิวต้องใส่นัดวัน'); return; }
+    b.disabled = true; b.textContent = 'กำลังบันทึก…';
+    // saved → the draft is cleared and the sheet is read back; failed → the draft stays and nothing says "saved"
+    google.script.run.withSuccessHandler(okd => { if (okd === false) { b.disabled = false; b.textContent = 'บันทึก'; alert('ไม่พบงานนี้ในตาราง'); return; } delete drafts[ref]; b.textContent = 'บันทึกแล้ว'; setTimeout(load, 600); })
+      .withFailureHandler(err => { b.disabled = false; b.textContent = 'บันทึก'; alert('บันทึกไม่สำเร็จ ข้อมูลที่แก้ยังอยู่ในช่อง: ' + err.message); }).boardUpdate(KEY, ref, patch);
+  });
+  function load() {
+    const my = ++seq;
+    google.script.run.withSuccessHandler(d => {
+      if (my !== seq) return;
+      const refs = new Set(d.rows.map(r => r[d.head.indexOf('เลขอ้างอิง')]));
+      const fresh = seen ? [...refs].filter(x => !seen.has(x)) : [];
+      data = d; draw(); if (!seen) seen = refs;
+      if (fresh.length && 'Notification' in window && Notification.permission === 'granted') new Notification('SBP AirCare · งานจองใหม่ ' + fresh.length + ' งาน');
+      if (fresh.length) document.title = `(${fresh.length}) งานจองใหม่`;
+      $('#upd').textContent = '· อัปเดต ' + new Date().toLocaleTimeString('th-TH');
+    }).withFailureHandler(err => { $('#list').innerHTML = '<p class="empty">โหลดไม่สำเร็จ: ' + esc(err.message) + '</p>'; }).boardData(KEY);
+  }
+  addEventListener('focus', () => { document.title = 'SBP AirCare · งานจอง'; if (seen) seen = new Set(data.rows.map(r => r[data.head.indexOf('เลขอ้างอิง')])); });
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  bar(); load(); setInterval(load, 20000);
+</script>
+</body>
+</html>

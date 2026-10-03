@@ -14,6 +14,7 @@ import { materialSet, buildOutdoor, buildPremiumIndoor, orbit, canvasTex } from 
 import { buildCeilingUnit, buildCassetteUnit, buildFloorUnit, animateUnit } from './units3d.js';
 import { mats as roomMats, rbox, F, windowUnit } from './roomkit3d.js';
 import { createAirflow } from './airflow3d.js';
+import { outlineTrunk } from './trunk3d.js';
 import { FURN, footprint, clampItem, frame2 } from './roomplan.js';
 
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -287,12 +288,13 @@ export function createRoomFit3D(container, o = {}) {
     const pOut = hole.clone().addScaledVector(outN, 0.1 + 0.04);
     const valve = f.o.clone().addScaledVector(f.t, outAlong + 0.3 * sc).addScaledVector(outN, 0.1 + 0.04).setY(ouY + 0.12);
     const pts = [hole.clone().addScaledVector(f.n, 0.01), pOut, pOut.clone().setY(valve.y > pOut.y ? pOut.y : valve.y), V(valve.x, valve.y > pOut.y ? pOut.y : valve.y, valve.z), valve];
-    const trunkM = new THREE.MeshStandardMaterial({ color: P.pipe, roughness: 0.45 });
+    const trunkM = new THREE.MeshStandardMaterial({ color: P.pipe, roughness: 0.45 }), trG = new THREE.Group(); outG.add(trG);
     for (let i = 0; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1], L2 = a.distanceTo(b); if (L2 < 0.01) continue;
-      const m = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, L2 + 0.06), trunkM); m.position.copy(a).lerp(b, 0.5); m.lookAt(b); m.castShadow = true; outG.add(m);
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, L2 + 0.06), trunkM); m.position.copy(a).lerp(b, 0.5); m.lookAt(b); m.castShadow = true; trG.add(m);
     }
-    const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.012, 24), trunkM); rim.position.copy(hole.clone().addScaledVector(f.n, 0.006)); rim.quaternion.setFromUnitVectors(V(0, 1, 0), f.n); outG.add(rim);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.012, 24), trunkM); rim.position.copy(hole.clone().addScaledVector(f.n, 0.006)); rim.quaternion.setFromUnitVectors(V(0, 1, 0), f.n); trG.add(rim);
+    outlineTrunk(trG, { color: theme === 'dark' ? 0x9fb3c8 : 0x7d8a98, opacity: 0.7 });   // Rev.25 joints and corners read against the wall
     if (s.show.dims) note(valve.clone().addScaledVector(outN, 0.2).setY(valve.y - 0.32), `ท่อ ~${R.pipe.len.toFixed(1)} ม.${R.pipe.extra > 0 ? ` (เกิน ${R.pipe.extra} ม.)` : ' (รวมในราคา)'}`, R.pipe.extra > 0 ? 'warn' : 'ok');
   }
 

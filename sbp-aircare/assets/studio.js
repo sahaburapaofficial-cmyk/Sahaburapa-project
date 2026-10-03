@@ -1,9 +1,9 @@
 // SBP AirCare — Room Studio UI (shared by all three variants). Builds its own markup inside `root`,
 // styled by assets/studio.css through the variant's --s-* tokens. cfg: { theme, onOpen(model, skuIndex), sceneStart }
-import { DEMO, BRAND_BY_ID, TYPE_BY_ID, DATA, CLEAN_PKGS, VAT, incVat, baht, btuFmt, h, $, $$, installOptions, cleanRate } from './sbp-core.js';
+import { DEMO, BRAND_BY_ID, TYPE_BY_ID, DATA, TRAVEL, CLEAN_PKGS, VAT, incVat, baht, btuFmt, h, $, $$, installOptions, cleanRate } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { toast } from './proto-ui.js';
-import { SCENE_GROUPS, SCENES, SCENE_BY_ID, TYPE_RULES, STD_SIZES, needBtu, btuBreakdown, recommendUnits, dirtFrom, effects, cleanInterval, dirtTh, thermal, stepT, timeToSet, steadyT, T_START, T_SET, ORIENT, GLASS, defaultOrient, dustRate, RISK, energy, RATE, EFF, LOAD_F } from './studio-model.js';
+import { SCENE_GROUPS, SCENES, SCENE_BY_ID, TYPE_RULES, STD_SIZES, needBtu, btuBreakdown, recommendUnits, dirtFrom, effects, cleanInterval, dirtTh, thermal, stepT, timeToSet, steadyT, T_START, T_SET, ORIENT, GLASS, defaultOrient, dustRate, RISK, energy, RATE, EFF, LOAD_F, SET_REF, SET_RANGE, SET_PER_DEG, PETS, LOCS, PM_STD_24H, envF, clogRisk } from './studio-model.js';
 
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TYPE_ORDER = ['wall', 'ceiling', 'cassette', 'floor', 'duct'];
@@ -75,8 +75,9 @@ export async function mountStudio(root, cfg = {}) {
   const note = h('div', { class: 'st-note' });
   const riskBar = h('div', { class: 'st-risk', 'aria-live': 'polite' });
   const energyCard = h('section', { class: 'st-energy' });
+  const envCard = h('section', { class: 'st-air', 'aria-label': 'สภาพแวดล้อมรอบห้อง' });
   const reco = h('div', { class: 'st-reco' });
-  root.append(h('div', { class: 'st-top' }, groupBar, sceneBar, riskBar), h('div', { class: 'st-main' }, stage, panel), kpis, bd, note, energyCard, reco,
+  root.append(h('div', { class: 'st-top' }, groupBar, sceneBar, riskBar), h('div', { class: 'st-main' }, stage, panel), kpis, bd, note, envCard, energyCard, reco,
     h('p', { class: 's-note st-disc' }, 'ภาพและตัวเลขในห้องจำลองเป็นแบบจำลองเพื่ออธิบายหลักการ (ขนาด BTU ใช้สูตรประมาณตามพื้นที่และการใช้งาน ผลของฝุ่นเป็นค่าประกอบการอธิบาย) ไม่ใช่ค่าที่วัดจากเครื่องจริง ขนาดและจำนวนเครื่องต้องยืนยันจากการสำรวจหน้างาน เวลาในแบบจำลองเร่ง 1 วินาที = 1 นาที'));
 
   /* ---------- scenes ---------- */
@@ -108,7 +109,10 @@ export async function mountStudio(root, cfg = {}) {
 
   /* ---------- model ---------- */
   let th = null, thClean = null, sizes = [];
-  function dirt() { return dirtFrom(state.months, dustRate(state.scene, state.p)); }
+  // Rev.13: room dust × the environment around it (pets · location · PM2.5) — same model everywhere (KPIs, cleaning interval, energy)
+  state.env = state.env || { cats: 0, dogs: 0, loc: 'city', pm: null }; state.setT = state.setT ?? SET_REF;
+  function dustNow() { return dustRate(state.scene, state.p) * envF(state.env).total; }
+  function dirt() { return dirtFrom(state.months, dustNow()); }
   function recompute(resetSim = false) {
     const s = state.scene, p = state.p;
     sizes = catalogSizes(state.type); if (!sizes.length) sizes = STD_SIZES;
@@ -116,12 +120,12 @@ export async function mountStudio(root, cfg = {}) {
     const rec = recommendUnits(need, area, state.type, sizes);
     if (state.auto) { state.n = rec.n; state.per = rec.per; }
     if (!sizes.includes(state.per)) state.per = sizes.find(x => x >= state.per) || sizes[sizes.length - 1];
-    th = thermal(p, s, state.n * state.per, dirt()); thClean = thermal(p, s, state.n * state.per, 0);
-    if (resetSim) { state.T = T_START; state.sim = 0; state.reached = null; }
+    th = thermal(p, s, state.n * state.per, dirt(), { inverter: state.inv ?? true }); thClean = thermal(p, s, state.n * state.per, 0, { inverter: state.inv ?? true });
+    if (resetSim) { state.T = th.tStart; state.sim = 0; state.reached = null; }
     state.need = need; state.rec = rec;
     V && V.setCap(Math.min(1.4, th.cap / Math.max(1, th.Qset)));
     V && V.setDirt(dirt());
-    renderControls(); renderKpis(); renderBd(); renderNote(); renderRisk(); renderEnergy(); renderReco(); drawInside(true); updateCycle();
+    renderControls(); renderKpis(); renderBd(); renderNote(); renderRisk(); renderEnv(); renderEnergy(); renderReco(); drawInside(true); updateCycle();
   }
   function tick(dt) {
     if (!th) return;
@@ -129,7 +133,7 @@ export async function mountStudio(root, cfg = {}) {
     for (let k = 0; k < 6; k++) state.T = stepT(state.T, th, dtSim / 6);
     state.sim += dtSim / 60;
     if (state.reached == null && state.T <= T_SET + 0.1) state.reached = state.sim;
-    if (state.sim > 240) { state.T = T_START; state.sim = 0; state.reached = null; }
+    if (state.sim > 240) { state.T = th.tStart; state.sim = 0; state.reached = null; }
     V && V.setTemp(state.T);
     hudT(); if (state.view === 'inside') drawInside();
   }
@@ -138,7 +142,7 @@ export async function mountStudio(root, cfg = {}) {
     if ((hudAcc += 1) % 6) return;
     hud.innerHTML = '';
     const ss = steadyT(th);
-    hud.append(h('div', { class: 'st-temp' }, h('b', {}, state.T.toFixed(1) + '°C'), h('small', {}, `ตั้งไว้ ${T_SET}°C · นอกห้อง 34°C`)),
+    hud.append(h('div', { class: 'st-temp' }, h('b', {}, state.T.toFixed(1) + '°C'), h('small', {}, `ตั้งไว้ ${T_SET}°C · นอกห้อง ${th.tout}°C (${th.time === 'night' ? 'ใช้กลางคืน' : 'กลางวันหน้าร้อน'}) · ${th.inv ? 'Inverter' : 'Fixed speed ตัด-ต่อ ±0.75°C'}`)),
       h('div', { class: 'st-clock' }, h('span', {}, `นาทีที่ ${Math.floor(state.sim)}`), state.reached != null ? h('em', { class: 'ok' }, `ถึง ${T_SET}°C ใน ${Math.round(state.reached)} นาที`) : ss > T_SET + 0.1 ? h('em', { class: 'bad' }, `คาดว่าไม่ถึง ${T_SET}°C · ค้างที่ ~${ss.toFixed(1)}°C`) : h('em', {}, 'กำลังทำความเย็น…')));
   }
 
@@ -195,7 +199,7 @@ export async function mountStudio(root, cfg = {}) {
 
   /* ---------- KPIs ---------- */
   function renderKpis() {
-    const d = dirt(), e = effects(d), ci = cleanInterval(dustRate(state.scene, state.p));
+    const d = dirt(), e = effects(d), ci = cleanInterval(dustNow());
     const total = state.n * state.per, ratio = total / state.need;
     const fit = ratio < 0.95 ? ['bad', 'เล็กเกินไป — เย็นช้า เครื่องทำงานหนัก'] : ratio > 1.6 ? ['warn', 'ใหญ่เกินจำเป็น — ลงทุนเกิน'] : ['ok', 'ขนาดเหมาะสม'];
     const tc = timeToSet(thClean), tn = timeToSet(th), ss = steadyT(th);
@@ -203,7 +207,7 @@ export async function mountStudio(root, cfg = {}) {
     const card = (lbl, big, sub, cls = '') => h('div', { class: 'st-kpi ' + cls }, h('span', { class: 'st-lbl' }, lbl), h('b', {}, big), sub ? h('small', {}, sub) : null);
     kpis.append(
       card('ห้องนี้ต้องการประมาณ', btuFmt(state.need), `เลือกไว้ ${state.n} × ${btuFmt(state.per)}${state.n > 1 ? ` = ${btuFmt(total)}` : ''} · ${fit[1]}`, fit[0]),
-      card(`เย็นถึง ${T_SET}°C (จาก 32°C)`, tn != null ? `${Math.round(tn)} นาที` : `ไม่ถึง`, tc != null ? (tn != null ? `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที${tn - tc >= 1 ? ` · ช้าลง ${Math.round(tn - tc)} นาที` : ''}` : `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที · ตอนนี้ค้างที่ ~${ss.toFixed(1)}°C`) : 'เครื่องเล็กเกินห้อง แม้สะอาดก็ไม่ถึง', tn == null ? 'bad' : tn - (tc || tn) > 8 ? 'warn' : 'ok'),
+      card(`เย็นถึง ${T_SET}°C (จาก ${th.tStart}°C · นอก ${th.tout}°C)`, tn != null ? `${Math.round(tn)} นาที` : `ไม่ถึง`, tc != null ? (tn != null ? `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที${tn - tc >= 1 ? ` · ช้าลง ${Math.round(tn - tc)} นาที` : ''}` : `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที · ตอนนี้ค้างที่ ~${ss.toFixed(1)}°C`) : 'เครื่องเล็กเกินห้อง แม้สะอาดก็ไม่ถึง', tn == null ? 'bad' : tn - (tc || tn) > 8 ? 'warn' : 'ok'),
       card('ผลของฝุ่นสะสม (แบบจำลอง)', `ลม −${Math.round((1 - e.air) * 100)}%`, `ความเย็นที่ได้ −${Math.round((1 - e.cap) * 100)}% · ไฟฟ้าต่อความเย็น +${Math.round((e.power - 1) * 100)}%`, d > 0.6 ? 'bad' : d > 0.35 ? 'warn' : 'ok'),
       card('รอบล้างที่แนะนำสำหรับห้องนี้', `ทุก ${ci.months} เดือน`, `${ci.visits} ครั้ง/ปี · ปรับตามสภาพจริงหลังตรวจครั้งแรก`),
     );
@@ -251,29 +255,30 @@ export async function mountStudio(root, cfg = {}) {
         const oneEx = k.px + (ins ? ins.item.ex : 0);
         list.append(h('li', {},
           h('div', { class: 'st-m-t' }, h('small', {}, `${BRAND_BY_ID[m.brand].name} · ${m.series}`), h('b', {}, k.sku), h('span', { class: 's-note' }, `${btuFmt(k.btu)}${k.d.approved ? '' : ' · ราคาอ้างอิง'}`)),
-          h('div', { class: 'st-m-p' }, h('b', {}, baht(incVat(oneEx * n))), h('small', {}, `${n} เครื่อง พร้อมติดตั้งมาตรฐาน · เครื่องละ ${baht(incVat(oneEx))}`)),
+          h('div', { class: 'st-m-p' }, h('b', {}, baht(oneEx * n)), h('small', {}, `${n} เครื่อง พร้อมติดตั้งมาตรฐาน · เครื่องละ ${baht(oneEx)}`)),
           h('div', { class: 'st-m-a' },
             h('button', { type: 'button', class: 's-btn primary', onclick: () => { cart.add({ kind: 'product', group: 'product', key: `P-${k.sku}`, name: `${BRAND_BY_ID[m.brand].name} ${k.sku}`, detail: `${TYPE_BY_ID[m.type].th} ${btuFmt(k.btu)} · จากห้องจำลอง ${state.scene.th}`, unitEx: k.px, qty: n }); if (ins) cart.add({ kind: 'service', group: 'install', key: `I-${ins.item.code}`, name: ins.item.name, detail: `สำหรับ ${k.sku}`, unitEx: ins.item.ex, qty: n }); toast(`ใส่ ${n} เครื่อง + ติดตั้งมาตรฐาน ในใบเสนอราคาแล้ว`); } }, 'ใส่ใบเสนอราคา'),
             cfg.onOpen ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => cfg.onOpen(m, i) }, 'รายละเอียด') : null)));
       });
-      col1.append(list, h('p', { class: 's-note' }, `เรียงจากราคาต่ำ · ${cands.length} รุ่นที่เข้าเงื่อนไข · ราคารวม VAT ตาม Pricebook 2569 ติดตั้งมาตรฐานรวมท่อและวัสดุ 4 เมตรแรก`));
+      col1.append(list, h('p', { class: 's-note' }, `เรียงจากราคาต่ำ · ${cands.length} รุ่นที่เข้าเงื่อนไข · ราคาก่อน VAT ตาม Pricebook 2569 ติดตั้งมาตรฐานรวมท่อและวัสดุ 4 เมตรแรก`));
     }
     // cleaning plan
-    const ci = cleanInterval(dustRate(state.scene, state.p)), band = sizeBandFor(type, per);
+    const ci = cleanInterval(dustNow()), band = sizeBandFor(type, per);
     const r1 = cleanRate(state.pkg, 'C1', type, band), r2 = cleanRate(state.pkg, 'C2', type, band);
     const col2 = h('div', { class: 'st-rc' }, h('h3', {}, 'แผนล้างรายปีสำหรับห้องนี้'));
     const pk = h('select', { 'aria-label': 'แพ็กเกจล้าง' }, CLEAN_PKGS.map(p => h('option', { value: p.id, selected: p.id === state.pkg }, p.th)));
     pk.addEventListener('change', () => { state.pkg = pk.value; renderReco(); });
     col2.append(h('label', { class: 's-field' }, 'แพ็กเกจ', pk));
     if (r1) {
-      const v1 = Math.max(r1.rate.s * n, DATA.minBill), v2 = Math.max((r2 ? r2.rate.s : r1.rate.s) * n, DATA.minBill);
+      const c1 = r1.rate.s * n, c2 = (r2 ? r2.rate.s : r1.rate.s) * n, tf = c => c < DATA.minBill ? TRAVEL.baseFee : 0;   // Rev.20 below the minimum = trip fee
+      const v1 = c1 + tf(c1), v2 = c2 + tf(c2);
       const annualEx = v1 * (ci.visits - 1) + v2;
       col2.append(h('dl', { class: 'st-plan' },
         h('dt', {}, 'รอบล้าง'), h('dd', {}, `${ci.visits} ครั้ง/ปี (ล้างใหญ่ 1 ครั้ง)`),
-        h('dt', {}, 'ล้างปกติ / รอบ'), h('dd', {}, baht(incVat(v1))),
-        h('dt', {}, 'ล้างใหญ่ / รอบ'), h('dd', {}, baht(incVat(v2))),
-        h('dt', { class: 'tot' }, 'รวมต่อปี'), h('dd', { class: 'tot' }, baht(incVat(annualEx)))),
-        h('p', { class: 's-note' }, `อัตรามาตรฐาน ${n} เครื่อง · ขั้นต่ำต่อรอบ ${baht(incVat(DATA.minBill))}${(r1.rate.s * n) < DATA.minBill ? ' (ปรับขึ้นเป็นขั้นต่ำแล้ว — รวมหลายห้องหรือหลายเครื่องในรอบเดียวกันจะคุ้มกว่า)' : ''} · อัตราพิเศษตามจำนวนเครื่องยืนยันในใบเสนอราคา`),
+        h('dt', {}, 'ล้างปกติ / รอบ'), h('dd', {}, baht(v1)),
+        h('dt', {}, 'ล้างใหญ่ / รอบ'), h('dd', {}, baht(v2)),
+        h('dt', { class: 'tot' }, 'รวมต่อปี'), h('dd', { class: 'tot' }, baht(annualEx))),
+        h('p', { class: 's-note' }, `อัตรามาตรฐาน ${n} เครื่อง ก่อน VAT · รวมค่าเดินทางในกรุงเทพฯ ระยะ ${TRAVEL.freeKm} กม. (${tf(c1) ? `ยอดล้างต่ำกว่า ${baht(DATA.minBill)} คิดค่าเดินทาง ${baht(TRAVEL.baseFee)}/รอบ` : 'ไม่มีค่าเดินทาง'}) · นอกพื้นที่คิดตามระยะ`),
         h('button', { type: 'button', class: 's-btn', onclick: () => { cart.add({ kind: 'service', group: 'contract', key: `K-${state.scene.id}-${n}-${ci.visits}-${state.pkg}`, name: `สัญญาล้างรายปี ${state.scene.th} ${n} เครื่อง × ${ci.visits} ครั้ง/ปี`, detail: `${state.pkg} · ${TYPE_RULES[type].th} ${btuFmt(per)}`, unitEx: annualEx, qty: 1, units: n }); toast('เพิ่มสัญญาล้างรายปีในใบเสนอราคาแล้ว'); } }, '+ ใส่สัญญาล้างในใบเสนอราคา'));
     } else col2.append(h('p', { class: 's-note' }, 'ขนาดนี้ต้องประเมินค่าล้างจากหน้างาน'));
     const col = [col1, col2];
@@ -289,6 +294,34 @@ export async function mountStudio(root, cfg = {}) {
     riskBar.append(h('span', { class: 'st-chip hrs' }, `เปิดเฉลี่ย ~${s.hrs || 8} ชม./วัน`));
   }
 
+  /* ---------- Rev.13 · environment around the room: pets (home / condo) · location · PM2.5 → clogging risk ---------- */
+  function renderEnv() {
+    const s = state.scene, E = state.env, home = ['home', 'condo'].includes(s.g), f = envF(E), risk = clogRisk(f.total);
+    const base = cleanInterval(dustRate(s, state.p)), now = cleanInterval(dustNow());
+    envCard.innerHTML = '';
+    const stepper = (k, th) => h('div', { class: 'st-air-pet' }, h('span', {}, th),
+      h('button', { type: 'button', 'aria-label': `ลด${th}`, disabled: !E[k], onclick: () => { E[k] = Math.max(0, E[k] - 1); recompute(false); } }, '−'),
+      h('output', { 'aria-live': 'polite' }, String(E[k])),
+      h('button', { type: 'button', 'aria-label': `เพิ่ม${th}`, onclick: () => { E[k] = Math.min(9, E[k] + 1); recompute(false); } }, '+'));
+    const locSeg = h('div', { class: 'st-seg st-env-loc', role: 'radiogroup', 'aria-label': 'ที่ตั้งของห้อง' }, LOCS.map(l => h('button', { type: 'button', role: 'radio', 'aria-checked': l.id === E.loc, onclick: () => { E.loc = l.id; recompute(false); } }, l.th)));
+    const pmIn = h('input', { type: 'number', min: '0', max: '500', step: '1', inputmode: 'numeric', placeholder: 'เช่น 32', value: E.pm ?? '', 'aria-label': 'ค่า PM2.5 ไมโครกรัมต่อลูกบาศก์เมตร' });
+    pmIn.addEventListener('change', () => { const v = +pmIn.value; E.pm = pmIn.value === '' || !(v > 0) ? null : Math.min(500, v); recompute(false); });
+    const pmNote = E.pm ? (E.pm > PM_STD_24H ? `เกินค่ามาตรฐาน 24 ชม. ของไทย (${PM_STD_24H} µg/m³) — ฝุ่นละเอียดเข้าแผ่นกรองและคอยล์มากขึ้น` : `ไม่เกินค่ามาตรฐาน 24 ชม. ของไทย (${PM_STD_24H} µg/m³)`) : 'ไม่ใส่ = ใช้ค่าทั่วไปของเขตเมือง';
+    envCard.append(
+      h('div', { class: 'st-air-head' }, h('div', {}, h('h3', {}, 'สภาพแวดล้อมรอบห้อง · แอร์จะอุดตันเร็วแค่ไหน'),
+        h('p', { class: 's-note' }, home ? 'สัตว์เลี้ยง ฝุ่นจากถนน และค่า PM2.5 ทำให้แผ่นกรองและคอยล์เย็นสะสมฝุ่นเร็วขึ้น ระบบนำไปคิดรอบล้างและค่าไฟในส่วนด้านล่างทันที' : 'ฝุ่นจากถนน ไซต์ก่อสร้าง และค่า PM2.5 ทำให้แผ่นกรองและคอยล์เย็นสะสมฝุ่นเร็วขึ้น ระบบนำไปคิดรอบล้างและค่าไฟด้านล่างทันที')),
+        h('div', { class: 'st-air-risk r-' + risk.k }, h('small', {}, 'ความเสี่ยงอุดตัน'), h('b', {}, risk.th), h('small', {}, `ฝุ่นสะสม ×${f.total.toFixed(2)} ของห้องแบบเดียวกัน`))),
+      h('div', { class: 'st-air-grid' },
+        home ? h('div', { class: 'st-air-box' }, h('h4', {}, 'สัตว์เลี้ยงในบ้าน'), stepper('cats', 'แมว'), stepper('dogs', 'สุนัข'),
+          h('p', { class: 's-note' }, 'ขนและรังแคสัตว์ติดแผ่นกรองเร็ว — ควรล้างแผ่นกรองเองทุก 2 สัปดาห์ และวางที่นอนสัตว์ให้ห่างจากใต้เครื่อง')) : null,
+        h('div', { class: 'st-air-box' }, h('h4', {}, 'ที่ตั้งของห้อง'), locSeg),
+        h('div', { class: 'st-air-box' }, h('h4', {}, 'ค่าฝุ่น PM2.5 ในพื้นที่ (µg/m³)'), h('label', { class: 's-field' }, 'ค่าเฉลี่ยที่คุณเห็นบ่อย', pmIn),
+          h('p', { class: 's-note' }, pmNote, ' · ดูค่าจริงได้ที่ ', h('a', { href: 'https://air4thai.pcd.go.th/', target: '_blank', rel: 'noopener' }, 'Air4Thai (กรมควบคุมมลพิษ)'), ' หรือแอป ', h('a', { href: 'https://pm25.gistda.or.th/', target: '_blank', rel: 'noopener' }, 'เช็คฝุ่น (GISTDA)')))),
+      h('p', { class: 'st-air-out' }, h('b', {}, `ห้องนี้ควรล้างทุก ${now.months} เดือน (ปีละ ${now.visits} ครั้ง)`), now.months !== base.months ? ` · ถ้าไม่มีปัจจัยเหล่านี้ ทุก ${base.months} เดือน` : ' · เท่ากับห้องแบบเดียวกันทั่วไป',
+        now.months <= 2 ? h('span', { class: 'st-air-tip' }, ' · ในสภาพนี้ ล้างแผ่นกรองเองทุก 1–2 สัปดาห์ ช่วยยืดรอบล้างโดยช่างได้มาก') : null),
+      h('p', { class: 's-note' }, 'ตัวคูณเป็นค่าตั้งต้นเพื่ออธิบาย (สัตว์เลี้ยง ที่ตั้ง และ PM2.5) ยังไม่ใช่ผลวัดจริง — ทีมช่างปรับจากข้อมูลก่อน–หลังล้างของงานจริง และยืนยันรอบล้างหลังเข้าตรวจครั้งแรก'));
+  }
+
   /* ---------- electricity: clean vs not cleaned, across sizes ---------- */
   const SIZES_SHOW = { wall: [9000, 12000, 18000, 24000], ceiling: [24000, 36000, 48000, 60000], cassette: [24000, 36000, 48000, 60000], floor: [36000, 48000, 60000], duct: [24000, 36000, 48000, 60000] };
   const bizGroup = g => !['home', 'condo'].includes(g);
@@ -300,22 +333,47 @@ export async function mountStudio(root, cfg = {}) {
     hrsIn.addEventListener('input', () => { state.hrs = +hrsIn.value; renderEnergy(); });
     const rateIn = h('input', { type: 'number', min: '2', max: '9', step: '0.01', value: rate.toFixed(2), 'aria-label': 'ค่าไฟต่อหน่วย' });
     rateIn.addEventListener('change', () => { state.rate = clampN(+rateIn.value, 2, 9); renderEnergy(); });
-    const sys = h('div', { class: 'st-seg', role: 'radiogroup', 'aria-label': 'ระบบคอมเพรสเซอร์' }, [['inv', 'Inverter'], ['fix', 'Fixed speed']].map(([k, t]) => h('button', { type: 'button', role: 'radio', 'aria-checked': (k === 'inv') === inv, onclick: () => { state.inv = k === 'inv'; renderEnergy(); } }, t)));
+    const setIn = h('input', { type: 'range', min: String(SET_RANGE[0]), max: String(SET_RANGE[1]), step: '1', value: state.setT, 'aria-label': 'อุณหภูมิที่ตั้งเฉลี่ย' });
+    setIn.addEventListener('input', () => { state.setT = +setIn.value; renderEnergy(); });
+    const setRng = h('label', { class: 'st-rng' }, h('span', {}, 'ตั้งเฉลี่ย', h('b', {}, `${state.setT}°C`), h('small', {}, state.setT >= 26 ? 'ช่วงที่ กฟผ. แนะนำ' : 'ต่ำกว่าคำแนะนำ')), setIn);
+    const sys = h('div', { class: 'st-seg', role: 'radiogroup', 'aria-label': 'ระบบคอมเพรสเซอร์' }, [['inv', 'Inverter'], ['fix', 'Fixed speed']].map(([k, t]) => h('button', { type: 'button', role: 'radio', 'aria-checked': (k === 'inv') === inv, onclick: () => { state.inv = k === 'inv'; recompute(true); } }, t)));
     const rows = [{ th: `ห้องนี้: ${state.n} × ${btuFmt(state.per)}`, btu: state.n * state.per, n: state.n, per: state.per, me: true }, ...SIZES_SHOW[type].map(b => ({ th: `1 × ${btuFmt(b)}`, btu: b, n: 1, per: b }))];
     const tb = h('tbody');
     rows.forEach(r => {
-      const E = energy(r.btu, type, inv, hrs, d, rate);
+      const E = energy(r.btu, type, inv, hrs, d, rate, state.setT);
       const band = sizeBandFor(type, r.per), c1 = cleanRate('Basic Clean', 'C1', type, band);
-      const cleanCost = c1 ? incVat(c1.rate.s) * r.n : null;
+      const cleanCost = c1 ? c1.rate.s * r.n : null;
       tb.append(h('tr', { class: r.me ? 'me' : '' }, h('th', { scope: 'row' }, r.th), h('td', {}, baht(Math.round(E.bahtMonthClean))), h('td', {}, baht(Math.round(E.bahtMonth))), h('td', { class: E.extraYear > 1 ? 'up' : '' }, E.extraYear > 1 ? '+' + baht(Math.round(E.extraYear)) : '—'), h('td', {}, cleanCost ? baht(Math.round(cleanCost)) : 'ประเมินหน้างาน')));
     });
-    const E0 = energy(state.n * state.per, type, inv, hrs, d, rate);
+    const E0 = energy(state.n * state.per, type, inv, hrs, d, rate, state.setT);
     energyCard.append(
       h('div', { class: 'st-en-head' }, h('div', {}, h('h3', {}, 'ค่าไฟ: ล้างแล้ว กับ ไม่ได้ล้าง ' + state.months + ' เดือน'), h('p', { class: 's-note' }, `ห้องนี้จ่ายค่าไฟแอร์เพิ่มราว ${baht(Math.round(E0.extraYear))} ต่อปี ถ้าปล่อยสภาพนี้ตลอดปี (ไฟฟ้าต่อความเย็น +${Math.round((effects(d).power - 1) * 100)}%)`)),
-        h('div', { class: 'st-en-ctl' }, h('label', { class: 'st-rng' }, h('span', {}, 'ใช้งาน', h('b', {}, String(hrs)), h('small', {}, 'ชม./วัน')), hrsIn), h('label', { class: 's-field' }, 'ค่าไฟ บาท/หน่วย', rateIn), sys)),
+        h('div', { class: 'st-en-ctl' }, h('label', { class: 'st-rng' }, h('span', {}, 'ใช้งาน', h('b', {}, String(hrs)), h('small', {}, 'ชม./วัน')), hrsIn), setRng, h('label', { class: 's-field' }, 'ค่าไฟ บาท/หน่วย', rateIn), sys)),
       h('div', { class: 'st-en-scroll', tabindex: '0', role: 'region', 'aria-label': 'ตารางค่าไฟตามขนาดเครื่อง' }, h('table', { class: 'st-en-t' }, h('thead', {}, h('tr', {}, h('th', {}, 'ขนาดเครื่อง'), h('th', {}, 'ค่าไฟ/เดือน เมื่อสะอาด'), h('th', {}, `ค่าไฟ/เดือน ไม่ล้าง ${state.months} เดือน`), h('th', {}, 'จ่ายเพิ่ม/ปี'), h('th', {}, 'ค่าล้างมาตรฐาน/ครั้ง'))), tb)),
-      h('p', { class: 's-note' }, `ตัวเลขประมาณการ: ประสิทธิภาพเฉลี่ย ${inv ? 'Inverter' : 'Fixed speed'} ${type === 'wall' ? (inv ? EFF.inverter.wall : EFF.fixed.wall) : (inv ? EFF.inverter.other : EFF.fixed.other)} BTU/ชม. ต่อวัตต์ · เครื่องทำงานเฉลี่ย ${Math.round(LOAD_F * 100)}% ของกำลัง · ค่าไฟ ${rate.toFixed(2)} บาท/หน่วย (${bizGroup(s.g) ? 'กิจการขนาดเล็ก ประมาณการ' : 'บ้านอยู่อาศัย ช่วง 201–400 หน่วย รอบ ก.ย.–ธ.ค. 2569 รวม Ft และ VAT'}) · ผลของฝุ่นอิงช่วงที่เผยแพร่: กระทรวงพลังงานสหรัฐฯ ระบุแผ่นกรองอุดตันทำให้ใช้ไฟเพิ่ม 5–15% และ กฟน./กฟผ. ระบุการล้างช่วยประหยัดราว 5–10% · ค่าล้างคือ Basic Clean ล้างปกติ รวม VAT ต่อรอบ ยังไม่รวมขั้นต่ำต่อรอบ ${baht(incVat(DATA.minBill))}`),
+      h('p', { class: 's-note' }, `ตัวเลขประมาณการ: ประสิทธิภาพเฉลี่ย ${inv ? 'Inverter' : 'Fixed speed'} ${type === 'wall' ? (inv ? EFF.inverter.wall : EFF.fixed.wall) : (inv ? EFF.inverter.other : EFF.fixed.other)} BTU/ชม. ต่อวัตต์ · เครื่องทำงานเฉลี่ย ${Math.round(LOAD_F * 100)}% ของกำลัง · ค่าไฟ ${rate.toFixed(2)} บาท/หน่วย (${bizGroup(s.g) ? 'กิจการขนาดเล็ก ประมาณการ' : 'บ้านอยู่อาศัย ช่วง 201–400 หน่วย รอบ ก.ย.–ธ.ค. 2569 รวม Ft และ VAT'}) · ผลของฝุ่นอิงช่วงที่เผยแพร่: กระทรวงพลังงานสหรัฐฯ ระบุแผ่นกรองอุดตันทำให้ใช้ไฟเพิ่ม 5–15% และ กฟน./กฟผ. ระบุการล้างช่วยประหยัดราว 5–10% · ค่าล้างคือ Basic Clean ล้างปกติ ก่อน VAT ต่อรอบ ยังไม่รวมขั้นต่ำต่อรอบ ${baht(DATA.minBill)}`),
+      typeTable(hrs, rate, d),
       h('p', { class: 'st-en-honest' }, h('b', {}, 'พูดตรงๆ: '), 'ห้องที่เปิดวันละไม่กี่ชั่วโมง ค่าไฟที่ประหยัดได้อาจน้อยกว่าค่าล้าง ประโยชน์หลักของการล้างคือ ลมแรงและเย็นเร็วขึ้น ลดกลิ่นอับและน้ำหยด และช่วยให้เครื่องไม่ทำงานหนักเกินไป ส่วนห้องที่เปิดทั้งวันหรือหลายเครื่อง ค่าไฟที่ลดลงจะเห็นผลชัดกว่า'));
+  }
+  // Rev.13 · every AC type for this room: units needed (same sizing rules as the recommendation), Inverter vs Fixed speed,
+  // per month and per year at the chosen hours / set point / tariff — the room's own dust level applies to all of them
+  function typeTable(hrs, rate, d) {
+    const need = state.need, area = state.p.w * state.p.d, tb = h('tbody'), sav = [];
+    Object.keys(TYPE_RULES).forEach(t => {
+      const sizes = catalogSizes(t).length ? catalogSizes(t) : STD_SIZES, rec = recommendUnits(need, area, t, sizes);
+      if (!rec || !rec.n) return;
+      const Ei = energy(rec.n * rec.per, t, true, hrs, d, rate, state.setT), Ef = energy(rec.n * rec.per, t, false, hrs, d, rate, state.setT);
+      const fit = state.scene.types.includes(t);
+      tb.append(h('tr', { class: t === state.type ? 'me' : '' }, h('th', { scope: 'row' }, TYPE_RULES[t].th, fit ? '' : h('small', { class: 'st-en-nf' }, ' · ไม่นิยมในห้องแบบนี้')),
+        h('td', {}, `${rec.n} × ${btuFmt(rec.per)}`), h('td', {}, baht(Math.round(Ei.bahtMonth))), h('td', {}, baht(Math.round(Ef.bahtMonth))),
+        h('td', {}, baht(Math.round(Ei.bahtMonth * 12))), h('td', { class: 'ok' }, baht(Math.round((Ef.bahtMonth - Ei.bahtMonth) * 12)))));
+    });
+    const lower = Math.round(energy(state.n * state.per, state.type, state.inv, hrs, d, rate, state.setT + 1).bahtMonth * 12), now = Math.round(energy(state.n * state.per, state.type, state.inv, hrs, d, rate, state.setT).bahtMonth * 12);
+    return h('div', { class: 'st-en-types' },
+      h('h4', {}, 'ค่าไฟแอร์ทุกประเภท สำหรับห้องนี้'),
+      h('p', { class: 's-note' }, `ใช้งาน ${hrs} ชม./วัน · ตั้ง ${state.setT}°C · ${rate.toFixed(2)} บาท/หน่วย · สภาพเครื่องตามเดือนที่ไม่ได้ล้างด้านบน · ตั้งสูงขึ้น 1°C ห้องนี้ประหยัดราว ${baht(Math.max(0, now - lower))} ต่อปี`),
+      h('div', { class: 'st-en-scroll', tabindex: '0', role: 'region', 'aria-label': 'ตารางค่าไฟตามประเภทแอร์' }, h('table', { class: 'st-en-t' },
+        h('thead', {}, h('tr', {}, h('th', {}, 'ประเภท'), h('th', {}, 'เครื่องที่ต้องใช้'), h('th', {}, 'Inverter /เดือน'), h('th', {}, 'Fixed speed /เดือน'), h('th', {}, 'Inverter /ปี'), h('th', {}, 'Inverter ประหยัดกว่า /ปี'))), tb)),
+      h('p', { class: 's-note st-src' }, 'ที่มา: ค่า Ft ก.ย.–ธ.ค. 2569 = 16.23 สตางค์/หน่วย (', h('a', { href: 'https://www.erc.or.th/th/automatic/', target: '_blank', rel: 'noopener' }, 'กกพ.'), ') · อัตราบ้านอยู่อาศัยแบบก้าวหน้าใหม่ตั้งแต่รอบบิล ก.ย. 2569: หน่วยที่ 201–400 = 4.1584 บาท (MEA/PEA) + VAT 7% ≈ 4.62 บาท/หน่วย ถ้าบ้านใช้ไฟรวมเกิน 400 หน่วย/เดือน แก้ช่องค่าไฟเป็น ~4.84 · อุณหภูมิ: ปรับสูงขึ้น 1°C ประหยัดราว 3–5% (คิด 5%/°C) กฟผ. แนะนำ 26–28°C คู่กับพัดลม · ประสิทธิภาพเครื่องเป็นค่าเฉลี่ยโดยประมาณ ไม่ใช่ค่าบนฉลากของรุ่น'));
   }
   const clampN = (v, a, b) => Math.max(a, Math.min(b, isFinite(v) ? v : a));
 
@@ -387,7 +445,7 @@ export async function mountStudio(root, cfg = {}) {
     });
   }
   function renderInsideSide() {
-    const d = dirt(), e = effects(d), rate = dustRate(state.scene, state.p), ci = cleanInterval(rate);
+    const d = dirt(), e = effects(d), rate = dustNow(), ci = cleanInterval(rate);
     const W = 300, Hh = 170, X = m => 34 + m / 18 * (W - 44), Y = v => 12 + (1.2 - v) / 0.6 * (Hh - 34);
     const line = f => Array.from({ length: 19 }, (_, m) => `${m ? 'L' : 'M'}${X(m).toFixed(1)} ${Y(f(effects(dirtFrom(m, rate)))).toFixed(1)}`).join('');
     const air = line(q => q.air), cap = line(q => q.cap), pow = line(q => q.power);

@@ -690,11 +690,16 @@ export function createACViewer(container, opts = {}) {
       state.theta = lerp(state.theta, state.camTo.theta, k * 0.9); state.phi = lerp(state.phi, state.camTo.phi, k * 0.9); state.radius = lerp(state.radius, state.camTo.radius, k * 0.9);
       if (Math.abs(state.theta - state.camTo.theta) < 1e-3) state.camTo = null;
     } else if (o.autoRotate && !rm && now - state.userAt > 3500 && !state.selected) {
-      state.autoDir = state.autoDir || 1;
-      state.theta += dt * 0.12 * state.autoDir * (state.explode > 0.5 ? 0.5 : 1);
-      if (state.theta > PRESET.persp.theta + 0.75) state.autoDir = -1;
-      if (state.theta < PRESET.persp.theta - 0.75) state.autoDir = 1;
+      // Rev.13: showroom turntable — an eased sway (slows into each end instead of bouncing) with a slight rise and fall;
+      // it picks up from wherever the viewer left the camera
+      const A = 0.75, base = PRESET.persp.theta;
+      if (!state.auto) { state.auto = { ph: Math.asin(clamp((state.theta - base) / A, -1, 1)), phi0: state.phi, w: 0 }; }
+      const au = state.auto; au.w = Math.min(1, au.w + dt * 0.6);            // ease in after the viewer lets go
+      au.ph += dt * 0.16 * (state.explode > 0.5 ? 0.5 : 1);
+      state.theta = lerp(state.theta, base + A * Math.sin(au.ph), au.w * k);
+      state.phi = lerp(state.phi, au.phi0 + Math.sin(au.ph * 0.6) * 0.035, au.w * k * 0.5);
     }
+    if (now - state.userAt <= 3500 || state.selected || state.camTo) state.auto = null;
     state.target.y = lerp(state.target.y, (state.unit === 'indoor' ? -0.02 : 0) + state.explode * 0.06 + o.targetOffset[1] * (1 - state.explode * 0.5), 0.1);
     state.target.x = lerp(state.target.x, o.targetOffset[0] * (1 - state.explode * 0.3), 0.1);
     const sp = Math.sin(state.phi);

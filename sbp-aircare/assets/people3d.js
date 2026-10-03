@@ -76,8 +76,8 @@ export function createCrowd(parent, opts = {}) {
       const female = s.female ?? ((i * 7 + 3) % 5 < 2), longSleeve = C.longSleeve ?? ((i * 5) % 3 === 0), skirt = C.skirt ?? (female && (i * 11) % 3 === 0);
       const p = {
         ...s, i, sk, female, skirt, longSleeve,
-        shirt: C.shirt ?? SHIRT[(i * 7) % SHIRT.length], pants: C.pants ?? PANTS[(i * 3) % PANTS.length], skin: C.skin ?? SKIN[(i * 5) % SKIN.length], hair: C.hair ?? HAIR[(i * 11) % HAIR.length], shoe: C.shoe ?? SHOE[(i * 13) % SHOE.length], capC: C.cap ?? null,
-        scale: (female ? 0.93 : 1.0) + ((i * 13) % 9) / 90, ph: (i * 1.37) % 6.28, seed: ((i * 9301 + 49297) % 233280) / 233280,
+        shirt: C.shirt ?? SHIRT[(i * 7) % SHIRT.length], pants: C.pants ?? PANTS[(i * 3) % PANTS.length], skin: C.skin ?? SKIN[(i * 5) % SKIN.length], hair: C.hair ?? HAIR[(i * 11) % HAIR.length], shoe: C.shoe ?? SHOE[(i * 13) % SHOE.length], capC: C.cap ?? null, glove: C.glove ?? null,
+        scale: s.scale ?? ((female ? 0.93 : 1.0) + ((i * 13) % 9) / 90), ph: (i * 1.37) % 6.28, seed: ((i * 9301 + 49297) % 233280) / 233280,
         u: 0, dir: 1, warm: 0, cold: 0, look: 0, walkT: 0,
       };
       sk.root.scale.setScalar(p.scale);
@@ -89,7 +89,7 @@ export function createCrowd(parent, opts = {}) {
     P.forEach(p => {
       const put = (k, c) => { const im = IM[k]; col.set(c); im.setColorAt(counts[k]++, col); };
       put('pelvis', p.skirt ? p.shirt : p.pants); put('torso', p.shirt); put('neck', p.skin); put('head', p.skin); put('hairS', p.hair); put('hairL', p.female ? p.hair : p.hair);
-      [0, 1].forEach(() => { put('uarm', p.shirt); put('farm', p.longSleeve ? p.shirt : p.skin); put('hand', p.skin); put('thigh', p.skirt ? p.skin : p.pants); put('shin', p.skirt ? p.skin : p.pants); put('shoe', p.shoe); });
+      [0, 1].forEach(() => { put('uarm', p.shirt); put('farm', p.longSleeve ? p.shirt : p.skin); put('hand', p.glove ?? p.skin); put('thigh', p.skirt ? p.skin : p.pants); put('shin', p.skirt ? p.skin : p.pants); put('shoe', p.shoe); });
       put('skirt', p.pants); put('cap', p.capC ?? 0x222222);
     });
     KINDS.forEach(([k, per]) => { IM[k].count = P.length * per; if (IM[k].instanceColor) IM[k].instanceColor.needsUpdate = true; });

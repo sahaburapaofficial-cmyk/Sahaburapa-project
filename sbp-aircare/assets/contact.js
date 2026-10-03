@@ -35,14 +35,14 @@ export function askTeam(topic, message = '') {
 export async function copyText(text, ta) {
   try { await navigator.clipboard.writeText(text); return true; } catch (e) { if (ta) { ta.focus(); ta.select(); } return false; }
 }
-export function handoffBox({ ref, title = 'สรุปคำขอของคุณ', text, subject = 'คำขอจากเว็บไซต์ SBP AirCare', note = 'ระบบช่วงทดลองยังไม่ส่งข้อมูลถึงทีมอัตโนมัติ กรุณาส่งสรุปนี้ให้เราทางอีเมล หรือโทรแจ้งเลขอ้างอิง ทีมจะติดต่อกลับเพื่อยืนยันราคาและนัดวัน' }) {
+export function handoffBox({ ref, title = 'สรุปคำขอของคุณ', text, subject = 'คำขอจากเว็บไซต์ SBP AirCare', note = 'คัดลอกสรุปนี้ส่งให้ทีมทาง LINE หรืออีเมล หรือโทรแจ้งเลขอ้างอิง ทีมจะติดต่อกลับเพื่อยืนยันราคาและนัดวันในเวลาทำการ' }) {
   const ta = h('textarea', { class: 's-hand-t', readonly: true, rows: Math.min(10, text.split('\n').length + 1), 'aria-label': 'สรุปคำขอสำหรับคัดลอก' }, text);
   const msg = h('p', { class: 's-hand-m', 'aria-live': 'polite' });
-  const copyBtn = h('button', { type: 'button', class: 's-btn primary', onclick: async () => { msg.textContent = (await copyText(text, ta)) ? 'คัดลอกแล้ว วางในอีเมลหรือแชตได้เลย' : 'คัดลอกอัตโนมัติไม่ได้ ข้อความถูกเลือกไว้แล้ว กดคัดลอกจากเครื่องของคุณ'; } }, 'คัดลอกสรุป');
+  const copyBtn = h('button', { type: 'button', class: 's-btn primary', onclick: async () => { msg.textContent = (await copyText(text, ta)) ? 'คัดลอกแล้ว วางในอีเมลหรือแชตได้' : 'คัดลอกอัตโนมัติไม่ได้ ข้อความถูกเลือกไว้แล้ว กดคัดลอกจากเครื่องของคุณ'; } }, 'คัดลอกสรุป');
   const mail = h('a', { class: 's-btn ghost', href: `mailto:${COMPANY.email}?subject=${encodeURIComponent(subject + (ref ? ' · ' + ref : ''))}&body=${encodeURIComponent(text)}` }, 'เปิดอีเมลพร้อมข้อความ');
   const em = h('span', { class: 's-hand-sel' }, COMPANY.email);
   return h('div', { class: 's-hand', role: 'status' },
-    h('p', { class: 's-hand-b' }, 'ช่วงทดลองใช้ (Beta)'),
+    h('p', { class: 's-hand-b' }, 'ส่งคำขอถึงทีม'),
     h('h3', {}, title, ref ? h('small', {}, ` · เลขอ้างอิง ${ref}`) : null),
     h('p', {}, note),
     ta, h('div', { class: 's-hand-act' }, copyBtn, h('a', { class: 's-btn ghost', href: lineLink(text), target: '_blank', rel: 'noopener' }, `ส่งทาง LINE ${COMPANY.line}`), mail), msg,

@@ -47,6 +47,9 @@ DATA = read(os.path.join(A, 'sbp-data.json'))
 DATA_TAG = '<script>globalThis.__SBP_DATA=' + DATA.replace('</', '<\\/') + '</script>'
 THGEO = read(os.path.join(A, 'thai-provinces.json'))
 DATA_TAG += '<script>globalThis.__SBP_TH=' + THGEO.replace('</', '<\\/') + '</script>'
+# Rev.20 address book for the area picker + travel rule (assets/th-address.json, tools/build-address.py)
+ADDRJ = read(os.path.join(A, 'th-address.json'))
+DATA_TAG += '<script>globalThis.__SBP_ADDR=' + ADDRJ.replace('</', '<\\/') + '</script>'
 # official brand logo files (only when supplied with the brand owner's permission): assets/logos/<key>.png → globalThis.__SBP_LOGOS
 LOGO_DIR = os.path.join(A, 'logos')
 if os.path.isdir(LOGO_DIR):
@@ -146,7 +149,9 @@ for v in 'abc':
 # ---- tester (preview.html) with embedded variants ----
 pv = read(os.path.join(ROOT, 'preview.html'))
 # Rev.10: the tester's "ส่งผลให้ทีม" posts to the same Apps Script endpoint as the site forms (single source: assets/submit.js)
-EP = re.search(r"export const ENDPOINT = '([^']*)'", read(os.path.join(A, 'submit.js'))).group(1)
+# Rev.19: ENDPOINT = BACKEND_URL (Apps Script, when deployed) || FORMSUBMIT — same rule as submit.js
+_sj = read(os.path.join(A, 'submit.js'))
+EP = re.search(r"const BACKEND_URL = '([^']*)'", _sj).group(1) or re.search(r"const FORMSUBMIT = '([^']*)'", _sj).group(1)
 if EP: pv = pv.replace('__SBP_ENDPOINT__', EP)
 pv = re.sub(r'<link rel="stylesheet" href="assets/([\w.-]+\.css)">', lambda m: f'<style>{css_inline(m.group(1))}</style>', pv)
 packs = ''.join(

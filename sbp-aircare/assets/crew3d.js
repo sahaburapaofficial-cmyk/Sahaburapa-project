@@ -12,7 +12,8 @@ import { chestTex, backTex, cardTex, boxTex } from './brand3d.js';
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
-const UNIFORM = { shirt: 0x1f4f8a, pants: 0x2b3440, shoe: 0x22262b, cap: 0xe2711d, longSleeve: true };
+// Rev.23: nitrile work gloves, safety shoes; belt + pouch, reflective strips and safety glasses are crew gear meshes below
+const UNIFORM = { shirt: 0x1f4f8a, pants: 0x2b3440, shoe: 0x1b1e22, cap: 0xe2711d, longSleeve: true, glove: 0x23262b };
 const sm = (c, x = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...x });
 const mb = (w, h, d, m, x = 0, y = 0, z = 0) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = true; return o; };
 const mc = (r, h, m, x = 0, y = 0, z = 0, r2) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r, r2 ?? r, h, 16), m); o.position.set(x, y, z); o.castShadow = true; return o; };
@@ -71,8 +72,12 @@ export function createCrew(parent, o = {}) {
           set(Sk.sh[0], -1.2 + slow * 0.1, 0, 0.1); set(Sk.el[0], -0.3); set(Sk.sh[1], -1.2 + slow * 0.1, 0, -0.1); set(Sk.el[1], -0.3); set(Sk.spine, 0.25); set(Sk.neck, 0.35); break;
         case 'receive':   // standing at the ladder foot, arms up to take the part
           set(Sk.sh[0], -2.3, 0, 0.15); set(Sk.el[0], -0.2); set(Sk.sh[1], -2.3, 0, -0.15); set(Sk.el[1], -0.2); set(Sk.neck, -0.35); break;
-        case 'spray':   // right hand on the gun, left steadies the lance, sweeping
-          set(Sk.sh[0], -2.0 + w2 * 0.18, w2 * 0.2, 0.05); set(Sk.el[0], -0.35); set(Sk.sh[1], -1.75 + w2 * 0.15, 0.25, -0.2); set(Sk.el[1], -0.95); set(Sk.neck, -0.28); set(Sk.head, -0.1, w2 * 0.15); set(Sk.spine, -0.05, w2 * 0.1); break;
+        case 'spray':   // right hand on the gun, left steadies the lance, sweeping along the fins (weight shifts with the sweep)
+          set(Sk.sh[0], -2.0 + w2 * 0.18, w2 * 0.2, 0.05); set(Sk.el[0], -0.35); set(Sk.sh[1], -1.75 + w2 * 0.15, 0.25, -0.2); set(Sk.el[1], -0.95); set(Sk.neck, -0.28); set(Sk.head, -0.1, w2 * 0.15); set(Sk.spine, -0.05, w2 * 0.1); Sk.pelvis.rotation.z = w2 * 0.03; set(Sk.kn[0], 0.06 + Math.max(0, w2) * 0.08); set(Sk.kn[1], 0.06 + Math.max(0, -w2) * 0.08); break;
+        case 'blow':   // Blower: one hand aims the nozzle up the fins in long slow passes, the other on the ladder rail
+          set(Sk.sh[0], -1.95 + slow * 0.25, slow * 0.35, 0.05); set(Sk.el[0], -0.3); set(Sk.wr[0], 0.25); set(Sk.sh[1], -1.2, 0, -0.35); set(Sk.el[1], -0.6); set(Sk.neck, -0.3); set(Sk.head, -0.1, slow * 0.25); set(Sk.spine, -0.04, slow * 0.12); Sk.pelvis.rotation.z = slow * 0.025; break;
+        case 'checkTime':   // looks at the wrist watch, then at the foam on the coil
+          set(Sk.sh[1], -1.15, 0, -0.55); set(Sk.el[1], -1.75); set(Sk.wr[1], 0, 0, 0.4); set(Sk.sh[0], -0.2, 0, 0.05); set(Sk.el[0], -0.35); set(Sk.neck, slow > 0 ? 0.35 : -0.25); set(Sk.head, 0, slow > 0 ? -0.35 : 0.05); break;
         case 'sprayLow':   // washing parts on the table / outdoor coil, bent forward
           set(Sk.spine, 0.35, w2 * 0.12); set(Sk.sh[0], -1.35 + w2 * 0.15, w2 * 0.2); set(Sk.el[0], -0.3); set(Sk.sh[1], -1.1, 0.2); set(Sk.el[1], -0.9); set(Sk.neck, 0.15); break;
         case 'hold':   // holds the cleaning bag spout / steadies the ladder
@@ -126,8 +131,8 @@ export function createCrew(parent, o = {}) {
   }
   const cust = o.customer || {};
   crowd.set([
-    { x: M[0].x, z: M[0].z, pose: 'rig', rig: rig(M[0]), female: false, colors: { ...UNIFORM, skin: 0xc99a73, hair: 0x1d1a17 } },
-    { x: M[1].x, z: M[1].z, pose: 'rig', rig: rig(M[1]), female: false, colors: { ...UNIFORM, skin: 0xa87653, hair: 0x2a211b } },
+    { x: M[0].x, z: M[0].z, pose: 'rig', rig: rig(M[0]), female: false, scale: 0.985, colors: { ...UNIFORM, skin: 0xc99a73, hair: 0x1d1a17 } },   // ~1.72 m
+    { x: M[1].x, z: M[1].z, pose: 'rig', rig: rig(M[1]), female: false, scale: 0.955, colors: { ...UNIFORM, skin: 0xa87653, hair: 0x2a211b } },  // ~1.67 m
     { x: M[2].x, z: M[2].z, pose: 'rig', rig: rig(M[2]), female: cust.female ?? true, colors: { shirt: 0xd8d2c4, pants: 0x3b3f46, skin: 0xe3bd98, hair: 0x2a211b, longSleeve: true, ...(cust.colors || {}) } },
   ]);
   const P = crowd.people();
@@ -136,6 +141,15 @@ export function createCrew(parent, o = {}) {
     const mk = (tx, w, h) => { const d = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tx, transparent: true, roughness: 0.9, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 })); d.matrixAutoUpdate = false; d.renderOrder = 3; crowd.group.add(d); return d; };
     return { chest: mk(chestTex(), 0.085, 0.042), back: mk(backTex(), 0.25, 0.125) };
   });
+  // crew gear following the body: work belt + tool pouch (pelvis), reflective strips (torso), safety glasses (head, when spraying)
+  const gearM = { belt: sm(0x1b1d20, { roughness: 0.7 }), pouch: sm(0x3a2f26, { roughness: 0.85 }), refl: sm(0xd9dee4, { roughness: 0.25, metalness: 0.3, emissive: 0x30363c }), lens: new THREE.MeshStandardMaterial({ color: 0x1b2836, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.75 }) };
+  const gear = [0, 1].map(() => {
+    const mk = (geo, m) => { const o = new THREE.Mesh(geo, m); o.matrixAutoUpdate = false; o.castShadow = true; crowd.group.add(o); return o; };
+    return { belt: mk(new THREE.CylinderGeometry(0.14, 0.14, 0.045, 20, 1, true).scale(1.2, 1, 0.74), gearM.belt), pouch: mk(new THREE.BoxGeometry(0.07, 0.1, 0.05), gearM.pouch),
+      refl: mk(new THREE.CylinderGeometry(0.153, 0.153, 0.024, 22, 1, true).scale(1.18, 1, 0.7), gearM.refl), glasses: mk(new THREE.BoxGeometry(0.15, 0.032, 0.02), gearM.lens) };
+  });
+  const GOFF = { belt: new THREE.Matrix4().makeTranslation(0, 0.02, 0), pouch: new THREE.Matrix4().makeTranslation(0.17, -0.04, 0.03), refl: new THREE.Matrix4().makeTranslation(0, 0.2, 0), glasses: new THREE.Matrix4().makeTranslation(0, 0.135, 0.103) };
+  const SPRAYS = { spray: 1, sprayUp: 1, sprayLow: 1, crouchSpray: 1, blow: 1 };
   const OFF = { chest: new THREE.Matrix4().makeTranslation(0.07, 0.36, 0.1), back: new THREE.Matrix4().makeRotationY(Math.PI).premultiply(new THREE.Matrix4().makeTranslation(0, 0.3, -0.1)) };
 
   function apply(m, s, instant) {
@@ -188,6 +202,10 @@ export function createCrew(parent, o = {}) {
       }
       const D = decals[i]; Sk.spine.updateMatrixWorld(true);
       D.chest.matrix.copy(Sk.spine.matrixWorld).multiply(OFF.chest); D.back.matrix.copy(Sk.spine.matrixWorld).multiply(OFF.back);
+      const Gr = gear[i]; Sk.pelvis.updateMatrixWorld(true); Sk.head.updateMatrixWorld(true);
+      Gr.belt.matrix.copy(Sk.pelvis.matrixWorld).multiply(GOFF.belt); Gr.pouch.matrix.copy(Sk.pelvis.matrixWorld).multiply(GOFF.pouch); Gr.refl.matrix.copy(Sk.spine.matrixWorld).multiply(GOFF.refl);
+      Gr.glasses.matrix.copy(Sk.head.matrixWorld).multiply(GOFF.glasses); Gr.glasses.visible = !!SPRAYS[m.act] && !m.path.length;
+      [Gr.belt, Gr.pouch, Gr.refl, Gr.glasses].forEach(o => { o.matrixWorldNeedsUpdate = true; });
     });
   }
   return {

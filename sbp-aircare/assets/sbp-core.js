@@ -6,6 +6,12 @@
 
 export const VAT = 0.07;
 export const incVat = n => Math.round(n * (1 + VAT));
+// ★Rev.16 owner decision (2 ต.ค. 2569: "ราคาก่อนแวททั้งหมด ทุกราคา งานบริการให้เป็นตัวเลข round up hundred digit และระบุราคาก่อน VAT เสมอ"):
+// every price on the site is shown BEFORE VAT and labelled so; VAT 7% appears only in the totals of a quotation.
+// Service rates (cleaning, repair, installation service) are rounded UP to the next 100 baht when loaded — the Pricebook file
+// is not edited (tools_recon.py still checks it 1:1). Materials sold per metre / piece keep their exact Pricebook price.
+export const up100 = n => n == null ? n : Math.ceil(n / 100) * 100;
+export const EX_TH = 'ก่อน VAT';
 
 /* ---------- taxonomy ---------- */
 export const TYPES = [
@@ -30,6 +36,7 @@ export async function loadData(url) {
   const j = globalThis.__SBP_DATA || await (await fetch(url || new URL('./sbp-data.json', import.meta.url))).json();
   const S = i => (i == null || i < 0 ? null : j.pool[i]);
   DATA.version = j.v; DATA.minBill = j.minBill;
+  await loadAddr();   // Rev.20 address book for the area picker + travel rule
   // products -> series cards
   const groups = new Map();
   let skuCount = 0;
@@ -42,7 +49,7 @@ export async function loadData(url) {
     const inverter = /inverter/i.test(d.system || '');
     const key = [bid, d.series || model, type, inverter].join('|');
     if (!groups.has(key)) groups.set(key, { id: slug(key), code: model, brand: bid, type, inverter, label: d.refrigerant || '—', series: (d.series || model) + (/inverter|fixed/i.test(d.series || '') ? '' : inverter ? ' · Inverter' : d.system ? ' · ' + d.system : ''), popular: false, isNew: false, skus: [] });
-    groups.get(key).skus.push({ sku: model, btu, px, price: incVat(px), installStdEx: ix, stock: 'check', d });
+    groups.get(key).skus.push({ sku: model, btu, px, price: px, installStdEx: ix, stock: 'check', d });
     skuCount++;
   }
   DEMO.models = [...groups.values()].map(m => (m.skus.sort((a, b) => a.btu - b.btu), m.code = m.skus[0].sku, m));
@@ -54,19 +61,19 @@ export async function loadData(url) {
   // the Basic/MASS tier stays in the Pricebook for the sales team. Copper brand shown as O-TWO (Pricebook to be updated to match).
   // Rev.08 owner decision: the web shows one copper spec only — O-TWO 0.70 mm. Type L / project-grade copper stays in the Pricebook (QTN/BOQ work) but is not listed on the web.
   const brand = t => t == null ? t : t.replace(/K Copper Type L/g, 'O-TWO').replace(/K Copper/g, 'O-TWO').replace(/ท่อน้ำยาทองแดง 0\.70 มม\./g, 'ท่อน้ำยาทองแดง O-TWO 0.70 มม.').replace(/ท่อ Type L หรือ Project-grade ใช้เมื่อระบุใน QTN\/BOQ;\s*ไม่รวมอัตโนมัติหากไม่ระบุ;\s*/g, '');
-  DATA.inst = j.inst.map(([c, cat, n, u, p, inc, exc, w, sv]) => ({ code: c, cat: S(cat), name: brand(n), unit: S(u), ex: p, inc: brand(S(inc)), exc: S(exc), warranty: S(w), survey: S(sv) })).filter(i => !/-MASS$/.test(i.code) && !/^MAT-CU-L-/.test(i.code));
+  DATA.inst = j.inst.map(([c, cat, n, u, p, inc, exc, w, sv]) => ({ code: c, cat: S(cat), name: brand(n), unit: S(u), ex: /^INS-/.test(c) ? up100(p) : p, inc: brand(S(inc)), exc: S(exc), warranty: S(w), survey: S(sv) })).filter(i => !/-MASS$/.test(i.code) && !/^MAT-CU-L-/.test(i.code));
   DATA.instByCode = Object.fromEntries(DATA.inst.map(i => [i.code, i]));
-  DATA.clean = j.clean.map(([pk, lv, ty, rg, u, s, sp, pj, w, care, doc, inc, exc, st, n]) => ({ pkg: S(pk), level: lv, ty: S(ty), type: TYPE_FROM_CLEAN[S(ty)] || null, range: S(rg), unit: S(u), rate: { s, sp, pj }, warranty: S(w), care: S(care), doc: S(doc), inc: S(inc), exc: S(exc), status: S(st), name: n }));
-  DATA.rep = j.rep.map(([ty, n, u, s, sp, pj, w, inc, exc, st]) => ({ cat: S(ty), name: n.replace(/^ซ่อมแอร์:\s*/, ''), unit: S(u), rate: { s, sp, pj }, warranty: S(w), inc: S(inc), exc: S(exc), status: S(st) }));
+  DATA.clean = j.clean.map(([pk, lv, ty, rg, u, s, sp, pj, w, care, doc, inc, exc, st, n]) => ({ pkg: S(pk), level: lv, ty: S(ty), type: TYPE_FROM_CLEAN[S(ty)] || null, range: S(rg), unit: S(u), rate: { s: up100(s), sp, pj, pb: s }, warranty: S(w), care: S(care), doc: S(doc), inc: S(inc), exc: S(exc), status: S(st), name: n }));
+  DATA.rep = j.rep.map(([ty, n, u, s, sp, pj, w, inc, exc, st]) => ({ cat: S(ty), name: n.replace(/^ซ่อมแอร์:\s*/, ''), unit: S(u), rate: { s: up100(s), sp, pj, pb: s }, warranty: S(w), inc: S(inc), exc: S(exc), status: S(st) }));
   // headline "from" prices for service cards
   const minOf = arr => Math.min(...arr.filter(x => x != null));
   const c1 = DATA.clean.filter(r => r.pkg === 'Basic Clean' && r.level === 'C1' && r.type).map(r => r.rate.s);
   const ins = DATA.inst.filter(i => /^INS-/.test(i.code) && i.ex).map(i => i.ex);
   const dia = DATA.rep.filter(r => r.cat === 'ตรวจวินิจฉัย').map(r => r.rate.s);
   const set = (id, from) => { const s = SERVICES.find(x => x.id === id); if (s) s.from = from; };
-  set('clean', `เริ่ม ${baht(incVat(minOf(c1)))} / เครื่อง`);
-  set('install', `เริ่ม ${baht(incVat(minOf(ins)))} / เครื่อง`);
-  set('repair', `ค่าตรวจเริ่ม ${baht(incVat(minOf(dia)))}`);
+  set('clean', `เริ่ม ${baht((minOf(c1)))} / เครื่อง`);
+  set('install', `เริ่ม ${baht((minOf(ins)))} / เครื่อง`);
+  set('repair', `ค่าตรวจเริ่ม ${baht((minOf(dia)))}`);
   DATA.loaded = true;
   return DATA;
 }
@@ -179,7 +186,7 @@ export const baht = n => '฿' + Math.round(n).toLocaleString('en-US');
 export const btuFmt = n => n.toLocaleString('en-US') + ' BTU';
 export const kbtu = n => (n / 1000).toFixed(n % 1000 ? 1 : 0) + 'k';
 
-/* ---------- service area: Bangkok + 4 vicinity provinces; nearby provinces by road distance ---------- */
+/* ---------- company + HQ point (service area: see TRAVEL below) ---------- */
 export const HQ = { th: 'สำนักงานใหญ่ 593 ถ.พระราม 2', lat: 13.664, lon: 100.44 };   // approximate point
 // Rev.10 (2 ต.ค. 2569) — company facts for the about / contact blocks. Email from the owner; address, phone, LINE OA and Facebook
 // from the official site sahaburapagroup.com (home + contact pages); tax id = juristic person registration no. 0105553009307
@@ -188,7 +195,7 @@ export const HQ = { th: 'สำนักงานใหญ่ 593 ถ.พระ�
 // is possible at an extra charge (amount not published → the team states it in the quotation; never invent a figure).
 export const COMPANY = {
   th: 'บริษัท สหบูรพากรุ๊ป จำกัด', en: 'Saha Burapa Group Co., Ltd.', brand: 'SBP AirCare', service: 'Sahaburapa Service',
-  addr: '593 ถนนพระราม 2 แขวงบางมด เขตจอมทอง กรุงเทพฯ 10150', tel: '02-459-3291-9', telHref: 'tel:024593291', email: 'Sahaburapa.official@gmail.com',
+  addr: '593 ถนนพระราม 2 แขวงบางมด เขตจอมทอง กรุงเทพฯ 10150', tel: '02-459-3299', telHref: 'tel:024593299', email: 'Sahaburapa.official@gmail.com',
   web: 'www.sahaburapagroup.com', webUrl: 'https://www.sahaburapagroup.com', years: 'กว่า 30 ปี', taxId: '0105553009307',
   line: '@sahaservices', lineUrl: 'https://line.me/R/ti/p/@sahaservices', fbUrl: 'https://www.facebook.com/profile.php?id=61560113712375',
   hours: 'จันทร์–เสาร์ 08:30–17:30 น. (หยุดวันอาทิตย์)', hoursNote: 'นอกเวลาทำการและวันอาทิตย์ให้บริการได้ มีค่าใช้จ่ายเพิ่มเติม ทีมแจ้งในใบเสนอราคา',
@@ -196,83 +203,91 @@ export const COMPANY = {
   trade: 'จำหน่ายและนำเข้าน้ำยาแอร์ อุปกรณ์ เครื่องมือ และอะไหล่แอร์ ทั้งปลีกและส่ง',
   mapUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('สหบูรพากรุ๊ป 593 ถนนพระราม 2 บางมด จอมทอง กรุงเทพฯ'),
 };
-export const ZONES = [
-  { province: 'กรุงเทพมหานคร', tier: 'core', districts: ['พระนคร','ดุสิต','หนองจอก','บางรัก','บางเขน','บางกะปิ','ปทุมวัน','ป้อมปราบศัตรูพ่าย','พระโขนง','มีนบุรี','ลาดกระบัง','ยานนาวา','สัมพันธวงศ์','พญาไท','ธนบุรี','บางกอกใหญ่','ห้วยขวาง','คลองสาน','ตลิ่งชัน','บางกอกน้อย','บางขุนเทียน','ภาษีเจริญ','หนองแขม','ราษฎร์บูรณะ','บางพลัด','ดินแดง','บึงกุ่ม','สาทร','บางซื่อ','จตุจักร','บางคอแหลม','ประเวศ','คลองเตย','สวนหลวง','จอมทอง','ดอนเมือง','ราชเทวี','ลาดพร้าว','วัฒนา','บางแค','หลักสี่','สายไหม','คันนายาว','สะพานสูง','วังทองหลาง','คลองสามวา','บางนา','ทวีวัฒนา','ทุ่งครุ','บางบอน'] },
-  { province: 'นนทบุรี', tier: 'core', districts: ['เมืองนนทบุรี','บางกรวย','บางใหญ่','บางบัวทอง','ไทรน้อย','ปากเกร็ด'] },
-  { province: 'ปทุมธานี', tier: 'core', districts: ['เมืองปทุมธานี','คลองหลวง','ธัญบุรี','หนองเสือ','ลาดหลุมแก้ว','ลำลูกกา','สามโคก'] },
-  { province: 'สมุทรปราการ', tier: 'core', districts: ['เมืองสมุทรปราการ','บางบ่อ','บางพลี','พระประแดง','พระสมุทรเจดีย์','บางเสาธง'] },
-  { province: 'สมุทรสาคร', tier: 'core', districts: ['เมืองสมุทรสาคร','กระทุ่มแบน','บ้านแพ้ว'] },
-];
-// nearby places with approximate coordinates (district office level). Production: Google Distance Matrix from the job address.
-export const NEARBY = [
-  ['นครปฐม', 'เมืองนครปฐม', 13.819, 100.062], ['นครปฐม', 'สามพราน', 13.724, 100.215], ['นครปฐม', 'พุทธมณฑล', 13.802, 100.322], ['นครปฐม', 'นครชัยศรี', 13.803, 100.186], ['นครปฐม', 'บางเลน', 14.022, 100.169], ['นครปฐม', 'ดอนตูม', 13.962, 100.087], ['นครปฐม', 'กำแพงแสน', 14.005, 99.99],
-  ['สมุทรสงคราม', 'เมืองสมุทรสงคราม', 13.409, 100.001], ['สมุทรสงคราม', 'อัมพวา', 13.425, 99.955],
-  ['พระนครศรีอยุธยา', 'พระนครศรีอยุธยา', 14.353, 100.568], ['พระนครศรีอยุธยา', 'บางปะอิน', 14.228, 100.578], ['พระนครศรีอยุธยา', 'วังน้อย', 14.237, 100.714], ['พระนครศรีอยุธยา', 'บางไทร', 14.195, 100.476], ['พระนครศรีอยุธยา', 'อุทัย', 14.365, 100.683], ['พระนครศรีอยุธยา', 'เสนา', 14.327, 100.405],
-  ['ฉะเชิงเทรา', 'เมืองฉะเชิงเทรา', 13.689, 101.071], ['ฉะเชิงเทรา', 'บางปะกง', 13.504, 100.967], ['ฉะเชิงเทรา', 'บ้านโพธิ์', 13.593, 101.083], ['ฉะเชิงเทรา', 'บางน้ำเปรี้ยว', 13.843, 101.052], ['ฉะเชิงเทรา', 'บางคล้า', 13.72, 101.21],
-  ['ชลบุรี', 'เมืองชลบุรี', 13.361, 100.985], ['ชลบุรี', 'ศรีราชา', 13.174, 100.93], ['ชลบุรี', 'บางละมุง', 12.925, 100.878], ['ชลบุรี', 'พานทอง', 13.466, 101.093], ['ชลบุรี', 'บ้านบึง', 13.314, 101.108],
-  ['ราชบุรี', 'เมืองราชบุรี', 13.536, 99.817], ['ราชบุรี', 'บ้านโป่ง', 13.816, 99.878], ['ราชบุรี', 'โพธาราม', 13.692, 99.849], ['ราชบุรี', 'ดำเนินสะดวก', 13.519, 99.955],
-  ['สุพรรณบุรี', 'เมืองสุพรรณบุรี', 14.474, 100.122], ['สระบุรี', 'เมืองสระบุรี', 14.528, 100.91], ['สระบุรี', 'หนองแค', 14.34, 100.873],
-  ['นครนายก', 'เมืองนครนายก', 14.204, 101.213], ['ชลบุรี', 'พัทยา', 12.927, 100.877], ['ชลบุรี', 'แหลมฉบัง', 13.08, 100.9], ['ชลบุรี', 'บ่อวิน', 13.05, 101.1], ['ระยอง', 'เมืองระยอง', 12.681, 101.281], ['ระยอง', 'ปลวกแดง', 12.98, 101.21], ['สระบุรี', 'แก่งคอย', 14.586, 101.0], ['สระบุรี', 'หนองแซง', 14.5, 100.83], ['ฉะเชิงเทรา', 'แปลงยาว', 13.59, 101.29], ['กาญจนบุรี', 'เมืองกาญจนบุรี', 14.004, 99.548], ['เพชรบุรี', 'เมืองเพชรบุรี', 13.112, 99.94], ['ปราจีนบุรี', 'เมืองปราจีนบุรี', 14.051, 101.372], ['อ่างทอง', 'เมืองอ่างทอง', 14.589, 100.455],
-].map(([province, district, lat, lon]) => ({ province, district, lat, lon }));
-// Travel rule outside the 5 core provinces — modelled on published fees of Thai AC service shops (market survey 29 ก.ย. 2569):
-// 300 flat for the next ring (e.g. +300 นครปฐม/สมุทรสาคร), 800 for 61–80 km bands, 5–10 บาท/กม. beyond a free radius,
-// ~3,000/day for 150–200 km jobs. Amounts are before VAT, per trip (one-way road km from HQ).
-// waiveAt / minUnits are cost-based proposals (no shop publishes them) — owner to confirm.
+/* ---------- ★Rev.20 service area + travel (owner 3 ต.ค. 2569: "รับระยะ 1–30 กม. เฉพาะในกรุงเทพ และมีข้อจำกัดต่อ 1 งาน หากไม่ถึง
+   มีค่าเดินทาง และถ้าระยะเกินกว่านั้นบวกตามระยะทางไปเหมือนคอนเซ็ปบริษัทอื่น ๆ") ----------
+   · พื้นที่หลัก = ที่อยู่ในกรุงเทพมหานคร และระยะถนนจากสำนักงานใหญ่ไม่เกิน freeKm → ไม่มีค่าเดินทาง เมื่องานล้างถึงยอดขั้นต่ำ
+     (DATA.minBill) · งานล้างที่ยอดต่ำกว่าขั้นต่ำ → ค่าเดินทาง baseFee แทนการเติมยอดขั้นต่ำ
+   · นอกพื้นที่หลัก (กรุงเทพฯ ที่ไกลกว่า freeKm หรือจังหวัดอื่น) ≤ maxKm → baseFee + perKm × กม. ที่เกิน freeKm ต่อเที่ยว (ปัดขึ้นหลักร้อย)
+   · เกิน maxKm → ไม่รับรายเครื่อง (งานโครงการ / สัญญา)
+   baseFee 300 และ perKm 10 คือค่าที่เว็บประกาศอยู่แล้วจากการสำรวจร้านแอร์ (29 ก.ย. 2569) — เจ้าของยืนยันตัวเลขได้ที่นี่ที่เดียว
+   ระยะ = เส้นตรงจากจุดที่ว่าการเขต/อำเภอ (หรือจุดกลางแขวง/ตำบล) × roadFactor — ค่าประมาณ ทีมยืนยันจากที่อยู่จริง */
 export const TRAVEL = {
-  roadFactor: 1.35,
-  bands: [
-    { id: 'Z1', maxKm: 60, fee: () => 300, waiveAt: 4, minUnits: 1, th: 'ไม่เกิน 60 กม.' },
-    { id: 'Z2', maxKm: 100, fee: () => 800, waiveAt: 8, minUnits: 3, th: '61–100 กม.' },
-    { id: 'Z3', maxKm: 150, fee: () => 1500, waiveAt: null, minUnits: 5, th: '101–150 กม.' },
-  ],
-  maxKm: 150,
-  perKm: 10,
-  farDay: 3000,
-  source: 'สำรวจราคาที่ร้านแอร์ในไทยประกาศบนเว็บ 18 แหล่ง (29 ก.ย. 2569)',
+  roadFactor: 1.35, freeKm: 30, freeProvince: 'กรุงเทพมหานคร', baseFee: 300, perKm: 10, maxKm: 150,
+  source: 'ค่าเดินทางเริ่มต้นและต่อกิโลเมตรจากการสำรวจราคาที่ร้านแอร์ในไทยประกาศ (29 ก.ย. 2569)',
 };
 export const TIER_TH = {
-  core: { th: 'อยู่ในพื้นที่ให้บริการ', note: 'กรุงเทพฯ และปริมณฑล ไม่มีค่าเดินทางเพิ่ม' },
-  extended: { th: 'รับงานได้ มีค่าเดินทางเพิ่ม', note: 'นอกกรุงเทพฯ และปริมณฑล คิดค่าเดินทางต่อเที่ยวตามช่วงระยะทางจากสำนักงานใหญ่ ยกเว้นเมื่อจำนวนเครื่องถึงเกณฑ์' },
-  out: { th: 'เกินระยะให้บริการ', note: 'เกินระยะที่รับงานรายเครื่อง ฝากข้อมูลไว้เพื่อประเมินเป็นงานโครงการหรือสัญญา' },
-  unknown: { th: 'ไม่พบชื่อพื้นที่นี้', note: 'ลองพิมพ์ชื่อเขตหรืออำเภอ หรือให้ทีมตรวจสอบจากที่อยู่จริง' },
+  core: { th: 'พื้นที่ให้บริการหลัก', note: `กรุงเทพฯ ในระยะ ${TRAVEL.freeKm} กม. จากสำนักงานใหญ่ ไม่มีค่าเดินทางเมื่อยอดงานล้างถึงขั้นต่ำ` },
+  extended: { th: 'รับงานได้ คิดค่าเดินทางตามระยะ', note: `ค่าเดินทางต่อเที่ยว = ${TRAVEL.baseFee} บาท + ${TRAVEL.perKm} บาทต่อ กม. ที่เกิน ${TRAVEL.freeKm} กม. (ก่อน VAT ปัดขึ้นหลักร้อย)` },
+  out: { th: 'เกินระยะรับงานรายเครื่อง', note: `ไกลกว่า ${TRAVEL.maxKm} กม. ฝากข้อมูลไว้ ทีมประเมินเป็นงานโครงการหรือสัญญา` },
+  unknown: { th: 'ไม่พบพื้นที่นี้', note: 'เลือกจากรายการ หรือพิมพ์ชื่อแขวง/ตำบล เขต/อำเภอ หรือรหัสไปรษณีย์' },
 };
-const norm = s => (s || '').replace(/\s|เขต|อำเภอ|อ\.|จังหวัด|จ\./g, '').toLowerCase();
+// fee for one trip at `km` road km outside the core area (null = beyond maxKm)
+export const travelFee = km => km > TRAVEL.maxKm ? null : up100(TRAVEL.baseFee + TRAVEL.perKm * Math.max(0, km - TRAVEL.freeKm));
+
+/* address book (assets/th-address.json, built by tools/build-address.py): provinces near HQ with every district / subdistrict /
+   postcode and a point; other provinces by name. Loaded by loadData() (or globalThis.__SBP_ADDR in single-file builds). */
+export const ADDR = { list: [], other: [], loaded: false };
+export async function loadAddr(url) {
+  if (ADDR.loaded) return ADDR;
+  try {
+    const j = globalThis.__SBP_ADDR || await (await fetch(url || new URL('./th-address.json', import.meta.url))).json();
+    const list = [];
+    j.p.forEach(([p, ds]) => ds.forEach(([d, la, lo, subs]) => subs.forEach(([s, z, sla, slo]) => list.push({ p, d, s, z, lat: sla ?? la, lon: slo ?? lo }))));
+    Object.assign(ADDR, { list, other: j.o, src: j.v, loaded: true });
+  } catch (e) { ADDR.loaded = true; }
+  return ADDR;
+}
 const hav = (a, b, c, d) => { const R = 6371, t = x => x * Math.PI / 180; const dl = t(c - a), dn = t(d - b); const s = Math.sin(dl / 2) ** 2 + Math.cos(t(a)) * Math.cos(t(c)) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(s)); };
-export function travelFor(km) {
-  const band = TRAVEL.bands.find(x => km <= x.maxKm);
-  return band ? { fee: band.fee(km), band, minUnits: band.minUnits, waiveAt: band.waiveAt } : null;
+export const roadKm = (lat, lon) => Math.round(hav(HQ.lat, HQ.lon, lat, lon) * TRAVEL.roadFactor);
+const pTh = p => p === 'กรุงเทพมหานคร' ? 'กรุงเทพฯ' : p;
+const BKK = p => p === 'กรุงเทพมหานคร';
+// display name of one address: แขวง… เขต… กรุงเทพฯ / ต.… อ.… จ.…
+export const addrTh = a => !a ? '' : BKK(a.p) ? `${a.s ? 'แขวง' + a.s + ' ' : ''}${a.d ? 'เขต' + a.d + ' ' : ''}กรุงเทพฯ${a.z ? ' ' + a.z : ''}` : `${a.s ? 'ต.' + a.s + ' ' : ''}${a.d ? 'อ.' + a.d + ' ' : ''}จ.${a.p}${a.z ? ' ' + a.z : ''}`;
+/** zone of a picked address {p, d?, s?, z?} → { tier, km, fee, province, district, sub, zip, match } */
+export function zoneOf(a) {
+  if (!a || !a.p) return null;
+  const base = { province: a.p, district: a.d || '', sub: a.s || '', zip: a.z || '', match: addrTh(a), districts: [] };
+  const rows = ADDR.list.filter(r => r.p === a.p && (!a.d || r.d === a.d) && (!a.s || r.s === a.s) && (!a.z || r.z === a.z));
+  if (!rows.length) return ADDR.other.includes(a.p) ? { ...base, tier: 'out', km: null, fee: null } : { ...base, tier: 'unknown', km: null, fee: null };
+  // a whole province / district: the nearest part decides (the team confirms from the exact address)
+  const km = Math.min(...rows.map(r => roadKm(r.lat, r.lon)));
+  if (BKK(a.p) && km <= TRAVEL.freeKm) return { ...base, tier: 'core', km, fee: 0 };
+  const fee = travelFee(km);
+  return fee == null ? { ...base, tier: 'out', km, fee: null } : { ...base, tier: 'extended', km, fee };
 }
-// fee actually charged for a job with `units` machines (waived at volume); returns { fee, waived, short }
-export function travelCharge(zone, units = 1) {
-  if (!zone || zone.tier !== 'extended') return { fee: 0, waived: false, short: 0 };
-  const waived = !!(zone.waiveAt && units >= zone.waiveAt);
-  return { fee: waived ? 0 : zone.fee, waived, short: Math.max(0, (zone.minUnits || 1) - units) };
+const nrm = s => (s || '').replace(/\s|แขวง|เขต|ตำบล|อำเภอ|จังหวัด|ต\.|อ\.|จ\./g, '').replace(/^กทม$|^กรุงเทพฯ?$/, 'กรุงเทพมหานคร').toLowerCase();
+/** type-ahead: subdistrict / district / province / postcode → up to n picks, best first */
+export function addrSearch(q, n = 8) {
+  const k = nrm(q); if (k.length < 2) return [];
+  const out = [], seen = new Set(), add = (a, score) => { const key = `${a.p}|${a.d || ''}|${a.s || ''}|${a.z || ''}`; if (!seen.has(key)) { seen.add(key); out.push({ ...a, score }); } };
+  const zip = /^\d{2,5}$/.test(k);
+  for (const r of ADDR.list) {
+    if (zip) { if (r.z.startsWith(k)) add({ p: r.p, d: r.d, s: r.s, z: r.z }, r.z === k ? 3 : 1); continue; }
+    const s = nrm(r.s), d = nrm(r.d), p = nrm(r.p);
+    if (s === k) add({ p: r.p, d: r.d, s: r.s, z: r.z }, 6); else if (s.startsWith(k)) add({ p: r.p, d: r.d, s: r.s, z: r.z }, 4);
+    if (d === k) add({ p: r.p, d: r.d }, 7); else if (d.startsWith(k)) add({ p: r.p, d: r.d }, 5);
+    if (p === k || p.startsWith(k)) add({ p: r.p }, p === k ? 5 : 2);
+  }
+  if (!zip) ADDR.other.forEach(p => { if (nrm(p).startsWith(k)) add({ p }, 1); });
+  return out.sort((a, b) => b.score - a.score || (a.s ? 1 : 0) - (b.s ? 1 : 0) || roadKmOf(a) - roadKmOf(b)).slice(0, n);
 }
-export const travelNote = z => z && z.tier === 'extended'
-  ? `ค่าเดินทาง ${baht(incVat(z.fee))}/เที่ยว (${z.bandTh})${z.waiveAt ? ` · ยกเว้นเมื่อ ${z.waiveAt} เครื่องขึ้นไป` : ''}${z.minUnits > 1 ? ` · ขั้นต่ำ ${z.minUnits} เครื่อง` : ''}`
-  : '';
+const roadKmOf = a => { const r = ADDR.list.find(x => x.p === a.p && (!a.d || x.d === a.d)); return r ? roadKm(r.lat, r.lon) : 999; };
+/** free text (older inputs, tests): the best pick, or "unknown" */
 export function checkZone(input) {
-  const q = norm(input);
-  if (q.length < 2) return null;
-  // collect every candidate name, then keep the longest one that matches (so "พระนครศรีอยุธยา" never resolves to เขตพระนคร)
-  const cands = [];
-  for (const z of ZONES) { cands.push({ name: z.province, z }); z.districts.forEach(d => cands.push({ name: d, z })); }
-  NEARBY.forEach(n => { cands.push({ name: n.district, n }); cands.push({ name: n.province, n: NEARBY.find(x => x.province === n.province) }); });
-  const hit = cands.filter(c => { const k = norm(c.name); return k.includes(q) || q.includes(k); }).sort((a, b) => (norm(b.name) === q) - (norm(a.name) === q) || b.name.length - a.name.length)[0];
-  if (hit && hit.z) return { ...hit.z, match: hit.name, tier: 'core', km: 0, fee: 0 };
-  if (hit && hit.n) {
-    const n = hit.n;
-    const km = Math.round(hav(HQ.lat, HQ.lon, n.lat, n.lon) * TRAVEL.roadFactor);
-    const t = travelFor(km);
-    return { province: n.province, match: hit.name === n.province ? n.province : n.district, districts: [], km, tier: t ? 'extended' : 'out', fee: t ? t.fee : null, band: t ? t.band.id : null, bandTh: t ? t.band.th : '', minUnits: t ? t.minUnits : null, waiveAt: t ? t.waiveAt : null };
-  }
-  if (/^\d{5}$/.test(q)) {
-    if (['10270', '10280', '10290', '10540', '10560', '10130'].includes(q)) return { ...ZONES[3], match: 'รหัส ' + q, tier: 'core', km: 0, fee: 0 };
-    const p = { '10': 'กรุงเทพมหานคร', '11': 'นนทบุรี', '12': 'ปทุมธานี', '74': 'สมุทรสาคร' }[q.slice(0, 2)];
-    if (p) return { ...ZONES.find(z => z.province === p), match: 'รหัส ' + q, tier: 'core', km: 0, fee: 0 };
-  }
-  return { province: '', match: input, tier: 'unknown', districts: [] };
+  if (input && typeof input === 'object') return zoneOf(input);
+  const q = nrm(input); if (q.length < 2) return null;
+  const best = addrSearch(input, 1)[0];
+  return best ? zoneOf(best) : { province: '', match: input, tier: 'unknown', districts: [], km: null, fee: null };
 }
+/** travel for one visit: zone (or null when not given yet) + the cleaning amount of that visit (before VAT)
+ *  → { fee, small (cleaning below the minimum), distance (part for km beyond freeKm), label } */
+export function jobTravel(zone, cleanEx = 0) {
+  const small = cleanEx > 0 && cleanEx < DATA.minBill;
+  if (zone && zone.tier === 'extended') return { fee: zone.fee, small, distance: true, label: `ค่าเดินทาง ${zone.km} กม. (ระยะถนนโดยประมาณ)` };
+  if (small && (!zone || zone.tier === 'core' || zone.tier === 'unknown')) return { fee: TRAVEL.baseFee, small, distance: false, label: `ค่าเดินทาง (งานล้างต่ำกว่าขั้นต่ำ ${baht(DATA.minBill)})` };
+  return { fee: 0, small, distance: false, label: '' };
+}
+export const travelNote = z => !z ? '' : z.tier === 'core' ? `ในระยะ ${z.km} กม. · ไม่มีค่าเดินทางเมื่องานล้างถึง ${baht(DATA.minBill)}` : z.tier === 'extended' ? `ระยะถนนประมาณ ${z.km} กม. · ค่าเดินทาง ${baht(z.fee)}/เที่ยว (ก่อน VAT)` : z.tier === 'out' ? TIER_TH.out.note : TIER_TH.unknown.note;
 
 /* ---------- annual cleaning contract (real pricebook rates) ---------- */
 export const CLEAN_PKGS = [
@@ -319,14 +334,15 @@ export function estimateContract({ units, visits, zone = null, high = false, pkg
   const deepVisits = deep ? 1 : 0;
   const normalVisits = Math.max(0, visits - deepVisits);
   const minBill = DATA.minBill;
-  const v1 = Math.max(c1, minBill), v2 = Math.max(c2, minBill);
-  const tc = travelCharge(zone, count); const travel = tc.fee;
-  const annualEx = v1 * normalVisits + v2 * deepVisits + travel * visits;
+  // ★Rev.20 below the cleaning minimum a visit carries the travel fee (no top-up to the minimum); outside the core area every visit does
+  const t1 = jobTravel(zone, c1), t2 = jobTravel(zone, c2);
+  const v1 = c1 + t1.fee, v2 = c2 + t2.fee, travel = t1.fee;
+  const annualEx = v1 * normalVisits + v2 * deepVisits;
   return {
-    count, visits, level: lvl, lines, perVisitC1: v1, perVisitC2: v2, travel, travelWaived: tc.waived, travelShort: tc.short,
+    count, visits, level: lvl, lines, perVisitC1: v1, perVisitC2: v2, travel, travelLabel: t1.label, travelWaived: false, travelShort: 0,
     minBillApplied: c1 < minBill || (deep && c2 < minBill),
     annualEx, vat: Math.round(annualEx * VAT), annualInc: incVat(annualEx),
-    perUnitYear: incVat(annualEx) / count, teamDaysPerVisit: Math.ceil(teamDays * 2) / 2, high,
+    perUnitYear: annualEx / count, teamDaysPerVisit: Math.ceil(teamDays * 2) / 2, high,
     // aliases kept for older markup
     low: annualEx, high_: incVat(annualEx),
   };
@@ -357,21 +373,26 @@ export const SERVICES = [
 export const isVRF = (...t) => /VRV|VRF/i.test(t.filter(Boolean).join(' '));
 export const VRF_NOTE = 'ระบบ VRV / VRF ออกแบบเฉพาะโครงการ ไม่มีราคาบนเว็บ ติดต่อทีมโครงการเพื่อสำรวจและออกแบบ';
 // topics offered in every page's contact form (askTeam() pre-selects one)
-export const CONTACT_TOPICS = ['ล้างแอร์', 'ติดตั้งแอร์', 'ซ่อม / ตรวจเช็ก', 'สัญญาล้างรายปี', 'ซื้อแอร์', 'FUJIVA', 'ระบบ VRV / VRF', 'งานโครงการอื่น', 'อื่น ๆ'];
+export const CONTACT_TOPICS = ['ล้างแอร์', 'ติดตั้งแอร์', 'ซ่อม / ตรวจเช็ก', 'เทิร์นแอร์เก่า', 'สัญญาล้างรายปี', 'ซื้อแอร์', 'FUJIVA', 'ระบบ VRV / VRF', 'งานโครงการอื่น', 'อื่น ๆ'];
 export const PROCESS = [
   { th: 'เลือกบริการหรือรุ่น', d: 'ดูราคาบนเว็บ ใส่ลงใบเสนอราคาเบื้องต้น ระบบรวมยอดและ VAT ให้' },
   { th: 'ยืนยันหน้างาน', d: 'ทีมโทรยืนยัน รายการที่ต้องประเมินหน้างานจะแจ้งราคาก่อนเริ่มงาน' },
   { th: 'ลงมือทำงาน', d: 'คลุมพื้นที่ ทำตามขั้นตอน ถ่ายภาพก่อน–หลัง' },
   { th: 'ส่งมอบ + รายงาน', d: 'ทดสอบการทำงาน ส่งเอกสารตามแพ็กเกจ และเงื่อนไขรับประกันต่อรายการ' },
 ];
+// ★Rev.15 owner rule (2 ต.ค. 2569): normal booking at least 3 days ahead · คิวด่วน (earlier, today included) +500 before VAT per
+// visit, only when a crew is free. queue.js works out everything else from these two numbers.
+export const QUEUE_RULES = { leadDays: 3, rushFeeEx: 500 };
 export const FAQ = [
-  { q: 'ราคาบนเว็บรวม VAT แล้วหรือยัง', a: 'ราคาตัวใหญ่รวม VAT 7% แล้ว ราคาก่อน VAT แสดงไว้ข้างกันทุกรายการ ใบเสนอราคาเบื้องต้นแยกยอดก่อน VAT และ VAT ให้' },
+  { q: 'ต้องจองล่วงหน้ากี่วัน ถ้าต้องการด่วนได้ไหม', a: `จองปกติล่วงหน้า ${QUEUE_RULES.leadDays} วัน ถ้าต้องการเร็วกว่านั้น (รวมถึงวันนี้) เลือกคิวด่วน มีค่าบริการเพิ่ม ${(QUEUE_RULES.rushFeeEx).toLocaleString('en-US')} บาทต่อการเข้างาน (ก่อน VAT) รับเมื่อมีทีมว่างเท่านั้น ทีมยืนยันคิวก่อนทุกครั้ง ถ้าไม่มีคิวจะไม่เก็บค่าคิวด่วนและเสนอวันที่ใกล้ที่สุดให้ งานนอกเวลาทำการและวันอาทิตย์มีค่าใช้จ่ายเพิ่มเติม ทีมแจ้งในใบเสนอราคา` },
+  { q: 'ราคาบนเว็บรวม VAT แล้วหรือยัง', a: 'ทุกราคาบนเว็บเป็นราคาก่อน VAT ราคางานบริการปัดเป็นหลักร้อยให้อ่านง่าย VAT 7% คิดครั้งเดียวที่ยอดรวมของใบเสนอราคา (แสดงยอดก่อน VAT · VAT · รวมทั้งสิ้น แยกให้เห็น)' },
   { q: 'ราคาติดตั้งรวมอะไรบ้าง', a: 'รวมท่อน้ำยาและวัสดุ 4 เมตรแรก ท่อน้ำทิ้ง สายไฟตามระยะที่ระบุ เบรกเกอร์ ขาแขวน Vacuum และทดสอบ ส่วนที่เกินเลือกเพิ่มได้ในหน้าสินค้า' },
   { q: 'รายการที่ขึ้นว่า "ประเมินหน้างาน" คืออะไร', a: 'งานที่ราคาขึ้นกับสภาพจริง เช่น รื้อเครื่องเดิม งานสูง นั่งร้าน เปิดฝ้า ทีมจะแจ้งราคาให้ยืนยันก่อนเริ่มงานทุกครั้ง' },
   { q: 'สัญญารายปีต่างจากเรียกล้างทีละครั้งอย่างไร', a: 'ทีมวางรอบล่วงหน้าทั้งปี ได้อัตราตามจำนวนเครื่อง มีรายงานตามแพ็กเกจหลังทุกรอบ และวางบิลตามรอบ' },
-  { q: 'นอกกรุงเทพฯ และปริมณฑลรับงานไหม', a: 'รับถึงระยะประมาณ 150 กม. จากสำนักงานใหญ่ ค่าเดินทางต่อเที่ยว (ก่อน VAT): ไม่เกิน 60 กม. 300 บาท ยกเว้นเมื่อ 4 เครื่องขึ้นไป · 61–100 กม. 800 บาท ขั้นต่ำ 3 เครื่อง ยกเว้นเมื่อ 8 เครื่องขึ้นไป · 101–150 กม. 1,500 บาท ขั้นต่ำ 5 เครื่อง ไกลกว่านั้นรับเป็นงานโครงการหรือสัญญา' },
+  // Rev.18: numbers come from TRAVEL / DATA.minBill so the answers can never drift from the calculators
+  { q: 'พื้นที่ให้บริการและค่าเดินทางคิดอย่างไร', get a() { const T = TRAVEL; return `พื้นที่หลักคือกรุงเทพฯ ในระยะ ${T.freeKm} กม. จากสำนักงานใหญ่ พระราม 2 ไม่มีค่าเดินทางเมื่อยอดงานล้างถึง ${(DATA.minBill || 4500).toLocaleString('en-US')} บาท ถ้าต่ำกว่านั้นคิดค่าเดินทาง ${T.baseFee} บาทต่อการเข้างาน นอกพื้นที่หลักรับถึงประมาณ ${T.maxKm} กม. ค่าเดินทางต่อเที่ยว ${T.baseFee} บาท + ${T.perKm} บาทต่อกิโลเมตรที่เกิน ${T.freeKm} กม. (ก่อน VAT ปัดขึ้นหลักร้อย) ไกลกว่านั้นรับเป็นงานโครงการหรือสัญญา`; } },
   { q: 'รับงานระบบ VRV / VRF ไหม', a: 'รับเป็นงานโครงการแยกจากงานล้างและติดตั้งทั่วไป เพราะต้องสำรวจ ออกแบบท่อและคอนโทรล และทำ BOQ ตามอาคารจริง กด "ติดต่อสอบถาม VRV / VRF" แล้วทีมโครงการจะติดต่อกลับ' },
-  { q: 'มียอดขั้นต่ำไหม', a: 'งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน 4,500 บาทก่อน VAT ระบบจะแจ้งในใบเสนอราคาเบื้องต้นเมื่อยอดต่ำกว่านี้' },
+  { q: 'มียอดขั้นต่ำไหม', get a() { return 'งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ' + (DATA.minBill || 4500).toLocaleString('en-US') + ` บาทก่อน VAT ถ้ายอดงานล้างต่ำกว่านี้ คิดค่าเดินทาง ${TRAVEL.baseFee} บาทต่อการเข้างาน ใบเสนอราคาเบื้องต้นแสดงให้เห็นก่อนส่งทุกครั้ง`; } },
 ];
 
 /* ---------- utilities used by all variants ---------- */
@@ -398,3 +419,14 @@ export function countUp(el, to, dur = 900, fmt = n => Math.round(n).toLocaleStri
   const step = t => { const k = Math.min(1, (t - t0) / dur); const e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
+
+// Rev.12/15 estimated on-site time per unit for one crew of two (minutes) — from what Thai air-con shops publish online.
+// Owner: depends on the site and the unit, never a promise / pass-fail line / price basis → always shown with TIME_NOTE.
+export const JOB_TIME = {
+  C1: { wall: [30, 60], ceiling: [40, 90], cassette: [40, 90], floor: [40, 90] },
+  C2: { wall: [90, 150], ceiling: [90, 120], cassette: [90, 120], floor: [90, 120] },
+  install: { wall: [120, 240], ceiling: [180, 360], cassette: [180, 480], floor: [180, 360] },
+};
+export const TIME_NOTE = 'เวลาโดยประมาณจากข้อมูลร้านแอร์ทั่วไป ขึ้นกับหน้างานและสภาพเครื่อง ไม่ใช่เกณฑ์หรือคำรับรอง';
+const minTh = m => m < 60 ? `${m} นาที` : `${+(m / 60).toFixed(1)} ชม.`.replace('.0 ', ' ');
+export const timeTh = ([a, b]) => (a < 60 && b <= 60) ? `${a}–${b} นาที` : `${minTh(a)}–${minTh(b)}`.replace(/ ชม\.–/, '–');
