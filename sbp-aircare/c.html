@@ -500,6 +500,7 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
 
   <section class="sec" id="prices" data-reveal>
     <div class="sec-h"><p class="eyebrow">ค่าบริการทั้งหมด</p><h2>ราคาชัด ก่อนเรียกช่าง</h2><p>ราคาทุกรายการดึงจาก Pricebook 2569 ของบริษัท (ใบเสนอราคาติดตั้ง / ล้างและซ่อม) ทุกราคาเป็นราคาก่อน VAT · ล้างและติดตั้งครอบคลุมทุกประเภท ยกเว้นระบบ VRV / VRF <a href="#quote" data-ask="ระบบ VRV / VRF">ติดต่อทีมโครงการแยก</a></p></div>
+    <div id="allSvc"></div>
     <div class="panel" id="priceCenter"></div>
   </section>
 
@@ -554,6 +555,7 @@ import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
 import { mountSymptomGuide } from './assets/symptoms.js';
 import { mountEnterprise } from './assets/enterprise.js';
+import { mountAllServices } from './assets/allservices.js';
 import { mountTradeIn } from './assets/tradein.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
@@ -601,7 +603,8 @@ TYPES.forEach(t => $('#urows').append(h('div', { class: 'urow' }, h('div', { htm
   h('div', { class: 'stp' }, h('button', { type: 'button', 'data-b-step': `${t.id}:-1`, 'aria-label': 'ลด' }, '−'), h('input', { type: 'number', min: '0', id: `vc-u-${t.id}`, 'data-b-unit': t.id, 'aria-label': `จำนวน ${t.th}`, inputmode: 'numeric' }), h('button', { type: 'button', 'data-b-step': `${t.id}:1`, 'aria-label': 'เพิ่ม' }, '+')))));
 const BLD = mountBuilder($('[data-builder]'));
 mountEnterprise($('#entRoot'), { openCart: CART.open, builder: BLD });   // Rev.22 enterprise: sector pain points + sample annual contracts
-mountPriceCenter($('#priceCenter'));
+const PC = mountPriceCenter($('#priceCenter'));
+mountAllServices($('#allSvc'), { prices: PC });
 
 // catalog
 const drawer = $('#drawer');

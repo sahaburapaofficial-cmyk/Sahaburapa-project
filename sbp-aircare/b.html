@@ -527,6 +527,7 @@ footer .sx-foot{padding-block:24px 8px}
   <section class="s" id="prices">
     <div class="sheet">
       <div class="sheet-h"><div><p class="lbl">Sheet 02 · ค่าบริการ</p><h2>ตารางค่าบริการและวัสดุ</h2><p>ราคาทุกรายการดึงจาก Pricebook 2569 ของบริษัท (ใบเสนอราคาติดตั้ง / ล้างและซ่อม) ทุกราคาเป็นราคาก่อน VAT · ล้างและติดตั้งครอบคลุมทุกประเภท ยกเว้นระบบ VRV / VRF <a href="#quote" data-ask="ระบบ VRV / VRF">ติดต่อทีมโครงการแยก</a></p></div><span class="sheet-no">P-01</span></div>
+      <div id="allSvc" style="padding:14px 20px 0"></div>
       <div id="priceCenter" style="padding:14px 20px 6px"></div>
     </div>
   </section>
@@ -662,6 +663,7 @@ import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
 import { mountSymptomGuide } from './assets/symptoms.js';
 import { mountEnterprise } from './assets/enterprise.js';
+import { mountAllServices } from './assets/allservices.js';
 import { mountTradeIn } from './assets/tradein.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
@@ -691,7 +693,8 @@ TYPES.forEach(t => $('#schedBody').append(h('tr', {},
   h('td', { class: 'hide-m' }, h('div', { class: 'bar' }, h('i', { 'data-b-bar': t.id }))))));
 const BLD = mountBuilder($('[data-builder]'));
 mountEnterprise($('#entRoot'), { openCart: CART.open, builder: BLD });   // Rev.22 enterprise: sector pain points + sample annual contracts
-mountPriceCenter($('#priceCenter'));
+const PC = mountPriceCenter($('#priceCenter'));
+mountAllServices($('#allSvc'), { prices: PC });
 
 // catalog (table-first)
 const drawer = $('#drawer');

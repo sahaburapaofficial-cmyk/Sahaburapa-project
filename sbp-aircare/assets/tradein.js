@@ -13,7 +13,12 @@
 //     the site names no retailer.
 //   · verdict = rules of thumb technicians use (age, major fault, R22, repair ≥ 50 % of a new set, age × repair ≥ new set) —
 //     shown as reasons, never as a promise (rule 11: no "ประหยัดไฟแน่นอน")
-import { h, baht, DATA, DEMO, TYPES, TYPE_BY_ID, VOLUME_HINT, installOptions, btuFmt } from './sbp-core.js';
+//   · Rev.26 (owner 4 ต.ค. 2569: "ตรวจเช็คข้อมูลและวิธีการจัดเก็บข้อมูล workflow ให้ละเอียด ให้ลูกค้าได้คำตอบและความกระจ่างมากที่สุด และ
+//     จุดประสงค์ลูกค้าคืออะไรในการเทิร์น"): the purpose of the trade-in (PURPOSES, several) with what to check for each · old unit
+//     brand / model from the nameplate (optional — empty stays empty) · questions and answers (QA) · tradeInSummary() = the one
+//     structured record that goes to the team (cart.draft.tradein → quote / booking field "ข้อมูลเทิร์นแอร์เก่า" → Sheet column) and
+//     is shown to the visitor before sending ("ข้อมูลที่ส่งถึงทีม")
+import { h, baht, DATA, DEMO, TYPES, TYPE_BY_ID, BRANDS, VOLUME_HINT, installOptions, btuFmt } from './sbp-core.js';
 import { energy, RATE } from './studio-model.js';
 import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
@@ -62,6 +67,29 @@ export const ISSUES = [
   { id: 'fanIn', th: 'มอเตอร์พัดลมคอยล์เย็นเสีย', major: false },
   { id: 'fanOut', th: 'มอเตอร์พัดลมคอยล์ร้อนเสีย', major: false },
   { id: 'weak', th: 'ไม่ค่อยเย็น ค่าไฟสูง ยังไม่รู้สาเหตุ', major: false },
+];
+// Rev.26 — why the visitor is looking at a trade-in; each purpose says what to check and where the page answers it
+export const PURPOSES = [
+  { id: 'reno', th: 'รีโนเวท / ตกแต่งห้องใหม่', tip: 'แจ้งแบบห้องใหม่และตำแหน่งที่อยากติด ทีมวางแนวท่อและรางให้เข้ากับงานตกแต่ง และนัดติดตั้งหลังงานที่มีฝุ่น (ทาสี ขัดพื้น) เสร็จ' },
+  { id: 'cost', th: 'ค่าซ่อมแพง ไม่อยากซ่อมซ้ำ', tip: 'เทียบการ์ดซ่อมเครื่องเดิมกับเครื่องใหม่หลังหักมูลค่าเทิร์นด้านล่าง ทีมให้ใบเสนอราคาทั้งสองทางพร้อมกันได้ ตัดสินใจหลังเห็นราคาจริง' },
+  { id: 'bill', th: 'ค่าไฟสูง', tip: 'ค่าไฟด้านล่างเป็นประมาณการตามชั่วโมงที่ใช้ ถ้าเครื่องเดิมไม่ได้ล้างนาน ลองล้างก่อนแล้วดูบิลเดือนถัดไป จะเห็นว่าส่วนต่างมาจากความสกปรกหรือจากอายุเครื่อง' },
+  { id: 'upgrade', th: 'อยากได้เครื่องใหม่ เงียบกว่า / Inverter', tip: 'ดูรุ่น Inverter ขนาดเดียวกันในแคตตาล็อก เทียบเสียง ฟังก์ชัน และการรับประกันของผู้ผลิตแต่ละรุ่น' },
+  { id: 'size', th: 'เย็นไม่พอ / ห้องเปลี่ยนการใช้งาน', tip: 'คำนวณ BTU ที่ห้องต้องการในห้องจำลองก่อน เครื่องใหม่อาจต้องใหญ่กว่าเดิม ทีมตรวจสายไฟและเบรกเกอร์ในวันสำรวจ' },
+  { id: 'move', th: 'ขาย / ปล่อยเช่า / ส่งมอบห้อง', tip: 'แจ้งวันที่ต้องส่งมอบห้อง ทีมนัดวันรื้อและติดตั้งให้ทันกำหนด และมีใบส่งมอบงานเป็นหลักฐานกับผู้ซื้อหรือผู้เช่า' },
+  { id: 'r22', th: 'เครื่องใช้น้ำยา R22 เติมยาก', tip: 'R22 ทยอยเลิกใช้ ค่าเติมสูงกว่า R32 ตามตารางราคา ดูป้ายข้างเครื่องเพื่อยืนยันชนิดน้ำยา' },
+];
+// Rev.26 — questions visitors ask before a trade-in (answers follow TRADE_IN.terms and the Pricebook; nothing promised beyond them)
+export const QA = [
+  ['มูลค่าเทิร์นคิดจากอะไร', 'ขนาด BTU และสภาพเครื่อง (ใช้งานได้ / เสีย) ตามตารางมูลค่าเทิร์น ทีมยืนยันตัวเลขเมื่อตรวจเครื่องจริง แล้วระบุในใบเสนอราคา'],
+  ['เครื่องเสียแล้ว หรือคนละยี่ห้อกับเครื่องใหม่ รับไหม', 'รับทุกยี่ห้อ ใช้งานได้หรือเสียแล้ว ขนาด 9,000 BTU ขึ้นไป ขอให้มีคอยล์เย็นและคอยล์ร้อนครบพร้อมหน้ากากและฝาครอบ'],
+  ['รับเป็นเงินสดได้ไหม', 'ไม่ได้ มูลค่าเทิร์นหักจากใบเสนอราคาเครื่องใหม่พร้อมติดตั้งของบริษัท'],
+  ['ต้องเตรียมข้อมูลอะไร', 'รูปป้ายข้างคอยล์เย็นและคอยล์ร้อน (รุ่น ปีผลิต ชนิดน้ำยา) รูปตัวเครื่องทั้งสองด้าน และอาการที่เป็น ส่งทาง LINE พร้อมเลขอ้างอิง'],
+  ['ไม่รู้อายุเครื่องหรือชนิดน้ำยา', 'เลือก "ไม่ทราบ" ได้ ป้ายข้างเครื่องมีปีผลิตและชนิดน้ำยา ทีมอ่านจากรูปให้'],
+  ['ติดตั้งที่ตำแหน่งเดิมได้ไหม', 'ส่วนใหญ่ได้ ทีมตรวจขายึด แนวท่อ สายไฟ และเบรกเกอร์เดิม แล้วแจ้งในใบเสนอราคาว่าส่วนไหนใช้ต่อได้ ส่วนไหนควรเปลี่ยน'],
+  ['รื้อเครื่องเดิมกับติดตั้งเครื่องใหม่วันเดียวกันไหม', 'นัดเป็นวันเดียวกันได้ ทีมเก็บน้ำยาเครื่องเดิมก่อนรื้อ ไม่ปล่อยทิ้งสู่อากาศ แล้วติดตั้งเครื่องใหม่ เวลาขึ้นกับหน้างานและจำนวนเครื่อง'],
+  ['ค่ารื้อและเก็บน้ำยาเครื่องเดิมเท่าไร', 'ยังไม่มีอัตรามาตรฐานบนเว็บ ทีมประเมินจากรูปหน้างานและแจ้งในใบเสนอราคาก่อนยืนยัน'],
+  ['ถ้าตัดสินใจซ่อมแทน', 'เริ่มจากค่าตรวจวินิจฉัย ทีมแจ้งราคาซ่อมให้อนุมัติก่อนทุกครั้ง ไม่ซ่อมก่อนลูกค้าอนุมัติ'],
+  ['ข้อมูลที่กรอกเก็บไว้ที่ไหน', 'ระหว่างกรอก ข้อมูลอยู่ในเบราว์เซอร์ของเครื่องนี้เท่านั้น เมื่อกดส่งใบเสนอราคา ข้อมูลเครื่องเดิมและช่วงมูลค่าเทิร์นไปกับคำขอถึงทีมพร้อมเลขอ้างอิง เว็บไม่เก็บรูป'],
 ];
 const AGE_LOSS = y => Math.min(0.15, Math.max(0, y - 3) * 0.01);   // assumed efficiency loss with age: 1 %/yr after year 3, at most 15 %
 
@@ -141,34 +169,63 @@ export function tradeIn(x) {
   };
 }
 
+/** Rev.26 — the one record the team receives (text for the request / e-mail / Sheet column, data kept in cart.draft.tradein) */
+export function tradeInSummary(x) {
+  const R = tradeIn(x), t = TYPE_BY_ID[x.type] || { th: x.type }, q = R.q;
+  const why = (x.why || []).map(id => (PURPOSES.find(p => p.id === id) || {}).th).filter(Boolean);
+  const unit = [x.brand ? `ยี่ห้อ ${x.brand}` : 'ยี่ห้อ (ไม่ได้ระบุ)', x.model ? `รุ่น ${x.model}` : null, `${t.th} ${btuFmt(x.btu)}`, `อายุ ${R.age.th}`,
+    (SYSTEMS.find(s => s.id === x.sys) || {}).th, `น้ำยา ${(REFS.find(s => s.id === x.ref) || {}).th}`].filter(Boolean).join(' · ');
+  const lines = [
+    `เทิร์นแอร์เก่า ${q} เครื่อง`,
+    `เป้าหมาย: ${why.length ? why.join(' / ') : '(ไม่ได้ระบุ)'}`,
+    `เครื่องเดิม: ${unit}`,
+    `อาการ: ${R.issue.th}`,
+    `คำแนะนำจากหน้าเว็บ: ${R.title}`,
+    R.trade ? `มูลค่าเทิร์นโดยประมาณ: ${baht(R.trade.lo)}–${baht(R.trade.hi)} ต่อเครื่อง (${R.trade.working ? 'ใช้งานได้' : 'เสีย / ต้องซ่อม'}) — ทีมยืนยันเมื่อตรวจเครื่อง` : 'มูลค่าเทิร์น: ทีมประเมินหน้างาน',
+    R.repair.lines.length ? `ค่าซ่อมที่รู้ราคา: ${R.repair.unknown ? 'อย่างน้อย ' : ''}${baht(R.repair.known * q)}${R.repair.unknown ? ` + ${R.repair.unknown} รายการประเมินหน้างาน` : ''} (ก่อน VAT)` : null,
+    R.setEx != null ? `เครื่องใหม่ Inverter + ติดตั้งมาตรฐาน (ราคากลางในเว็บ): ${baht(R.setEx * q)} ก่อน VAT` : null,
+    R.net ? `หลังหักมูลค่าเทิร์น ≈ ${baht(R.net[0] * q)}–${baht(R.net[1] * q)} ก่อน VAT (ไม่รวมงานประเมินหน้างาน)` : null,
+  ].filter(Boolean);
+  return { text: lines.join('\n'), data: { q, why: x.why || [], brand: x.brand || '', model: x.model || '', type: x.type, btu: x.btu, age: x.age, sys: x.sys, ref: x.ref, issue: x.issue, verdict: R.verdict, trade: R.trade && [R.trade.lo, R.trade.hi], setEx: R.setEx, net: R.net } };
+}
+
 /** UI — the section body (#tradein) */
 export function mountTradeIn(root, { catalog, openCart } = {}) {
   if (!root) return null;
-  const st = { age: 'a12', type: 'wall', btu: 12000, sys: 'unk', ref: 'unk', issue: 'comp', qty: 1, hrs: 8 };
+  const st = { age: 'a12', type: 'wall', btu: 12000, sys: 'unk', ref: 'unk', issue: 'comp', qty: 1, hrs: 8, why: [], brand: '', model: '' };
   try { Object.assign(st, JSON.parse(localStorage.getItem('sbp-tradein') || '{}')); } catch (e) {}
   const save = () => { try { localStorage.setItem('sbp-tradein', JSON.stringify(st)); } catch (e) {} };
   const form = h('div', { class: 'ti-form' }), out = h('div', { class: 'ti-out', 'aria-live': 'polite' });
   root.append(h('div', { class: 'ti' }, form, out));
   const seg = (label, list, key, cls = '') => h('fieldset', { class: 'ti-f ' + cls }, h('legend', {}, label), h('div', { class: 'ti-chips' },
     list.map(o => h('button', { type: 'button', 'aria-pressed': String(st[key] === o.id), onclick: () => { st[key] = o.id; draw(); } }, o.th))));
+  const multi = (label, list, key) => h('fieldset', { class: 'ti-f ti-why' }, h('legend', {}, label, h('small', {}, ' (เลือกได้หลายข้อ)')), h('div', { class: 'ti-chips' },
+    list.map(o => h('button', { type: 'button', 'aria-pressed': String(st[key].includes(o.id)), onclick: () => { st[key] = st[key].includes(o.id) ? st[key].filter(x => x !== o.id) : [...st[key], o.id]; draw(); } }, o.th))));
+  const brandNames = () => [...new Set(BRANDS.map(b => b.name))].sort((a, b) => a.localeCompare(b));
   const num = (label, key, min, max, unit) => h('label', { class: 'ti-num' }, label, h('input', { type: 'number', inputmode: 'numeric', min, max, value: st[key],
     onchange: e => { const v = Math.max(min, Math.min(max, Math.round(+e.target.value || min))); st[key] = v; e.target.value = v; draw(); } }), h('span', {}, unit));
   const priceOf = l => (l.ex == null ? h('em', { class: 'ti-sv' }, 'ประเมินหน้างาน') : h('b', {}, baht(l.ex * l.qty)));
   function drawForm() {
     form.innerHTML = '';
     const types = TYPES.filter(t => t.id !== 'duct');
+    if (!Array.isArray(st.why)) st.why = [];
     form.append(
+      multi('เทิร์นเพื่ออะไร', PURPOSES, 'why'),
       seg('แอร์อายุเท่าไร', AGES, 'age'),
       h('div', { class: 'ti-row' },
         h('label', { class: 'ti-sel' }, 'ประเภท', h('select', { onchange: e => { st.type = e.target.value; draw(); } }, types.map(t => h('option', { value: t.id, selected: t.id === st.type }, t.th)))),
         h('label', { class: 'ti-sel' }, 'ขนาด', h('select', { onchange: e => { st.btu = +e.target.value; draw(); } }, SIZES.filter(b => st.type !== 'wall' || b <= 30000).map(b => h('option', { value: b, selected: b === st.btu }, btuFmt(b)))))),
+      h('div', { class: 'ti-row' },
+        h('label', { class: 'ti-sel' }, 'ยี่ห้อเครื่องเดิม', h('select', { onchange: e => { st.brand = e.target.value; draw(); } },
+          h('option', { value: '', selected: !st.brand }, 'ไม่ระบุ / ไม่ทราบ'), brandNames().map(n => h('option', { value: n, selected: n === st.brand }, n)), h('option', { value: 'อื่น ๆ', selected: st.brand === 'อื่น ๆ' }, 'ยี่ห้ออื่น'))),
+        h('label', { class: 'ti-sel' }, 'รุ่น (จากป้ายเครื่อง ถ้ามี)', h('input', { type: 'text', maxlength: 40, value: st.model || '', autocomplete: 'off', placeholder: 'เว้นว่างได้', onchange: e => { st.model = e.target.value.trim().slice(0, 40); draw(); } }))),
       seg('ระบบคอมเพรสเซอร์', SYSTEMS, 'sys'),
       seg('น้ำยาแอร์ (ดูจากป้ายข้างเครื่อง)', REFS, 'ref'),
       seg('ตอนนี้เป็นอย่างไร', ISSUES, 'issue', 'ti-issues'),
       h('div', { class: 'ti-row' }, num('จำนวนเครื่อง', 'qty', 1, 200, 'เครื่อง'), num('เปิดวันละ', 'hrs', 1, 24, 'ชม.')));
   }
   function drawOut() {
-    const R = tradeIn(st), q = R.q, t = TYPE_BY_ID[st.type];
+    const R = tradeIn(st), q = R.q, t = TYPE_BY_ID[st.type], S0 = tradeInSummary(st);
     out.innerHTML = '';
     const repCard = h('div', { class: 'ti-card' + (R.verdict === 'repair' || R.verdict === 'keep' ? ' pick' : '') },
       h('h4', {}, R.issue.id === 'reno' ? 'ใช้เครื่องเดิมต่อ' : 'ซ่อมเครื่องเดิม'),
@@ -189,6 +246,7 @@ export function mountTradeIn(root, { catalog, openCart } = {}) {
     out.append(
       h('div', { class: 'ti-verdict ti-' + R.verdict }, h('b', {}, R.title), h('p', {}, R.sub),
         R.why.length ? h('ul', {}, R.why.map(w => h('li', {}, w))) : null),
+      ...(st.why.length ? [h('div', { class: 'ti-for' }, h('b', {}, 'สำหรับเป้าหมายของคุณ'), h('ul', {}, PURPOSES.filter(p => st.why.includes(p.id)).map(p => h('li', {}, h('span', {}, p.th), p.tip))))] : []),
       h('div', { class: 'ti-cmp' }, repCard, newCard),
       h('details', { class: 'ti-terms' }, h('summary', {}, 'ตารางมูลค่าเทิร์นและเงื่อนไข'),
         h('table', {}, h('caption', {}, 'มูลค่าเทิร์นต่อเครื่อง (บาท) ตามขนาดเครื่องเดิม'), h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, 'ขนาดเครื่องเดิม'), h('th', { scope: 'col' }, 'ใช้งานได้'), h('th', { scope: 'col' }, 'เสีย / ต้องซ่อม'))),
@@ -202,13 +260,19 @@ export function mountTradeIn(root, { catalog, openCart } = {}) {
         ['วันติดตั้ง', 'เก็บน้ำยาเครื่องเดิมก่อนรื้อ ไม่ปล่อยทิ้งสู่อากาศ รื้อ ขนออก แล้วติดตั้งเครื่องใหม่'],
         ['ส่งมอบ', 'ทดสอบ วัดค่า ใบรับมอบงาน และรับประกันงานติดตั้ง'],
       ].map(([a, b], i) => h('li', {}, h('span', {}, String(i + 1)), h('b', {}, a), h('small', {}, b)))),
+      h('details', { class: 'ti-terms ti-data' }, h('summary', {}, 'ข้อมูลที่ส่งถึงทีมเมื่อขอประเมิน'),
+        h('ul', {}, S0.text.split('\n').map(x => h('li', {}, x))),
+        h('p', { class: 'ti-mut' }, 'ข้อมูลนี้แนบไปกับใบเสนอราคาเมื่อคุณกดส่ง และบันทึกในระบบรับคำขอของทีมพร้อมเลขอ้างอิง · ระหว่างนี้อยู่ในเบราว์เซอร์ของเครื่องนี้เท่านั้น · รูปป้ายเครื่องส่งทาง LINE')),
       h('div', { class: 'ti-acts' },
         h('button', { type: 'button', class: 's-btn primary', onclick: () => {
-          cart.add({ kind: 'survey', group: 'install', key: `TI-${st.type}-${st.btu}-${st.age}-${st.issue}`, name: `ประเมินเทิร์นแอร์เก่า ${q} เครื่อง → เครื่องใหม่ Inverter`, detail: `${t.th} ${btuFmt(st.btu)} · อายุ ${R.age.th} · ${R.issue.th}${R.trade ? ` · มูลค่าเทิร์นโดยประมาณ ${baht(R.trade.lo)}–${baht(R.trade.hi)} ต่อเครื่อง` : ''}`, unitEx: null, qty: 1 });
+          cart.items.filter(i => /^TI-/.test(i.key || '')).forEach(i => cart.remove(i.id));   // one trade-in request, always the latest answers
+          cart.add({ kind: 'survey', group: 'install', key: 'TI-REQ', name: `ประเมินเทิร์นแอร์เก่า ${q} เครื่อง → เครื่องใหม่ Inverter`, detail: `${st.brand ? st.brand + ' · ' : ''}${t.th} ${btuFmt(st.btu)} · อายุ ${R.age.th} · ${R.issue.th}${R.trade ? ` · มูลค่าเทิร์นโดยประมาณ ${baht(R.trade.lo)}–${baht(R.trade.hi)} ต่อเครื่อง` : ''}`, unitEx: null, qty: 1 });
+          cart.draft.tradein = tradeInSummary(st); cart.saveDraft();
           toast('เพิ่มคำขอประเมินเทิร์นในใบเสนอราคาแล้ว'); openCart && openCart(); } }, 'ขอประเมินมูลค่าเทิร์น'),
         catalog ? h('button', { type: 'button', class: 's-btn', onclick: () => {
           catalog.setType(st.type); catalog.setBtu(st.btu); const c = document.getElementById('catalog'); c && c.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } }, `ดูเครื่องใหม่ ${btuFmt(st.btu)}`) : null,
-        h('button', { type: 'button', class: 's-btn ghost', onclick: () => askTeam('เทิร์นแอร์เก่า', `เทิร์นแอร์เก่า ${q} เครื่อง · ${t.th} ${btuFmt(st.btu)} · อายุ ${R.age.th} · ${SYSTEMS.find(s => s.id === st.sys).th} · น้ำยา ${REFS.find(s => s.id === st.ref).th} · อาการ: ${R.issue.th}${R.trade ? ` · มูลค่าเทิร์นโดยประมาณ ${baht(R.trade.lo)}–${baht(R.trade.hi)} ต่อเครื่อง` : ''} · จะส่งรูปป้ายเครื่องให้ทีม`) }, 'ส่งรูปป้ายเครื่องให้ทีม')),
+        h('button', { type: 'button', class: 's-btn ghost', onclick: () => askTeam('เทิร์นแอร์เก่า', `${S0.text.replace(/\n/g, ' · ')} · จะส่งรูปป้ายเครื่องให้ทีม`) }, 'ส่งรูปป้ายเครื่องให้ทีม')),
+      h('div', { class: 'ti-qa' }, h('h4', {}, 'คำถามก่อนเทิร์น'), h('div', { class: 'ti-qa-g' }, QA.map(([qq, a]) => h('details', {}, h('summary', {}, qq), h('p', {}, a))))),
       h('p', { class: 'ti-note' }, `ราคาก่อน VAT ตาม Pricebook อัตรามาตรฐาน · ราคาเครื่องใหม่ = ราคากลางของรุ่น Inverter ขนาดใกล้เคียงในเว็บ · ค่าไฟเป็นประมาณการ (เปิดวันละ ${R.energy.hrs} ชม. · ${RATE.home} บาท/หน่วย · สมมติประสิทธิภาพลดลงราว 1% ต่อปีหลังปีที่ 3) ไม่ใช่การรับประกันค่าไฟ · ซ่อมทุกครั้งแจ้งราคาให้อนุมัติก่อน${R.special ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไข ทีมขายยืนยันในใบเสนอราคา' : ''}`));
   }
   function draw() { save(); drawForm(); drawOut(); }

@@ -1,4 +1,4 @@
-// Rev.24 — trade-in old AC: repair lines resolve in the Pricebook, new-set price from the catalogue, honest wording. node tests/tradein.mjs
+// Rev.24 / 26 — trade-in old AC: repair lines resolve in the Pricebook, new-set price from the catalogue, honest wording. node tests/tradein.mjs
 import { readFileSync } from 'node:fs';
 globalThis.__SBP_DATA = JSON.parse(readFileSync(new URL('../assets/sbp-data.json', import.meta.url)));
 globalThis.__SBP_ADDR = { v: 0, p: [], o: [] };
@@ -47,7 +47,16 @@ ok(T.tradeIn({ ...base, type: 'cassette', btu: 36000, age: 'a8', issue: 'leak', 
 ok(T.tradeIn({ ...base, age: 'a8', issue: 'leak', ref: 'r32', sys: 'inv' }).verdict === 'replace', '8-yr wall 12k leak: known repair ≥ 50% of a new set → replace');
 ok(T.tradeIn({ ...base, age: 'a6', issue: 'reno' }).verdict === 'keep' && T.tradeIn({ ...base, age: 'a16', issue: 'reno' }).verdict === 'replace', 'renovation: 5–7 yr keep · 15+ yr replace');
 ok(T.tradeIn({ ...base, qty: 12 }).special && !T.tradeIn({ ...base, qty: 2 }).special, `special-rate hint from ${core.VOLUME_HINT} units, without a figure`);
-const all = JSON.stringify([T.AGES, T.ISSUES, T.SYSTEMS, T.REFS, ...T.ISSUES.flatMap(i => ['a3', 'a8', 'a16'].map(age => T.tradeIn({ ...base, issue: i.id, age })))]);
+// Rev.26 — purpose, nameplate, the one record sent to the team, Q&A
+ok(T.PURPOSES.length >= 6 && T.PURPOSES.every(p => p.id && p.th && p.tip), `${T.PURPOSES.length} purposes, each with what to check`);
+const Sm = T.tradeInSummary({ ...base, why: ['reno', 'cost'], brand: 'Daikin', model: 'FTKC12' });
+ok(/เป้าหมาย: รีโนเวท/.test(Sm.text) && /ค่าซ่อมแพง/.test(Sm.text) && /ยี่ห้อ Daikin · รุ่น FTKC12/.test(Sm.text), 'summary carries purposes + brand / model');
+ok(/มูลค่าเทิร์นโดยประมาณ: ฿300–฿700 ต่อเครื่อง \(เสีย/.test(Sm.text) && /หลังหักมูลค่าเทิร์น/.test(Sm.text), 'summary carries the trade-in range and net');
+ok(Sm.data.trade.join() === '300,700' && Sm.data.why.join() === 'reno,cost' && Sm.data.verdict === R.verdict, 'structured data for the request');
+const Se = T.tradeInSummary(base);
+ok(/เป้าหมาย: \(ไม่ได้ระบุ\)/.test(Se.text) && /ยี่ห้อ \(ไม่ได้ระบุ\)/.test(Se.text) && !/รุ่น /.test(Se.text.split('\n')[2]), 'empty fields stay empty (no guessed brand / model)');
+ok(T.QA.length >= 8 && T.QA.every(([q, a]) => q && a) && T.QA.some(([q]) => /เงินสด/.test(q)) && T.QA.some(([q]) => /เก็บไว้ที่ไหน/.test(q)), `${T.QA.length} questions incl. cash and where the data goes`);
+const all = JSON.stringify([T.PURPOSES, T.QA, Sm.text, T.AGES, T.ISSUES, T.SYSTEMS, T.REFS, ...T.ISSUES.flatMap(i => ['a3', 'a8', 'a16'].map(age => T.tradeIn({ ...base, issue: i.id, age })))]);
 ok(!FORBID.test(all), 'no forbidden / discount words');
 console.log(fail ? `\n${fail} FAIL` : '\nALL PASS');
 process.exit(fail ? 1 : 0);

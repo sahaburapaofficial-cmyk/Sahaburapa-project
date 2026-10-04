@@ -22,6 +22,7 @@
     "backend:check": "node tools/backend-check.mjs",
     "review": "node tests/review-fixes.mjs",
     "tradein": "node tests/tradein.mjs",
+    "allservices": "node tests/allservices.mjs",
     "enterprise": "node tests/enterprise.mjs && node tests/enterprise-ui.mjs a.html && node tests/enterprise-ui.mjs b.html && node tests/enterprise-ui.mjs c.html 390",
     "triage": "node tests/acdiag.mjs && node tests/acbot.mjs a.html && node tests/acbot.mjs b.html && node tests/acbot.mjs c.html 390"
   },

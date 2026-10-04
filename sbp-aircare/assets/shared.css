@@ -1628,3 +1628,43 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 .ti-terms tr.on{background:var(--s-accent-soft)}
 .ti-terms ul{margin:6px 0;padding-left:18px;font-size:13.5px;display:grid;gap:3px}
 @media (pointer:coarse){.ti-terms summary{min-height:44px}}
+/* Rev.26 trade-in: purpose tips · data the team receives · questions */
+.ti-why legend small{font-weight:400;color:var(--s-ink-2)}
+.ti-sel input{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);min-width:0}
+.ti-for{border:1px solid var(--s-line);border-left:4px solid var(--s-accent);border-radius:12px;padding:10px 14px;background:var(--s-card)}
+.ti-for ul{margin:6px 0 0;padding-left:18px;display:grid;gap:4px;font-size:13.5px;line-height:1.55}
+.ti-for li span{font-weight:600;margin-right:6px}
+.ti-data ul{list-style:none;padding:0}
+.ti-data li{border-bottom:1px dashed var(--s-line);padding:3px 0}
+.ti-qa{display:grid;gap:6px}
+.ti-qa h4{margin:0;font-size:16px}
+.ti-qa details{border:1px solid var(--s-line);border-radius:10px;padding:6px 12px;background:var(--s-card)}
+.ti-qa summary{cursor:pointer;font-weight:600;font-size:14px;min-height:32px;display:flex;align-items:center}
+.ti-qa p{margin:4px 0 6px;font-size:13.5px;line-height:1.6;color:var(--s-ink-2)}
+@media (pointer:coarse){.ti-qa summary,.ti-sel input{min-height:44px}}
+.ti-qa-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;align-items:start}
+@media (max-width:640px){.ti-qa-g{grid-template-columns:1fr}}
+/* Rev.26 all services overview + visit rules (allservices.js) */
+.as{display:grid;gap:14px;margin-bottom:16px}
+.as-head h3{margin:0 0 4px;font-size:18px}
+.as-head p{margin:0;font-size:14px;color:var(--s-ink-2)}
+.as-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.as-card{display:grid;gap:4px;align-content:start;text-align:left;font:inherit;color:var(--s-ink);background:var(--s-card);border:1px solid var(--s-line);border-radius:var(--s-r);padding:12px 14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.as-card:hover{border-color:var(--s-accent);transform:translateY(-1px)}
+.as-card:focus-visible{outline:2px solid var(--s-accent);outline-offset:2px}
+.as-card b{font-size:15px}
+.as-card small{font-size:12.5px;line-height:1.5;color:var(--s-ink-2)}
+.as-meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:4px;font-size:12.5px}
+.as-meta em{font-style:normal;color:var(--s-ink-2)}
+.as-meta strong{font-variant-numeric:tabular-nums;color:var(--s-accent)}
+.as-meta strong.sv{color:var(--s-warn)}
+.as-rules{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.as-rules>div{background:var(--s-card-2);border:1px solid var(--s-line);border-radius:var(--s-r);padding:12px 16px}
+.as-rules h4{margin:0 0 8px;font-size:15px}
+.as-rules dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px;line-height:1.55}
+.as-rules dt{font-weight:600}
+.as-rules dd{margin:0;color:var(--s-ink-2)}
+.as-rules ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:13.5px}
+@media (max-width:1100px){.as-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:860px){.as-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.as-rules{grid-template-columns:1fr}}
+@media (max-width:520px){.as-grid{grid-template-columns:1fr}.as-rules dl{grid-template-columns:1fr}.as-rules dd{margin-bottom:6px}}

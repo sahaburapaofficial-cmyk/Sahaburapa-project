@@ -597,6 +597,7 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
   <!-- PRICE CENTRE -->
   <section class="sec" id="prices" data-reveal>
     <div class="sec-h"><div><p class="eyebrow">ค่าบริการทั้งหมด</p><h2>ราคาล้าง ติดตั้ง ซ่อม และอุปกรณ์เสริม</h2><p>ราคาทุกรายการดึงจาก Pricebook 2569 ของบริษัท (ใบเสนอราคาติดตั้ง / ล้างและซ่อม) ทุกราคาเป็นราคาก่อน VAT กด "เพิ่ม" เพื่อรวมยอดในใบเสนอราคาเบื้องต้น</p></div></div>
+    <div id="allSvc"></div>
     <div class="tile" id="priceCenter"></div>
   </section>
 
@@ -713,6 +714,7 @@ import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
 import { mountSymptomGuide } from './assets/symptoms.js';
 import { mountEnterprise } from './assets/enterprise.js';
+import { mountAllServices } from './assets/allservices.js';
 import { mountTradeIn } from './assets/tradein.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
@@ -753,6 +755,7 @@ TYPES.forEach(t => $('#ucards').append(h('div', { class: 'ucard' },
 const BLD = mountBuilder($('[data-builder]'));
 mountEnterprise($('#entRoot'), { openCart: CART.open, builder: BLD });   // Rev.22 enterprise: sector pain points + sample annual contracts
 const PC = mountPriceCenter($('#priceCenter'));
+mountAllServices($('#allSvc'), { prices: PC });
 $$('[data-pc]').forEach(a => a.addEventListener('click', e => { const map = { clean: 'clean', install: 'install', repair: 'repair', move: 'move', project: 'project' }; if (map[a.dataset.pc]) { e.preventDefault(); PC.show(map[a.dataset.pc]); } }));
 
 // catalog

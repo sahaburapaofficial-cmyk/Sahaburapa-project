@@ -38,8 +38,8 @@ export const hasPhoto = (m, sku) => photosFor(m, sku).length > 0;
 // shots are kept in localStorage per render version so returning visitors see them at once.
 const SHOTS = {};
 const KEYS = ['wall', 'wall:fujiva', 'ceiling', 'cassette', 'floor'];
-const CACHE = 'sbp-shots-r13';   // Rev.13: studio-lit, higher-resolution shots → older cached shots are dropped
-try { ['sbp-shots-r11', 'sbp-shots-r12'].forEach(k => localStorage.removeItem(k)); } catch (e) { /* storage blocked */ }
+const CACHE = 'sbp-shots-r26';   // Rev.13: studio-lit, higher-resolution shots → older cached shots are dropped
+try { ['sbp-shots-r11', 'sbp-shots-r12', 'sbp-shots-r13'].forEach(k => localStorage.removeItem(k)); } catch (e) { /* storage blocked */ }
 try { Object.assign(SHOTS, JSON.parse(localStorage.getItem(CACHE) || '{}')); } catch (e) { /* storage blocked */ }
 const saveShots = () => { try { localStorage.setItem(CACHE, JSON.stringify(SHOTS)); } catch (e) { /* full or blocked: render again next time */ } };
 let studioP = null, queue = Promise.resolve(), idle = null;
@@ -85,7 +85,7 @@ function studio() {
       r.render(scene, cam);
       let out = null; try { out = cv.toDataURL('image/webp', 0.9); if (!/^data:image\/webp/.test(out)) out = cv.toDataURL('image/png'); } catch (e) {}
       // Rev.14: a render that came out (almost) empty — software / broken GL draws only the shadow — is not a shot: keep the line art
-      if (out && out.length < 24000) out = null;
+      if (out && out.length < 12000) out = null;   // Rev.26: real shots of a flat white body compress to ~20 KB; an empty shadow-only frame is far smaller
       scene.remove(g); g.traverse(o => { if (o.isMesh) { o.geometry.dispose(); } });
       return out;
     };

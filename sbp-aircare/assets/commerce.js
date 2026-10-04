@@ -90,7 +90,9 @@ export function repriceLine(l) {
   if ((x = m(/^(?:R|RP)-(.+)$/))) { const r = DATA.rep.find(r => r.name === x[1]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
   return l;
 }
-const KEY = 'sbp-quote-v2', DKEY = 'sbp-booking-v1';   // Rev.16.1: booking draft (answers / contact / date) — never photos
+const KEY = 'sbp-quote-v2', DKEY = 'sbp-booking-v1';
+// Rev.26: trade-in record (tradein.tradeInSummary) — only while a trade-in request line is in the quote
+const tiOf = D => (cart.items.some(i => /^TI-/.test(i.key || '')) && D.tradein && D.tradein.text) || '';   // Rev.16.1: booking draft (answers / contact / date) — never photos
 // Rev.11: the quotation maths as pure functions — the cart and the quick cleaning booking (quickclean.js) share them,
 // so every total on the site follows the same rules (VAT, cleaning minimum per visit, travel by zone and unit count).
 // machines on site = the largest per-group count (a product + its install line is still one machine)
@@ -241,6 +243,8 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
         : visit.length && cart.prefDate && J.kind !== 'past' && J.time[2] ? h('p', { class: 's-note' }, 'เวลาหน้างานของรายการนี้ ทีมประเมินและยืนยันก่อนนัด') : null);   // rule 22: always with TIME_NOTE
     body.append(whenBox);
     if (jobs.clean || jobs.install || jobs.repair) body.append(step(3, 'สภาพหน้างาน + รูป', 'ให้ทีมประเมินงานนอกมาตรฐานก่อนนัด'), ticketPanel(D, jobs, { onChange: () => cart.saveDraft() }));
+    if (tiOf(D)) { const tb = h('div', { class: 'tk-diag ti-box' }, h('p', { class: 'tk-l' }, 'ข้อมูลเทิร์นแอร์เก่า', h('small', {}, ' · ส่งไปกับคำขอ ทีมยืนยันมูลค่าเมื่อตรวจเครื่อง')),
+      h('ul', {}, tiOf(D).split('\n').map(x => h('li', {}, x)))); body.append(tb); }
     const keep = () => cart.saveDraft();
     const inp = (id, k, attrs) => h('input', { id, value: D[k] || '', oninput: e => { D[k] = e.target.value; keep(); }, ...attrs });
     const isJob0 = !!(jobs.clean || jobs.install || jobs.repair);
@@ -271,11 +275,11 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
         if (miss) { err.textContent = miss[1]; const el = document.getElementById(miss[0]); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } return; }
       }
       const t = cart.totals(), sc = (D.scope || []).flatMap(x => x.r.lines), scEx = (D.scope || []).reduce((n, x) => n + x.r.est, 0);
-      const tk = isJob ? ticketText(D) : '';
+      const tk = isJob ? ticketText(D) : '', ti = tiOf(D);   // Rev.26: the trade-in record travels with quotes and bookings
       sent = { ref, rid: newRid(), isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
-        fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'แขวง/ตำบล': cart.addr?.s || '', 'เขต/อำเภอ': cart.addr?.d || cart.zone?.district || '', 'จังหวัด': cart.addr?.p || cart.zone?.province || '', 'รหัสไปรษณีย์': cart.addr?.z || '', 'ระยะถนนประมาณ (กม.)': cart.zone?.km ?? '', 'ค่าเดินทาง (ก่อน VAT)': t.travel, 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc),
+        fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'แขวง/ตำบล': cart.addr?.s || '', 'เขต/อำเภอ': cart.addr?.d || cart.zone?.district || '', 'จังหวัด': cart.addr?.p || cart.zone?.province || '', 'รหัสไปรษณีย์': cart.addr?.z || '', 'ระยะถนนประมาณ (กม.)': cart.zone?.km ?? '', 'ค่าเดินทาง (ก่อน VAT)': t.travel, 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc), 'ข้อมูลเทิร์นแอร์เก่า': ti,
           ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : '', jobs.repair ? `ซ่อม / ตรวจเช็ก ${jobs.repair} รายการ` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'จำนวนรูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ผลประเมินเบื้องต้น (ผู้ช่วย)': (jobs.repair && D.diag && D.diag.text) || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
-        text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${visit.length && cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null].filter(x => x != null).join('\n') };
+        text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${visit.length && cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null, ti ? '' : null, ti ? '— ข้อมูลเทิร์นแอร์เก่า (ทีมยืนยันมูลค่าเมื่อตรวจเครื่อง) —' : null, ti || null].filter(x => x != null).join('\n') };
       render();
     });
     body.append(f);
