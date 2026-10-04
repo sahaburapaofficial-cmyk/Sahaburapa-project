@@ -4,6 +4,7 @@
 // fans spin, flaps/vanes swing, float switch bobs; air (warm → cold at the coil), condensate, drain and refrigerant flow as particles.
 // Callouts sit in two columns at the sides with leader lines (they never overlap); on phones they collapse to numbered dots + legend.
 // Principle illustration built from manufacturer documentation — proportions are indicative, not any specific model.
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { mountThrowSim } from './throwsim3d.js';
 import * as THREE from './three.module.min.js';
 import { track as glTrack } from './gl-pool.js';
@@ -175,13 +176,17 @@ export function createHowItWorks3D(container, opts = {}) {
   const camera = new THREE.PerspectiveCamera(34, 1, 0.02, 60);
   const M = materialSet(bp ? 'blueprint' : dark ? 'showroom' : 'studio');
   const accent = new THREE.Color(dark ? 0xff8a3d : 0xe2711d);
-  const ctxMat = new THREE.MeshStandardMaterial({ color: dark ? 0x1a232e : bp ? 0xf1f5fa : 0xeef1f4, roughness: 0.95 });
-  const ctxMat2 = new THREE.MeshStandardMaterial({ color: dark ? 0x222d3a : bp ? 0xe6edf6 : 0xe2e7ec, roughness: 0.9 });
+  // Rev.23 (owner 3 ต.ค. 2569: "สีรางครอบท่อมันกลืนกับผนัง … ทำให้สีมันตัดกัน"): painted wall in a tone the white trunking stands out on;
+  // the visitor can switch the wall paint (incl. white, to see why a matching colour hides the details) and open the trunk lids
+  const WALL_DEF = 0xe6d6bb, wallHex = c => (dark ? new THREE.Color(c).lerp(new THREE.Color(0x1a232e), 0.72) : bp ? new THREE.Color(0xf1f5fa) : new THREE.Color(c));
+  const ctxMat = new THREE.MeshStandardMaterial({ color: wallHex(WALL_DEF), roughness: 0.95 });
+  const ctxMat2 = new THREE.MeshStandardMaterial({ color: wallHex(WALL_DEF).multiplyScalar(dark ? 1.1 : 0.96), roughness: 0.9 });
+  const slabMat = new THREE.MeshStandardMaterial({ color: dark ? 0x222d3a : bp ? 0xe6edf6 : 0xe2e7ec, roughness: 0.9 });
   const glassMat = new THREE.MeshBasicMaterial({ color: dark ? 0x3a5068 : 0xbfd6ea, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide });
   const pipeMat = new THREE.MeshStandardMaterial({ color: bp ? 0x9fb3cf : 0x1c1f23, roughness: 0.85 });
   const cols = { warm: dark ? 0xff9a52 : 0xf07a2e, cold: dark ? 0x55d6ff : 0x1597e8, water: dark ? 0x7cc8ff : 0x2a7fd4, liq: dark ? 0x62b8ff : 0x1f6fd1, gas: dark ? 0xb4e6ff : 0x5bb6e8, hot: 0xff6a2a };
   const cutPlane = new THREE.Plane(V(-1, 0, 0), 100);
-  const st = { type: null, step: -1, cut: false, xray: true, layers: { air: true, water: true, refr: true }, t: 0, vis: true, cam: { t: V(0, 0, 0), th: 0.6, ph: 1.4, r: 1.6 }, fly: null, userAt: 0 };
+  const st = { type: null, step: -1, cut: false, xray: true, trunkOpen: false, layers: { air: true, water: true, refr: true }, t: 0, vis: true, cam: { t: V(0, 0, 0), th: 0.6, ph: 1.4, r: 1.6 }, fly: null, userAt: 0 };
   const orbitState = { theta: 0.6, phi: 1.4, radius: 1.6, minR: 0.5, maxR: 6, wheelZoom: false, userAt: 0 };
   orbit(renderer.domElement, orbitState, () => { st.fly = null; st.cam.th = orbitState.theta; st.cam.ph = orbitState.phi; st.userAt = performance.now(); });
   const cache = {};
@@ -214,15 +219,15 @@ export function createHowItWorks3D(container, opts = {}) {
       const plate = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.22, 0.006), M.metal.clone()); plate.material.clippingPlanes = [cutPlane]; plate.position.set(0, 0, -0.158); ctx.add(plate);
       camLimit = p => { p.z = Math.max(p.z, 0.05); };
     } else if (type === 'ceiling') {
-      const s = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.12, 2.4), ctxMat); s.position.set(0.4, 0.1175 + 0.3 + 0.06, 0.0); ctx.add(s);
+      const s = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.12, 2.4), slabMat); s.position.set(0.4, 0.1175 + 0.3 + 0.06, 0.0); ctx.add(s);
       const w = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.8, 0.08), ctxMat2); w.position.set(1.0, -0.45, -0.66); ctx.add(w);
       camLimit = p => { p.y = Math.min(p.y, 0.35); p.z = Math.max(p.z, -0.55); };
     } else {
       const bs = new THREE.Shape(); bs.moveTo(-1.6, -1.6); bs.lineTo(1.6, -1.6); bs.lineTo(1.6, 1.6); bs.lineTo(-1.6, 1.6); bs.closePath();
       const hl = new THREE.Path(); hl.moveTo(-0.43, -0.43); hl.lineTo(-0.43, 0.43); hl.lineTo(0.43, 0.43); hl.lineTo(0.43, -0.43); hl.closePath(); bs.holes.push(hl);
       const bg = new THREE.ExtrudeGeometry(bs, { depth: 0.012, bevelEnabled: false }); bg.rotateX(Math.PI / 2);
-      const board = new THREE.Mesh(bg, ctxMat.clone()); board.position.y = 0.012; board.material.clippingPlanes = [cutPlane]; board.material.side = THREE.DoubleSide; ctx.add(board);
-      const slab = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.12, 3.2), ctxMat2); slab.position.set(0, 0.246 + 0.38 + 0.06, 0); ctx.add(slab);
+      const board = new THREE.Mesh(bg, slabMat.clone()); board.material.color.set(dark ? 0x2a3440 : 0xf4f5f2); board.position.y = 0.012; board.material.clippingPlanes = [cutPlane]; board.material.side = THREE.DoubleSide; ctx.add(board);
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.12, 3.2), slabMat); slab.position.set(0, 0.246 + 0.38 + 0.06, 0); ctx.add(slab);
       const ext = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.1, 1.7), ctxMat2); ext.position.set(1.26, -0.4, -0.9); ctx.add(ext);   // exterior wall strip the pipe run passes through
       camLimit = p => { p.y = Math.min(p.y, -0.05); };
     }
@@ -235,6 +240,8 @@ export function createHowItWorks3D(container, opts = {}) {
     // ---- tidy pipe run: trunking with fittings + insulated pipes bent at right angles ----
     const RT = ROUTE[type], TR = buildTrunk(RT.c, RT.lids, { caps: RT.caps, blueprint: bp }); ctx.add(TR.group);
     const trunkMats = TR.mats.map(m => { m.transparent = true; m.opacity = 1; return m; });
+    // crisp edges on the trunking, fittings and caps so every joint reads against the wall
+    { const em = new THREE.LineBasicMaterial({ color: dark ? 0x9fb3c8 : 0x7d8a98, transparent: true, opacity: 0.85 }); TR.group.traverse(o => { if (o.isMesh && o.geometry) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 28), em); e.raycast = () => {}; o.add(e); } }); trunkMats.edge = em; }
     const offs = (side, depth) => RT.c.map((p, i) => {   // pipe centre-line inside the trunk, `side` across the face, `depth` toward the wall
       const seg = k => { const a = V(...RT.c[k]), b = V(...RT.c[k + 1]), n = V(...RT.lids[k]); return { s: n.clone().cross(b.sub(a).normalize()), n }; };
       const ks = [i - 1, i].filter(k => k >= 0 && k < RT.c.length - 1).map(seg);
@@ -294,7 +301,7 @@ export function createHowItWorks3D(container, opts = {}) {
     const w = st.layers.water ? (!k || k === 'water' ? 1 : 0.2) : 0; C.drips.target = w; C.drain.target = w;
     ['o-front', 'o-top', 'o-side', 'o-grille'].forEach(id => C.OU.parts[id] && C.OU.parts[id].traverse(ob => { if (!ob.material) return; const see = k === 'outdoor' && id !== 'o-grille'; ob.material.transparent = see; ob.material.opacity = see ? 0.28 : 1; ob.material.depthWrite = !see; ob.material.needsUpdate = true; }));
     const fanStep = k === 'fan'; C.U.parts.coil && C.U.parts.coil.traverse(ob => { if (!ob.material) return; ob.material.transparent = fanStep; ob.material.opacity = fanStep ? 0.22 : 1; ob.material.depthWrite = !fanStep; });
-    const see = ['coil', 'outdoor'].includes(k); C.trunkMats.forEach(m => { m.opacity = 1; m.depthWrite = true; });   // trunking stays solid white (finished look); flow shows on the exposed pipe ends
+    const see = ['coil', 'outdoor'].includes(k); C.trunkMats.forEach(m => { m.opacity = st.trunkOpen ? 0.22 : 1; m.depthWrite = !st.trunkOpen; });   // trunking stays solid white (finished look); flow shows on the exposed pipe ends
     const r = st.layers.refr ? (!k || ['coil', 'outdoor'].includes(k) ? 1 : 0.2) : 0; C.lq.target = r; C.gs.target = r; C.ex.target = st.layers.refr ? (!k || k === 'outdoor' ? 1 : 0.3) : 0;
   }
   function flyTo(c, instant) {
@@ -355,6 +362,8 @@ export function createHowItWorks3D(container, opts = {}) {
     setCut(v) { st.cut = !!v; const [, c] = CUT[st.type]; cutPlane.constant = st.cut ? c : 100; },
     setXray(v) { st.xray = !!v; const C = cache[st.type]; C && C.xr.set(st.xray); },
     setLayer(k, v) { st.layers[k] = !!v; applyVisual(); },
+    setWall(c) { ctxMat.color.copy(wallHex(c)); ctxMat2.color.copy(wallHex(c)).multiplyScalar(dark ? 1.1 : 0.96); },
+    setTrunkOpen(v) { st.trunkOpen = !!v; Object.values(cache).forEach(C => C.trunkMats.forEach(m => { m.opacity = st.trunkOpen ? 0.22 : 1; m.depthWrite = !st.trunkOpen; m.needsUpdate = true; })); },
     get type() { return st.type; }, get step() { return st.step; },
   };
 }
@@ -406,7 +415,14 @@ export function mountHowItWorks(root, cfg = {}) {
   const tw = h('div', { class: 'hw-throw' });
   const fb = h('div', { class: 'hw-fb', hidden: true }, 'อุปกรณ์นี้แสดงภาพ 3 มิติไม่ได้ ขั้นตอนด้านข้างยังอ่านได้ครบ');
   stage.append(coSvg, coBox, cap, ctrl, fb);
-  root.append(tabs, h('div', { class: 'hw-main' }, h('div', { class: 'hw-left' }, stage, legendM, h('div', { class: 'hw-keys' }, ...[['warm', 'ลมอุ่นจากห้อง'], ['cold', 'ลมเย็นหลังผ่านคอยล์'], ['water', 'น้ำทิ้ง'], ['liq', 'น้ำยาเหลว (ท่อเล็ก)'], ['gas', 'ไอน้ำยากลับ (ท่อใหญ่)'], ['hot', 'ความร้อนที่คอยล์ร้อนระบายออก']].map(([k, t]) => h('span', {}, h('i', { class: 'k-' + k }), t)))), h('div', { class: 'hw-side' }, list, facts)),
+  // Rev.23 wall paint + trunk lids: see the white trunking, its fittings and the pipes inside clearly against the wall
+  const WALLS = [['ครีม', 0xe6d6bb], ['เทาอุ่น', 0xc8c1b6], ['ฟ้าหม่น', 0xc2d2df], ['เขียวเสจ', 0xc4cfbd], ['ขาว (สีเดียวกับราง)', 0xf3f4f1]];
+  const wallRow = h('div', { class: 'hw-wall', role: 'group', 'aria-label': 'สีผนังและรางครอบท่อ' }, h('span', {}, 'สีผนัง'),
+    ...WALLS.map(([th, c], i) => h('button', { type: 'button', class: 'hw-sw', 'aria-pressed': String(i === 0), title: th, 'aria-label': `ผนังสี${th}`, style: `--sw:#${c.toString(16).padStart(6, '0')}`,
+      onclick: e => { wallRow.querySelectorAll('.hw-sw').forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget))); V3 && V3.setWall(c); wallTip.textContent = i === 4 ? 'รางสีเดียวกับผนังดูกลมกลืน แต่มองหาจุดต่อและฝาปิดได้ยาก — ตอนตรวจงานเลือกดูบนผนังสีอื่น' : 'รางครอบท่อสีขาวตัดกับผนัง เห็นข้อต่อโค้ง ข้อต่อตรง ฝาปิดปลาย และแนวรางได้ชัด'; } })),
+    h('label', { class: 'hw-tg' }, h('input', { type: 'checkbox', onchange: e => V3 && V3.setTrunkOpen(e.target.checked) }), 'เปิดฝารางดูท่อด้านใน'));
+  const wallTip = h('p', { class: 'hw-wall-tip' }, 'รางครอบท่อสีขาวตัดกับผนัง เห็นข้อต่อโค้ง ข้อต่อตรง ฝาปิดปลาย และแนวรางได้ชัด');
+  root.append(tabs, h('div', { class: 'hw-main' }, h('div', { class: 'hw-left' }, stage, wallRow, wallTip, legendM, h('div', { class: 'hw-keys' }, ...[['warm', 'ลมอุ่นจากห้อง'], ['cold', 'ลมเย็นหลังผ่านคอยล์'], ['water', 'น้ำทิ้ง'], ['liq', 'น้ำยาเหลว (ท่อเล็ก)'], ['gas', 'ไอน้ำยากลับ (ท่อใหญ่)'], ['hot', 'ความร้อนที่คอยล์ร้อนระบายออก']].map(([k, t]) => h('span', {}, h('i', { class: 'k-' + k }), t)))), h('div', { class: 'hw-side' }, list, facts)),
     h('div', { class: 'hw-throw-card' }, h('h3', {}, 'ลมเย็นไปทางไหนในห้อง — ลองสั่งงานเองในห้องจริง 12 เมตร'), h('p', { class: 'hw-throw-sub' }, 'เลือกเครื่อง 4 แบบ แล้วสั่งงานจาก' + ({ panel: 'แผงควบคุมห้อง', glass: 'แผงสัมผัส' }[cfg.throwStyle] || 'รีโมต') + ': เปิด/ปิด โหมด อุณหภูมิ ความแรงลม บานสวิงขึ้นลง/ซ้ายขวา · เส้นลมเปลี่ยนสีตามอุณหภูมิ: ฟ้าเข้ม = ลมเย็นจากเครื่อง · ฟ้าอ่อน/ขาว = ผสมกับอากาศในห้องแล้ว · ส้ม = อากาศอุ่นจากคน หน้าต่าง เครื่องใช้ไฟฟ้า ที่ลอยขึ้นแล้วไหลกลับเข้าเครื่อง · พื้นแสดงอุณหภูมิระดับตัวคน · คนที่ร้อนจะพัดมือ'), tw),
     h('p', { class: 's-note' }, 'ภาพจำลองหลักการทำงานจากโครงสร้างตามเอกสารผู้ผลิต สัดส่วนและรูปทรงไม่ใช่รุ่นใดรุ่นหนึ่ง ฝาครอบแสดงแบบมองทะลุเพื่อเห็นกลไกด้านใน (ปิดได้ที่ "มองทะลุตัวเครื่อง") · ระยะลมเป็นค่าโดยประมาณ ขึ้นกับรุ่น ความเร็วพัดลม และสภาพห้อง'));
   let type = cfg.start || 'wall', step = -1, V3 = null, timer = null, playing = false;
@@ -471,7 +487,7 @@ export function mountHowItWorks(root, cfg = {}) {
   render();
   TS = mountThrowSim(tw, { theme: cfg.theme, type, style: cfg.throwStyle, fallback: () => { const d = h('div'); d.innerHTML = throwSvg(type); return d; } });
   const boot = () => { try { V3 = createHowItWorks3D(stage, { theme: cfg.theme, onFrame: layout }); V3.setType(type); if (step >= 0) V3.focus(step); } catch (e) { console.warn('how-it-works 3D unavailable', e); fb.hidden = false; } };
-  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); boot(); } }, { rootMargin: '500px 0px' }); io.observe(stage);
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); whenQuiet(boot); } }, { rootMargin: '500px 0px' }); io.observe(stage);
   const K = { grille: 'intake', front: 'intake', intake: 'intake', filter: 'filter', coil: 'coil', fan: 'fan', blower: 'fan', motor: 'fan', pan: 'water', pump: 'water', drain: 'water', louver: 'throw', outdoor: 'outdoor' };
   return {
     setType(t) { if (t === type || !TYPES[t]) return; type = t; step = -1; if (playing) toggle(); V3 && V3.setType(t); render(); },

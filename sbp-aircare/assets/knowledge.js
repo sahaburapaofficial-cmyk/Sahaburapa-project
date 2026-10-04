@@ -3,6 +3,7 @@
 // Every number is read from the same constants the tools use (recommendBtu, FIT_RULES, PRICING, TRAVEL, Pricebook rows),
 // so a guide can never disagree with the calculator next to it. Wording follows the banned-claims list (CLAUDE.md §6.6 #11).
 // Owner / tech lead to review the copy; data corrections flow in through the constants.
+import { guideAnim } from './animicons.js';   // Rev.26
 import { h, $$, recommendBtu, btuFmt, baht, incVat, DATA, PRICING, TRAVEL, VRF_NOTE } from './sbp-core.js';
 import { PKG_INFO, METHOD_INFO } from './commerce.js';
 import { FIT_RULES } from './roomfit.js';
@@ -59,7 +60,7 @@ export const GUIDES = [
   { id: 'contract', aud: 'biz', th: 'สัญญาล้างรายปีสำหรับองค์กร', lead: 'วางรอบทั้งปี รายงานทุกรอบ วางบิลตามรอบ', min: 2,
     body: () => [L('ทีมวางรอบล่วงหน้าทั้งปี ส่งรายงานตามแพ็กเกจหลังทุกรอบ และวางบิลตามรอบ',
       'ราคาบนเว็บเป็นอัตรามาตรฐานต่อเครื่องต่อครั้ง ตั้งแต่ 10 เครื่องขึ้นไปอาจได้อัตราพิเศษตามเงื่อนไข ทีมขายยืนยันในใบเสนอราคา',
-      `งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ${baht(incVat(DATA.minBill))} รวม VAT (${baht(DATA.minBill)} ก่อน VAT)`,
+      `งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ${baht(DATA.minBill)} ก่อน VAT ต่ำกว่านี้คิดค่าเดินทาง ${baht(TRAVEL.baseFee)} ต่อการเข้างาน`,
       `กำลังทีมต่อวันตามคู่มือบริษัท: ติดผนังราว ${PRICING.unitsPerTeamDay.wall} เครื่อง · แขวน / สี่ทิศทางราว ${PRICING.unitsPerTeamDay.cassette} เครื่อง ต่อทีม-วัน`)],
     try: [['คำนวณงบทั้งปี', 'b2b']] },
   { id: 'packages', aud: 'biz', th: 'แพ็กเกจล้าง 3 ระดับ ต่างกันอย่างไร', lead: 'เอกสาร ภาพ ค่าตรวจวัด และระยะรับประกันงานล้าง', min: 3,
@@ -71,9 +72,10 @@ export const GUIDES = [
   { id: 'vrf', aud: 'biz', th: 'ระบบ VRV / VRF', lead: 'งานโครงการแยก ออกแบบตามอาคารจริง', min: 1,
     body: () => [P(VRF_NOTE), P('ล้างและติดตั้งแอร์ทุกประเภทอื่นมีราคามาตรฐานบนเว็บ ส่วน VRV / VRF ทีมโครงการจะสำรวจ ออกแบบท่อและคอนโทรล แล้วทำ BOQ ให้')],
     try: [['ติดต่อสอบถาม VRV / VRF', 'ask:ระบบ VRV / VRF']] },
-  { id: 'area', aud: 'all', th: 'พื้นที่บริการและค่าเดินทาง', lead: 'กรุงเทพฯ และปริมณฑลไม่มีค่าเดินทาง', min: 1,
-    body: () => [L('กรุงเทพฯ นนทบุรี ปทุมธานี สมุทรปราการ สมุทรสาคร ไม่มีค่าเดินทาง',
-      ...TRAVEL.bands.map(b => `ระยะ ${b.th}: ${baht(incVat(b.fee(0)))} รวม VAT ต่อเที่ยว${b.minUnits > 1 ? ` · ขั้นต่ำ ${b.minUnits} เครื่อง` : ''}${b.waiveAt ? ` · ยกเว้นเมื่อ ${b.waiveAt} เครื่องขึ้นไป` : ''}`),
+  { id: 'area', aud: 'all', th: 'พื้นที่บริการและค่าเดินทาง', lead: `กรุงเทพฯ ในระยะ ${TRAVEL.freeKm} กม. จากพระราม 2 เป็นพื้นที่หลัก`, min: 1,
+    body: () => [L(`พื้นที่หลัก: กรุงเทพฯ ในระยะถนน ${TRAVEL.freeKm} กม. จากสำนักงานใหญ่ ไม่มีค่าเดินทางเมื่อยอดงานล้างถึง ${baht(DATA.minBill)} ก่อน VAT`,
+      `งานล้างที่ยอดต่ำกว่า ${baht(DATA.minBill)} คิดค่าเดินทาง ${baht(TRAVEL.baseFee)} ต่อการเข้างาน`,
+      `นอกพื้นที่หลัก (ไม่เกิน ${TRAVEL.maxKm} กม.): ${baht(TRAVEL.baseFee)} + ${baht(TRAVEL.perKm)} ต่อกิโลเมตรที่เกิน ${TRAVEL.freeKm} กม. ต่อเที่ยว ก่อน VAT ปัดขึ้นหลักร้อย`,
       `ไกลกว่า ${TRAVEL.maxKm} กม. รับเป็นงานโครงการหรือสัญญา`)],
     try: [['เช็กพื้นที่ของคุณ', 'area']] },
 ];
@@ -100,7 +102,7 @@ export function mountKnowledge(root, { ids = {} } = {}) {
     list.forEach(g => {
       const tries = g.try.filter(([, k]) => k.startsWith('ask:') || ids[k] || document.getElementById(k));
       grid.append(h('details', { class: 'kh-card', id: `kh-${g.id}` },
-        h('summary', {}, h('span', { class: 'kh-aud' }, g.aud === 'biz' ? 'องค์กร' : g.aud === 'home' ? 'บ้าน' : 'ทุกคน', ` · อ่าน ${g.min} นาที`), h('b', {}, g.th), h('small', {}, g.lead)),
+        h('summary', {}, guideAnim(g.id, 'kh-ai'), h('span', { class: 'kh-aud' }, g.aud === 'biz' ? 'องค์กร' : g.aud === 'home' ? 'บ้าน' : 'ทุกคน', ` · อ่าน ${g.min} นาที`), h('b', {}, g.th), h('small', {}, g.lead)),
         h('div', { class: 'kh-body' }, g.body(), tries.length ? h('div', { class: 'kh-try' }, h('span', {}, 'ลองเอง:'), tries.map(([th, k]) => h('button', { type: 'button', class: 's-btn', onclick: () => go(k) }, th))) : null)));
     });
   }

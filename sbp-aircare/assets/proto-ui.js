@@ -3,8 +3,9 @@
 import {
   DEMO, TYPES, TYPE_BY_ID, BRANDS, BRAND_BY_ID, BTU_BANDS, PRICE_BANDS, emptyFilter, queryCatalog, facetCounts,
   baht, btuFmt, checkZone, TIER_TH, estimateContract, PRESETS, recommendBtu, h, $, $$, countUp, reduceMotion,
-  CLEAN_PKGS, SIZE_BANDS, DATA, incVat, TRAVEL, stockTh, travelNote, VOLUME_HINT,
+  CLEAN_PKGS, SIZE_BANDS, DATA, incVat, up100, TRAVEL, stockTh, travelNote, VOLUME_HINT,
 } from './sbp-core.js';
+import { attachAddr } from './addrpick.js';
 import { createACViewer, createRoomSim, PARTS } from './ac3d.js';
 import { deferred } from './lazy.js';
 
@@ -27,7 +28,7 @@ export function mountCatalog(root, cfg) {
     { key: 'type', th: 'ประเภท', opts: TYPES.map(t => ({ id: t.id, th: t.th, dot: t.color })) },
     { key: 'btu', th: 'ขนาด BTU', opts: BTU_BANDS.map(b => ({ id: b.id, th: b.th })) },
     { key: 'brand', th: 'แบรนด์', opts: BRANDS.map(b => ({ id: b.id, th: b.name, own: b.own })), collapsible: 8 },
-    { key: 'price', th: 'ราคาเครื่อง (รวม VAT)', opts: PRICE_BANDS.map(b => ({ id: b.id, th: b.th })) },
+    { key: 'price', th: 'ราคาเครื่อง (ก่อน VAT)', opts: PRICE_BANDS.map(b => ({ id: b.id, th: b.th })) },
     { key: 'inverter', th: 'ระบบ', opts: [{ id: 'inv', th: 'Inverter' }, { id: 'fix', th: 'Fixed speed' }], single: true },
   ];
   function renderFacets() {
@@ -154,19 +155,20 @@ export function mountBuilder(root, cfg = {}) {
     const has = e.count > 0;
     root.classList.toggle('has-est', has);
     out('count').forEach(x => countUp(x, e.count || 0, 500));
-    out('low').forEach(x => has ? countUp(x, e.annualInc, 700, n => baht(n)) : x.textContent = '—');
-    out('high').forEach(x => x.textContent = has ? `${baht(e.annualEx)} ก่อน VAT` : '—');
-    out('perunit').forEach(x => x.textContent = has ? baht(e.perUnitYear) : '—');
+    out('low').forEach(x => has ? countUp(x, e.annualEx, 700, n => baht(n)) : x.textContent = '—');
+    out('high').forEach(x => x.textContent = has ? `ก่อน VAT · รวม VAT ${baht(e.annualInc)}` : '—');
+    out('perunit').forEach(x => x.textContent = has ? `≈ ${baht(up100(e.perUnitYear))} ก่อน VAT` : '—');
     out('teamdays').forEach(x => x.textContent = has ? `${e.teamDaysPerVisit} ทีม-วัน / รอบ (ประมาณ)` : '—');
-    out('off').forEach(x => x.textContent = has ? `ใช้${e.level.th} (${e.count} เครื่อง)${e.minBillApplied ? ` · ปรับขั้นต่ำ ${baht(DATA.minBill)}/รอบ` : ''}${high ? ' · งานสูงเกิน 3 ม. ประเมินหน้างาน' : ''}${e.count >= VOLUME_HINT ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไขบริษัท ทีมขายยืนยันในใบเสนอราคา' : ''}` : '');
+    out('off').forEach(x => x.textContent = has ? `ใช้${e.level.th} (${e.count} เครื่อง)${e.travel ? ` · ${e.travelLabel || 'ค่าเดินทาง'} ${baht(e.travel)}/รอบ` : ''}${high ? ' · งานสูงเกิน 3 ม. ประเมินหน้างาน' : ''}${e.count >= VOLUME_HINT ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไขบริษัท ทีมขายยืนยันในใบเสนอราคา' : ''}` : '');
     out('visits').forEach(x => x.textContent = `${visits} ครั้ง / ปี${deep ? ' (ล้างใหญ่ 1)' : ''}`);
-    out('tier').forEach(x => x.textContent = !zone || zone.tier === 'core' ? 'กทม.และปริมณฑล' : zone.tier === 'extended' ? (e.travelWaived ? `ยกเว้นค่าเดินทาง (${e.count} เครื่อง)` : `+ค่าเดินทาง ${baht(incVat(zone.fee))}/รอบ${e.travelShort ? ` · ขั้นต่ำ ${zone.minUnits} เครื่อง` : ''}`) : zone.tier === 'out' ? 'เกินระยะ — ประเมินแยก' : 'ตรวจพื้นที่');
+    out('tier').forEach(x => x.textContent = e.travel ? `+ค่าเดินทาง ${baht(e.travel)}/รอบ` : zone && zone.tier === 'out' ? 'เกินระยะ · ทีมประเมินเป็นงานโครงการ' : 'ไม่มีค่าเดินทาง');
     $$('[data-b-bar]', root).forEach(bar => { const k = bar.dataset.bBar; const max = Math.max(1, ...Object.values(units)); bar.style.setProperty('--w', ((units[k] || 0) / max * 100).toFixed(1) + '%'); });
     linesBox.innerHTML = '';
     if (has) linesBox.append(h('table', { class: 's-btable' }, h('thead', {}, h('tr', {}, h('th', {}, 'ประเภท'), h('th', {}, 'เครื่อง'), h('th', {}, 'ล้างปกติ/เครื่อง'), h('th', {}, 'ล้างใหญ่/เครื่อง'))),
-      h('tbody', {}, e.lines.map(l => h('tr', {}, h('td', {}, `${TYPE_BY_ID[l.type].th} ${l.range || ''}`), h('td', {}, String(l.n)), h('td', {}, baht(incVat(l.c1))), h('td', {}, baht(incVat(l.c2))))))),
-      h('p', { class: 's-note' }, `ราคารวม VAT ตาม Pricebook · ${pkg}`));
+      h('tbody', {}, e.lines.map(l => h('tr', {}, h('td', {}, `${TYPE_BY_ID[l.type].th} ${l.range || ''}`), h('td', {}, String(l.n)), h('td', {}, baht(l.c1)), h('td', {}, baht(l.c2)))))),
+      h('p', { class: 's-note' }, `ราคาก่อน VAT ตาม Pricebook (ปัดขึ้นเป็นหลักร้อย) · ${pkg}`));
     cfg.onChange && cfg.onChange(e, { units: { ...units }, visits, zone, high });
+    root.dispatchEvent(new CustomEvent('sbp:builder', { detail: { e, state: { units: { ...units }, visits, zone, high, pkg, size, deep } } }));   // Rev.26 annual plan (annualplan.js)
   }
   $$('[data-b-unit]', root).forEach(inp => inp.addEventListener('input', () => { units[inp.dataset.bUnit] = Math.max(0, Math.min(999, parseInt(inp.value || '0', 10) || 0)); markPreset(null); calc(); }));
   $$('[data-b-step]', root).forEach(b => b.addEventListener('click', () => {
@@ -183,35 +185,49 @@ export function mountBuilder(root, cfg = {}) {
   $('[data-b-pkg]', root).addEventListener('change', e => { pkg = e.target.value; calc(); });
   $('[data-b-size]', root).addEventListener('change', e => { size = +e.target.value; calc(); });
   $('[data-b-deep]', root).addEventListener('change', e => { deep = e.target.checked; calc(); });
-  const zi = $('[data-b-zone]', root), zr = $('[data-b-zone-result]', root);
-  zi && zi.addEventListener('input', () => {
-    zone = checkZone(zi.value);
-    if (zr) { zr.dataset.tier = zone ? zone.tier : ''; zr.textContent = !zone ? '' : zone.tier === 'core' ? `${zone.match} — ${TIER_TH.core.th}` : zone.tier === 'extended' ? `${zone.match} ${zone.province} · ~${zone.km} กม. · ${travelNote(zone)}` : zone.tier === 'out' ? `${zone.match} · ~${zone.km} กม. — ${TIER_TH.out.th}` : TIER_TH.unknown.th; }
+  // Rev.20 area picker (addrpick.js) in place of the free-text box
+  const zr = $('[data-b-zone-result]', root);
+  const zap = attachAddr($('[data-b-zone]', root), { onPick: (a, z) => {
+    zone = z && z.tier !== 'unknown' ? z : null;
+    if (zr) { zr.dataset.tier = z ? z.tier : ''; zr.textContent = !z ? '' : `${z.match} — ${(TIER_TH[z.tier] || TIER_TH.unknown).th} · ${travelNote(z)}`; }
     calc();
-  });
+  } });
+  const zi = zap && zap.input;
   const first = PRESETS[1]; setUnits(first.units); visits = first.visits; markPreset(first.id);
   $$('[data-b-visits]', root).forEach(r => r.checked = +r.value === visits);
   calc();
-  return { estimate: () => last, state: () => ({ units: { ...units }, visits, zone, high, pkg, size, deep }), zoneInput: () => zi ? zi.value : '' };
+  // ★Rev.22 load a sample (enterprise.js "ปรับจำนวนเครื่องเอง") — units, visits, package, size band, deep clean
+  function load(o = {}) {
+    if (o.units) setUnits(o.units);
+    if (o.visits) { visits = o.visits; $$('[data-b-visits]', root).forEach(r => r.checked = +r.value === visits); }
+    if (o.pkg) { pkg = o.pkg; $('[data-b-pkg]', root).value = pkg; }
+    if (o.size != null) { size = o.size; $('[data-b-size]', root).value = String(size); }
+    if (o.deep != null) { deep = !!o.deep; $('[data-b-deep]', root).checked = deep; }
+    markPreset(null); calc();
+  }
+  return { estimate: () => last, state: () => ({ units: { ...units }, visits, zone, high, pkg, size, deep }), zoneInput: () => zi ? zi.value : '', load };
 }
 
 /* ---------------- Service-area checker ---------------- */
 export function mountZone(root, cfg = {}) {
-  const inp = $('[data-z-input]', root), res = $('[data-z-result]', root);
-  function run() {
-    const z = checkZone(inp.value);
+  const res = $('[data-z-result]', root);
+  // Rev.20 postal-style picker: แขวง/ตำบล · เขต/อำเภอ · จังหวัด · รหัสไปรษณีย์ → zone and travel fee of that exact place
+  const ap = attachAddr($('[data-z-input]', root), { onPick: (a, z) => show(z) });
+  function show(z) {
     $$('[data-z-prov]', root).forEach(el => el.classList.toggle('hit', !!z && el.dataset.zProv === z.province));
     if (!z) { res.hidden = true; return; }
     res.hidden = false; res.dataset.tier = z.tier;
     res.innerHTML = '';
-    res.append(h('strong', {}, TIER_TH[z.tier].th), h('span', {}, ` ${z.match}${z.province && z.match !== z.province ? ' · ' + z.province : ''}`), h('p', {}, TIER_TH[z.tier].note));
-    if (z.tier === 'extended') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. จากสำนักงานใหญ่ · ${travelNote(z)} (${baht(z.fee)} ก่อน VAT)`));
-    if (z.tier === 'out') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. เกิน ${TRAVEL.maxKm} กม. — รับเป็นงานโครงการหรือสัญญา คิดค่าทีมต่อวัน + ทางด่วน + ที่พักตามจริง`));
+    res.append(h('strong', {}, (TIER_TH[z.tier] || TIER_TH.unknown).th), h('span', {}, ` ${z.match || ''}`), h('p', {}, (TIER_TH[z.tier] || TIER_TH.unknown).note));
+    if (z.tier === 'core') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. จากสำนักงานใหญ่ · ไม่มีค่าเดินทางเมื่อยอดงานล้างถึง ${baht(DATA.minBill)} (ต่ำกว่านั้น ${baht(TRAVEL.baseFee)} ต่อการเข้างาน)`));
+    if (z.tier === 'extended') res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. จากสำนักงานใหญ่ · ค่าเดินทาง ${baht(z.fee)} ต่อเที่ยว (ก่อน VAT)`));
+    if (z.tier === 'out' && z.km != null) res.append(h('p', { class: 's-zfee' }, `ระยะทางถนนประมาณ ${z.km} กม. เกิน ${TRAVEL.maxKm} กม. — รับเป็นงานโครงการหรือสัญญา ทีมแจ้งค่าเดินทางในใบเสนอราคา`));
     cfg.onResult && cfg.onResult(z);
   }
-  inp.addEventListener('input', run);
-  $$('[data-z-try]', root).forEach(b => b.addEventListener('click', () => { inp.value = b.dataset.zTry; run(); }));
-  $$('[data-z-prov]', root).forEach(el => el.addEventListener('click', () => { inp.value = el.dataset.zProv; run(); }));
+  const run = text => { ap.input.value = text; ap.input.dispatchEvent(new Event('input')); };
+  $$('[data-z-try]', root).forEach(b => b.addEventListener('click', () => run(b.dataset.zTry)));
+  $$('[data-z-prov]', root).forEach(el => el.addEventListener('click', () => run(el.dataset.zProv)));
+  return { pick: z => ap.set(z), input: ap.input };
 }
 
 /* ---------------- FAQ ---------------- */
@@ -275,7 +291,8 @@ function bootViewer(root, cfg = {}) {
     });
   }
   function showInfo(meta) {
-    $$('[data-part]', root).forEach(b => b.setAttribute('aria-pressed', !!meta && b.dataset.part === meta.id));
+    // Rev.13: aria-pressed only on real buttons; other part rows (B's table) get data-sel + aria-current (valid on a table row)
+    $$('[data-part]', root).forEach(b => { const on = !!meta && b.dataset.part === meta.id; if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', on); else { b.toggleAttribute('data-sel', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); } });
     if (!info) return;
     if (!meta) { info.classList.remove('on'); info.innerHTML = cfg.infoEmpty || '<p>แตะชิ้นส่วนเพื่อดูว่าทำหน้าที่อะไร และช่างทำอะไรกับมันตอนล้าง</p>'; return; }
     info.classList.add('on');
@@ -409,14 +426,53 @@ export function wireDrawers() {
 export function priceRange(m, skus) { const ps = skus.map(s => s.price); return [Math.min(...ps), Math.max(...ps)]; }
 
 /* ---------------- line art per unit type (placeholder until approved product photos) ---------------- */
+// Rev.13 (owner: "icon แอร์แขวนใต้ฝ้าให้สมจริงกว่านี้ ไม่เหมือนติดผนัง … ทุกประเภท represent accurate · ดูเป็นองค์กร"):
+// technical line drawings in one stroke weight — the mounting context (wall, ceiling slab, false ceiling, floor) and the real
+// air path of each type tell them apart: wall = blows down/forward · ceiling-suspended = slim wide body tight under the slab,
+// long horizontal throw, return from underneath · cassette = hidden body above the false ceiling, four-way panel from below ·
+// floor-standing = tall cabinet, top discharge · ducted = hidden unit, linear supply diffuser + return grille.
+const arr = (x1, y1, x2, y2, dash = false) => {   // line with an open chevron head at (x2, y2)
+  const a = Math.atan2(y2 - y1, x2 - x1), k = 5.2, w = 0.5;
+  const h1 = `${(x2 - k * Math.cos(a - w)).toFixed(1)} ${(y2 - k * Math.sin(a - w)).toFixed(1)}`, h2 = `${(x2 - k * Math.cos(a + w)).toFixed(1)} ${(y2 - k * Math.sin(a + w)).toFixed(1)}`;
+  return `<path class="ta-air"${dash ? ' stroke-dasharray="2.5 3"' : ''} d="M${x1} ${y1}L${x2} ${y2}"/><path class="ta-air" d="M${h1}L${x2} ${y2}L${h2}"/>`;
+};
+const slab = (y, x0 = 6, x1 = 154) => { let d = `<path d="M${x0} ${y}H${x1}"/>`; for (let x = x0 + 6; x < x1; x += 10) d += `<path class="ta-hatch" d="M${x} ${y}l-6 -6"/>`; return d; };
 export function typeArt(type, cls = 'art') {
-  const S = (d) => `<svg class="${cls}" viewBox="0 0 160 110" role="img" aria-label="ภาพประกอบ ${TYPE_BY_ID[type].th}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const S = (d) => `<svg class="${cls}" viewBox="0 0 160 110" role="img" aria-label="ภาพประกอบ ${TYPE_BY_ID[type].th}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><style>.ta-hatch{stroke-width:.9;opacity:.45}.ta-air{stroke-width:1.3;opacity:.75}.ta-body{fill:currentColor;fill-opacity:.07}.ta-thin{stroke-width:1}</style>${d}</svg>`;
   switch (type) {
-    case 'wall': return S('<rect x="14" y="30" width="132" height="40" rx="10"/><path d="M22 62h116"/><path d="M30 70c10 10 90 10 100 0"/><rect x="116" y="40" width="14" height="6" rx="2"/><path d="M40 84l-4 12M60 86l-2 12M80 86v12M100 86l2 12M120 84l4 12" stroke-dasharray="2 4"/>');
-    case 'cassette': return S('<path d="M8 28h144"/><rect x="36" y="30" width="88" height="14" rx="3"/><rect x="46" y="44" width="68" height="28" rx="4"/><rect x="62" y="52" width="36" height="12" rx="2"/><path d="M46 58l-14 12M114 58l14 12M80 72v14" stroke-dasharray="2 4"/>');
-    case 'ceiling': return S('<path d="M8 22h144"/><path d="M28 22v6M132 22v6"/><rect x="20" y="28" width="120" height="30" rx="8"/><path d="M26 58c16 8 92 8 108 0"/><path d="M40 70l-6 16M80 72v16M120 70l6 16" stroke-dasharray="2 4"/>');
-    case 'floor': return S('<rect x="56" y="10" width="48" height="90" rx="6"/><path d="M62 20h36M62 26h36M62 32h36"/><rect x="66" y="48" width="28" height="8" rx="2"/><path d="M104 22l22-6M104 30l24 0" stroke-dasharray="2 4"/><path d="M50 100h60"/>');
-    default: return S('<path d="M8 20h144"/><rect x="30" y="24" width="100" height="26" rx="4"/><path d="M130 30h18v14h-18M12 30h18v14H12"/><path d="M8 50h144" stroke-dasharray="3 3"/><rect x="56" y="54" width="48" height="8" rx="2"/><path d="M68 66v16M92 66v16" stroke-dasharray="2 4"/>');
+    case 'wall': return S(
+      // wall face on the left, body with top intake slots, front seam, display, open louver, air down & forward
+      `<path d="M10 8V98"/>${[16, 28, 40, 52, 64, 76, 88].map(y => `<path class="ta-hatch" d="M10 ${y}l-6 6"/>`).join('')}` +
+      `<rect class="ta-body" x="20" y="24" width="124" height="40" rx="10"/><path class="ta-thin" d="M30 30h104" stroke-dasharray="1.5 3"/><path d="M26 52h112"/>` +
+      `<rect class="ta-thin" x="112" y="36" width="16" height="6" rx="1.5"/><path d="M30 64c16 9 88 9 104 0"/>` +
+      arr(50, 76, 42, 98) + arr(80, 78, 78, 101) + arr(110, 76, 118, 98));
+    case 'ceiling': return S(
+      // ceiling slab, short hanger brackets, slim wide body with an end cap (depth), front outlet + louver, long horizontal
+      // throw, return air drawn up into the underside
+      slab(16) + `<path d="M30 16v6M128 16v6"/>` +
+      `<path class="ta-body" d="M18 22H140V44H18Z"/><path class="ta-body" d="M140 22l12 -4v22l-12 4"/><path class="ta-thin" d="M26 30H132"/>` +
+      `<path d="M24 44h110"/><path d="M26 44l-4 8h106l-2 -8"/>` +
+      arr(40, 56, 74, 70) + arr(70, 58, 112, 70) + arr(100, 56, 146, 66) + arr(60, 98, 60, 80, true) + arr(96, 98, 96, 80, true));
+    case 'cassette': return S(
+      // slab + hidden body (dashed) above the false ceiling line, square panel seen from below: four louver slots, central
+      // return grille, air out four ways, return up through the middle
+      slab(10) + `<rect class="ta-thin" x="44" y="16" width="72" height="20" rx="3" stroke-dasharray="3 3"/><path d="M4 40H40M120 40H156"/>` +
+      `<path class="ta-body" d="M40 40H120L144 58H16Z"/><path class="ta-thin" d="M48 43.5H112M24 55H136M44 42L30 56M116 42L130 56"/>` +
+      `<path d="M60 46H100L106 52H54Z"/><path class="ta-thin" d="M62 48H98M58 50H102"/>` +
+      arr(30, 62, 18, 80) + arr(130, 62, 142, 80) + arr(62, 64, 52, 88) + arr(98, 64, 108, 88) + arr(80, 100, 80, 62, true));
+    case 'floor': return S(
+      // floor line, tall cabinet with depth, top discharge louvers, display, lower return grille, air out of the top
+      `<path d="M28 100H136"/>${[34, 46, 58, 70, 82, 94, 106, 118, 130].map(x => `<path class="ta-hatch" d="M${x} 100l-6 6"/>`).join('')}` +
+      `<rect class="ta-body" x="56" y="12" width="44" height="88" rx="5"/><path class="ta-body" d="M100 14l10 -5v86l-10 5"/>` +
+      `<path class="ta-thin" d="M62 20h32M62 25h32M62 30h32"/><rect class="ta-thin" x="70" y="40" width="16" height="6" rx="1.5"/>` +
+      `<path class="ta-thin" d="M62 68h32M62 73h32M62 78h32M62 83h32M62 88h32"/>` +
+      arr(54, 22, 26, 14) + arr(54, 28, 24, 32) + arr(30, 80, 52, 80, true));
+    default: return S(
+      // ducted: slab, hidden unit + supply duct (dashed) above the false ceiling, linear diffuser and return grille in it
+      slab(10) + `<path d="M4 58H156"/><rect class="ta-thin" x="22" y="20" width="56" height="24" rx="3" stroke-dasharray="3 3"/>` +
+      `<path class="ta-thin" d="M78 26H116V54M78 38H104V54" stroke-dasharray="3 3"/>` +
+      `<rect class="ta-body" x="96" y="56" width="44" height="5" rx="1.5"/><rect class="ta-body" x="24" y="56" width="30" height="5" rx="1.5"/><path class="ta-thin" d="M30 56v5M36 56v5M42 56v5M48 56v5"/>` +
+      arr(106, 66, 100, 92) + arr(118, 66, 118, 94) + arr(130, 66, 136, 92) + arr(39, 92, 39, 66, true));
   }
 }
 
@@ -450,7 +506,6 @@ export function productDrawerContent(m, skuIndex, { onPick, on3D, onQuote } = {}
       h('button', { type: 'button', class: 'btn-primary', onclick: () => onQuote && onQuote(m, sku) }, 'ขอราคาพร้อมติดตั้ง'),
       h('button', { type: 'button', class: 'btn-ghost', onclick: () => on3D && on3D(m, sku) }, 'ดูข้างในแบบ 3 มิติ'),
     ),
-    h('p', { class: 'pd-note' }, 'ข้อมูลรุ่นและราคาในต้นแบบนี้สร้างขึ้นเพื่อทดสอบหน้าจอ ใช้ข้อมูลจริงจาก Catalog เมื่อพัฒนา'),
   );
   return wrap;
 }
@@ -458,7 +513,7 @@ export function compareTable(items) {
   const rows = [
     ['แบรนด์', x => BRAND_BY_ID[x.m.brand].name], ['รุ่น', x => x.m.series], ['ประเภท', x => TYPE_BY_ID[x.m.type].th],
     ['ขนาด', x => btuFmt(x.sku.btu)], ['ระบบ', x => x.m.inverter ? 'Inverter' : 'Fixed speed'], ['น้ำยา', x => x.m.label],
-    ['ราคาเครื่อง รวม VAT', x => baht(x.sku.price)], ['พร้อมติดตั้งมาตรฐาน', x => x.sku.installStdEx ? baht(incVat(x.sku.px + x.sku.installStdEx)) : '—'], ['รับประกัน', x => x.sku.d?.warranty || '—'],
+    ['ราคาเครื่อง ก่อน VAT', x => baht(x.sku.price)], ['พร้อมติดตั้งมาตรฐาน', x => x.sku.installStdEx ? baht(x.sku.px + x.sku.installStdEx) : '—'], ['รับประกัน', x => x.sku.d?.warranty || '—'],
   ];
   const tbl = h('table', { class: 'cmp' });
   tbl.append(h('thead', {}, h('tr', {}, h('th', {}, ''), ...items.map(x => h('th', {}, `${x.sku.sku}`)))));

@@ -2,7 +2,7 @@
 // for cleaning / installing / repairing it, with pricebook prices and "add to quote".
 // Process text follows the company forms: SBP-SR-ACCL-UNI-001 Rev.07 (cleaning), SBP-SR-ACIN-UNI-001 Rev.04 (installation)
 // and the repair section of the pricebook. Prices are read from DATA (standard rate only).
-import { DATA, CLEAN_PKGS, SIZE_BANDS, PRICING, TYPE_BY_ID, incVat, baht, btuFmt, installOptions, cleanRate, h, $$, reduceMotion } from './sbp-core.js';
+import { DATA, TRAVEL, CLEAN_PKGS, SIZE_BANDS, PRICING, TYPE_BY_ID, incVat, baht, btuFmt, installOptions, cleanRate, h, $$, reduceMotion } from './sbp-core.js';
 import { cart, materialTable, cleanPackageGuide } from './commerce.js';
 import { toast } from './proto-ui.js';
 
@@ -176,8 +176,11 @@ export const PHC = { pre: 'ก่อนเริ่มงาน · แบบฟ�
 // Service level: Basic Clean (P1) → T1 checks · Standard Care (P2) → T2 measurements + 2–4 photos + grade A–D.
 // Method: C1 Standard Cleaning (washed in place) · C2 Deep Clean (indoor coil un-hooked / lowered, refrigerant pipes NOT cut).
 // Rev.09 r3: every step carries a stable id (no text change) so the teardown view (cleanguide.js) can show it in 3D.
+// Rev.23: in shops / cafés (cleaning scene) the condensing unit hangs on wall brackets up high — ladder + a second man holding it
+export const OU_HIGH = { ceiling: true, cassette: true };
 export function cleanSteps(type, level, pkg) {
-  const bag = { wall: 'ติดถุงล้างแอร์ใต้ตัวเครื่องต่อสายลงถัง', ceiling: 'ติดถุงรองน้ำใต้ตัวเครื่องตลอดความยาว', cassette: 'ติดถุงรับน้ำใต้หน้ากากทั้ง 4 ด้าน', floor: 'วางถาดรองน้ำใต้คอยล์ต่อสายลงถัง' }[type];
+  // Rev.23 (owner 3 ต.ค. 2569): the cleaning canvas wraps the unit on every side — no water splashes out of it
+  const bag = { wall: 'ครอบผ้าใบล้างแอร์ให้มิดตัวเครื่อง (ด้านบน ด้านข้างทั้งสอง และด้านล่าง) รัดขอบให้แนบ ต่อสายลงถัง', ceiling: 'ครอบผ้าใบล้างแอร์ตลอดความยาวเครื่อง ปิดด้านข้างและด้านหลังให้มิด รัดขอบให้แนบ ต่อสายลงถัง', cassette: 'ติดผ้าใบรับน้ำใต้หน้ากากทั้ง 4 ด้าน ขอบชิดฝ้าให้มิด ต่อสายลงถัง', floor: 'วางถาดรองน้ำใต้คอยล์ คลุมผ้าใบรอบตัวตู้ ต่อสายลงถัง' }[type];
   const fan = { wall: 'พัดลมกรงกระรอก (Cross-flow)', ceiling: 'พัดลมโบลเวอร์ (Sirocco)', cassette: 'พัดลมเทอร์โบ', floor: 'พัดลมโบลเวอร์ (Sirocco)' }[type];
   const t2 = pkg !== 'Basic Clean', c2 = level === 'C2';
   const S = [
@@ -185,7 +188,7 @@ export function cleanSteps(type, level, pkg) {
     { id: 'precheck', ph: 'pre', part: null, t: 'ตรวจสภาพก่อนเริ่มงานและสภาพเดิม', d: `เปิดเครื่องทดสอบ ตรวจความเย็น น้ำทิ้ง${type === 'cassette' ? ' ปั๊มน้ำทิ้งและลูกลอย' : ''} เสียงและการสั่น รีโมต Error Code บันทึกสภาพเดิมของเครื่องและทรัพย์สินใกล้เคียง ถ่ายภาพก่อนงาน ถ้าพบอาการผิดปกติ ช่างแจ้งก่อนเริ่มล้าง`, chk: ['รอยแตก / กรอบ / ซีด', 'สนิม / คราบฝังแน่น', 'ร่องรอยซ่อมเดิม', 'ฉนวนท่อเสื่อม'], you: 'สภาพเดิมถูกบันทึก คุ้มครองทั้งลูกค้าและบริษัท' },
     t2 ? { id: 'premeasure', ph: 'pre', part: null, t: 'วัดค่าก่อนงาน (T2)', d: 'วัดอุณหภูมิลมกลับ (Return) และลมจ่าย (Supply) ที่จุดเดิม คำนวณ ΔT วัดกระแสไฟขณะเดินเครื่องและแรงดันไฟ เพื่อเทียบหลังงาน', chk: ['Return °C', 'Supply °C', 'ΔT °C', 'Current A', 'Voltage V'] } : null,
     { id: 'power', ph: 'work', part: null, t: 'ตัดแยกไฟและตรวจยืนยันก่อนทำงาน', d: 'ปิดเบรกเกอร์เฉพาะวงจรเครื่อง แล้วตรวจยืนยันว่าไม่มีไฟเข้าเครื่องก่อนแตะชิ้นส่วนใด' },
-    { id: 'cover', ph: 'work', part: null, t: 'คลุมป้องกันพื้น ผนัง และแผงวงจร', d: `ปูผ้าใบรองพื้น ${bag} คลุมแผงวงจรและเซนเซอร์ด้วยพลาสติกกันน้ำครบทุกจุด` },
+    { id: 'cover', ph: 'work', part: null, t: 'คลุมป้องกันพื้น ผนัง และแผงวงจร', d: `ปูผ้าใบรองพื้น ${bag} คลุมแผงวงจรและเซนเซอร์ด้วยพลาสติกกันน้ำครบทุกจุด ตรวจขอบผ้าใบก่อนฉีดว่าไม่มีช่องที่น้ำจะกระเด็นออก`, chk: ['ผ้าใบครอบมิดทุกด้าน', 'สายลงถังไม่พับ', 'แผงวงจร / เซนเซอร์คลุมแล้ว'] },
     { id: 'parts', ph: 'work', part: 'grille', t: 'บันทึกจุดยึด แล้วถอดล้างแผ่นกรอง หน้ากาก บานสวิง', d: 'ถ่ายภาพหรือบันทึกตำแหน่งน็อต คลิป และจุดยึดก่อนถอด ถอดชิ้นส่วนพลาสติกออกมาล้างแยกนอกตัวเครื่อง' },
   ];
   if (c2) S.push(
@@ -199,11 +202,12 @@ export function cleanSteps(type, level, pkg) {
   );
   S.push(
     { id: 'chem', ph: 'work', part: 'coil', t: 'ฉีดน้ำยาล้างคอยล์ ทิ้งให้คราบหลุด', d: 'บันทึกชนิดและปริมาณน้ำยาที่ใช้จริง · A1 น้ำยาล้างคอยล์กรดอุตสาหกรรม หรือ A2 Chemical Wash สเปรย์โฟมเกรด อย. ทำเมื่ออนุมัติในใบเสนอราคา' },
+    { id: 'dwell', ph: 'work', part: 'coil', t: 'ทิ้งน้ำยาไว้ให้ทำงาน 5–15 นาที ตามความสกปรก', d: 'คราบน้อยประมาณ 5 นาที คราบปานกลางประมาณ 10 นาที คราบหนา / คราบน้ำมันประมาณ 15 นาที ไม่เกินเวลาที่ผู้ผลิตน้ำยากำหนด และไม่ปล่อยให้น้ำยาแห้งบนครีบ ระหว่างรอ ผู้ช่วยเตรียมปั๊มน้ำแรงดันและสายฉีด', chk: ['คราบน้อย ~5 นาที', 'ปานกลาง ~10 นาที', 'คราบหนา ~15 นาที'], dwell: [5, 15], you: 'น้ำยามีเวลาละลายคราบ จึงล้างออกได้ลึกโดยไม่ต้องใช้แรงดันสูง' },
     { id: 'coilFront', ph: 'work', part: 'coil', t: 'ล้างแผงคอยล์เย็นด้านหน้า', d: 'ฉีดตามแนวครีบจากบนลงล่างด้วยแรงดันที่เหมาะกับครีบ ไม่ฉีดเฉียงจนครีบล้ม น้ำสกปรกลงถุงและถัง' },
     c2 ? null : { id: 'fanWash', ph: 'work', part: 'fan', t: `ล้าง${fan}เท่าที่หัวฉีดเข้าถึง`, d: 'C1 ล้างที่ตำแหน่งเดิม หมุนใบพัดให้ล้างได้ทั่วทีละช่วง โดยไม่ถอดใบพัด' },
     { id: 'drain', ph: 'work', part: type === 'cassette' ? 'pump' : 'pan', t: 'ล้างและทะลวงถาด / ทางน้ำทิ้ง', d: `ล้างเมือก ทะลวงทางน้ำ${type === 'cassette' ? ' ตรวจปั๊มน้ำทิ้งและลูกลอย' : ''} แล้วเทน้ำทดสอบให้ไหลออกปลายท่อได้ปกติ` },
     { id: 'outdoor', ph: 'work', part: 'outdoor', t: 'ฉีดล้างคอยล์ร้อนจากภายนอก', d: 'ล้างครีบระบายความร้อน ตรวจใบพัด ฐานรอง และยางรองกันสั่น ถ้าเข้าถึงอย่างปลอดภัยไม่ได้ บันทึก "ไม่รวม / เข้าไม่ถึง"' },
-    { id: 'dry', ph: 'close', part: null, t: 'เป่าและเช็ดให้แห้ง ตรวจฉนวนและจุดยึด', d: 'ชิ้นส่วนแห้งก่อนประกอบ ไม่มีน้ำค้างใกล้แผงวงจร ตรวจฉนวนท่อและจุดยึดก่อนประกอบกลับ' },
+    { id: 'dry', ph: 'close', part: null, t: 'เป่าไล่น้ำด้วยเครื่องเป่าลม (Blower) แล้วเช็ดให้แห้ง', d: 'เป่าไล่น้ำที่ค้างในครีบคอยล์ ใบพัด และถาดน้ำทิ้งด้วย Blower เป่าตามแนวครีบจากด้านบนลงล่าง เช็ดชิ้นส่วนให้แห้งก่อนประกอบ ไม่มีน้ำค้างใกล้แผงวงจร ตรวจฉนวนท่อและจุดยึดก่อนประกอบกลับ', chk: ['เป่าครีบคอยล์', 'เป่าใบพัด / ถาดน้ำทิ้ง', 'เช็ดชิ้นส่วนแห้ง', 'ไม่มีน้ำค้างใกล้แผงวงจร'] },
     { id: 'assemble', ph: 'close', part: null, t: c2 ? 'ประกอบกลับครบ ยึดเครื่องเข้าที่ ตรวจการรั่วซึม' : 'ประกอบกลับครบ ไม่มีชิ้นส่วนเหลือ', d: c2 ? 'ใส่ใบพัดและถาดกลับ แขวนตัวเครื่องให้ล็อกครบทุกจุด ประกอบตามทะเบียนชิ้นส่วน ตรวจจุดต่อไม่รั่วซึม' : 'ประกอบตามตำแหน่งที่บันทึกไว้ เก็บพลาสติกคลุม ถุงล้าง และผ้าใบ', you: 'ไม่มีชิ้นส่วนเหลือ' },
     { id: 'cleanup', ph: 'close', part: null, t: 'ทำความสะอาดและส่งคืนพื้นที่', d: 'เช็ดพื้นและผนังบริเวณที่ทำงาน ถ่ายภาพหลังงานให้ครบ' },
     { id: 'testDrain', ph: 'test', part: type === 'cassette' ? 'pump' : 'pan', t: 'ทดสอบระบายน้ำทิ้ง (T1 · ทุกระดับ)', d: 'เทน้ำทดสอบ ตรวจว่าไหลออกปกติ ไม่ย้อนหรือซึม', chk: type === 'cassette' ? ['ถาด', 'ท่อ', 'ปั๊ม', 'ลูกลอย'] : ['ถาด', 'ท่อ'] },
@@ -419,7 +423,7 @@ export function mountServices(root, cfg = {}) {
   }
 
   const addBtn = (label, line, cls = 'primary') => h('button', { type: 'button', class: 's-btn ' + cls, onclick: () => { cart.add(line); toast(`เพิ่ม "${line.name}" แล้ว`); } }, label);
-  const priceBig = (ex, unit) => ex == null ? h('div', { class: 'sv-price' }, h('b', {}, 'ประเมินหน้างาน')) : h('div', { class: 'sv-price' }, h('b', {}, baht(incVat(ex))), h('small', {}, `ต่อ${unit || 'เครื่อง'} รวม VAT · ก่อน VAT ${baht(ex)}`));
+  const priceBig = (ex, unit) => ex == null ? h('div', { class: 'sv-price' }, h('b', {}, 'ประเมินหน้างาน')) : h('div', { class: 'sv-price' }, h('b', {}, baht(ex)), h('small', {}, `ต่อ${unit || 'เครื่อง'} · ก่อน VAT`));
   const list = (title, items, cls = '') => items && items.length ? h('div', { class: 'sv-box ' + cls }, h('h4', {}, title), h('ul', {}, items.map(x => h('li', {}, x)))) : null;
   const splitTxt = s => (s || '').replace(/^ไม่รวม\s*/, '').split(/[;,]\s*|\s+และ\s+/).map(x => x.trim()).filter(Boolean);
 
@@ -438,7 +442,7 @@ export function mountServices(root, cfg = {}) {
           h('dt', {}, 'ดูแลหลังบริการ'), h('dd', {}, r?.care || '—'),
           h('dt', {}, 'เอกสารที่ได้รับ'), h('dd', {}, r?.doc || '—'),
           h('dt', {}, 'กำลังทีม (ล้างปกติ)'), h('dd', {}, `ประมาณ ${per} เครื่อง / ทีม / วัน ขึ้นกับหน้างาน`),
-          h('dt', {}, 'ขั้นต่ำต่อครั้ง'), h('dd', {}, `ค่าล้างรวมต่อครั้งขั้นต่ำ ${baht(incVat(DATA.minBill))} (รวม VAT)`)),
+          h('dt', {}, 'ยอดขั้นต่ำต่อครั้ง'), h('dd', {}, `งานล้าง ${baht(DATA.minBill)} ก่อน VAT · ต่ำกว่านี้คิดค่าเดินทาง ${baht(TRAVEL.baseFee)} ต่อการเข้างาน`)),
         list('รวมในราคา', r ? [r.inc] : []),
         list('ไม่รวม', splitTxt(r?.exc), 'exc'),
         extrasBox(),
@@ -473,15 +477,15 @@ export function mountServices(root, cfg = {}) {
         list('สาเหตุที่เป็นไปได้ (ต้องตรวจยืนยันหน้างาน)', S.causes),
         items.length ? h('div', { class: 'sv-box' }, h('h4', {}, 'ราคาซ่อมที่อาจเกี่ยวข้อง'), h('ul', { class: 'sv-rep' }, items.map(r => h('li', {},
           h('span', {}, r.name, h('small', {}, r.warranty || '')),
-          h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(incVat(r.rate.s))))))) : null,
-        h('p', { class: 's-note' }, 'รายการด้านบนเป็นตัวอย่างงานซ่อมในกลุ่มอาการนี้ ยังไม่ใช่ผลวินิจฉัย ช่างต้องตรวจและแจ้งราคาจริงก่อนซ่อม ราคารวม VAT ต่อหน่วยตาม Pricebook 2569 ไม่รวมอะไหล่เฉพาะรุ่นที่ระบุ "ประเมิน"'),
+          h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(r.rate.s)))))) : null,
+        h('p', { class: 's-note' }, 'รายการด้านบนเป็นตัวอย่างงานซ่อมในกลุ่มอาการนี้ ยังไม่ใช่ผลวินิจฉัย ช่างต้องตรวจและแจ้งราคาจริงก่อนซ่อม ราคาก่อน VAT ต่อหน่วยตาม Pricebook 2569 ไม่รวมอะไหล่เฉพาะรุ่นที่ระบุ "ประเมิน"'),
         h('div', { class: 'sv-box' }, h('h4', {}, 'ข้อมูลที่ช่วยให้ตรวจเร็วขึ้น'), h('ul', {}, ['ภาพป้าย Nameplate คอยล์เย็นและคอยล์ร้อน', 'Error Code ที่ขึ้น (ภาพหน้าจอหรือไฟกะพริบ)', 'วิดีโออาการ 10–20 วินาที', 'อายุเครื่องและประวัติการล้าง/ซ่อม'].map(x => h('li', {}, x)))));
     }
   }
   function extrasBox() {
     const ex = DATA.clean.filter(r => r.pkg === st.pkg && r.level === st.level && ['งานเพิ่ม', 'Access/Risk', 'เงื่อนไขเวลา'].includes(r.ty));
     if (!ex.length) return null;
-    return h('div', { class: 'sv-box' }, h('h4', {}, 'งานเพิ่มที่อาจเกิด (แจ้งก่อนทำ)'), h('ul', { class: 'sv-rep' }, ex.map(r => h('li', {}, h('span', {}, r.name), h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(incVat(r.rate.s)))))));
+    return h('div', { class: 'sv-box' }, h('h4', {}, 'งานเพิ่มที่อาจเกิด (แจ้งก่อนทำ)'), h('ul', { class: 'sv-rep' }, ex.map(r => h('li', {}, h('span', {}, r.name), h('b', {}, r.rate.s == null ? 'ประเมิน' : baht(r.rate.s))))));
   }
 
   function render() {
@@ -509,11 +513,13 @@ export function mountServices(root, cfg = {}) {
 }
 
 export function typeIcon(t) {
+  // Rev.13: same drawing language as proto-ui typeArt (mounting context + real air path), small enough for the tabs
   const d = {
-    wall: '<rect x="3" y="7" width="26" height="11" rx="3"/><path d="M8 18l2 4M16 18v5M24 18l-2 4"/>',
-    ceiling: '<path d="M2 4h28M9 4v4M23 4v4"/><rect x="4" y="8" width="24" height="9" rx="2"/><path d="M28 13h2M22 20h8"/>',
-    cassette: '<path d="M2 12h28"/><rect x="7" y="6" width="18" height="6"/><rect x="5" y="12" width="22" height="3"/><path d="M5 17l-3 4M27 17l3 4M13 19v4M19 19v4"/>',
-  }[t];
+    wall: '<path d="M2 2v22"/><rect x="5" y="6" width="25" height="10" rx="3"/><path d="M8 13h19"/><path d="M11 19l-1.5 4M17.5 19.5v4M24 19l1.5 4" stroke-dasharray="1.5 2"/>',
+    ceiling: '<path d="M1 3h30"/><path d="M3 4h24v7H3z"/><path d="M27 4l3-1.2v7L27 11"/><path d="M6 11l-1 2h20l-.6-2"/><path d="M9 17l7 3M17 16l9 3" stroke-dasharray="1.5 2"/>',
+    cassette: '<path d="M1 2h30"/><rect x="9" y="4" width="14" height="5" stroke-dasharray="1.5 1.5"/><path d="M1 11h7M24 11h7"/><path d="M8 11h16l5 4H3z"/><path d="M13 12.5h6"/><path d="M5 18l-3 5M27 18l3 5M12 19l-2 5M20 19l2 5" stroke-dasharray="1.5 2"/>',
+    floor: '<path d="M4 25h24"/><rect x="11" y="2" width="11" height="23" rx="1.5"/><path d="M13.5 5h6M13.5 7h6M13.5 18h6M13.5 20h6M13.5 22h6"/><path d="M10 5l-7-2M10 7l-7 1" stroke-dasharray="1.5 2"/>',
+  }[t] || '';
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   s.setAttribute('viewBox', '0 0 32 26'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('class', 'sv-ico');
   s.innerHTML = d; return s;

@@ -17,7 +17,7 @@ import { buildPremiumIndoor, buildOutdoor, materialSet, canvasTex } from './ac3d
 import { buildCeilingUnit, buildCassetteUnit } from './units3d.js';
 import { mats, rbox, F, windowUnit, TEX } from './roomkit3d.js';
 import { kit, printed } from './matkit3d.js';
-import { bentPath } from './trunk3d.js';
+import { bentPath, outlineTrunk } from './trunk3d.js';
 
 export const V = (x, y, z) => new THREE.Vector3(x, y, z);
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -243,7 +243,8 @@ const CU = { gas: 0.00476, liq: 0.00318 };       // copper outside radius (3/8",
 export function buildHome(scene, o = {}) {
   const type = o.type || 'wall', dark = o.theme === 'dark';
   const K = mats(dark ? 'dark' : 'light'), MK = kit('light'), M = materialSet(dark ? 'showroom' : 'studio');
-  if (!dark) { K.wall = K.wall.clone(); K.wall.color = new THREE.Color(0xe7e1d7); }
+  // Rev.25 room paint in a warm greige so the white trunking, fittings and caps read clearly (owner: "สีต้องตัดกับกำแพง")
+  if (!dark) { K.wall = K.wall.clone(); K.wall.color = new THREE.Color(0xd8c6aa); }
   if (!MK.trunkSeam) MK.trunkSeam = new THREE.MeshStandardMaterial({ color: 0xd9dcdf, roughness: 0.5 });
   const CEIL = 2.7, WH = type === 'cassette' ? 3.34 : 2.7;
   const root = new THREE.Group(); root.name = 'home'; scene.add(root);
@@ -256,7 +257,7 @@ export function buildHome(scene, o = {}) {
   const slabM = S(dark ? 0x3a3f46 : 0xd6d2cb, { roughness: 0.95 });
   const floorM = K.floor.clone(); floorM.map = K.floorT.clone(); floorM.map.needsUpdate = true; floorM.map.repeat.set(2.4, 1.8);
   box(5.2, 0.02, 4.0, floorM, 0, -0.01, 0); box(5.44, 0.18, 4.12, slabM, 0, -0.11, -0.06);
-  const extM = S(dark ? 0x4d545e : 0xe8e3da, { map: TEX.plaster('#e6e0d6'), roughness: 0.92 });
+  const extM = S(dark ? 0x4d545e : 0xffffff, { map: TEX.plaster('#c4b296'), roughness: 0.92 });   // exterior sand render
   box(5.44, WH, 0.12, K.wall, 0, WH / 2, -2.06);                                   // back wall (room)
   box(1.9, WH + 0.2, 0.12, extM, 3.67, WH / 2 - 0.1, -2.06);                       // back wall (balcony, exterior)
   // left wall with a window opening z ∈ [-1.1, 0.5], y ∈ [0.9, 2.2]
@@ -359,6 +360,7 @@ export function buildHome(scene, o = {}) {
   const trunk = { base: new THREE.Group(), lid: new THREE.Group(), fit: new THREE.Group() };
   [trunkA, trunkB].filter(Boolean).forEach(tk => { trunk.base.add(tk.base); trunk.lid.add(tk.lid); trunk.fit.add(tk.fit); });
   sys.add(trunk.base, trunk.lid, trunk.fit);
+  [trunk.base, trunk.lid, trunk.fit].forEach(g => outlineTrunk(g, { color: dark ? 0x9fb3c8 : 0x7d8a98, opacity: 0.7 }));
   // cassette: pipes above the ceiling hang from the slab on threaded rods + strut
   if (!trunkIn) for (let i = 0; i < C.length - 1; i++) { const a = C[i], b2 = C[i + 1], L = a.distanceTo(b2); for (let q = 0.35; q < L - 0.2; q += 0.75) { const p = a.clone().lerp(b2, q / L); const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, WH - p.y), MK.steel); rod.position.set(p.x, (WH + p.y) / 2 - 0.015, p.z); sys.add(rod); const d = b2.clone().sub(a).normalize(); const strut = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.02, 0.022), MK.steel); strut.position.set(p.x, p.y - 0.028, p.z); strut.rotation.y = Math.atan2(d.x, d.z); sys.add(strut); } }
   // wall caps (ฝาครอบผนัง) round the penetration on both faces
@@ -367,7 +369,7 @@ export function buildHome(scene, o = {}) {
   // mini trunk from the RCBO up to the main run (wall / ceiling) or to the ceiling (cassette)
   const RX = 1.85, rcboPos = V(RX, 1.42, -1.955);
   const miniTop = type === 'cassette' ? CEIL - 0.02 : (C[0].y + (C[1].y - C[0].y) * ((RX - C[0].x) / (C[1].x - C[0].x))) - 0.0375;
-  const mini = new THREE.Mesh(new THREE.BoxGeometry(0.032, miniTop - (rcboPos.y + 0.115), 0.02), MK.trunk); mini.position.set(RX, (miniTop + rcboPos.y + 0.115) / 2, -1.99); mini.castShadow = true; sys.add(mini);
+  const mini = new THREE.Mesh(new THREE.BoxGeometry(0.032, miniTop - (rcboPos.y + 0.115), 0.02), MK.trunk); mini.position.set(RX, (miniTop + rcboPos.y + 0.115) / 2, -1.99); mini.castShadow = true; sys.add(mini); outlineTrunk(mini, { color: dark ? 0x9fb3c8 : 0x7d8a98, opacity: 0.7 });
 
   /* ---------- condensing unit on its stand ---------- */
   // same FUJIVA set as the indoor unit and the cartons

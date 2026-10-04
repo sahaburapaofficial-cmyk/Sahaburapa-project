@@ -6,6 +6,7 @@
 //   → 8 the condensing unit throws the heat outside, liquid returns → 9 the whole loop together.
 // Uses the same realistic home as the technician stories (install3d): pipes run inside closed Airpro trunking; for the
 // refrigerant / drain steps the trunk lids and insulation turn see-through so the flow inside is visible.
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import * as THREE from './three.module.min.js';
 import { createStage, buildHome, createLabels, createPathFlow, V, clamp, ease, RM, smoothPts } from './install3d.js';
 import { createAirflow } from './airflow3d.js';
@@ -236,8 +237,8 @@ export function mountSystem3D(root, cfg = {}) {
     const open = drawHost.hidden; drawHost.hidden = !open; drawBtn.setAttribute('aria-expanded', String(open)); drawBtn.textContent = open ? 'ซ่อนภาพตัด 2 มิติ' : 'ดูภาพตัด 2 มิติ (แบบวิศวกรรม)';
     if (open && !drawing) import('./engdraw.js').then(m => { drawing = m.mountEngDrawings(drawHost, { start: type, onType: t => { setType(t); cfg.onType && cfg.onType(t); } }); });
   }
-  const io = new IntersectionObserver(es => { if (!es.some(e => e.isIntersecting)) return; io.disconnect();
-    try { V3 = createSystem3D(stageEl, { theme: cfg.theme, type, onStep: i => { step = i; paint(); } }); } catch (e) { console.warn('system 3D unavailable', e); fb.hidden = false; } }, { rootMargin: '400px 0px' });
+  const io = new IntersectionObserver(es => { if (!es.some(e => e.isIntersecting)) return; io.disconnect(); whenQuiet(() => {
+    try { V3 = createSystem3D(stageEl, { theme: cfg.theme, type, onStep: i => { step = i; paint(); } }); } catch (e) { console.warn('system 3D unavailable', e); fb.hidden = false; } }); }, { rootMargin: '400px 0px' });
   io.observe(stageEl);
   render();
   return { setType, mark(p) { const K = { grille: 1, intake: 1, filter: 1, coil: 2, fan: 4, blower: 4, pan: 3, pump: 3, louver: 5, outdoor: 7 }; if (K[p] != null) { stop(); go(K[p]); } }, _v3: () => V3 };

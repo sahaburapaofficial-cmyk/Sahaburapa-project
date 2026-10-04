@@ -6,6 +6,10 @@ import { readFileSync } from 'node:fs';
 const page = process.argv[2] || 'a.html';
 const FAKES = { ok: 'https://script.google.com/macros/s/TEST/exec', fail: 'https://script.google.com/macros/s/TEST/exec', fs: 'https://formsubmit.co/ajax/TEST' };
 const SRC = readFileSync(new URL('../assets/submit.js', import.meta.url), 'utf8');
+// Rev.19: ENDPOINT = BACKEND || FormSubmit — ok/fail point the back office (Apps Script) at the fake, fs the FormSubmit address, off empties both
+const patchSrc = (mode, FAKE) => SRC.replace(/const BACKEND_URL = '[^']*';/, `const BACKEND_URL = '${mode === 'ok' || mode === 'fail' ? FAKE : ''}';`)
+  .replace(/const FORMSUBMIT = '[^']*';/, `const FORMSUBMIT = '${mode === 'fs' ? FAKE : ''}';`);
+if (patchSrc('ok', FAKES.ok) === SRC) throw new Error('submit.js layout changed — update patchSrc');
 const b = await launch();
 const results = [];
 for (const mode of ['ok', 'fail', 'off', 'fs']) {
@@ -13,7 +17,7 @@ for (const mode of ['ok', 'fail', 'off', 'fs']) {
   const p = await b.newPage({ viewport: { width: 390, height: 844 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   const posts = [];
-  await p.route('**/assets/submit.js', r => r.fulfill({ contentType: 'text/javascript', body: SRC.replace(/export const ENDPOINT = '[^']*';/, `export const ENDPOINT = '${mode === 'off' ? '' : FAKE}';`) }));
+  await p.route('**/assets/submit.js', r => r.fulfill({ contentType: 'text/javascript', body: patchSrc(mode, FAKE) }));
   await p.route(FAKE, async r => {
     const d = JSON.parse(r.request().postData() || '{}'); posts.push(mode === 'fs' ? { kind: d['ประเภท'], ref: d['เลขอ้างอิง'], fields: d, ct: r.request().headers()['content-type'] } : d);
     if (mode === 'fs') return r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"success":"true","message":"The form was submitted successfully."}' });
@@ -36,6 +40,11 @@ for (const mode of ['ok', 'fail', 'off', 'fs']) {
   if (await add.count()) { await add.click(); await p.waitForTimeout(500); }
   await p.evaluate(() => document.querySelector('[data-cart-btn]')?.click()); await p.waitForTimeout(800);
   if (await p.locator('#s-q-name').count()) {
+    if (await p.locator('#s-q-addr').count()) {   // Rev.16.1: a cleaning / installation line makes it a job ticket — date, area and address are required
+      const d = await p.evaluate(() => new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10));
+      await p.fill('#s-q-date', d); await p.dispatchEvent('#s-q-date', 'change'); await p.waitForTimeout(300);
+      await p.fill('#s-cart-zone', 'บางขุนเทียน'); await p.waitForTimeout(500); await p.fill('#s-q-addr', '99/1 ถนนพระราม 2');
+    }
     await p.fill('#s-q-name', 'ทดสอบ ใบเสนอราคา'); await p.fill('#s-q-tel', '0812345678');
     await p.locator('.s-form button[type="submit"]').click(); await p.waitForTimeout(1500);
     out.quote = (await p.locator('.s-cart-b .s-hand').first().innerText()).split('\n').slice(0, 2).join(' / ');
@@ -57,7 +66,7 @@ console.log(JSON.stringify({ page, results }, null, 1));
 await b.close();
 const bad = results.some(r => r.errors) ||
   !results[0].contact.includes('ส่งถึงทีมแล้ว') || !results[0].quote.includes('ส่งถึงทีมแล้ว') || !results[0].feedback.includes('ส่งถึงทีมแล้ว') || results[0].posts.length !== 3 ||
-  !results[1].contact.includes('ช่วงทดลองใช้') || results[1].posts.length !== 3 ||
+  !results[1].contact.includes('ส่งคำขอถึงทีม') || results[1].posts.length !== 3 ||
   results[2].posts.length !== 0 || results[2].contact.includes('ส่งถึงทีมแล้ว') ||
   !results[3].contact.includes('ส่งถึงทีมแล้ว') || !results[3].quote.includes('ส่งถึงทีมแล้ว') || !results[3].feedback.includes('ส่งถึงทีมแล้ว') || results[3].posts.length !== 3;
 process.exit(bad ? 1 : 0);

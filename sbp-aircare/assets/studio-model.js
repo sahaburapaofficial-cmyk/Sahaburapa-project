@@ -206,12 +206,37 @@ export const EFF = { inverter: { wall: 18, other: 14 }, fixed: { wall: 12.5, oth
 // Thai tariff Sep–Dec 2569: residential tier 201–400 kWh 4.1584 + Ft 0.1623 + VAT ≈ 4.62 THB/kWh; small business ≈ 4.9 THB/kWh.
 export const RATE = { home: 4.62, biz: 4.9 };
 export const LOAD_F = 0.65;   // average compressor loading over the running hours (part load)
-export function energy(btu, type, inverter, hrs, dirt, rate) {
+// Rev.13 (owner: "เจาะลึกค่าไฟแอร์ทุกประเภท … เปิดกี่องศาเฉลี่ย"): set-point effect — published Thai guidance puts it at ~3–5 % less
+// electricity per +1 °C (and 5–10 % more per −1 °C); EGAT recommends 26–28 °C with a fan. The model uses 5 % per °C around the
+// 25 °C the room model is designed for, clamped to 20–30 °C. Sources: กฟผ. / scair.co.th / origin.co.th (searched 2 ต.ค. 2569).
+export const SET_REF = 25, SET_PER_DEG = 0.05, SET_RANGE = [20, 30];
+export const setPointF = t => Math.max(0.6, Math.min(1.5, 1 - SET_PER_DEG * ((t ?? SET_REF) - SET_REF)));
+export function energy(btu, type, inverter, hrs, dirt, rate, setT = SET_REF) {
   const eff = (inverter ? EFF.inverter : EFF.fixed)[type === 'wall' ? 'wall' : 'other'];
-  const kwhDayClean = btu / eff / 1000 * hrs * LOAD_F;
+  const kwhDayClean = btu / eff / 1000 * hrs * LOAD_F * setPointF(setT);
   const kwhDay = kwhDayClean * effects(dirt).power;
   return { eff, kwhMonthClean: kwhDayClean * 30, kwhMonth: kwhDay * 30, bahtMonthClean: kwhDayClean * 30 * rate, bahtMonth: kwhDay * 30 * rate, extraYear: (kwhDay - kwhDayClean) * 365 * rate };
 }
+// ---------- Rev.13 · environment around the room: pets, location, PM2.5 → how fast filter and coil clog ----------
+// Starting values to explain the effect (to be tuned from the company's before/after cleaning records, like `dust` per scene):
+// pet fur and dander load the filter on top of room dust; the outdoor air the unit's room draws in carries road / site / city
+// dust; a measured PM2.5 reading (Air4Thai · กรมควบคุมมลพิษ or GISTDA "เช็คฝุ่น") scales it, 25 µg/m³ ≈ a typical city day = 1.
+export const PETS = { cat: { th: 'แมว', add: 0.12 }, dog: { th: 'สุนัข', add: 0.18 } }, PETS_MAX = 0.8;
+export const LOCS = [
+  { id: 'green', th: 'ชานเมือง / มีต้นไม้ล้อม', f: 0.85 },
+  { id: 'city', th: 'ในเมืองทั่วไป', f: 1 },
+  { id: 'road', th: 'ติดถนนใหญ่ / ทางด่วน', f: 1.3 },
+  { id: 'site', th: 'ใกล้ไซต์ก่อสร้าง / โรงงาน', f: 1.5 },
+];
+export const LOC_BY_ID = Object.fromEntries(LOCS.map(l => [l.id, l]));
+export const PM_REF = 25, PM_STD_24H = 37.5;   // Thai 24-hour PM2.5 standard 37.5 µg/m³ (กรมควบคุมมลพิษ, ใช้ตั้งแต่ 1 มิ.ย. 2566)
+export const pmF = pm => pm > 0 ? Math.max(0.6, Math.min(2.5, Math.pow(pm / PM_REF, 0.6))) : 1;
+export function envF(env = {}) {
+  const pets = Math.min(PETS_MAX, (env.cats || 0) * PETS.cat.add + (env.dogs || 0) * PETS.dog.add);
+  const loc = (LOC_BY_ID[env.loc] || LOC_BY_ID.city).f, pm = pmF(env.pm);
+  return { pets: 1 + pets, loc, pm, total: (1 + pets) * loc * pm };
+}
+export const clogRisk = f => f < 0.95 ? { k: 'low', th: 'ต่ำ' } : f < 1.25 ? { k: 'mid', th: 'ปานกลาง' } : f < 1.7 ? { k: 'high', th: 'สูง' } : { k: 'vhigh', th: 'สูงมาก' };
 export function cleanInterval(rate) {
   const m = 6 * -Math.log(1 - 0.4) / rate;          // months until dirt reaches 0.4
   const opts = [1, 2, 3, 4, 6];
@@ -221,24 +246,48 @@ export function cleanInterval(rate) {
 export const dirtTh = d => d < 0.12 ? 'สะอาด' : d < 0.35 ? 'เริ่มมีฝุ่น' : d < 0.6 ? 'ถึงรอบล้าง' : d < 0.8 ? 'สกปรก — ลมเบาลง' : 'สกปรกมาก — อาจมีกลิ่นและน้ำหยด';
 
 // ---------- thermal (lumped room) ----------
-export const T_OUT = 34, T_SET = 25, T_START = 32;
-export function thermal(p, scene, capBtu, dirt) {
-  const need = needBtu(p, scene);
-  const Qset = need / 3.412 / 1.1;                 // W at set point
-  const UA = 0.4 * Qset / (T_OUT - T_SET);
-  const Qi = 0.6 * Qset;
-  const C = p.w * p.d * Math.min(p.h, 3.5) * 1.2 * 1005 * 6;   // occupied-zone air + furnishings, J/K
-  const cap = capBtu * 0.293 * effects(dirt).cap;   // W
-  return { need, Qset, UA, Qi, C, cap };
+// Rev.23 (owner 3 ต.ค. 2569: "เรื่องคำนวณแอร์อุณหภูมิให้แม่นยำและสมจริงกว่านี้") — still a planning model, now with:
+//  · outdoor air by when the room is used: Bangkok hot-season afternoon 35 °C (TMD normals: April mean max ≈ 35 °C) for day rooms,
+//    ≈ 29 °C for bedrooms used at night (no sun on the envelope at night → internal/solar gains ×0.75), start temperature 32 / 30 °C
+//  · rated conditions: capacity is rated at 27 °C indoor / 35 °C outdoor (TIS 1155 / ISO 5151 T1) — it rises ~2 %/°C with a warmer
+//    room and falls ~1 %/°C with hotter outdoor air (manufacturer capacity tables, typical slopes)
+//  · humid climate: only the sensible part pulls the room temperature down — sensible share of the room load ≈ 0.78, of the
+//    unit ≈ 0.78 clean, lower when the coil is fouled (less airflow → colder coil → more of the capacity goes to moisture)
+//  · inverter: runs above rated speed while the room is still hot (≈ +15 %), then modulates to hold the set point;
+//    fixed speed: full capacity on/off in a ±0.75 °C band around the set point (the room swings, like a real thermostat)
+export const T_OUT = 35, T_SET = 25, T_START = 32, T_DESIGN = 35;
+export const CLIMATE = { day: { out: 35, start: 32, gains: 1, th: 'กลางวัน' }, night: { out: 29, start: 30, gains: 0.75, th: 'กลางคืน' } };
+const NIGHT_ROOMS = new Set(['master', 'bedroom', 'kids', 'condobed']);
+export const useTime = scene => (scene && NIGHT_ROOMS.has(scene.id) ? 'night' : 'day');
+export const RATED = { in: 27, out: 35 }, SHR_LOAD = 0.78, INV_BOOST = 1.15, FIX_BAND = 0.75;
+export const capF = (Tin, Tout) => Math.max(0.8, Math.min(1.2, 1 + 0.02 * (Tin - RATED.in) - 0.01 * (Tout - RATED.out)));
+export const shrUnit = dirt => 0.78 - 0.06 * dirt;
+export function thermal(p, scene, capBtu, dirt, o = {}) {
+  const need = needBtu(p, scene), cl = CLIMATE[o.time || useTime(scene)];
+  const Qset = need / 3.412 / 1.1;                 // W at set point on a design day (need carries ~10 % allowance)
+  const UA = 0.4 * Qset / (T_DESIGN - T_SET);      // envelope share of the load, W/K
+  const Qi = 0.6 * Qset * cl.gains;                // people, appliances, sun through glass
+  const C = p.w * p.d * Math.min(p.h, 3.5) * 1.2 * 1005 * 8;   // room air + furniture + the inner skin of walls / slab that cools with it, J/K
+  const cap = capBtu * 0.293 * effects(dirt).cap;   // W total at rated conditions (after fouling)
+  return { need, Qset, UA, Qi, C, cap, shr: shrUnit(dirt), inv: o.inverter ?? true, tout: cl.out, tStart: cl.start, time: o.time || useTime(scene), on: true };
 }
+const loadS = (T, th) => SHR_LOAD * (th.Qi + th.UA * (th.tout - T));
+const capS = (T, th) => th.cap * th.shr * capF(T, th.tout);
 export function stepT(T, th, dt) {                   // dt seconds, returns new T
-  const load = th.Qi + th.UA * (T_OUT - T);
-  const q = T > T_SET ? th.cap : Math.min(th.cap, load);
+  const load = loadS(T, th), full = capS(T, th) * (th.inv && T > T_SET + 1.5 ? INV_BOOST : 1);
+  let q;
+  if (th.inv) q = T > T_SET ? full : Math.min(full, load);
+  else { if (T >= T_SET + FIX_BAND) th.on = true; else if (T <= T_SET - FIX_BAND) th.on = false; q = th.on ? full : 0; }
   return T + (load - q) / th.C * dt;
 }
-export function timeToSet(th, from = T_START, limitMin = 240) {
-  let T = from, t = 0;
-  while (T > T_SET + 0.1 && t < limitMin * 60) { T = stepT(T, th, 10); t += 10; }
+export function timeToSet(th, from = th.tStart ?? T_START, limitMin = 240) {
+  const t0 = { ...th, on: true }; let T = from, t = 0;
+  while (T > T_SET + 0.1 && t < limitMin * 60) { T = stepT(T, t0, 10); t += 10; }
   return T <= T_SET + 0.1 ? t / 60 : null;
 }
-export const steadyT = th => th.cap >= th.Qi + th.UA * (T_OUT - T_SET) ? T_SET : T_OUT + (th.Qi - th.cap) / th.UA;
+// the temperature the room settles at: set point if the unit keeps up, else where sensible capacity = sensible load
+export function steadyT(th) {
+  if (capS(T_SET, th) >= loadS(T_SET, th)) return T_SET;
+  let lo = T_SET, hi = th.tout + 5; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (capS(m, th) >= loadS(m, th)) hi = m; else lo = m; }
+  return (lo + hi) / 2;
+}

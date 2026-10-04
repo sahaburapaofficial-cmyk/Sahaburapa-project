@@ -7,9 +7,20 @@
  * deferred(el, boot): returns a stand-in for the scene's controller right away; method calls made before the scene exists
  * are remembered (latest call per method) and replayed in order once boot() — sync or async — has returned it.
  */
+// Rev.26.1 smooth: heavy work (a scene boot, a product render) waits until the visitor stops scrolling for a moment and the
+// browser is idle, so it never lands in the middle of a scroll or a tap. Bounded: it runs within ~1.5 s even if scrolling goes on.
+let lastInput = 0;
+if (typeof window !== 'undefined') ['scroll', 'wheel', 'touchmove', 'keydown'].forEach(t => addEventListener(t, () => { lastInput = performance.now(); }, { passive: true, capture: true }));
+export function whenQuiet(fn, quiet = 220, max = 1500) {
+  const t0 = performance.now();
+  const idle = window.requestIdleCallback ? f => requestIdleCallback(f, { timeout: 400 }) : f => setTimeout(f, 16);
+  const check = () => { const now = performance.now(); if (now - lastInput >= quiet || now - t0 >= max) idle(() => fn()); else setTimeout(check, quiet - (now - lastInput) + 10); };
+  check();
+}
+export const quiet = () => new Promise(r => whenQuiet(r));
 export function whenNear(el, fn, margin = '75% 0px') {
   if (!el || !('IntersectionObserver' in window)) { fn(); return; }
-  const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); fn(); } }, { rootMargin: margin });
+  const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); whenQuiet(fn); } }, { rootMargin: margin });
   io.observe(el);
 }
 export function deferred(el, boot, margin) {

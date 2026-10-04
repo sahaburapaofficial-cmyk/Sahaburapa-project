@@ -7,7 +7,7 @@ import * as THREE from './three.module.min.js';
 import { createWisps, airTint } from './wisp3d.js';
 import { track as glTrack } from './gl-pool.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
-import { fujivaBadge } from './brand3d.js';
+import { fujivaBadge, brandTex, drawFujiva } from './brand3d.js';
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const easeIO = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -276,53 +276,66 @@ export const FINISHES = {
 };
 const logoTex = () => fujivaBadge();   // Rev.12: the official FUJIVA logo (owner-supplied) — text wordmark until it has loaded
 // Rev.09: also the default wall body everywhere except the blueprint style; o.logo = false drops the FUJIVA wordmark (generic product shots)
+// Rev.26 (owner 4 ต.ค. 2569: "ใช้หน้าตา Body ตัวแอร์นี้ทำเป็นรูป Body ติดผนังทุก Model เพื่อ represent Fujiva … สมจริงที่สุดแบบ 360 องศา"):
+// the FUJIVA wall unit — a flat glossy white front panel with softly rounded corners standing proud of a light-grey chassis, a smoked
+// glass strip along the top edge, the "26" white LED digits behind the panel, the FUJIVA mark under it (logo only when o.logo is not
+// false — the customer's units in the job scenes carry none), rounded grey end caps with the round piping cover low on each side,
+// the grey underside with the outlet and its flap. Same part ids as buildIndoor (front / chassis / louver / filter / coil / blower …).
+const ledTex = () => canvasTex(160, 96, (g, w, h) => {
+  g.clearRect(0, 0, w, h);
+  // thin 7-segment "26" in white, as on the reference unit
+  const SEG = { 2: 'abged', 6: 'afedcg' }, P = 5, L = 30;
+  const seg = (x, y, s) => { const m = { a: [x, y, x + L, y], b: [x + L, y, x + L, y + L], c: [x + L, y + L, x + L, y + 2 * L], d: [x, y + 2 * L, x + L, y + 2 * L], e: [x, y + L, x, y + 2 * L], f: [x, y, x, y + L], g: [x, y + L, x + L, y + L] }[s]; g.beginPath(); g.moveTo(m[0], m[1]); g.lineTo(m[2], m[3]); g.stroke(); };
+  g.strokeStyle = '#ffffff'; g.lineWidth = P; g.lineCap = 'round'; g.shadowColor = 'rgba(255,255,255,.65)'; g.shadowBlur = 6;
+  [...SEG[2]].forEach(k => seg(w / 2 - L - 12, 16, k)); [...SEG[6]].forEach(k => seg(w / 2 + 12, 16, k));
+});
+// the FUJIVA mark printed in mid-grey on the panel, as on the reference unit (the official artwork, toned grey)
+const greyLogoTex = () => brandTex('fjPanelGrey', 512, 128, (g, w, h) => { g.clearRect(0, 0, w, h); drawFujiva(g, w / 2, h / 2, 76, '#8c9198'); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#8c9198'; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over'; });
 function buildPremiumIndoor(M, o = {}) {
   const U = buildIndoor(M);
   const { parts } = U;
-  const shellM = new THREE.MeshPhysicalMaterial({ color: 0xf4f4f1, roughness: 0.18, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, sheen: 0.2 });
-  const capM = new THREE.MeshPhysicalMaterial({ color: 0xe9e9e6, roughness: 0.3, metalness: 0, clearcoat: 0.6 });
-  // front band (top + curved front face)
-  const out = [[-0.10, 0.156], [0.06, 0.156], [0.096, 0.149], [0.118, 0.128], [0.127, 0.094], [0.129, 0.03], [0.126, -0.04], [0.118, -0.08], [0.104, -0.104]];
-  const inn = [[-0.10, 0.149], [0.06, 0.149], [0.091, 0.143], [0.111, 0.124], [0.12, 0.093], [0.122, 0.03], [0.119, -0.04], [0.111, -0.078], [0.098, -0.1]];
-  const sh = new THREE.Shape(); sh.moveTo(out[0][0], out[0][1]); sh.splineThru(out.slice(1).map(p => new THREE.Vector2(p[0], p[1])));
-  sh.lineTo(inn[inn.length - 1][0], inn[inn.length - 1][1]); sh.splineThru(inn.slice(0, -1).reverse().map(p => new THREE.Vector2(p[0], p[1]))); sh.closePath();
-  const fg = new THREE.ExtrudeGeometry(sh, { depth: 0.884, bevelEnabled: false, curveSegments: 24 }); fg.rotateY(-Math.PI / 2); fg.translate(0.442, 0, 0);
+  const flat = !!M.edge;
+  const shellM = flat ? M.shell : new THREE.MeshPhysicalMaterial({ color: 0xeeefec, roughness: 0.46, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.45 });
+  const capM = flat ? M.chassis : new THREE.MeshPhysicalMaterial({ color: 0xb4b8bd, roughness: 0.5, metalness: 0.05, clearcoat: 0.2 });
+  const glassM = flat ? M.dark : new THREE.MeshPhysicalMaterial({ color: 0x24282d, roughness: 0.08, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.04 });
+  const W = 0.9, PH = 0.262, PY = 0.016, PZ = 0.124, R = 0.032;
+  // front panel: rounded rectangle, gently bevelled — removable as "front" (cleaning)
   const fr = parts.front; fr.clear();
-  const band = new THREE.Mesh(fg, shellM); band.userData.finish = 'shell'; fr.add(band);
-  const glow = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.0022, 0.0015), new THREE.MeshBasicMaterial({ color: 0x7fe3ff, toneMapped: false })); glow.position.set(0, -0.062, 0.1225); glow.rotation.x = -0.2; fr.add(glow);
-  const disp = new THREE.Mesh(new THREE.PlaneGeometry(0.046, 0.022), M.display.isMeshBasicMaterial ? new THREE.MeshBasicMaterial({ map: displayTex(), transparent: true, toneMapped: false }) : M.display);
-  disp.position.set(0.33, 0.04, 0.1296); fr.add(disp);
-  if (!M.edge && o.logo !== false) { const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.03), new THREE.MeshBasicMaterial({ map: logoTex(), transparent: true, depthWrite: false })); logo.position.set(-0.3, 0.04, 0.1297); fr.add(logo); }
-  // chassis: rounded end caps + back + rear bottom
-  const cap = new THREE.Shape(); cap.moveTo(out[0][0], out[0][1]); cap.splineThru(out.slice(1).map(p => new THREE.Vector2(p[0], p[1])));
-  cap.splineThru([new THREE.Vector2(0.09, -0.122), new THREE.Vector2(0.05, -0.147)]); cap.lineTo(-0.085, -0.15); cap.quadraticCurveTo(-0.121, -0.15, -0.121, -0.12); cap.lineTo(-0.121, 0.13); cap.quadraticCurveTo(-0.121, 0.156, -0.10, 0.156);
-  const cg = new THREE.ExtrudeGeometry(cap, { depth: 0.012, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 4, curveSegments: 24 }); cg.rotateY(-Math.PI / 2);
+  const ps = new THREE.Shape(); const hw = W / 2, hh = PH / 2;
+  ps.moveTo(-hw + R, -hh); ps.lineTo(hw - R, -hh); ps.quadraticCurveTo(hw, -hh, hw, -hh + R); ps.lineTo(hw, hh - R); ps.quadraticCurveTo(hw, hh, hw - R, hh); ps.lineTo(-hw + R, hh); ps.quadraticCurveTo(-hw, hh, -hw, hh - R); ps.lineTo(-hw, -hh + R); ps.quadraticCurveTo(-hw, -hh, -hw + R, -hh);
+  const pg = new THREE.ExtrudeGeometry(ps, { depth: 0.01, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 5, curveSegments: 20 });
+  const panel = new THREE.Mesh(pg, shellM); panel.position.set(0, PY, PZ); panel.userData.finish = 'shell'; fr.add(panel);
+  fr.add(box(W - 0.024, PH - 0.024, 0.016, shellM, 0, PY, PZ + 0.0064));   // flat face in front of the extruded cap: two clean triangles, no sliver seams
+  // smoked glass strip along the top edge (with a fine silver line under it)
+  const strip = box(W - 0.05, 0.006, 0.02, glassM, 0, PY + hh + 0.004, PZ + 0.004); fr.add(strip);
+  if (!flat) fr.add(box(W - 0.06, 0.0015, 0.021, new THREE.MeshPhysicalMaterial({ color: 0xd8dade, metalness: 0.95, roughness: 0.2 }), 0, PY + hh + 0.0005, PZ + 0.004));
+  // LED digits + the FUJIVA mark
+  const fz = PZ + 0.0145;
+  const disp = new THREE.Mesh(new THREE.PlaneGeometry(0.052, 0.031), flat ? M.display : new THREE.MeshBasicMaterial({ map: ledTex(), transparent: true, toneMapped: false, depthWrite: false })); disp.position.set(0, PY + 0.004, fz); fr.add(disp);
+  if (!flat && o.logo !== false) { const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.092, 0.023), new THREE.MeshBasicMaterial({ map: greyLogoTex(), transparent: true, depthWrite: false })); logo.position.set(0, PY - 0.066, fz); fr.add(logo); }
+  // chassis: light-grey body behind the panel — rounded end caps (with the round piping cover low on each side), top, back, underside
   const ch = parts.chassis; ch.clear();
-  [0.456, -0.444].forEach(x => { const m = new THREE.Mesh(cg, capM); m.position.x = x; m.userData.finish = 'cap'; ch.add(m); });
-  ch.add(box(0.884, 0.29, 0.006, M.chassis, 0, 0.0, -0.118), box(0.884, 0.006, 0.13, M.chassis, 0, -0.147, -0.055));
-  // wing-shaped horizontal flap
+  const cap = new THREE.Shape(); cap.moveTo(-0.12, 0.13); cap.quadraticCurveTo(-0.12, 0.152, -0.098, 0.152); cap.lineTo(0.09, 0.152); cap.quadraticCurveTo(0.112, 0.152, 0.112, 0.13);
+  cap.lineTo(0.112, -0.098); cap.quadraticCurveTo(0.112, -0.118, 0.092, -0.126); cap.lineTo(0.03, -0.15); cap.lineTo(-0.098, -0.15); cap.quadraticCurveTo(-0.12, -0.15, -0.12, -0.128); cap.closePath();
+  const cg = new THREE.ExtrudeGeometry(cap, { depth: 0.012, bevelEnabled: true, bevelThickness: 0.005, bevelSize: 0.005, bevelSegments: 5, curveSegments: 18 }); cg.rotateY(-Math.PI / 2);
+  [0.452, -0.44].forEach(x => { const m = new THREE.Mesh(cg, capM); m.position.x = x; m.userData.finish = 'cap'; ch.add(m); });
+  if (!flat) [1, -1].forEach(sx => { const pc = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.004, 28), capM); pc.rotation.z = Math.PI / 2; pc.position.set(sx * 0.4585, -0.095, 0.02); ch.add(pc);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.0012, 6, 32), new THREE.MeshStandardMaterial({ color: 0x8e9398, roughness: 0.5 })); ring.rotation.y = Math.PI / 2; ring.position.set(sx * 0.4605, -0.095, 0.02); ch.add(ring); });
+  ch.add(box(0.884, 0.004, 0.226, capM, 0, 0.15, -0.006), box(0.884, 0.29, 0.006, M.chassis, 0, 0.0, -0.118), box(0.884, 0.006, 0.13, capM, 0, -0.147, -0.055));
+  if (!flat) {
+    const slotM = new THREE.MeshStandardMaterial({ color: 0x9a9fa5, roughness: 0.6 });   // fine intake grille on the top (grey)
+    const slots = new THREE.InstancedMesh(new THREE.BoxGeometry(0.0042, 0.0012, 0.12), slotM, 58); const mm = new THREE.Matrix4();
+    for (let i = 0; i < 58; i++) { mm.makeTranslation(-0.415 + i * 0.01456, 0.1525, -0.03); slots.setMatrixAt(i, mm); }
+    ch.add(slots);
+    const cav = box(0.84, 0.002, 0.07, new THREE.MeshStandardMaterial({ color: 0x3a3e44, roughness: 0.9 }), 0, -0.118, 0.065); ch.add(cav);
+  }
+  // flap: thin wing in the chassis grey, as on the reference underside
   const piv = parts.louver.userData.flap; piv.clear();
   const wing = new THREE.Shape(); wing.moveTo(-0.04, 0); wing.quadraticCurveTo(0.0, 0.009, 0.045, 0.002); wing.quadraticCurveTo(0.0, -0.002, -0.04, 0);
-  const wg = new THREE.ExtrudeGeometry(wing, { depth: 0.8, bevelEnabled: false, curveSegments: 12 }); wg.rotateY(-Math.PI / 2); wg.translate(0.4, 0, 0);
-  const flap = new THREE.Mesh(wg, shellM); flap.userData.finish = 'shell'; flap.position.z = 0.012; piv.add(flap);
-  // ---- Rev.08 premium details: top intake slots, champagne trim, glass display with icons, dark outlet cavity, status LED
-  const flat = !!M.edge;
-  const slotM = flat ? M.dark : new THREE.MeshStandardMaterial({ color: 0x2c3036, roughness: 0.55 });
-  const slots = new THREE.InstancedMesh(new THREE.BoxGeometry(0.0042, 0.0018, 0.118), slotM, 58); const mm = new THREE.Matrix4();
-  for (let i = 0; i < 58; i++) { mm.makeTranslation(-0.415 + i * 0.01456, 0.1566, -0.03); slots.setMatrixAt(i, mm); }
-  fr.add(slots);
-  const trimM = flat ? M.metal : new THREE.MeshPhysicalMaterial({ color: 0xcbb896, metalness: 0.95, roughness: 0.22, clearcoat: 0.6 });
-  const trim = box(0.86, 0.0045, 0.0022, trimM, 0, -0.022, 0.1268); fr.add(trim);
-  if (!flat) {
-    const dispT = canvasTex(256, 96, (g, w, h) => {
-      g.clearRect(0, 0, w, h); const r = 18; g.fillStyle = 'rgba(12,16,22,0.94)'; g.beginPath(); g.moveTo(r, 0); g.arcTo(w, 0, w, h, r); g.arcTo(w, h, 0, h, r); g.arcTo(0, h, 0, 0, r); g.arcTo(0, 0, w, 0, r); g.fill();
-      g.fillStyle = '#8fe8ff'; g.font = '600 58px ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('25°', w * 0.44, h / 2 + 3);
-      g.strokeStyle = '#8fe8ff'; g.lineWidth = 3; const cx = w * 0.84, cy = h / 2; for (let k = 0; k < 3; k++) { const a = k * Math.PI / 3; g.beginPath(); g.moveTo(cx - Math.cos(a) * 14, cy - Math.sin(a) * 14); g.lineTo(cx + Math.cos(a) * 14, cy + Math.sin(a) * 14); g.stroke(); }
-    });
-    disp.material = new THREE.MeshBasicMaterial({ map: dispT, transparent: true, toneMapped: false }); disp.geometry = new THREE.PlaneGeometry(0.072, 0.027); disp.position.set(0.315, 0.036, 0.1297);
-    const led = new THREE.Mesh(new THREE.CircleGeometry(0.0022, 16), new THREE.MeshBasicMaterial({ color: 0x5cf0a0, toneMapped: false })); led.position.set(0.37, 0.018, 0.1298); fr.add(led); fr.userData.led = led;
-    const cav = box(0.84, 0.002, 0.07, new THREE.MeshStandardMaterial({ color: 0x1b1e22, roughness: 0.9 }), 0, -0.1, 0.065); ch.add(cav);
-  }
+  const wg = new THREE.ExtrudeGeometry(wing, { depth: 0.82, bevelEnabled: false, curveSegments: 12 }); wg.rotateY(-Math.PI / 2); wg.translate(0.41, 0, 0);
+  const flap = new THREE.Mesh(wg, capM); flap.userData.finish = 'cap'; flap.position.z = 0.012; piv.add(flap);
+  // keep the coil block clear of the flat front panel (its front fins came within millimetres of the panel face)
+  parts.coil.position.z -= 0.028;
   U.finishMats = { shell: shellM, cap: capM };
   return U;
 }
@@ -690,11 +703,16 @@ export function createACViewer(container, opts = {}) {
       state.theta = lerp(state.theta, state.camTo.theta, k * 0.9); state.phi = lerp(state.phi, state.camTo.phi, k * 0.9); state.radius = lerp(state.radius, state.camTo.radius, k * 0.9);
       if (Math.abs(state.theta - state.camTo.theta) < 1e-3) state.camTo = null;
     } else if (o.autoRotate && !rm && now - state.userAt > 3500 && !state.selected) {
-      state.autoDir = state.autoDir || 1;
-      state.theta += dt * 0.12 * state.autoDir * (state.explode > 0.5 ? 0.5 : 1);
-      if (state.theta > PRESET.persp.theta + 0.75) state.autoDir = -1;
-      if (state.theta < PRESET.persp.theta - 0.75) state.autoDir = 1;
+      // Rev.13: showroom turntable — an eased sway (slows into each end instead of bouncing) with a slight rise and fall;
+      // it picks up from wherever the viewer left the camera
+      const A = 0.75, base = PRESET.persp.theta;
+      if (!state.auto) { state.auto = { ph: Math.asin(clamp((state.theta - base) / A, -1, 1)), phi0: state.phi, w: 0 }; }
+      const au = state.auto; au.w = Math.min(1, au.w + dt * 0.6);            // ease in after the viewer lets go
+      au.ph += dt * 0.16 * (state.explode > 0.5 ? 0.5 : 1);
+      state.theta = lerp(state.theta, base + A * Math.sin(au.ph), au.w * k);
+      state.phi = lerp(state.phi, au.phi0 + Math.sin(au.ph * 0.6) * 0.035, au.w * k * 0.5);
     }
+    if (now - state.userAt <= 3500 || state.selected || state.camTo) state.auto = null;
     state.target.y = lerp(state.target.y, (state.unit === 'indoor' ? -0.02 : 0) + state.explode * 0.06 + o.targetOffset[1] * (1 - state.explode * 0.5), 0.1);
     state.target.x = lerp(state.target.x, o.targetOffset[0] * (1 - state.explode * 0.3), 0.1);
     const sp = Math.sin(state.phi);

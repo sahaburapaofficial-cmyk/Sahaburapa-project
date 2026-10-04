@@ -5,8 +5,9 @@
 // the two levels side by side with the standard price from the Pricebook, a step player over the 3D job scene
 // (jobscene3d.js, lazy: two technicians + the customer on a real site per unit type) and a parts tray / install checklist.
 // Who does what in each step (lead / assistant) is written out too, so the teamwork reads without the 3D view.
+import { quiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DATA, SIZE_BANDS, cleanRate, installOptions, incVat, baht, h, $$ } from './sbp-core.js';
-import { cleanSteps, installSteps, CLEAN_HOW, INSTALL_HOW, PH, PHC } from './services.js';
+import { cleanSteps, installSteps, CLEAN_HOW, INSTALL_HOW, PH, PHC, OU_HIGH } from './services.js';
 import { METHOD_INFO, cart } from './commerce.js';
 import { toast } from './proto-ui.js';
 
@@ -24,14 +25,8 @@ const PKGS = [{ id: 'Basic Clean', th: 'ล้างมาตรฐาน', sub:
 // scair.co.th): wall C1 30–60 min · big clean 1.5–2.5 h · cassette 40–90 min (C1) / up to ~2 h · wall install 2–4 h · cassette
 // install ~3 h to a full day. Ceiling / floor-standing follow the cassette ranges (no separate published figure). Always shown
 // with TIME_NOTE — never as a promise, a pass/fail line or a price basis; the crew confirms on site.
-export const JOB_TIME = {
-  C1: { wall: [30, 60], ceiling: [40, 90], cassette: [40, 90], floor: [40, 90] },
-  C2: { wall: [90, 150], ceiling: [90, 120], cassette: [90, 120], floor: [90, 120] },
-  install: { wall: [120, 240], ceiling: [180, 360], cassette: [180, 480], floor: [180, 360] },
-};
-export const TIME_NOTE = 'เวลาโดยประมาณจากข้อมูลร้านแอร์ทั่วไป ขึ้นกับหน้างานและสภาพเครื่อง ไม่ใช่เกณฑ์หรือคำรับรอง';
-const minTh = m => m < 60 ? `${m} นาที` : `${+(m / 60).toFixed(1)} ชม.`.replace('.0 ', ' ');
-export const timeTh = ([a, b]) => (a < 60 && b <= 60) ? `${a}–${b} นาที` : `${minTh(a)}–${minTh(b)}`.replace(/ ชม\.–/, '–');
+import { JOB_TIME, TIME_NOTE, timeTh } from './sbp-core.js';   // Rev.15: moved to the domain core (queue.js uses them too)
+export { JOB_TIME, TIME_NOTE, timeTh };
 // which part groups come off at each teardown step, per unit type (ids of the ac3d / units3d part groups)
 export const TEAR = {
   wall: { parts: ['front', 'filter', 'louver'], lower: [], fan: ['blower'], pan: ['pan'], fanW: 'blower', panW: 'pan' },
@@ -59,7 +54,7 @@ const WHO_CLEAN = {
   precheck: ['เปิดเครื่องทดสอบด้วยรีโมต', 'ถ่ายภาพก่อนงาน'],
   premeasure: ['วัดอุณหภูมิลมกลับ / ลมจ่ายที่ตัวเครื่อง', 'จดค่าลงรายงาน'],
   power: ['ปิดเบรกเกอร์วงจรแอร์', 'วัดยืนยันว่าไม่มีไฟเข้าเครื่อง'],
-  cover: ['ครอบถุงล้างที่ตัวเครื่อง คลุมแผงวงจร', 'จับสายถุงลงถัง วางถังรับน้ำ'],
+  cover: ['ครอบผ้าใบล้างแอร์ให้มิดตัวเครื่อง รัดขอบ คลุมแผงวงจร', 'จับสายผ้าใบลงถัง วางถังรับน้ำ ตรวจขอบไม่มีช่อง'],
   parts: ['ถอดชิ้นส่วนทีละชิ้น ส่งลงมา', 'รับชิ้นส่วน นำไปวางเรียงบนโต๊ะ แล้วล้างแยก'],
   lower: ['ปลดตัวเครื่อง / แผงปิดตามแบบเครื่อง', 'ประคองและรับแผงที่ถอด'],
   nocut: ['ชี้ให้ลูกค้าเห็นว่าท่อยังต่ออยู่', 'ถ่ายภาพจุดต่อท่อ'],
@@ -68,12 +63,13 @@ const WHO_CLEAN = {
   coilBack: ['ฉีดล้างคอยล์ด้านหลัง', 'จับปลายถุงล้าง ดูน้ำลงถัง'],
   washParts: ['เช็ดและตรวจชิ้นส่วนที่ล้างแล้ว', 'ล้างชิ้นส่วนทีละชิ้นในอ่าง'],
   register: ['ถ่ายภาพลงทะเบียนชิ้นส่วน', 'เรียงชิ้นส่วนบนโต๊ะตามลำดับ'],
-  chem: ['พ่นน้ำยาล้างคอยล์ให้ทั่ว', 'เตรียมเครื่องฉีดน้ำ จับถุงล้าง'],
+  chem: ['พ่นน้ำยาล้างคอยล์ให้ทั่ว', 'จับปลายผ้าใบ ดูน้ำยาไหลลงถัง'],
+  dwell: ['ดูเวลาและสภาพคราบ ทิ้งน้ำยาไว้ 5–15 นาที', 'เตรียมปั๊มน้ำแรงดัน ต่อสายฉีด ตรวจหัวฉีด'],
   coilFront: ['ฉีดล้างคอยล์ตามแนวครีบ', 'จับปลายถุงล้าง ดูน้ำลงถัง'],
   fanWash: ['ฉีดใบพัด หมุนด้วยมือทีละช่วง', 'จับปลายถุงล้าง'],
   drain: ['เทน้ำทดสอบลงถาด', 'ดูน้ำที่ปลายท่อ'],
-  outdoor: ['ตรวจยางกันสั่นและจุดต่อที่คอยล์ร้อน', 'ฉีดล้างครีบคอยล์ร้อน'],
-  dry: ['เป่าและเช็ดตัวเครื่องให้แห้ง', 'เช็ดชิ้นส่วนบนโต๊ะให้แห้ง'],
+  outdoor: ['ตรวจยางกันสั่นและจุดต่อที่คอยล์ร้อน (ติดที่สูง: จับบันไดให้ผู้ช่วย)', 'ฉีดล้างครีบคอยล์ร้อน (ติดที่สูง: ขึ้นบันได)'],
+  dry: ['เป่าไล่น้ำในคอยล์และใบพัดด้วย Blower', 'เช็ดชิ้นส่วนบนโต๊ะให้แห้ง'],
   assemble: ['ประกอบชิ้นส่วนกลับเข้าตัวเครื่อง', 'ยื่นชิ้นส่วนขึ้นไปตามลำดับ'],
   cleanup: ['ถอดถุงล้าง เก็บอุปกรณ์ที่ตัวเครื่อง', 'กวาดและเช็ดพื้นที่'],
   testDrain: ['เทน้ำทดสอบหลังประกอบ', 'ดูน้ำออกปลายท่อ'],
@@ -114,7 +110,7 @@ export function cleanTimeline(type, level, pkg) {
       case 'precheck': x.run = 1; x.flash = true; x.cam = 'unit'; x.crew = [c('uf', 'remote', 'remote'), c('uf2', 'photo', 'tablet'), CUSTW]; x.tags = [{ at: 'unit', th: 'เปิดทดสอบ · ถ่ายภาพก่อนงาน' }]; break;
       case 'premeasure': x.run = 1; x.probes = 1; x.cam = 'unit'; x.crew = [c('L', 'measure', 'probe'), c('foot', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'unit', th: 'วัดลมกลับ / ลมจ่าย · กระแสไฟ' }]; break;
       case 'power': P.power = 0; x.cam = 'breaker'; x.crew = [c('breaker', 'switch'), c('uf', 'measure', 'meter'), CUSTW]; x.tags = [{ at: 'breaker', th: 'ปิดเบรกเกอร์ · ยืนยันไม่มีไฟ', kind: 'ok' }]; break;
-      case 'cover': P.bag = 1; P.pcb = 1; x.cam = 'bag'; x.crew = [c('L', 'work'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'bag', th: type === 'floor' ? 'ถาดรองน้ำ + ถัง · คลุมแผงวงจร' : 'ถุงล้าง + ถัง · คลุมแผงวงจร' }, { at: 'mat', th: 'เสื่อยางกันน้ำกันรอย' }]; break;
+      case 'cover': P.bag = 1; P.pcb = 1; x.cam = 'bag'; x.crew = [c('L', 'work'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'bag', th: type === 'floor' ? 'ถาดรองน้ำ + ผ้าใบรอบตู้ · คลุมแผงวงจร' : 'ผ้าใบล้างแอร์ครอบมิดทุกด้าน · คลุมแผงวงจร' }, { at: 'mat', th: 'เสื่อยางกันน้ำกันรอย' }]; break;
       case 'parts': off(T.parts); x.cam = 'team';
         if (!c2) { clean(T.parts, 0.06); x.spray = { by: 1, at: 'tub' }; x.crew = [c('L', 'work'), c('tub', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'table', th: 'ผู้ช่วยรับชิ้นส่วน · ล้างแยกนอกตัวเครื่อง' }]; }
         else { x.crew = [c('L', 'work'), c('table', 'table'), CUSTW]; x.tags = [{ at: 'table', th: 'วางเรียงตามลำดับ · บันทึกจุดยึด' }]; }
@@ -127,18 +123,19 @@ export function cleanTimeline(type, level, pkg) {
       case 'washParts': clean(Object.keys(P.off), 0.05); x.spray = { by: 1, at: 'tub' }; x.cam = 'tub'; x.crew = [c('table2', 'table', 'cloth'), c('tub', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'tub', th: 'ล้างทีละชิ้น' }]; break;
       case 'register': x.flash = true; x.cam = 'table'; x.crew = [c('table2', 'photo', 'tablet'), c('table', 'table'), CUSTW]; x.tags = [{ at: 'table', th: 'ทะเบียนชิ้นส่วน + ภาพ (บังคับ)', kind: 'ok' }]; break;
       case 'chem': P.foam = 1; x.spray = { by: 0, at: 'coil', chem: true }; x.cam = 'under'; x.crew = [c('L', 'spray', 'sprayer'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: 'น้ำยาล้างคอยล์ · ทิ้งให้คราบหลุด' }]; break;
+      case 'dwell': P.foam = 1; P.dirt.coil = Math.max(0.2, P.dirt.coil - 0.2); x.dwell = s.dwell; x.cam = 'pump'; x.crew = [c('L', 'checkTime'), c('washer', 'crouch'), CUSTW]; x.beats = [{ t: 3.4, set: { cam: 'team' }, crew: [c('L', 'work'), null, null] }]; x.tags = [{ at: 'unit', th: `น้ำยาทำงาน ${s.dwell[0]}–${s.dwell[1]} นาที ตามความสกปรก` }, { at: 'washer', th: 'เตรียมปั๊มน้ำแรงดัน' }]; break;
       case 'coilFront': P.foam = 0; clean(['coil'], c2 ? 0.05 : 0.28); P.bagWater = Math.min(1, P.bagWater + 0.4); x.spray = { by: 0, at: 'coil' }; x.cam = 'under'; x.crew = [c('L', 'spray', 'gun'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'bag', th: 'น้ำสกปรกลงถุงและถัง' }]; break;
       case 'fanWash': clean([T.fanW], 0.4); P.bagWater = Math.min(1, P.bagWater + 0.2); x.spray = { by: 0, at: 'fan' }; x.cam = 'under'; x.crew = [c('L', 'spray', 'gun'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: 'ใบพัดล้างในตำแหน่ง · เท่าที่หัวฉีดเข้าถึง', kind: 'warn' }]; break;
       case 'drain': if (c2) { clean(T.pan, 0.05); x.spray = { by: 1, at: 'tub' }; x.cam = 'tub'; x.crew = [c('table2', 'table', 'cloth'), c('tub', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'tub', th: 'ถาดและจุดต่อทางน้ำทิ้ง ล้างนอกตัวเครื่อง' }]; } else { clean([T.panW], 0.3); x.drain = 1; x.cam = 'under'; x.crew = [c('L', 'pour', 'jug'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: 'ทะลวงทางน้ำ · เทน้ำทดสอบ' }]; } break;
-      case 'outdoor': clean(['outdoor'], 0.1); x.spray = { by: 1, at: 'outdoor' }; x.cam = 'outdoor'; x.crew = [c('valve', 'crouch', 'torch'), c('out', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'outdoor', th: 'ล้างครีบคอยล์ร้อน · ตรวจยางรองกันสั่น' }]; break;
-      case 'dry': x.cam = 'team'; x.crew = [c('L', 'work', 'blower'), c('table', 'table', 'cloth'), CUSTW]; x.tags = [{ at: 'unit', th: 'เป่า · เช็ดแห้ง · ตรวจฉนวน' }]; break;
+      case 'outdoor': clean(['outdoor'], 0.1); x.spray = { by: 1, at: 'outdoor' }; x.cam = 'outdoor'; x.crew = OU_HIGH[type] ? [c('outFoot', 'hold'), c('out', 'sprayLow', 'gun'), CUSTW] : [c('valve', 'crouch', 'torch'), c('out', 'crouchSpray', 'gun'), CUSTW]; x.tags = [{ at: 'outdoor', th: OU_HIGH[type] ? 'คอยล์ร้อนติดผนังที่สูง · ตั้งบันได จับบันไดตลอดเวลาที่ฉีด' : 'ล้างครีบคอยล์ร้อน · ตรวจยางรองกันสั่น', kind: OU_HIGH[type] ? 'warn' : undefined }]; break;
+      case 'dry': x.cam = 'bag'; x.spray = { by: 0, at: 'coil', air: true }; x.crew = [c('L', 'blow', 'blower'), c('table', 'table', 'cloth'), CUSTW]; x.tags = [{ at: 'unit', th: 'Blower เป่าไล่น้ำในครีบ · เช็ดแห้ง · ตรวจฉนวน' }]; break;
       case 'assemble': P.off = {}; P.lower = 0; x.cam = 'team'; x.crew = [c('L', 'work'), c('foot', 'hold'), CUSTW]; x.tags = [{ at: 'unit', th: c2 ? 'ประกอบตามทะเบียนชิ้นส่วน · ล็อกขายึดครบ' : 'ประกอบกลับครบ · ไม่มีชิ้นส่วนเหลือ', kind: 'ok' }]; break;
       case 'cleanup': P.bag = 0; P.pcb = 0; P.bagWater = 0; x.flash = true; x.crew = [c('L', 'work'), c('uf2', 'sweep', 'broom'), CUSTW]; x.tags = [{ at: 'unit', th: 'คืนพื้นที่ · ถ่ายภาพหลังงาน' }]; break;
       case 'testDrain': x.drain = 1; x.cam = 'under'; x.crew = [c('L', 'pour', 'jug'), c('foot', 'watch'), CUSTW]; x.tags = [{ at: 'unit', th: 'น้ำไหลออกปกติ ไม่ย้อน ไม่ซึม', kind: 'ok' }]; break;
       case 'testRun': P.power = 1; x.run = 1; x.crew = [c('uf', 'remote', 'remote'), c('breaker', 'measure', 'meter'), CUSTW]; x.tags = [{ at: 'unit', th: 'เดินเครื่องทุกโหมด · ลมออกสม่ำเสมอ', kind: 'ok' }]; break;
       case 'postmeasure': P.power = 1; x.run = 1; x.probes = 1; x.cam = 'unit'; x.crew = [c('L', 'measure', 'probe'), c('foot', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'unit', th: 'วัดค่าหลังงาน ที่จุดเดิม' }]; break;
       case 'basicCheck': P.power = 1; x.run = 1; x.crew = [c('uf', 'remote', 'remote'), c('uf2', 'tablet', 'tablet'), CUSTW]; break;
-      case 'a4': x.cam = 'outdoor'; x.crew = [c('valve', 'crouch', 'torch'), c('out', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'outdoor', th: 'เมื่ออนุมัติ / พบผิดปกติเท่านั้น', kind: 'warn' }]; break;
+      case 'a4': x.cam = 'outdoor'; x.crew = OU_HIGH[type] ? [c('out', 'measure', 'torch'), c('outFoot', 'hold'), CUSTW] : [c('valve', 'crouch', 'torch'), c('out', 'tablet', 'tablet'), CUSTW]; x.tags = [{ at: 'outdoor', th: 'เมื่ออนุมัติ / พบผิดปกติเท่านั้น', kind: 'warn' }]; break;
       case 'grade': x.cam = 'meet'; x.crew = [c('leadMeet', 'tablet', 'tablet'), c('box', 'crouch'), CUSTW]; break;
       case 'next': x.cam = 'meet'; x.crew = [c('leadMeet', 'explain'), c('box', 'carryBox', 'box'), c('custMeet', 'explain')]; break;
       case 'sign': x.cam = 'meet'; x.crew = [c('leadMeet', 'present', 'tablet'), c('asstMeet', 'idle'), c('custMeet', 'sign')]; break;
@@ -247,7 +244,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
             h('dt', {}, 'ทดสอบรั่ว'), h('dd', {}, leak ? leak.d : '—'), h('dt', {}, 'สุญญากาศ'), h('dd', {}, vac ? vac.d : '—'), h('dt', {}, 'ส่งมอบ'), h('dd', {}, hand ? hand.d : '—'),
             h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, (it.exc || '').split(',').slice(0, 4).join(', ')),
             h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME.install[st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
-          h('div', { class: 'cg-pr' }, it.ex != null ? [h('b', {}, baht(incVat(it.ex))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(it.ex)} · ${it.name}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
+          h('div', { class: 'cg-pr' }, it.ex != null ? [h('b', {}, baht(it.ex)), h('small', {}, `ต่อเครื่อง ก่อน VAT · ${it.name}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
           h('div', { class: 'cg-act' },
             h('button', { type: 'button', class: 's-btn ' + (on ? 'primary' : 'ghost'), onclick: () => { st.level = o.key; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${steps.length} ขั้นตอน`),
             it.ex != null ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'service', group: 'install', key: `I-${it.code}`, name: it.name, detail: it.warranty || '', unitEx: it.ex, qty: 1 }); toast(`เพิ่ม "${it.name}" แล้ว`); } }, 'ใส่ใบเสนอราคา') : null)));
@@ -271,12 +268,12 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
         h('dl', {}, h('dt', {}, 'ถอดออกมาล้าง'), h('dd', {}, out.join(' · ')), h('dt', {}, 'ล้างในเครื่อง'), h('dd', {}, inPlace.join(' · ')), h('dt', {}, 'ไม่รวม'), h('dd', { class: 'x' }, notInc.join(' · ')),
           c2 ? [h('dt', {}, 'เพิ่มจาก C1'), h('dd', {}, 'ทะเบียนชิ้นส่วนที่ถอด + ภาพ (บังคับ) · ชิ้นที่ไม่ได้ถอดต้องระบุเหตุผล')] : null,
           h('dt', {}, 'เวลาโดยประมาณ'), h('dd', {}, `${timeTh(JOB_TIME[lv][st.type])} ต่อเครื่อง`, h('small', { class: 'cg-tnote' }, TIME_NOTE))),
-        h('div', { class: 'cg-pr' }, r ? [h('b', {}, baht(incVat(r.rate.s))), h('small', {}, `ต่อเครื่อง รวม VAT · ก่อน VAT ${baht(r.rate.s)} · ${st.pkg}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
+        h('div', { class: 'cg-pr' }, r ? [h('b', {}, baht(r.rate.s)), h('small', {}, `ต่อเครื่อง ก่อน VAT · ${st.pkg}`)] : [h('b', {}, 'ประเมินหน้างาน')]),
         h('div', { class: 'cg-act' },
           h('button', { type: 'button', class: 's-btn ' + (st.level === lv ? 'primary' : 'ghost'), onclick: () => { st.level = lv; refresh(true); root.querySelector('.cg-main').scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } }, `ดู ${n} ขั้นตอน`),
           r ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'service', group: 'clean', key: `CL-${st.pkg}-${lv}-${st.type}-${st.size}`, name: `${r.name} · ${c2 ? 'ล้างใหญ่ C2' : 'ล้างปกติ C1'}`, detail: `${st.pkg} · ${r.warranty || ''}`, unitEx: r.rate.s, qty: 1 }); toast(`เพิ่ม "${r.name} · ${c2 ? 'ล้างใหญ่ C2' : 'ล้างปกติ C1'}" แล้ว`); } }, 'ใส่ใบเสนอราคา') : null));
     };
-    cmp.append(col('C1'), col('C2'), h('p', { class: 'cg-when' }, h('b', {}, 'เลือกล้างใหญ่เมื่อ'), ' เห็นคราบดำที่ใบพัด กลิ่นอับไม่หายหลังล้างปกติ หรือไม่ได้ล้างมานาน · งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ', baht(incVat(DATA.minBill)), ' รวม VAT'));
+    cmp.append(col('C1'), col('C2'), h('p', { class: 'cg-when' }, h('b', {}, 'เลือกล้างใหญ่เมื่อ'), ' เห็นคราบดำที่ใบพัด กลิ่นอับไม่หายหลังล้างปกติ หรือไม่ได้ล้างมานาน · งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ', baht(DATA.minBill), ' ก่อน VAT'));
   }
   const PHI = { pre: 'ก่อนเริ่มงาน', work: 'งานติดตั้ง', test: 'ทดสอบ', hand: 'ส่งมอบ' };
   const phName = ph => st.job === 'install' ? PHI[ph] : PH[ph];
@@ -381,19 +378,29 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
     st.i = Math.max(0, Math.min(TL.length - 1, i));
     renderCard(); renderTray(); renderSheet(); renderTags(); if (st.d4) renderRuler();
     const s = TL[st.i].state;
-    if (V3) V3.show(clone(s), { jump: Math.abs(st.i - lastI) !== 1 });
+    if (V3 && !swapping) V3.show(clone(s), { jump: Math.abs(st.i - lastI) !== 1 });
     lastI = st.i;
     if (s.flash && !RM()) { flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); }
   }
+  // Rev.13: a new unit type / job rebuilds the 3D site (venue, unit, crew) — the buttons, card and steps update at once, the
+  // rebuild runs a frame later behind a short fade, and quick repeated clicks collapse into one rebuild (the last choice)
+  let swapping = false, swapTok = 0, v3Type = st.type, v3Job = st.job;
   function refresh(keepStep) {
     const cur = TL[st.i] && TL[st.i].step.id;
     TL = timeline();
     renderLvl(); renderCmp(); renderStrip(); renderCap();
-    if (V3) { V3.setJob(st.job); V3.setType(st.type); }
     const j = keepStep && cur ? TL.findIndex(t => t.step.id === cur) : -1;
-    if (V3 && j < 0) V3.reset();
+    const heavy = !!V3 && (v3Type !== st.type || v3Job !== st.job);
+    if (heavy) { swapping = true; host.classList.add('cg-swap'); }
     lastI = -9; go(j >= 0 ? j : 0);
     if (st.d4) { size4(); onScroll4(); }
+    if (!heavy) { if (V3 && j < 0) V3.reset(); return; }
+    const tok = ++swapTok;
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+      if (tok !== swapTok || !V3) return;
+      try { V3.setJob(st.job); V3.setType(st.type); v3Type = st.type; v3Job = st.job; if (j < 0) V3.reset(); }
+      finally { swapping = false; lastI = -9; go(st.i); requestAnimationFrame(() => host.classList.remove('cg-swap')); }
+    }, 0)));
   }
   function stop() { st.playing = false; clearTimeout(timer); play.textContent = 'เล่นทีละขั้น'; }
   function togglePlay() {
@@ -415,15 +422,27 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
   /* ----- lazy 3D ----- */
   let booting = false;
   const io = new IntersectionObserver(async es => {
-    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect();
-    try { const mod = await import('./jobscene3d.js'); V3 = mod.createJobScene(host, { theme, type: st.type, job: st.job, onFrame }); V3.show(clone(TL[st.i].state), { jump: true }); lastI = st.i; renderTags(); }
+    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect(); await quiet();
+    try { const mod = await import('./jobscene3d.js'); V3 = mod.createJobScene(host, { theme, type: st.type, job: st.job, onFrame }); v3Type = st.type; v3Job = st.job; V3.show(clone(TL[st.i].state), { jump: true }); lastI = st.i; renderTags(); }
     catch (e) { console.warn('job scene 3D unavailable', e); fb.hidden = false; host.hidden = true; }
   }, { rootMargin: '300px 0px' });
   io.observe(host);
+  /* ----- Rev.13 · auto preview: when the scene is well in view and the visitor has not touched the section yet, the crew
+     plays the job by itself (pauses off screen, resumes on return); any click / key / drag in the section hands control
+     back for good. Not with reduced motion or in the 4D scroll mode (the scroll drives it there). */
+  let touched = false, autoOn = false;
+  const own = () => { touched = true; autoOn = false; };
+  ['click', 'keydown', 'change'].forEach(ev => root.addEventListener(ev, e => { if (e.isTrusted) own(); }, { passive: true }));   // not pointerdown / wheel: scrolling past must not count
+  const io2 = new IntersectionObserver(es => {
+    const e = es[es.length - 1], inView = e.isIntersecting && e.intersectionRatio >= 0.55;
+    if (inView && !touched && !st.d4 && !RM() && !st.playing) { autoOn = true; if (st.i >= TL.length - 1) go(0); togglePlay(); }
+    else if (!inView && autoOn && st.playing) stop();
+  }, { threshold: [0, 0.55] });
+  io2.observe(host);
   return {
-    setJob: j => { st.job = j; st.level = j === 'install' ? 'STANDARD' : 'C1'; $$('button', jobSeg).forEach(b => b.setAttribute('aria-pressed', String(b.textContent.startsWith(j === 'install' ? 'งานติดตั้ง' : 'งานล้าง')))); refresh(false); },
-    setLevel: lv => { st.level = lv; refresh(true); }, setType: t => { st.type = t; $$('button', typeSeg).forEach((b, i) => b.setAttribute('aria-pressed', String(JOB_TYPES[i].id === t))); refresh(false); },
-    go: i => go(i), set4D: on => set4D(!!on), steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
+    setJob: j => { own(); st.job = j; st.level = j === 'install' ? 'STANDARD' : 'C1'; $$('button', jobSeg).forEach(b => b.setAttribute('aria-pressed', String(b.textContent.startsWith(j === 'install' ? 'งานติดตั้ง' : 'งานล้าง')))); refresh(false); },
+    setLevel: lv => { own(); st.level = lv; refresh(true); }, setType: t => { own(); st.type = t; $$('button', typeSeg).forEach((b, i) => b.setAttribute('aria-pressed', String(JOB_TYPES[i].id === t))); refresh(false); },
+    go: i => { own(); stop(); go(i); }, set4D: on => { own(); set4D(!!on); }, steps: () => TL.map(t => t.step.id), advance: sec => V3 && V3.advance(sec), busy: () => !!(V3 && V3.busy()), ready: () => !!V3,
   };
 }
 // the pages call it by its round-3 name too

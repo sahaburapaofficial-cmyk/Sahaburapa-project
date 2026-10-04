@@ -6,6 +6,7 @@
 // Rev.09 round 3 — room planner ("จัดห้องเองเหมือนเกม Sims แต่สมจริง"): furnished presets, a furniture catalogue, drag /
 // rotate / delete in the 3D view (or from the list, keyboard-accessible), drag the AC along its wall; the cold air flows
 // around the furniture and the checks add air-path, comfort and window/door clashes (roomplan.js).
+import { quiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DEMO, BRAND_BY_ID, TYPE_BY_ID, baht, btuFmt, incVat, recommendBtu, installOptions, addonsFor, h, $$ } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { productVisual, photosFor } from './product-media.js';
@@ -116,8 +117,8 @@ export function fitCheck(S) {
   const len = r1(0.3 + run + Math.abs(drop) + (t === 'cassette' ? wallDist + 0.5 : 0) + 0.4);
   const extra = Math.max(0, Math.ceil(len - FIT_RULES.pipeIncluded));
   const pipeItem = addonsFor(t, btu)[0].items[0].item;
-  const costInc = pipeItem && pipeItem.ex != null ? incVat(pipeItem.ex * extra) : null;
-  add(extra ? 'info' : 'ok', extra ? `ท่อน้ำยาประมาณ ${len} ม. · เกินระยะที่รวม ${extra} ม.` : `ท่อน้ำยาประมาณ ${len} ม. อยู่ในระยะที่รวมในราคา (${FIT_RULES.pipeIncluded} ม.)`, extra && costInc != null ? `ส่วนเกินประมาณ ${baht(costInc)} รวม VAT (${pipeItem.name}) · ช่างวัดระยะจริงหน้างาน` : 'คอยล์ร้อนอยู่ใกล้ ท่อสั้น ระบบทำงานได้ดีและดูแลง่าย');
+  const costInc = pipeItem && pipeItem.ex != null ? (pipeItem.ex * extra) : null;
+  add(extra ? 'info' : 'ok', extra ? `ท่อน้ำยาประมาณ ${len} ม. · เกินระยะที่รวม ${extra} ม.` : `ท่อน้ำยาประมาณ ${len} ม. อยู่ในระยะที่รวมในราคา (${FIT_RULES.pipeIncluded} ม.)`, extra && costInc != null ? `ส่วนเกินประมาณ ${baht(costInc)} ก่อน VAT (${pipeItem.name}) · ช่างวัดระยะจริงหน้างาน` : 'คอยล์ร้อนอยู่ใกล้ ท่อสั้น ระบบทำงานได้ดีและดูแลง่าย');
   if (sku) {
     const mp = parseFloat(sku.d.maxPipe), ml = parseFloat(sku.d.maxLift);
     if (mp && len > mp) add('warn', `ยาวเกินที่ผู้ผลิตกำหนด (${mp} ม.)`, 'ต้องย้ายตำแหน่งคอยล์ร้อนให้ใกล้ขึ้น');
@@ -173,7 +174,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
   // 1 · model
   const typeSeg = seg(FIT_TYPES.map(id => ({ id, th: TYPE_BY_ID[id].th })), S.unit.type, v => { S.unit.type = v; S.sel = null; pickBest(); renderPick(); sync(); }, 'ประเภทแอร์', 'rf-types');
   const q = h('input', { type: 'search', class: 'rf-q', placeholder: 'ค้นหารุ่น แบรนด์ หรือ BTU', 'aria-label': 'ค้นหารุ่นแอร์' });
-  const list = h('div', { class: 'rf-list', role: 'list' });
+  const list = h('div', { class: 'rf-list', role: 'group', 'aria-label': 'รุ่นที่แนะนำ' });   // Rev.13: toggle buttons in a group (a list item cannot be pressed)
   const selBox = h('div', { class: 'rf-selm' });
   const fj = BRAND_BY_ID.fujiva;
   const fjNote = fj && !fj.n ? h('p', { class: 'rf-fj' }, h('b', {}, 'FUJIVA'), ' แบรนด์ของเรา · ข้อมูลรุ่นกำลังนำเข้า ', h('button', { type: 'button', class: 'rf-link', onclick: () => { const need = fitCheck(S).need; const i = FUJIVA_PREVIEW.skus.findIndex(k => k.btu >= need); setModel(FUJIVA_PREVIEW, i < 0 ? 3 : i); } }, 'ลองตัวเครื่อง FUJIVA'), ' · ', h('button', { type: 'button', class: 'rf-link', onclick: () => askTeam('FUJIVA', 'สนใจ FUJIVA สำหรับ' + roomText()) }, 'สอบถาม FUJIVA')) : null;
@@ -244,7 +245,8 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
   const ctas = h('div', { class: 'rf-ctas' },
     h('button', { type: 'button', class: 's-btn primary', onclick: addQuote }, 'ใส่ใบเสนอราคา'),
     h('button', { type: 'button', class: 's-btn', onclick: () => { if (S.sel && S.sel.m.preview) askTeam('FUJIVA'); else if (S.sel && onOpenModel) onOpenModel(S.sel.m, S.sel.si); } }, 'รายละเอียดรุ่น'),
-    h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'survey', group: 'install', key: `SV-FIT-${roomText()}`, name: 'ขอสำรวจหน้างานติดตั้ง', detail: `${roomText()} · ${S.sel ? BRAND_BY_ID[S.sel.m.brand].name + ' ' + S.sel.m.skus[S.sel.si].sku : TYPE_BY_ID[S.unit.type].th}`, unitEx: null, qty: 1 }); toast('เพิ่มคำขอสำรวจในใบเสนอราคาแล้ว'); } }, 'ขอสำรวจหน้างาน'));
+    h('button', { type: 'button', class: 's-btn ghost', onclick: () => { cart.add({ kind: 'survey', group: 'install', key: `SV-FIT-${roomText()}`, name: 'ขอสำรวจหน้างานติดตั้ง', detail: `${roomText()} · ${S.sel ? BRAND_BY_ID[S.sel.m.brand].name + ' ' + S.sel.m.skus[S.sel.si].sku : TYPE_BY_ID[S.unit.type].th}`, unitEx: null, qty: 1 }); toast('เพิ่มคำขอสำรวจในใบเสนอราคาแล้ว'); } }, 'ขอสำรวจหน้างาน'),
+    h('a', { class: 's-btn ghost', href: '#photo-survey' }, 'ส่งรูปให้ทีมประเมินก่อน'));   // Rev.13: fewer site visits (survey.js)
   stage.append(h('section', { class: 'rf-sec rf-res' }, h('h3', {}, h('span', {}, '5'), 'ผลตรวจการติดตั้ง'), sum, ul, price, ctas));   // under the view: keeps both columns balanced
 
   const roomText = () => `ห้อง ${S.room.w.toFixed(1)}×${S.room.l.toFixed(1)}×${S.room.h.toFixed(2)} ม.`;
@@ -282,7 +284,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     if (!out.length) list.append(h('p', { class: 'rf-note' }, 'ไม่พบรุ่นที่ค้นหา'));
     out.forEach(x => {
       const on = S.sel && S.sel.m === x.m && S.sel.si === x.si;
-      list.append(h('button', { type: 'button', class: 'rf-item', role: 'listitem', 'aria-pressed': on, onclick: () => { setModel(x.m, x.si); } },
+      list.append(h('button', { type: 'button', class: 'rf-item', 'aria-pressed': on, onclick: () => { setModel(x.m, x.si); } },
         h('b', {}, BRAND_BY_ID[x.m.brand].name, ' ', x.s.sku), h('small', {}, `${TYPE_BY_ID[x.m.type].th} · ${btuFmt(x.s.btu)} · ${baht(x.s.price)}`)));
     });
   }
@@ -291,7 +293,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     if (!S.sel) { selBox.append(h('p', { class: 'rf-note' }, 'ยังไม่ได้เลือกรุ่น')); return; }
     const { m, si } = S.sel, s = m.skus[si], d = S.unit.dims;
     selBox.append(productVisual(m, s, { size: 'thumb' }),
-      h('div', {}, h('p', { class: 'rf-br' }, BRAND_BY_ID[m.brand].name, ' · ', TYPE_BY_ID[m.type].th, m.inverter ? ' · Inverter' : ''), h('b', { class: 'rf-sku' }, s.sku), h('p', { class: 'rf-meta' }, `${btuFmt(s.btu)} · ${s.price == null ? 'ราคากำลังนำเข้า' : baht(s.price) + ' รวม VAT'}`),
+      h('div', {}, h('p', { class: 'rf-br' }, BRAND_BY_ID[m.brand].name, ' · ', TYPE_BY_ID[m.type].th, m.inverter ? ' · Inverter' : ''), h('b', { class: 'rf-sku' }, s.sku), h('p', { class: 'rf-meta' }, `${btuFmt(s.btu)} · ${s.price == null ? 'ราคากำลังนำเข้า' : baht(s.price) + ' ก่อน VAT'}`),
         h('p', { class: 'rf-dims' + (d.src === 'est' ? ' est' : '') }, `กว้าง ${Math.round(d.w * 100)} · สูง ${Math.round(d.h * 100)} · ลึก ${Math.round(d.d * 100)} ซม.`, h('small', {}, d.src === 'spec' ? ' ตามสเปกผู้ผลิต' : ' ขนาดโดยประมาณ · รอสเปกรุ่น'))));
   }
   function setModel(m, si = 0, quiet = false) {
@@ -323,7 +325,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     else if (S.sel) {
       const s = S.sel.m.skus[S.sel.si], ins = installOptions(S.sel.m.type, s.btu).find(o => o.key === 'STANDARD');
       const ex = s.px + (ins ? ins.item.ex || 0 : 0) + (R.pipe.extra && R.pipe.item && R.pipe.item.ex != null ? R.pipe.item.ex * R.pipe.extra : 0);
-      price.append(h('span', {}, ins ? 'เครื่อง + ติดตั้งมาตรฐาน' + (R.pipe.extra ? ` + ท่อเกิน ~${R.pipe.extra} ม.` : '') : 'ราคาเครื่อง (ติดตั้ง: ประเมินหน้างาน)'), h('b', {}, baht(incVat(ex))), h('small', {}, `ก่อน VAT ${baht(ex)} · ประมาณการ ยืนยันหลังสำรวจ`));
+      price.append(h('span', {}, ins ? 'เครื่อง + ติดตั้งมาตรฐาน' + (R.pipe.extra ? ` + ท่อเกิน ~${R.pipe.extra} ม.` : '') : 'ราคาเครื่อง (ติดตั้ง: ประเมินหน้างาน)'), h('b', {}, baht(ex)), h('small', {}, `ก่อน VAT · ประมาณการ ยืนยันหลังสำรวจ`));
     }
   }
   function addQuote() {
@@ -353,7 +355,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     actions: { rotate: id => rotateFurn(id), remove: id => removeFurn(id), nextWall: id => nextWall(id) },
   };
   const io = new IntersectionObserver(async es => {
-    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect();
+    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect(); await quiet();
     try { const mod = await import('./roomfit3d.js'); V3 = mod.createRoomFit3D(host, { theme, ...on3D }); V3.set(S, fitCheck(S)); if (S.pick) V3.select(S.pick); }
     catch (e) { console.warn('room-fit 3D unavailable', e); fb.hidden = false; host.hidden = true; }
   }, { rootMargin: '300px 0px' });

@@ -4,6 +4,7 @@
 // animated occupants from people3d.js who react to the air temperature where they are. The floor shows the
 // occupied-zone temperature, a distance scale runs along the front edge, and each person shows the temperature
 // around them. Fan speed / swing / dirty filter can be changed to see the throw grow or shrink. Illustrative only.
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import * as THREE from './three.module.min.js';
 import { track as glTrack } from './gl-pool.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
@@ -320,6 +321,6 @@ export function mountThrowSim(root, cfg = {}) {
       sim.setType(S.type); push();
     } catch (e) { console.warn('throw sim unavailable', e); fb.hidden = false; if (cfg.fallback) { stage.innerHTML = ''; stage.append(cfg.fallback()); } }
   };
-  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); boot(); } }, { rootMargin: '300px 0px' }); io.observe(stage);
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); whenQuiet(boot); } }, { rootMargin: '300px 0px' }); io.observe(stage);
   return { setType };
 }

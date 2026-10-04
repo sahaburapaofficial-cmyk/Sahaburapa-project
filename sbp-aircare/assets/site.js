@@ -7,10 +7,15 @@
 // "next step" cards at the bottom, an intent picker on the home view that starts a guided journey (a step strip that follows the
 // customer across views and remembers progress), the company / contact block, the beta notice + feedback form, and the footer.
 // Hidden views do not boot their 3D (scenes start on IntersectionObserver), so each view is lighter than the old page.
-import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS } from './sbp-core.js';
+import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS, DATA, TRAVEL } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
+import { mountRemoteSurvey } from './survey.js';
+import { QUEUE_URL, fetchStatus } from './queue.js';
+import { mountPalette } from './palette.js';
+import { mountFx } from './fx.js';
+import { mountAcBot } from './acbot.js';
 
 // Rev.12: official logo files — inlined by the build (globalThis.__SBP_LOGOS), read from assets/logos/ on the dev server
 const logoSrc = k => (globalThis.__SBP_LOGOS && globalThis.__SBP_LOGOS[k]) || `assets/logos/${k}.png`;
@@ -26,34 +31,36 @@ export const VIEWS = {
   home: { th: 'หน้าแรก' },
   shop: { th: 'ซื้อแอร์', lead: 'หาขนาดที่เหมาะกับห้อง เลือกรุ่นพร้อมราคาติดตั้ง แล้วลองวางในห้องของคุณก่อนตัดสินใจ' },
   service: { th: 'ล้าง · ติดตั้ง · ซ่อม', lead: 'ดูทีมช่างทำงานทีละขั้น เทียบระดับงาน ราคามาตรฐานจาก Pricebook และวัสดุที่ระบุไว้ในทุกแพ็กเกจ' },
-  business: { th: 'สำหรับองค์กร', lead: 'สัญญาล้างรายปี วางรอบล่วงหน้าทั้งปี มีรายงานรายเครื่อง ใส่จำนวนเครื่องแล้วเห็นงบประมาณทันที' },
+  business: { th: 'สำหรับองค์กร', lead: 'สำนักงาน หลายสาขา คอนโด โรงพยาบาล โรงเรียน โรงแรม โรงงาน — สัญญาล้างรายปีตามประเภทองค์กร วางรอบล่วงหน้าทั้งปี มีรายงานรายเครื่อง เห็นงบประมาณทันที' },
   knowledge: { th: 'ความรู้ · ลองเอง', lead: 'อ่านสั้น ๆ ก่อนตัดสินใจ แล้วลองกับเครื่องมือจำลอง: แอร์ทำงานอย่างไร ลมเย็นไปทางไหน ล้างแล้วได้อะไร' },
   contact: { th: 'ติดต่อเรา', lead: 'ข้อมูลบริษัท ช่องทางติดต่อ พื้นที่ให้บริการ และส่งคำขอให้ทีมติดต่อกลับ' },
 };
 const SEC_TH = {
-  hero: 'เริ่มต้น', book: 'จองล้างแอร์', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
-  catalog: 'เลือกรุ่นและราคา', studio: 'หาขนาด BTU ตามห้อง', room: 'หาขนาด BTU ตามห้อง', fit: 'ลองวางในห้องของคุณ',
+  hero: 'เริ่มต้น', book: 'จองล้างแอร์', coverage: 'พื้นที่ให้บริการ', standards: 'มาตรฐานงานของเรา', symptoms: 'อาการแอร์ยอดฮิต', enterprise: 'ลูกค้าองค์กร', start: 'เลือกสิ่งที่ต้องการ', flow: 'ขั้นตอนใช้บริการ', services: 'บริการของเรา', 'proc-sec': 'ขั้นตอนทำงาน',
+  catalog: 'เลือกรุ่นและราคา', tradein: 'เทิร์นแอร์เก่า', studio: 'หาขนาด BTU ตามห้อง', room: 'หาขนาด BTU ตามห้อง', fit: 'ลองวางในห้องของคุณ',
   cleanflow: 'ทีมช่างทำงานทีละขั้น', prices: 'ราคาทุกบริการ', quality: 'วัสดุในแพ็กเกจ', story: 'ล้างถึงชิ้นไหน', inside: 'ข้างในแอร์',
   howto: 'แอร์ทำงานอย่างไร · ขั้นตอนบริการ', b2b: 'ประเมินงบสัญญารายปี', learn: 'คู่มือก่อนตัดสินใจ', journey: 'แอร์ทำงานอย่างไร',
   about: 'เกี่ยวกับเรา', area: 'พื้นที่ให้บริการ', faq: 'คำถามที่พบบ่อย', quote: 'ส่งคำขอ',
 };
 // guided journeys: [section id (alternatives a|b), what the customer does there]; 'quote' = the quotation (or the contact form)
 export const JOURNEYS = {
-  clean: { th: 'ล้างแอร์', sub: 'บ้าน คอนโด ร้าน สำนักงาน · ล้างปกติ C1 หรือล้างใหญ่ C2', topic: 'ล้างแอร์', ico: 'M4 9h16v6H4zM7 15v3M12 15v4M17 15v3',
+  clean: { th: 'ล้างแอร์', sub: 'บ้าน คอนโด ร้าน สำนักงาน · ล้างปกติ C1 หรือล้างใหญ่ C2', topic: 'ล้างแอร์', ico: 'M3 5h18a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM5 10h14M12 15.5c-1.6 2.1-2.4 3.4-2.4 4.3a2.4 2.4 0 0 0 4.8 0c0-.9-.8-2.2-2.4-4.3z',
     steps: [['book', 'เลือกแอร์ วิธีล้าง และพื้นที่ ดูราคารวม'], ['cleanflow', 'ดูทีมช่างล้างทีละขั้น ล้างปกติ / ล้างใหญ่'], ['quote', 'ส่งคำขอนัดล้าง']] },   // Rev.11: starts at the quick booking
-  buy: { th: 'ซื้อแอร์ใหม่ + ติดตั้ง', sub: '', topic: 'ซื้อแอร์', ico: 'M3 7h18v8H3zM6 15v2M18 15v2M7 11h6',
+  buy: { th: 'ซื้อแอร์ใหม่ + ติดตั้ง', sub: '', topic: 'ซื้อแอร์', ico: 'M3 7.5l9-4 9 4v9l-9 4-9-4zM3 7.5l9 4 9-4M12 11.5v9M7.5 5.5l9 4',
     steps: [['studio|room', 'หาขนาด BTU ที่เหมาะกับห้อง'], ['catalog', 'เลือกรุ่นและแพ็กเกจติดตั้ง'], ['fit', 'ลองวางในห้องของคุณ'], ['quote', 'ส่งใบเสนอราคา']] },
-  install: { th: 'ติดตั้ง / ย้ายแอร์', sub: 'มีเครื่องแล้ว · ติดตั้งมาตรฐาน หรือพรีเมียม', topic: 'ติดตั้งแอร์', ico: 'M14 4l6 6-9 9H5v-6z',
-    steps: [['cleanflow', 'ดูขั้นตอนติดตั้งของทีม'], ['quality', 'วัสดุที่ใช้ในแต่ละแพ็กเกจ'], ['prices', 'ราคาติดตั้งตามขนาด'], ['quote', 'ขอสำรวจ / ใบเสนอราคา']] },
-  repair: { th: 'แอร์มีปัญหา / ซ่อม', sub: 'ไม่เย็น น้ำหยด มีเสียง มีกลิ่น', topic: 'ซ่อม / ตรวจเช็ก', ico: 'M14 6a4 4 0 0 0 5 5l-9 9-3-3 9-9',
-    steps: [['howto', 'เช็กอาการเบื้องต้นและขั้นตอนตรวจซ่อม'], ['prices', 'ค่าตรวจเช็กและค่าซ่อม'], ['quote', 'แจ้งอาการให้ทีม']] },
-  business: { th: 'องค์กร / สัญญารายปี', sub: 'สำนักงาน ร้านค้า โรงงาน อาคาร', topic: 'สัญญาล้างรายปี', ico: 'M4 20V8l8-4 8 4v12M9 20v-6h6v6',
-    steps: [['b2b', 'ประเมินงบล้างทั้งปี'], ['cleanflow', 'ดูมาตรฐานงานล้าง (SOP)'], ['area', 'พื้นที่และค่าเดินทาง'], ['quote', 'ขอใบเสนอราคาสัญญา']] },
+  install: { th: 'ติดตั้ง / ย้ายแอร์', sub: 'มีเครื่องแล้ว · ติดตั้งมาตรฐาน หรือพรีเมียม', topic: 'ติดตั้งแอร์', ico: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z',
+    steps: [['cleanflow', 'ดูขั้นตอนติดตั้งของทีม'], ['quality', 'วัสดุที่ใช้ในแต่ละแพ็กเกจ'], ['prices', 'ราคาติดตั้งตามขนาด'], ['quote', 'จองคิวติดตั้ง / ขอสำรวจ']] },
+  repair: { th: 'แอร์มีปัญหา / ซ่อม', sub: 'ไม่เย็น น้ำหยด มีเสียง มีกลิ่น', topic: 'ซ่อม / ตรวจเช็ก', ico: 'M4.5 16a7.5 7.5 0 1 1 15 0M12 16l3.5-3.5M12 16h.01M7 16h1M16 16h1M12 9.5v1M8.6 11l.7.7M15.4 11l-.7.7M9 20h6',
+    steps: [['symptoms', 'เช็กอาการ · ชี้จุดที่ต้องซ่อม'], ['howto', 'ขั้นตอนตรวจซ่อมของทีม'], ['prices', 'ค่าตรวจเช็กและค่าซ่อม'], ['quote', 'จองช่าง · แจ้งอาการ แนบรูป เลือกวัน']] },
+  tradein: { th: 'เทิร์นแอร์เก่า / รีโนเวท', sub: 'แอร์อายุ 7–10 ปีขึ้นไป · ซ่อมหรือเปลี่ยนดี', topic: 'เทิร์นแอร์เก่า', ico: 'M4 9h11l-3-3M20 15H9l3 3M7 4v3M17 17v3',
+    steps: [['tradein', 'เลือกอายุ อาการ ขนาด · เทียบซ่อมกับเครื่องใหม่'], ['catalog', 'เลือกเครื่องใหม่ขนาดเดิม'], ['quote', 'ส่งรูปป้ายเครื่อง · ขอประเมินมูลค่าเทิร์น']] },
+  business: { th: 'องค์กร / สัญญารายปี', sub: 'สำนักงาน หลายสาขา คอนโด โรงพยาบาล โรงเรียน โรงแรม โรงงาน', topic: 'สัญญาล้างรายปี', ico: 'M4 20V8l8-4 8 4v12M9 20v-6h6v6',
+    steps: [['enterprise', 'เลือกประเภทองค์กร · ดูสัญญาตัวอย่าง'], ['b2b', 'ปรับจำนวนเครื่อง · ประเมินงบทั้งปี'], ['standards', 'มาตรฐานงานและรายงาน'], ['area', 'พื้นที่และค่าเดินทาง'], ['quote', 'ขอใบเสนอราคาสัญญา / นัดสำรวจ']] },
 };
 // what to do after each view
 const NEXT = {
-  shop: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รวมเครื่อง ติดตั้ง อุปกรณ์เสริม และ VAT' }, { go: 'area', th: 'ตรวจพื้นที่และค่าเดินทาง', sub: 'ฟรีในกรุงเทพฯ และปริมณฑล' }, { go: 'cleanflow', pre: 'install', th: 'ดูขั้นตอนติดตั้งของทีม', sub: 'มาตรฐาน / พรีเมียม ทดสอบอะไรบ้าง' }],
-  service: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รายการที่กดเพิ่มไว้ รวม VAT' }, { ask: 'ล้างแอร์', th: 'นัดวันกับทีม', sub: 'ฝากชื่อและเบอร์ ทีมโทรกลับ' }, { go: 'catalog', th: 'ซื้อแอร์ใหม่พร้อมติดตั้ง', sub: 'ทุกรุ่นพร้อมราคา' }],
+  shop: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รวมเครื่อง ติดตั้ง อุปกรณ์เสริม และ VAT' }, { go: 'area', th: 'ตรวจพื้นที่และค่าเดินทาง', sub: 'เลือกแขวง/เขต เห็นค่าเดินทางทันที' }, { go: 'cleanflow', pre: 'install', th: 'ดูขั้นตอนติดตั้งของทีม', sub: 'มาตรฐาน / พรีเมียม ทดสอบอะไรบ้าง' }],
+  service: [{ cart: 1, th: 'ดูใบเสนอราคาของคุณ', sub: 'รายการที่กดเพิ่มไว้ พร้อมยอดรวม' }, { ask: 'ล้างแอร์', th: 'นัดวันกับทีม', sub: 'ฝากชื่อและเบอร์ ทีมโทรกลับ' }, { go: 'catalog', th: 'ซื้อแอร์ใหม่พร้อมติดตั้ง', sub: 'ทุกรุ่นพร้อมราคา' }],
   business: [{ ask: 'สัญญาล้างรายปี', th: 'ส่งรายการเครื่องให้ทีม', sub: 'ทีมขายเตรียมใบเสนอราคาสัญญา' }, { go: 'cleanflow', pre: 'clean', th: 'ดูมาตรฐานงานล้าง', sub: 'ขั้นตอนตามแบบฟอร์มของบริษัท' }, { go: 'area', th: 'พื้นที่ให้บริการ', sub: 'และค่าเดินทางนอกพื้นที่หลัก' }],
   knowledge: [{ go: 'studio|room', th: 'หาขนาด BTU ที่เหมาะ', sub: 'เลือกห้องที่ใกล้เคียงของคุณ' }, { go: 'catalog', th: 'ดูรุ่นแอร์และราคา', sub: 'เทียบรุ่นได้' }, { ask: 'อื่น ๆ', th: 'ถามทีมของเรา', sub: 'ฝากคำถาม ทีมติดต่อกลับ' }],
   contact: [{ go: 'home', th: 'กลับไปเลือกบริการ', sub: 'เริ่มจากสิ่งที่ต้องการ' }, { go: 'catalog', th: 'ดูรุ่นแอร์', sub: 'พร้อมราคาติดตั้ง' }, { go: 'cleanflow', th: 'ดูทีมช่างทำงาน', sub: 'ล้าง และติดตั้ง ทีละขั้น' }],
@@ -121,6 +128,8 @@ export function mountSite(cfg) {
       try { document.title = v === 'home' ? baseTitle : `${VIEWS[v].th} · ${baseTitle}`; } catch (e) { /* ignore */ }
       paintJourney(); observeSteps();
       hooks.onView && hooks.onView(v);
+      // Rev.14: the new page fades in as one piece (no per-section reveal), skipped for reduced motion and the first paint
+      if (seen.size > 1 && !RM()) { const de = document.documentElement; de.classList.remove('sx-enter'); void de.offsetWidth; de.classList.add('sx-enter'); clearTimeout(show.t); show.t = setTimeout(() => de.classList.remove('sx-enter'), 400); }
     }
     if (scroll === 'top') instant(() => scrollTo({ top: 0, behavior: 'instant' }), () => scrollTo(0, 0));   // a new view starts at its top at once
     if (focus && INTRO[v]) INTRO[v].h1.focus({ preventScroll: true });
@@ -171,7 +180,11 @@ export function mountSite(cfg) {
   const here = h('div', { class: 'sx-here', hidden: true });
   let hereStep = null;
   function goStep(s) {
-    if (s.id === 'quote') { if (cart.items.length) { openCart(); markDone(s.i); } else askTeam(JOURNEYS[J.k].topic); return; }
+    if (s.id === 'quote') {
+      // Rev.18: a repair journey with an empty quotation books a check-up visit (diagnosis fee line) through the job ticket
+      if (!cart.items.length && J.k === 'repair') { const d = DATA.rep.find(r => r.cat === 'ตรวจวินิจฉัย' && r.rate.s != null); if (d) cart.add({ kind: 'service', group: 'repair', key: `R-${d.name}`, name: d.name, unitEx: d.rate.s, qty: 1 }); }
+      if (cart.items.length) { openCart(); markDone(s.i); } else askTeam(JOURNEYS[J.k].topic); return;
+    }
     hereStep = s; const el = document.getElementById(s.id);
     if (el) { el.before(here); here.dataset.sx = el.dataset.sx; }
     go(s.id); paintHere();
@@ -227,13 +240,13 @@ export function mountSite(cfg) {
   if (startRoot) {
     const nb = BRANDS.filter(b => b.n).length;
     JOURNEYS.buy.sub = `${DEMO.skuCount} รุ่น ${nb} แบรนด์ พร้อมราคาติดตั้ง`;
-    const cards = ['clean', 'buy', 'install', 'repair', 'business'].map(k => {
+    const cards = ['clean', 'buy', 'tradein', 'install', 'repair', 'business'].map(k => {
       const j = JOURNEYS[k], steps = stepsOf(k);
       return h('button', { type: 'button', class: 'sx-int', onclick: () => startJourney(k) },
         svgI(j.ico), h('b', {}, j.th), h('small', {}, j.sub),
         h('ol', {}, steps.map(s => h('li', {}, s.th))), h('span', { class: 'sx-int-go' }, 'เริ่ม'));
     });
-    cards.push(h('button', { type: 'button', class: 'sx-int sx-int-fuj', onclick: () => askTeam('FUJIVA') }, svgI('M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z'), h('b', {}, 'แอร์ FUJIVA'), h('small', {}, 'แบรนด์ของบริษัท · ราคากำลังจะขึ้นเว็บ'), h('ol', {}, h('li', {}, 'สอบถามรุ่นและราคากับทีมขาย')), h('span', { class: 'sx-int-go' }, 'สอบถาม')));
+    cards.push(h('button', { type: 'button', class: 'sx-int sx-int-fuj', onclick: () => askTeam('FUJIVA') }, h('span', { class: 'sx-ico sx-ico-logo', 'aria-hidden': 'true' }, logoImg('fujiva', '')), h('b', {}, 'แอร์ FUJIVA'), h('small', {}, 'แบรนด์ของบริษัท · สอบถามรุ่นและราคากับทีมขาย'), h('ol', {}, h('li', {}, 'สอบถามรุ่นและราคากับทีมขาย')), h('span', { class: 'sx-int-go' }, 'สอบถาม')));
     startRoot.append(homeJ, h('div', { class: 'sx-ints' }, cards),
       h('ul', { class: 'sx-trust', 'aria-label': 'ทำไมเลือกเรา' }, [
         `ประสบการณ์ด้านแอร์ ${COMPANY.years}`, 'ทีมช่างของบริษัทเอง', 'ราคามาตรฐานจาก Pricebook แสดงก่อนเรียกช่าง', 'ใบกำกับภาษีเต็มรูป', 'รายงานหลังงานรายเครื่อง', 'วัสดุติดตั้งระบุยี่ห้อ'].map(t => h('li', {}, t))));
@@ -290,13 +303,27 @@ export function mountSite(cfg) {
     });
   }
 
+  /* ---- 8b · Rev.13: photo survey by LINE (fewer site visits) under the contact form ---- */
+  const qsec = $('#quote');
+  if (qsec && !qsec.querySelector('.sv2')) { const box = h('div', { class: 'sx-survey', id: 'photo-survey' }); qsec.append(box); mountRemoteSurvey(box); }
+  // Rev.15: request status by reference number — only when the team's sheet is connected (queue.js QUEUE_URL); never shown otherwise
+  if (qsec && QUEUE_URL && !qsec.querySelector('.sx-track')) {
+    const ref = h('input', { placeholder: 'เลขอ้างอิง เช่น Q1234567', 'aria-label': 'เลขอ้างอิง', autocomplete: 'off' }), tel = h('input', { placeholder: 'เบอร์โทร 4 ตัวท้าย', 'aria-label': 'เบอร์โทร 4 ตัวท้าย', inputmode: 'numeric', maxlength: 4 });
+    const out = h('p', { class: 's-note', 'aria-live': 'polite' });
+    const f = h('form', { class: 'sx-track' }, h('h3', {}, 'ตรวจสถานะคำขอ'), h('div', { class: 'sx-track-r' }, ref, tel, h('button', { class: 's-btn', type: 'submit' }, 'ตรวจสถานะ')), out);
+    f.addEventListener('submit', async e => { e.preventDefault(); out.textContent = 'กำลังตรวจ…'; const r = await fetchStatus(ref.value.trim(), tel.value.trim());
+      out.textContent = !r ? 'ตรวจไม่ได้ตอนนี้ โทรหรือแจ้งเลขอ้างอิงทาง LINE ได้' : r.ok ? `สถานะ: ${r.status}` : 'ไม่พบคำขอนี้ ตรวจเลขอ้างอิงและเบอร์ 4 ตัวท้ายอีกครั้ง'; });
+    qsec.append(f);
+  }
+
   /* ---- 9 · beta notice, feedback, footer, mobile bar ---- */
   const proto = $('aside.proto');
-  const fbBtn = () => h('button', { type: 'button', class: 'sx-fbb', onclick: openFeedback }, 'ให้ความเห็น');
+  const fbBtn = () => h('button', { type: 'button', class: 'sx-fbb', onclick: openFeedback }, 'ส่งความคิดเห็น');
   if (proto) {
     const hub = proto.querySelector('a');
     proto.innerHTML = ''; proto.classList.add('sx-beta');
-    proto.append(h('b', {}, `ทดลองใช้ (Beta) · แบบ ${variant}`), h('span', { class: 'sx-bt' }, canSend() ? ' · ราคาจาก Pricebook 2569 · คำขอส่งถึงทีมโดยตรง' : ' · ราคาจาก Pricebook 2569 · ช่วงทดลองระบบยังไม่ส่งคำขอถึงทีมอัตโนมัติ'), ' ', fbBtn());
+    // Rev.20 production wording: only which design this is + the A · B · C comparison (for the owner's review), no trial notice
+    proto.append(h('b', {}, `แบบเว็บไซต์ ${variant}`), h('span', { class: 'sx-bt' }, ' · ราคามาตรฐาน Pricebook 2569 ก่อน VAT'));
     if (hub) { hub.textContent = 'เทียบแบบ A · B · C'; proto.append(' ', hub); }
   }
   const foot = $('footer');
@@ -305,13 +332,13 @@ export function mountSite(cfg) {
     foot.append(h('div', { class: 'wrap sx-foot' },
       h('div', {}, h('b', { class: 'sx-fb-brand' }, logoImg('sbp', ''), COMPANY.brand), h('p', {}, COMPANY.th), h('p', {}, COMPANY.addr), COMPANY.hours ? h('p', {}, 'เวลาทำการ ', COMPANY.hours) : null, h('p', {}, 'โทร ', h('a', { href: COMPANY.telHref }, COMPANY.tel), ' · ', h('span', { class: 'sx-sel' }, COMPANY.email)), h('p', {}, 'LINE ', h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line), ' · เลขผู้เสียภาษี ', COMPANY.taxId)),
       h('div', {}, h('h4', {}, 'บริการและสินค้า'), h('ul', {}, live.filter(v => v !== 'home').map(v => h('li', {}, h('a', { href: '#' + v }, VIEWS[v].th))))),
-      h('div', {}, h('h4', {}, 'ช่วงทดลองใช้'), h('p', {}, 'เว็บไซต์เวอร์ชันทดลองสำหรับลูกค้ากลุ่มแรก ราคาตาม Pricebook 2569 ยืนยันอีกครั้งในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
-      h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))))));
+      h('div', {}, h('h4', {}, 'มาตรฐานบริการ'), h('ul', {}, h('li', {}, h('a', { href: '#standards' }, 'มาตรฐานงานล้างและติดตั้ง')), h('li', {}, h('a', { href: '#symptoms' }, 'เช็กอาการแอร์เสีย')), h('li', {}, h('a', { href: '#area' }, 'พื้นที่ให้บริการและค่าเดินทาง')), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))), h('p', {}, 'ราคามาตรฐานตาม Pricebook 2569 ก่อน VAT ยืนยันในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
+      h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: COMPANY.fbUrl, target: '_blank', rel: 'noopener' }, 'Facebook'))))));
   }
   // Rev.11: business facts for search engines (schema.org), built from COMPANY so the page and the data never disagree
   try {
     const ld = { '@context': 'https://schema.org', '@type': 'HVACBusiness', name: `${COMPANY.brand} · ${COMPANY.th}`, alternateName: [COMPANY.en, COMPANY.service],
-      description: 'ล้างแอร์ ติดตั้ง ซ่อม และจำหน่ายเครื่องปรับอากาศ โดยทีมช่างของบริษัท ราคามาตรฐานรวม VAT แสดงบนเว็บไซต์ · สัญญาล้างรายปีสำหรับองค์กร',
+      description: 'ล้างแอร์ ติดตั้ง ซ่อม และจำหน่ายเครื่องปรับอากาศ โดยทีมช่างของบริษัท ราคามาตรฐานก่อน VAT แสดงบนเว็บไซต์ · สัญญาล้างรายปีสำหรับองค์กร',
       url: location.origin + location.pathname, telephone: COMPANY.tel, email: COMPANY.email, taxID: COMPANY.taxId,
       address: { '@type': 'PostalAddress', streetAddress: '593 ถนนพระราม 2 แขวงบางมด', addressLocality: 'เขตจอมทอง', addressRegion: 'กรุงเทพมหานคร', postalCode: '10150', addressCountry: 'TH' },
       areaServed: ['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'สมุทรสาคร'].map(n => ({ '@type': 'AdministrativeArea', name: n })),
@@ -339,15 +366,15 @@ export function mountSite(cfg) {
       h('label', { class: 's-field' }, 'อะไรที่สับสน หรืออยากให้ปรับ', h('textarea', { name: 'sx-fix', rows: 3 })),
       h('label', { class: 's-field' }, 'ชื่อ / เบอร์ (ถ้าต้องการให้ทีมติดต่อกลับ)', h('input', { name: 'sx-who', autocomplete: 'name' })),
       h('div', { class: 'sx-dlg-a' }, h('button', { type: 'submit', class: 's-btn primary' }, canSend() ? 'ส่งความเห็น' : 'สร้างสรุปความเห็น'), h('button', { type: 'button', class: 's-btn ghost', onclick: close }, 'ปิด')));
-    const body = h('div', { class: 'sx-dlg-b' }, h('h2', { id: 'sx-fb-h' }, `ช่วยเราปรับเว็บไซต์ · แบบ ${variant}`), h('p', {}, 'ใช้เวลาไม่ถึง 1 นาที ความเห็นของคุณใช้ตัดสินใจเลือกแบบเว็บไซต์จริง'), f);
+    const body = h('div', { class: 'sx-dlg-b' }, h('h2', { id: 'sx-fb-h' }, 'ความคิดเห็นต่อเว็บไซต์'), h('p', {}, 'ใช้เวลาไม่ถึง 1 นาที ความเห็นของคุณใช้ตัดสินใจเลือกแบบเว็บไซต์จริง'), f);
     const dlg = h('div', { class: 'sx-dlg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'sx-fb-h' }, body);
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
     f.addEventListener('submit', e => {
       e.preventDefault(); const fd = new FormData(f), g = k => (fd.get(k) || '').toString().trim();
-      const text = [`ความเห็นทดลองใช้เว็บไซต์ SBP AirCare · แบบ ${variant}`, `ใช้งานง่าย: ${g('sx-ease') || '-'}`, `หาสิ่งที่ต้องการ: ${g('sx-find') || '-'}`, `ส่วนที่ชอบที่สุด: ${g('sx-best') || '-'}`, `ควรปรับ: ${g('sx-fix') || '-'}`, `หน้าที่เปิดดู: ${[...seen].map(v => VIEWS[v].th).join(', ')}`, g('sx-who') ? `ผู้ให้ความเห็น: ${g('sx-who')}` : null].filter(Boolean).join('\n');
+      const text = [`ความคิดเห็นต่อเว็บไซต์ SBP AirCare · แบบ ${variant}`, `ใช้งานง่าย: ${g('sx-ease') || '-'}`, `หาสิ่งที่ต้องการ: ${g('sx-find') || '-'}`, `ส่วนที่ชอบที่สุด: ${g('sx-best') || '-'}`, `ควรปรับ: ${g('sx-fix') || '-'}`, `หน้าที่เปิดดู: ${[...seen].map(v => VIEWS[v].th).join(', ')}`, g('sx-who') ? `ผู้ให้ความเห็น: ${g('sx-who')}` : null].filter(Boolean).join('\n');
       const box = h('div'), ref = 'F' + Date.now().toString().slice(-7);
       body.innerHTML = ''; body.append(h('h2', { id: 'sx-fb-h' }, 'ขอบคุณสำหรับความเห็น'), box, h('div', { class: 'sx-dlg-a' }, h('button', { type: 'button', class: 's-btn ghost', onclick: close }, 'ปิด')));
-      deliver(box, 'feedback', { ref, variant, text, title: 'ความเห็นของคุณ', subject: `ความเห็นทดลองใช้เว็บไซต์ แบบ ${variant}`,
+      deliver(box, 'feedback', { ref, variant, text, title: 'ความเห็นของคุณ', subject: `ความคิดเห็นต่อเว็บไซต์ แบบ ${variant}`,
         fields: { 'ใช้งานง่าย': g('sx-ease'), 'หาสิ่งที่ต้องการ': g('sx-find'), 'ส่วนที่ชอบที่สุด': g('sx-best'), 'ควรปรับ': g('sx-fix'), 'หน้าที่เปิดดู': [...seen].map(v => VIEWS[v].th).join(', '), 'ผู้ให้ความเห็น': g('sx-who') } });
     });
     document.body.append(dlg); addEventListener('keydown', esc);
@@ -355,5 +382,19 @@ export function mountSite(cfg) {
   }
 
   route(location.hash, true);
-  return { go, view: () => cur, startJourney, openFeedback };
+  // Rev.14: reading progress — a hairline along the bottom of the header (Stripe / Medium pattern)
+  const hdr = $('header.hdr');
+  if (hdr && !hdr.querySelector('.sx-prog')) {
+    const bar = h('div', { class: 'sx-prog', 'aria-hidden': 'true' }); hdr.append(bar); let q = 0;
+    const upd = () => { q = 0; const max = document.documentElement.scrollHeight - innerHeight; bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max).toFixed(4) : 0})`; };
+    addEventListener('scroll', () => { if (!q) q = requestAnimationFrame(upd); }, { passive: true }); addEventListener('resize', upd); upd();
+  }
+  // Rev.14: command palette (Ctrl / ⌘ K) over every page, section, model, FAQ and quick action
+  try { mountPalette({ variant, views, viewTh: Object.fromEntries(Object.entries(VIEWS).map(([k, v]) => [k, v.th])), secTh: { ...SEC_TH, ...labels, 'photo-survey': 'ส่งรูปหน้างานให้ทีมประเมิน' }, go, openCart, openProduct: cfg.openProduct, openFeedback }); } catch (e) { console.warn('palette unavailable', e); }
+  try { mountFx(variant); } catch (e) { /* decorative only */ }
+  // Rev.20 "ถามอาการแอร์" automatic assistant (rule based, in the page)
+  // ★Rev.22.1 travel figures written in the page markup come from TRAVEL (one place — the owner still has to confirm them)
+  $$('[data-travel]').forEach(el => { const v = TRAVEL[el.dataset.travel]; if (v != null) el.textContent = Number(v).toLocaleString('en-US'); });
+  let BOT = null; try { BOT = mountAcBot({ openCart, go }); } catch (e) { /* optional */ }
+  return { go, view: () => cur, startJourney, openFeedback, bot: BOT };
 }

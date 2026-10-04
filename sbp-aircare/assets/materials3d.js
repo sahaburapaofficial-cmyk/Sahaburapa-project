@@ -11,6 +11,7 @@
 // Brand names are printed as plain text (no logo artwork is reproduced). Official logo files supplied with the brand
 // owners' permission can be dropped in as globalThis.__SBP_LOGOS[key] (build.py inlines assets/logos/<key>.png) and
 // are then printed instead of the text. Display proportions are for explanation — not to scale between items.
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import * as THREE from './three.module.min.js';
 import { track as glTrack } from './gl-pool.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
@@ -24,15 +25,8 @@ const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const TAU = Math.PI * 2;
 
-export const MATS = [
-  { id: 'copper', brand: 'O-TWO', th: 'ท่อน้ำยาทองแดง หนา 0.70 มม.', spec: 'ท่อทองแดงความหนาผนัง 0.70 มม. ขนาดท่อตามรุ่นเครื่อง เช่น 1/4" + 3/8" ใช้ความหนาเดียวกันทุกงานบนเว็บ', why: 'ผนังท่อที่หนาพอทนแรงดันน้ำยา บานแฟลร์แล้วไม่ร้าว ดัดโค้งแล้วไม่ยุบ ลดความเสี่ยงรั่วในระยะยาว · ความหนาต้องไม่น้อยกว่าที่คู่มือผู้ผลิตของรุ่นนั้นกำหนด', cam: { y: 0.13, r: 1.0, ph: 1.28 } },
-  { id: 'insul', brand: 'Aeroflex', th: 'ฉนวนหุ้มท่อ Aeroflex', spec: 'ยาง EPDM เซลล์ปิด สีดำ หนา 3/8 นิ้ว หุ้มทั้งท่อเล็กและท่อใหญ่ตลอดแนว มีชื่อยี่ห้อพิมพ์บนผิวฉนวน', why: 'กันผิวท่อเย็นเกิดหยดน้ำ (คอนเดนส์) หยดใส่ฝ้าหรือผนัง และลดความเย็นที่สูญเสียระหว่างทาง', cam: { y: 0.08, r: 0.82, ph: 1.22 } },
-  { id: 'duct', brand: 'Airpro', th: 'รางครอบท่อ + ข้องอ ข้อต่อ', spec: 'รางสีขาว 75 / 100 มม. พร้อมข้องอ ข้อต่อตรง ฝาครอบผนัง ฝาปิดปลาย ยี่ห้อเดียวกันทั้งชุด ภายในเดินท่อน้ำยา ท่อน้ำทิ้ง และสายไฟเรียบร้อย', why: 'ท่อไม่โดนแดดฝนโดยตรง แนวท่อตรงเรียบร้อย สีขาวกลมกลืนกับผนัง หน้าบ้านดูสวยหลังติดตั้ง', cam: { y: 0.18, r: 1.08, ph: 1.32 } },
-  { id: 'cable', brand: 'Yazaki', th: 'สายไฟ THW', spec: 'สาย THW (60227 IEC 01) 3 เส้น ไฟ (น้ำตาล) นิวทรัล (ฟ้า) สายดิน (เขียวแถบเหลือง) ขนาดตามกระแสเครื่อง เช่น 1×2.5 ตร.มม.', why: 'สายได้มาตรฐานและขนาดพอกับกระแสเครื่อง ลดความร้อนสะสมที่สายและจุดต่อ มีสายดินแยกเพื่อความปลอดภัย', cam: { y: 0.1, r: 0.9, ph: 1.2 } },
-  { id: 'drain', brand: 'SCG', th: 'ท่อน้ำทิ้ง PVC สีฟ้า', spec: 'ท่อ PVC สีฟ้า 3/4 นิ้ว (หรือ 1 นิ้วตามเครื่อง) วางลาดลงตลอดแนว มีจุดยึดเป็นระยะ ปลายท่อลงท่อระบาย', why: 'ท่อแข็งแรงไม่ตกท้องช้าง น้ำไหลสะดวก ลดปัญหาน้ำย้อนกลับไปหยดจากตัวเครื่อง', cam: { y: 0.1, r: 0.92, ph: 1.24 } },
-  { id: 'mount', brand: '', th: 'ขาแขวนคอยล์ร้อน + ยางรองกันสั่น', spec: 'ขาแขวนเหล็กชุบกัลวาไนซ์รับน้ำหนักตามรุ่น ยางรองกันสั่นทุกจุดวางเครื่อง ยึดพุกตามชนิดผนัง', why: 'เครื่องได้ระดับ ระบายลมดี ลดเสียงและแรงสั่นที่ส่งเข้าผนังและห้องข้างเคียง', cam: { y: 0.21, r: 1.18, ph: 1.3 } },
-  { id: 'rcbo', brand: 'NANO', th: 'เบรกเกอร์กันดูด (RCBO)', spec: 'RCBO 1P ตัดไฟรั่ว 30 mA 6 kA ขนาด 20A หรือ 32A ตามกระแสเครื่อง แยกวงจรแอร์ (NANO หรือยี่ห้อที่อนุมัติตามใบเสนอราคา)', why: 'ตัดไฟเมื่อไฟเกิน ลัดวงจร หรือไฟรั่ว ช่วยป้องกันไฟดูดและไฟไหม้', cam: { y: 0.17, r: 0.98, ph: 1.34 } },
-];
+export { MATS } from './matdata.js';   // Rev.26: data moved so the spec cards load without three.js
+import { MATS } from './matdata.js';
 const RC = 1.18;                                   // platform radius where pedestals sit
 const PR = 0.27;                                   // pedestal radius
 const OVER = { t: [0, 0.0, 0.92], th: 0, ph: 1.18, r: 2.55 };
@@ -364,6 +358,6 @@ export function mountMaterials3D(root, cfg = {}) {
   paint();
   const onTour = id => { tour = id; if (!cur) paint(); };
   const boot = () => { try { V3 = createMaterials3D(stage, { theme: cfg.theme, onTour }); } catch (e) { console.warn('materials 3D unavailable', e); fb.hidden = false; } };
-  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); boot(); } }, { rootMargin: '400px 0px' }); io.observe(stage);
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); whenQuiet(boot); } }, { rootMargin: '400px 0px' }); io.observe(stage);
   return { focus: id => { cur = id; V3 && V3.setFocus(id); paint(); } };
 }
