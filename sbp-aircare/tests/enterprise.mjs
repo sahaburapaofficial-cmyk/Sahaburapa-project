@@ -38,5 +38,9 @@ const chain = E.SECTORS.find(s => s.id === 'chain'), cc = E.sampleContract(chain
 ok(cc.branches === 12 && cc.unitsAll === 72 && cc.perVisitC1 >= core.DATA.minBill, `chain: 6 × 12 branches = 72 units, each branch visit ≥ minimum (${cc.perVisitC1})`);
 const office = E.SECTORS.find(s => s.id === 'office');
 ok(E.sampleContract(office, { pkg: 'Corporate Control' }).annualEx > E.sampleContract(office).annualEx, 'switching package recalculates from the Pricebook');
+// Rev.26 annual plan: example months, deep clean first and before the hot season, evenly spread
+const AP = await import('../assets/annualplan.js');
+for (const n of [2, 3, 4]) { const M = AP.planMonths(n, true); ok(M.length === n && M[0].deep && M.filter(x => x.deep).length === 1 && M[0].m <= 1 && M.every((x, i) => !i || x.m > M[i - 1].m), `plan ${n}×: ${M.map(x => AP.MONTHS[x.m] + (x.deep ? '(C2)' : '')).join(' ')}`); }
+ok(!AP.planMonths(3, false).some(x => x.deep), 'no deep clean when unticked');
 console.log(fail ? `\n${fail} FAIL` : '\nALL PASS');
 process.exit(fail ? 1 : 0);

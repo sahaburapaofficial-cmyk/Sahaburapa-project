@@ -19,4 +19,9 @@ const V = A.visitRules(), txt = V.map(r => r.d).join(' ');
 ok(txt.includes(core.baht(core.DATA.minBill)) && txt.includes(core.baht(core.TRAVEL.baseFee)) && txt.includes(core.baht(core.QUEUE_RULES.rushFeeEx)), 'visit rules quote the published constants');
 ok(!/นอกเวลา[^·]*฿/.test(txt), 'out of hours: no amount (rule 22)');
 ok(!/ส่วนลด|ฟรี|แน่นอน|%/.test(JSON.stringify([A.GROUPS.map(g => g.slice(0, 3)), V])), 'no discount / promise words');
+// Rev.26 material spec cards: every material has an animated cut-away and site checks; no brand photo without permission
+const MC = await import('../assets/matcards.js'), MD = await import('../assets/matdata.js');
+ok(MD.MATS.every(m => (MC.CHECK[m.id] || []).length >= 3), 'every material: ≥3 checks the customer can do on site');
+ok(Object.keys(MC.MAT_PHOTOS).length === 0, 'no product photos until the brand owner allows them (rule 14)');
+ok(!/ฟรี|แน่นอน|ส่วนลด/.test(JSON.stringify(MC.CHECK)), 'checks: no promise words');
 console.log(fail ? `\n${fail} FAIL` : '\nALL PASS'); process.exit(fail ? 1 : 0);

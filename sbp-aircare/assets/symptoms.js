@@ -6,6 +6,7 @@
 import { h } from './sbp-core.js';
 import { SYMPTOMS, symptom, matchSymptoms } from './acdiag.js';
 import { triageCard, bookDiag } from './acbot.js';
+import { symAnim } from './animicons.js';   // Rev.26 animated illustration per symptom
 
 export function mountSymptomGuide(root, { openCart, start = 'warm' } = {}) {
   if (!root) return null;
@@ -14,7 +15,7 @@ export function mountSymptomGuide(root, { openCart, start = 'warm' } = {}) {
   const main = h('div', { class: 'sg-main', 'aria-live': 'polite' });
   const items = new Map();
   const list = h('div', { class: 'sg-list', role: 'group', 'aria-label': 'เลือกอาการ' }, SYMPTOMS.map(s => {
-    const b = h('button', { type: 'button', class: 'sg-it', 'aria-pressed': 'false', 'data-sym': s.id, onclick: () => pick(s.id, true) }, s.short);
+    const b = h('button', { type: 'button', class: 'sg-it', 'aria-pressed': 'false', 'data-sym': s.id, onclick: () => pick(s.id, true) }, symAnim(s.id, 'mini'), h('span', {}, s.short));
     items.set(s.id, b); return b;
   }));
   const hint = h('p', { class: 'sg-hint', 'aria-live': 'polite' });
@@ -33,7 +34,7 @@ export function mountSymptomGuide(root, { openCart, start = 'warm' } = {}) {
   function pick(id, focus) {
     const s = symptom(id); if (!s || cur === id) return;
     cur = id; items.forEach((b, k) => b.setAttribute('aria-pressed', String(k === id)));
-    main.innerHTML = ''; main.append(triageCard(s, act, { wide: true }));
+    main.innerHTML = ''; main.append(...[symAnim(id, 'big')].filter(Boolean), triageCard(s, act, { wide: true }));
     if (focus && matchMedia('(max-width: 900px)').matches) main.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
   root.append(h('div', { class: 'sg' }, side, main));

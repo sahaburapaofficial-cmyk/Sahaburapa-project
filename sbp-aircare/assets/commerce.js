@@ -1,6 +1,7 @@
 // SBP AirCare — commerce layer shared by all three prototypes:
 // product detail with install package + add-ons, full service price centre, quote basket, zone/travel fee.
 // Markup uses the "s-" classes styled in assets/shared.css through each variant's alias tokens.
+import { mountMatCards } from './matcards.js';
 import {
   DATA, DEMO, cleanRate, TYPES, TYPE_BY_ID, BRAND_BY_ID, CLEAN_PKGS, VAT, incVat, timeTh, TIME_NOTE, baht, btuFmt, installOptions, addonsFor,
   checkZone, TIER_TH, TRAVEL, h, $, $$, stockTh, jobTravel, travelNote, zoneOf, addrTh, SIZE_BANDS, isVRF, VRF_NOTE, COMPANY,
@@ -461,6 +462,7 @@ export function mountMaterials(root, cfg = {}) {
   let type = 'wall', btu = 12000;
   const show = h('div', { class: 'mt3-root' }); root.append(show);
   import('./materials3d.js').then(m => m.mountMaterials3D(show, { theme: cfg.theme })).catch(e => console.warn('materials showcase', e));
+  mountMatCards(root);   // Rev.26 brand spec cards + animated cut-aways
   const sizes = { wall: [12000, 18000, 24000, 30000], ceiling: [24000, 36000, 48000, 60000], cassette: [24000, 36000, 48000, 60000], floor: [36000, 48000, 60000] };
   const bar = h('div', { class: 's-seg', role: 'group', 'aria-label': 'ประเภทเครื่อง' });
   const sz = h('div', { class: 's-seg', role: 'group', 'aria-label': 'ขนาด' });

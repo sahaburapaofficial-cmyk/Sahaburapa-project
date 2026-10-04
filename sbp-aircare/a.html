@@ -714,6 +714,7 @@ import { mountAreaMap } from './assets/areamap3d.js';
 import { mountStandards } from './assets/standards.js';
 import { mountSymptomGuide } from './assets/symptoms.js';
 import { mountEnterprise } from './assets/enterprise.js';
+import { mountAnnualPlan } from './assets/annualplan.js';
 import { mountAllServices } from './assets/allservices.js';
 import { mountTradeIn } from './assets/tradein.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
@@ -753,6 +754,7 @@ TYPES.forEach(t => $('#ucards').append(h('div', { class: 'ucard' },
   h('div', { class: 'stp' }, h('button', { type: 'button', 'data-b-step': `${t.id}:-1`, 'aria-label': `ลด ${t.th}` }, '−'), h('input', { type: 'number', min: '0', id: `va-u-${t.id}`, 'data-b-unit': t.id, 'aria-label': `จำนวน ${t.th}`, inputmode: 'numeric' }), h('button', { type: 'button', 'data-b-step': `${t.id}:1`, 'aria-label': `เพิ่ม ${t.th}` }, '+')),
   h('div', { class: 'bar' }, h('i', { 'data-b-bar': t.id })))));
 const BLD = mountBuilder($('[data-builder]'));
+mountAnnualPlan($('[data-builder]'), { builder: BLD });
 mountEnterprise($('#entRoot'), { openCart: CART.open, builder: BLD });   // Rev.22 enterprise: sector pain points + sample annual contracts
 const PC = mountPriceCenter($('#priceCenter'));
 mountAllServices($('#allSvc'), { prices: PC });

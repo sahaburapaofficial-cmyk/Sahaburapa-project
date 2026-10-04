@@ -168,6 +168,7 @@ export function mountBuilder(root, cfg = {}) {
       h('tbody', {}, e.lines.map(l => h('tr', {}, h('td', {}, `${TYPE_BY_ID[l.type].th} ${l.range || ''}`), h('td', {}, String(l.n)), h('td', {}, baht(l.c1)), h('td', {}, baht(l.c2)))))),
       h('p', { class: 's-note' }, `ราคาก่อน VAT ตาม Pricebook (ปัดขึ้นเป็นหลักร้อย) · ${pkg}`));
     cfg.onChange && cfg.onChange(e, { units: { ...units }, visits, zone, high });
+    root.dispatchEvent(new CustomEvent('sbp:builder', { detail: { e, state: { units: { ...units }, visits, zone, high, pkg, size, deep } } }));   // Rev.26 annual plan (annualplan.js)
   }
   $$('[data-b-unit]', root).forEach(inp => inp.addEventListener('input', () => { units[inp.dataset.bUnit] = Math.max(0, Math.min(999, parseInt(inp.value || '0', 10) || 0)); markPreset(null); calc(); }));
   $$('[data-b-step]', root).forEach(b => b.addEventListener('click', () => {
