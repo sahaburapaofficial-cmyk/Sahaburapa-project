@@ -47,7 +47,7 @@ export function mountAnnualPlan(builderRoot, { builder } = {}) {
     const vis = V.map((v, i) => ({ ...v, i, ex: v.deep ? e.perVisitC2 : e.perVisitC1 }));
     let acc = 0; vis.forEach(v => { acc += v.ex; v.acc = acc; });
     S = { e, st, vis, units: shown, total: acc, pkg: st.pkg || 'Standard Care' };
-    drawTimeline(); drawList(); frame(RM ? vis[0].m + 0.95 : t); loop();
+    drawTimeline(); drawList(); B = null; frame(RM ? vis[0].m + 0.95 : t); loop();
   }
   const X = m => 40 + m / 12 * 1120;
   function drawTimeline() {
@@ -77,36 +77,48 @@ export function mountAnnualPlan(builderRoot, { builder } = {}) {
     const done = cur ? Math.floor((tm - cur.m) * 1.15 * n) : -1;
     return { cur, dirt: i => cur ? (i < done ? 0 : Math.min(1, (12 / vis.length) / (gap * 1.2))) : base, done: Math.max(0, Math.min(n, done)) };
   }
-  function drawBuilding(st) {
+  // Rev.26.1 smooth: the building and the info panel are built once per setup; frames only patch fills / text that changed
+  let B = null, txtKey = '', lastCur = -2;
+  const col = d => { const a = [90, 200, 250], b = [176, 138, 90]; return `rgb(${a.map((x, k) => Math.round(x + (b[k] - x) * d)).join(',')})`; };
+  function buildBuilding() {
     const n = S.units.length, per = Math.min(10, Math.max(4, Math.ceil(Math.sqrt(n * 1.6)))), floors = Math.ceil(n / per);
-    const W = 260, fh = Math.min(34, 190 / Math.max(1, floors)), top = 220 - floors * fh;
-    const col = d => { const a = [90, 200, 250], b = [176, 138, 90]; return `rgb(${a.map((x, k) => Math.round(x + (b[k] - x) * d)).join(',')})`; };
+    const W = 260, fh = Math.min(34, 190 / Math.max(1, floors)), top = 220 - floors * fh, pos = [];
     let g = `<polygon class="yp-roof" points="20,${top} ${20 + W},${top} ${44 + W},${top - 16} 44,${top - 16}"/><polygon class="yp-side" points="${20 + W},${top} ${44 + W},${top - 16} ${44 + W},${204} ${20 + W},220"/>`;
     for (let f = 0; f < floors; f++) {
       const y = top + f * fh; g += `<rect class="yp-fl" x="20" y="${y}" width="${W}" height="${fh}"/>`;
       for (let j = 0; j < per; j++) { const i = f * per + j; if (i >= n) break;
-        const x = 30 + j * (W - 20) / per, d = st.dirt(i), active = st.cur && i === st.done;
-        g += `<rect x="${x}" y="${y + fh * 0.3}" width="${(W - 20) / per - 6}" height="${fh * 0.4}" rx="2" fill="${col(d)}" stroke="${TYPE_C[S.units[i]]}" stroke-width="1.6"/>${active ? `<circle class="yp-crew" cx="${x + 6}" cy="${y + fh * 0.5}" r="${Math.max(3, fh * 0.2)}"/>` : ''}`; }
+        const x = 30 + j * (W - 20) / per; pos.push([x + 6, y + fh * 0.5]);
+        g += `<rect class="yp-u" x="${x}" y="${y + fh * 0.3}" width="${(W - 20) / per - 6}" height="${fh * 0.4}" rx="2" stroke="${TYPE_C[S.units[i]]}" stroke-width="1.6"/>`; }
     }
-    svgB.innerHTML = `<svg viewBox="0 0 320 236">${g}<rect class="yp-gr" x="0" y="220" width="320" height="16"/></svg>`;
-  }
-  function frame(tm) {
-    if (!S) return;
-    const st = state(tm), ph = svgT.querySelector('.yp-ph'), x = X(tm);
-    if (ph) { ph.setAttribute('x1', x); ph.setAttribute('x2', x); }
-    svgT.querySelectorAll('.yp-v').forEach(g => g.classList.toggle('on', st.cur && +g.dataset.i === st.cur.i));
-    list.querySelectorAll('li').forEach(li => li.classList.toggle('on', st.cur && +li.dataset.i === st.cur.i));
-    drawBuilding(st);
-    const spent = S.vis.filter(v => v.m + 1 <= tm || (st.cur && v.i === st.cur.i)).reduce((a, v) => a + v.ex, 0);
-    const txt = st.cur ? `${MONTHS[st.cur.m]} · รอบ ${st.cur.i + 1} ${st.cur.deep ? 'ล้างใหญ่ C2' : 'ล้างปกติ C1'} · ล้างแล้ว ${Math.round(st.done / S.units.length * S.e.count)} / ${S.e.count} เครื่อง` : `${MONTHS[Math.floor(tm) % 12]} · ใช้งานตามปกติ ฝุ่นค่อย ๆ สะสมจนถึงรอบถัดไป`;
-    now.replaceChildren(h('b', {}, txt), h('dl', {},
-      h('dt', {}, 'งบสะสมถึงเดือนนี้'), h('dd', {}, `${baht(spent)} / ${baht(S.total)}`),
+    svgB.innerHTML = `<svg viewBox="0 0 320 236">${g}<circle class="yp-crew" r="${Math.max(3, fh * 0.2)}" cx="-20" cy="-20"/><rect class="yp-gr" x="0" y="220" width="320" height="16"/></svg>`;
+    B = { u: [...svgB.querySelectorAll('.yp-u')], crew: svgB.querySelector('.yp-crew'), pos, fills: [] };
+    const tl = { ph: svgT.querySelector('.yp-ph'), v: [...svgT.querySelectorAll('.yp-v')], li: [...list.querySelectorAll('li')] };
+    B.tl = tl;
+    const dd = () => h('dd', {});
+    B.head = h('b', {}); B.spent = dd();
+    now.replaceChildren(B.head, h('dl', {},
+      h('dt', {}, 'งบสะสมถึงเดือนนี้'), B.spent,
       h('dt', {}, 'รอบต่อปี'), h('dd', {}, `${S.vis.length} รอบ · ${S.e.teamDaysPerVisit} ทีม-วัน ต่อรอบ`),
       h('dt', {}, 'เอกสารหลังทุกรอบ'), h('dd', {}, `${reportOf(S.pkg)} · ${S.e.count * S.vis.length} รายการต่อปี`),
       h('dt', {}, 'จ่ายตามรอบ'), h('dd', {}, 'วางบิลหลังจบแต่ละรอบ ไม่ต้องจ่ายทั้งปีล่วงหน้า')),
       h('small', {}, 'ภาพเคลื่อนไหวเพื่ออธิบายแผน · ฝุ่นในภาพเป็นภาพประกอบ ไม่ใช่ค่าที่วัด · ราคามาตรฐานก่อน VAT ตาม Pricebook'));
-    if (ring) ring.style.setProperty('--p', (tm / 12 * 100).toFixed(1));
-    if (ring) ring.dataset.m = MONTHS[Math.floor(tm) % 12];
+    txtKey = ''; lastCur = -2;
+  }
+  function frame(tm) {
+    if (!S) return;
+    if (!B) buildBuilding();
+    const st = state(tm), x = X(tm);
+    if (B.tl.ph) { B.tl.ph.setAttribute('x1', x); B.tl.ph.setAttribute('x2', x); }
+    const ci = st.cur ? st.cur.i : -1;
+    if (ci !== lastCur) { lastCur = ci; B.tl.v.forEach(g => g.classList.toggle('on', +g.dataset.i === ci)); B.tl.li.forEach(li => li.classList.toggle('on', +li.dataset.i === ci)); }
+    B.u.forEach((r, i) => { const f = col(Math.round(st.dirt(i) * 20) / 20); if (B.fills[i] !== f) { B.fills[i] = f; r.setAttribute('fill', f); } });
+    const p = st.cur && B.pos[Math.min(st.done, B.pos.length - 1)];
+    B.crew.setAttribute('cx', p ? p[0] : -20); B.crew.setAttribute('cy', p ? p[1] : -20);
+    const spent = S.vis.filter(v => v.m + 1 <= tm || (st.cur && v.i === st.cur.i)).reduce((a, v) => a + v.ex, 0);
+    const txt = st.cur ? `${MONTHS[st.cur.m]} · รอบ ${st.cur.i + 1} ${st.cur.deep ? 'ล้างใหญ่ C2' : 'ล้างปกติ C1'} · ล้างแล้ว ${Math.round(st.done / S.units.length * S.e.count)} / ${S.e.count} เครื่อง` : `${MONTHS[Math.floor(tm) % 12]} · ใช้งานตามปกติ ฝุ่นค่อย ๆ สะสมจนถึงรอบถัดไป`;
+    const key = txt + spent;
+    if (key !== txtKey) { txtKey = key; B.head.textContent = txt; B.spent.textContent = `${baht(spent)} / ${baht(S.total)}`; }
+    if (ring) { ring.style.setProperty('--p', (tm / 12 * 100).toFixed(1)); const m = MONTHS[Math.floor(tm) % 12]; if (ring.dataset.m !== m) ring.dataset.m = m; }
   }
   function loop() {
     cancelAnimationFrame(raf);

@@ -6,6 +6,7 @@
 // Rev.09 round 3 — room planner ("จัดห้องเองเหมือนเกม Sims แต่สมจริง"): furnished presets, a furniture catalogue, drag /
 // rotate / delete in the 3D view (or from the list, keyboard-accessible), drag the AC along its wall; the cold air flows
 // around the furniture and the checks add air-path, comfort and window/door clashes (roomplan.js).
+import { quiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DEMO, BRAND_BY_ID, TYPE_BY_ID, baht, btuFmt, incVat, recommendBtu, installOptions, addonsFor, h, $$ } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { productVisual, photosFor } from './product-media.js';
@@ -354,7 +355,7 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     actions: { rotate: id => rotateFurn(id), remove: id => removeFurn(id), nextWall: id => nextWall(id) },
   };
   const io = new IntersectionObserver(async es => {
-    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect();
+    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect(); await quiet();
     try { const mod = await import('./roomfit3d.js'); V3 = mod.createRoomFit3D(host, { theme, ...on3D }); V3.set(S, fitCheck(S)); if (S.pick) V3.select(S.pick); }
     catch (e) { console.warn('room-fit 3D unavailable', e); fb.hidden = false; host.hidden = true; }
   }, { rootMargin: '300px 0px' });

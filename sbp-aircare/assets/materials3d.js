@@ -11,6 +11,7 @@
 // Brand names are printed as plain text (no logo artwork is reproduced). Official logo files supplied with the brand
 // owners' permission can be dropped in as globalThis.__SBP_LOGOS[key] (build.py inlines assets/logos/<key>.png) and
 // are then printed instead of the text. Display proportions are for explanation — not to scale between items.
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import * as THREE from './three.module.min.js';
 import { track as glTrack } from './gl-pool.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
@@ -357,6 +358,6 @@ export function mountMaterials3D(root, cfg = {}) {
   paint();
   const onTour = id => { tour = id; if (!cur) paint(); };
   const boot = () => { try { V3 = createMaterials3D(stage, { theme: cfg.theme, onTour }); } catch (e) { console.warn('materials 3D unavailable', e); fb.hidden = false; } };
-  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); boot(); } }, { rootMargin: '400px 0px' }); io.observe(stage);
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); whenQuiet(boot); } }, { rootMargin: '400px 0px' }); io.observe(stage);
   return { focus: id => { cur = id; V3 && V3.setFocus(id); paint(); } };
 }

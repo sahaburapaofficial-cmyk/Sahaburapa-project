@@ -10,6 +10,7 @@
 //   ตรวจเช็ก / ซ่อม            — symptom intake → safety → run + error code → filters / coil / drain → ΔT → current / voltage
 //                              → outdoor unit → refrigerant check (A4, when needed) → itemised quote → repair after approval
 // Values shown on the meters are EXAMPLES of what gets recorded, not pass/fail limits (there is no single ΔT for all brands).
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import * as THREE from './three.module.min.js';
 import { createStage, buildHome, createLabels, createPathFlow, V, clamp, ease, RM } from './install3d.js';
 import { buildTools, createTech } from './tech3d.js';
@@ -379,8 +380,8 @@ export function mountTechStory(root, cfg = {}) {
     tierSeg.hidden = mode !== 'install'; tierSeg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.textContent === (tier === 'STANDARD' ? 'มาตรฐาน' : 'พรีเมียม')));
     paint();
   }
-  const io = new IntersectionObserver(es => { if (!es.some(e => e.isIntersecting)) return; io.disconnect();
-    try { S3 = createTechStory3D(stage, { theme: cfg.theme, onStep: i => { step = i; paint(); } }); if (mode !== 'C1') S3.setStory(mode, tier); } catch (e) { console.warn('story 3D unavailable', e); fb.hidden = false; } }, { rootMargin: '400px 0px' });
+  const io = new IntersectionObserver(es => { if (!es.some(e => e.isIntersecting)) return; io.disconnect(); whenQuiet(() => {
+    try { S3 = createTechStory3D(stage, { theme: cfg.theme, onStep: i => { step = i; paint(); } }); if (mode !== 'C1') S3.setStory(mode, tier); } catch (e) { console.warn('story 3D unavailable', e); fb.hidden = false; } }); }, { rootMargin: '400px 0px' });
   io.observe(stage);
   render();
   return { setFinish() {}, _s3: () => S3 };

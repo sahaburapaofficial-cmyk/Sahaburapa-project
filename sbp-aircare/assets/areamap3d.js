@@ -42,11 +42,17 @@ function districtPoints() {
 export async function mountAreaMap(host, cfg = {}) {
   if (!host) return { highlight() {}, setView() {} };
   const hold = h('div', { class: 'am-stage am-wait', 'aria-hidden': 'true' });
-  host.classList.add('am', 'am-' + (cfg.theme || 'light'), cfg.compact ? 'am-compact' : 'am-full'); host.append(hold);
-  return deferred(host, () => { hold.remove(); return boot(host, cfg); });
+  host.classList.add('am', 'am-' + (cfg.theme || 'light'), cfg.compact ? 'am-compact' : 'am-full'); host.append(hold, legendEl());
+  // Rev.26.1 smooth: the placeholder keeps its place (same box as the stage, legend already there) until the stage replaces it —
+  // before, it was removed first and the whole page below jumped up and back while the map loaded
+  return deferred(host, () => boot(host, cfg, hold));
 }
 
-async function boot(host, cfg) {
+const legendEl = () => h('div', { class: 'am-legend' },
+  h('span', {}, h('i', { class: 'core' }), `พื้นที่หลัก กรุงเทพฯ ≤ ${TRAVEL.freeKm} กม.`),
+  h('span', {}, h('i', { class: 'ext' }), 'ใกล้เคียง · คิดค่าเดินทางตามระยะ'),
+  h('span', {}, h('i', { class: 'hq' }), 'สำนักงานใหญ่ พระราม 2'));
+async function boot(host, cfg, hold) {
   const theme = cfg.theme || 'light', C = PAL[theme] || PAL.light, compact = !!cfg.compact;
   const geo = await loadGeo(); const raw = geo.prov || geo;
   const inBox = p => p.p.some(rings => rings.some(r => { for (let i = 0; i < r.length; i += 2) if (r[i] > BOX.lon[0] && r[i] < BOX.lon[1] && r[i + 1] > BOX.lat[0] && r[i + 1] < BOX.lat[1]) return true; return false; }));
@@ -65,11 +71,8 @@ async function boot(host, cfg) {
     h('button', { type: 'button', 'data-v': 'city', 'aria-pressed': 'true' }, 'พื้นที่หลัก'),
     h('button', { type: 'button', 'data-v': 'region', 'aria-pressed': 'false' }, `รอบนอก ${TRAVEL.maxKm} กม.`));
   if (views) stage.append(views);
-  const legend = h('div', { class: 'am-legend' },
-    h('span', {}, h('i', { class: 'core' }), `พื้นที่หลัก กรุงเทพฯ ≤ ${TRAVEL.freeKm} กม.`),
-    h('span', {}, h('i', { class: 'ext' }), 'ใกล้เคียง · คิดค่าเดินทางตามระยะ'),
-    h('span', {}, h('i', { class: 'hq' }), 'สำนักงานใหญ่ พระราม 2'));
-  host.append(stage, legend);
+  if (hold && hold.parentNode) hold.replaceWith(stage); else host.prepend(stage);
+  if (!host.querySelector('.am-legend')) host.append(legendEl());
   if (!compact) host.append(h('p', { class: 's-note am-note' }, `แบบจำลองเพื่ออธิบาย · วงรอบ = ระยะถนนโดยประมาณจากสำนักงานใหญ่ · จุด = ที่ว่าการเขต/อำเภอ · เส้นเคลื่อนไหว = ทีมช่างออกงาน (ภาพประกอบ ไม่ใช่ตำแหน่งจริง) · ค่าเดินทางจริงคิดจากแขวง/ตำบลของหน้างาน`));
 
   let renderer;

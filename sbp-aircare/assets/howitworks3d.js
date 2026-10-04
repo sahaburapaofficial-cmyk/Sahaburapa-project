@@ -4,6 +4,7 @@
 // fans spin, flaps/vanes swing, float switch bobs; air (warm → cold at the coil), condensate, drain and refrigerant flow as particles.
 // Callouts sit in two columns at the sides with leader lines (they never overlap); on phones they collapse to numbered dots + legend.
 // Principle illustration built from manufacturer documentation — proportions are indicative, not any specific model.
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { mountThrowSim } from './throwsim3d.js';
 import * as THREE from './three.module.min.js';
 import { track as glTrack } from './gl-pool.js';
@@ -486,7 +487,7 @@ export function mountHowItWorks(root, cfg = {}) {
   render();
   TS = mountThrowSim(tw, { theme: cfg.theme, type, style: cfg.throwStyle, fallback: () => { const d = h('div'); d.innerHTML = throwSvg(type); return d; } });
   const boot = () => { try { V3 = createHowItWorks3D(stage, { theme: cfg.theme, onFrame: layout }); V3.setType(type); if (step >= 0) V3.focus(step); } catch (e) { console.warn('how-it-works 3D unavailable', e); fb.hidden = false; } };
-  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); boot(); } }, { rootMargin: '500px 0px' }); io.observe(stage);
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); whenQuiet(boot); } }, { rootMargin: '500px 0px' }); io.observe(stage);
   const K = { grille: 'intake', front: 'intake', intake: 'intake', filter: 'filter', coil: 'coil', fan: 'fan', blower: 'fan', motor: 'fan', pan: 'water', pump: 'water', drain: 'water', louver: 'throw', outdoor: 'outdoor' };
   return {
     setType(t) { if (t === type || !TYPES[t]) return; type = t; step = -1; if (playing) toggle(); V3 && V3.setType(t); render(); },

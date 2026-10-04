@@ -5,6 +5,7 @@
 // the two levels side by side with the standard price from the Pricebook, a step player over the 3D job scene
 // (jobscene3d.js, lazy: two technicians + the customer on a real site per unit type) and a parts tray / install checklist.
 // Who does what in each step (lead / assistant) is written out too, so the teamwork reads without the 3D view.
+import { quiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DATA, SIZE_BANDS, cleanRate, installOptions, incVat, baht, h, $$ } from './sbp-core.js';
 import { cleanSteps, installSteps, CLEAN_HOW, INSTALL_HOW, PH, PHC, OU_HIGH } from './services.js';
 import { METHOD_INFO, cart } from './commerce.js';
@@ -421,7 +422,7 @@ export function mountJobGuide(root, { theme = 'light', start = 'C1', type = 'wal
   /* ----- lazy 3D ----- */
   let booting = false;
   const io = new IntersectionObserver(async es => {
-    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect();
+    if (!es.some(e => e.isIntersecting) || booting) return; booting = true; io.disconnect(); await quiet();
     try { const mod = await import('./jobscene3d.js'); V3 = mod.createJobScene(host, { theme, type: st.type, job: st.job, onFrame }); v3Type = st.type; v3Job = st.job; V3.show(clone(TL[st.i].state), { jump: true }); lastI = st.i; renderTags(); }
     catch (e) { console.warn('job scene 3D unavailable', e); fb.hidden = false; host.hidden = true; }
   }, { rootMargin: '300px 0px' });

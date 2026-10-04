@@ -10,7 +10,7 @@
 // captioned "ภาพประกอบ" so a render is never mistaken for the real product.
 import { h, TYPE_BY_ID, BRAND_BY_ID } from './sbp-core.js';
 import { typeArt } from './proto-ui.js';
-import { whenNear } from './lazy.js';
+import { whenNear, quiet } from './lazy.js';
 
 let MEDIA = { models: {}, series: {}, brands: {} };
 let BASE = './assets/products/';
@@ -52,10 +52,13 @@ function studio() {
     const { buildCeilingUnit, buildCassetteUnit, buildFloorUnit } = await import('./units3d.js');
     const { RoomEnvironment } = await import('./RoomEnvironment.js');
     let r;
-    const W = 1080, H = 720;   // Rev.13: 1.5× the old size — crisp on retina cards and in the product drawer
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const cv = document.createElement('canvas');
     r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
-    r.setPixelRatio(1); r.setSize(W, H, false);
+    // Rev.13: 1080×720 — crisp on retina cards and in the product drawer · Rev.26.1: a device without a real GPU (software GL) renders
+    // 720×480 with a 1024 shadow map — 2.25× fewer pixels, so reading the shot back does not stall the page
+    let soft = false; try { const g = r.getContext(), d = g.getExtension('WEBGL_debug_renderer_info'); soft = /swiftshader|llvmpipe|software|basic render/i.test(d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : ''); } catch (_) {}
+    const W = soft ? 720 : 1080, H = soft ? 480 : 720; cv.width = W; cv.height = H;
+    r.setPixelRatio(1); r.setSize(W, H, false); r.debug.checkShaderErrors = false;   // Rev.26.1: no synchronous shader-log reads
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.0;
     r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene = new THREE.Scene();
@@ -63,7 +66,7 @@ function studio() {
     // Rev.13 product-photo lighting: warm key (soft shadow), cool fill from the left, and a rim light from behind-above that
     // draws a bright edge along the white body so it separates from the light backdrop
     scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe6ee, 0.4));
-    const key = new THREE.DirectionalLight(0xfff6ec, 1.45); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 9; key.shadow.bias = -0.0004;
+    const key = new THREE.DirectionalLight(0xfff6ec, 1.45); key.castShadow = true; key.shadow.mapSize.set(soft ? 1024 : 2048, soft ? 1024 : 2048); key.shadow.radius = 9; key.shadow.bias = -0.0004;
     const fill = new THREE.DirectionalLight(0xe6efff, 0.38), rim = new THREE.DirectionalLight(0xeaf2ff, 1.15);
     scene.add(key, key.target, fill, fill.target, rim, rim.target);
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.22 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
@@ -83,11 +86,16 @@ function studio() {
       fill.position.set(c.x - 3, c.y + 1, c.z + 2); fill.target.position.copy(c); rim.position.set(c.x - 1.5, c.y + 2.6, c.z - 3.2); rim.target.position.copy(c);
       const sc = key.shadow.camera; sc.left = sc.bottom = -rad * 1.6; sc.right = sc.top = rad * 1.6; sc.near = 0.1; sc.far = 12; sc.updateProjectionMatrix();
       r.render(scene, cam);
-      let out = null; try { out = cv.toDataURL('image/webp', 0.9); if (!/^data:image\/webp/.test(out)) out = cv.toDataURL('image/png'); } catch (e) {}
-      // Rev.14: a render that came out (almost) empty — software / broken GL draws only the shadow — is not a shot: keep the line art
-      if (out && out.length < 12000) out = null;   // Rev.26: real shots of a flat white body compress to ~20 KB; an empty shadow-only frame is far smaller
       scene.remove(g); g.traverse(o => { if (o.isMesh) { o.geometry.dispose(); } });
-      return out;
+      // Rev.26.1 smooth: encode off the main thread (toBlob is async; toDataURL blocked the page 1–3 s per shot on slower devices)
+      return new Promise(res => {
+        const done = blob => {
+          // Rev.14: a render that came out (almost) empty — software / broken GL draws only the shadow — is not a shot: keep the line art
+          if (!blob || blob.size < (soft ? 4400 : 8800)) return res(null);   // Rev.26: real shots of a flat white body compress to ~15 KB; an empty frame is far smaller
+          const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(blob);
+        };
+        try { cv.toBlob(bl => (bl && bl.type === 'image/webp') ? done(bl) : cv.toBlob(done, 'image/png'), 'image/webp', 0.9); } catch (e) { res(null); }
+      });
     };
     const outdoor = (g, x, z, s = 0.62, logo = false) => { const O = buildOutdoor(M, { logo }); O.root.scale.setScalar(s); O.root.position.set(x, 0.55 * s / 2, z); O.root.rotation.y = -0.18; g.add(O.root); };
     const BUILD = {
@@ -108,10 +116,10 @@ export function productShot(key) {
     if (SHOTS[key]) return SHOTS[key];
     clearTimeout(idle);
     const st = await studio(); if (!st) return null;
-    await new Promise(res => requestAnimationFrame(() => setTimeout(res, 0)));   // let the page breathe between shots
-    try { SHOTS[key] = st.render(key); } catch (e) { SHOTS[key] = null; }
+    await quiet();   // Rev.26.1: render between scrolls, when the browser is idle (was: next frame)
+    try { SHOTS[key] = await st.render(key); } catch (e) { SHOTS[key] = null; }
     if (SHOTS[key]) saveShots();
-    idle = setTimeout(() => { const p = studioP; studioP = null; p && p.then(s => s && s.dispose()); }, 1500);   // free the GL context
+    idle = setTimeout(() => { const p = studioP; studioP = null; p && p.then(s => s && s.dispose()); }, 5000);   // free the GL context (Rev.26.1: 5 s — cards scrolling into view in bursts reuse it)
     return SHOTS[key];
   });
   queue = job.catch(() => null);
@@ -138,7 +146,14 @@ export function productVisual(m, sku, { size = 'card', tag = null } = {}) {
     const holder = h('div', { class: 's-ph-art', html: typeArt(m.type) });
     fig.append(holder, h('figcaption', {}, 'ภาพประกอบ'));
     const key = m.brand === 'fujiva' && m.type === 'wall' ? 'wall:fujiva' : m.type;
-    const swap = src => { if (src && holder.isConnected !== false) holder.replaceWith(h('img', { src, alt: `ภาพประกอบ ${t ? t.th : ''}`, decoding: 'async' })); };
+    // Rev.26.1 smooth: decode first, then swap — a data-URL image is 0 px tall until decoded, which made the page jump; width/height
+    // give the 3:2 box up front
+    const swap = src => {
+      if (!src) return;
+      const img = h('img', { src, alt: `ภาพประกอบ ${t ? t.th : ''}`, decoding: 'async', width: 1080, height: 720 });
+      const put = () => { if (holder.isConnected !== false && holder.parentNode) { img.classList.add('s-ph-in'); holder.replaceWith(img); } };
+      (img.decode ? img.decode() : Promise.resolve()).then(put, put);
+    };
     if (SHOTS[key]) swap(SHOTS[key]); else whenNear(fig, () => productShot(key).then(swap));
   }
   if (tag) fig.append(h('span', { class: 's-ph-tag' }, tag));

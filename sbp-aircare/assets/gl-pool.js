@@ -53,6 +53,9 @@ function wire() {
  *  after a restore; opts.redraw() → called after a restore for scenes that render on demand. Returns { release() }. */
 export function track(renderer, el, opts = {}) {
   const gl = renderer.getContext();
+  // Rev.26.1 smooth: three.js reads every shader / program log after compiling (checkShaderErrors) — a synchronous GPU round trip
+  // that froze the page 1–4 s while a scene booted. Off in production; add ?glcheck to the URL when debugging shaders.
+  try { renderer.debug.checkShaderErrors = /[?&]glcheck/.test(location.search); } catch (_) {}
   const e = { renderer, el, scene: opts.scene || null, env: !!(opts.scene && opts.scene.environment), redraw: opts.redraw || null, ext: gl && gl.getExtension('WEBGL_lose_context'), state: 'live', t: performance.now(), d: 0 };
   const cv = renderer.domElement;
   // loseContext() makes the context unusable at once but three.js only learns of it from the async event — until then a
@@ -60,7 +63,23 @@ export function track(renderer, el, opts = {}) {
   const render0 = renderer.render.bind(renderer);
   // Rev.12: on capable computers the scene gets sharper shadows and texture filtering (quality3d.js); otherwise as before
   const fx = enhance(renderer);
-  renderer.render = (s, c) => { if (e.state !== 'live') return; fx && fx.prepare(s); render0(s, c); };
+  // Rev.26.1 smooth: the first frame of each scene compiles its shaders in the background (KHR_parallel_shader_compile via
+  // renderer.compileAsync) instead of freezing the page; the loading shimmer stays until it is ready. Without the extension
+  // (some software GL) it renders at once as before.
+  const par = !!(gl && gl.getExtension('KHR_parallel_shader_compile')) && typeof renderer.compileAsync === 'function';
+  const ready = new WeakSet(), busy = new WeakSet();
+  // the canvas fades in on its first real frame (no pop from the loading shimmer to a finished scene)
+  let shown = false; const RMq = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (cv && cv.style && !RMq) { cv.style.opacity = '0'; cv.style.transition = 'opacity .35s ease-out'; }
+  const show = () => { if (!shown) { shown = true; if (cv && cv.style) cv.style.opacity = ''; } };
+  renderer.render = (s, c) => {
+    if (e.state !== 'live') return; fx && fx.prepare(s);
+    if (par && s && c && !ready.has(s) && renderer.getRenderTarget() === null) {   // screen frames only: PMREM / render-to-texture passes need the frame now
+      if (!busy.has(s)) { busy.add(s); renderer.compileAsync(s, c).catch(() => {}).then(() => { ready.add(s); busy.delete(s); if (e.state === 'live') { render0(s, c); show(); } }); }
+      return;
+    }
+    render0(s, c); show();
+  };
   cv.addEventListener('webglcontextlost', () => { e.state = 'lost'; schedule(); });
   cv.addEventListener('webglcontextrestored', () => {
     e.state = 'live'; e.t = performance.now();

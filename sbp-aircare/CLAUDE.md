@@ -1,6 +1,6 @@
 # CLAUDE.md — SBP AirCare Website · Technical Handover Specification
 
-> **สถานะ:** Rev.26 · 4 ต.ค. 2569 (ดู §7.1h–7.1u) · Rev.12 ขึ้นเว็บแล้ว (PR #7) · ก่อนหน้า Rev.09 r5 (ต่อจาก Rev.08.1 — r5 = โครงเว็บตามเส้นทางลูกค้า เตรียม Beta) · เจ้าของโปรเจกต์: ธนวัฒน์ (บริษัท สหบูรพากรุ๊ป จำกัด) · repo: `sahaburapaofficial-cmyk/Sahaburapa-project` โฟลเดอร์ `sbp-aircare/` (Public · เว็บ https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/)
+> **สถานะ:** Rev.26.1 · 4 ต.ค. 2569 (ดู §7.1h–7.1v) · Rev.12 ขึ้นเว็บแล้ว (PR #7) · ก่อนหน้า Rev.09 r5 (ต่อจาก Rev.08.1 — r5 = โครงเว็บตามเส้นทางลูกค้า เตรียม Beta) · เจ้าของโปรเจกต์: ธนวัฒน์ (บริษัท สหบูรพากรุ๊ป จำกัด) · repo: `sahaburapaofficial-cmyk/Sahaburapa-project` โฟลเดอร์ `sbp-aircare/` (Public · เว็บ https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/)
 > **เริ่มที่ [`HANDOFF.md`](HANDOFF.md)** — ภาพรวม สถานะฟีเจอร์ ตัวแปร/ไฟล์ config และ todo ล่าสุดในไฟล์เดียว · ไฟล์นี้คือสเปกเชิงลึก
 > **ไฟล์นี้คืออะไร:** เอกสารส่งมอบงานสำหรับ Claude Code (CLI) วางไว้ที่ root ของ repo — Claude Code อ่าน `CLAUDE.md` อัตโนมัติทุกครั้งที่เปิดโปรเจกต์
 > **ซอร์สโค้ดเต็ม:** อยู่ในไฟล์ `SBP-WEB-011_Prototype_Source.zip` (ทุกไฟล์ ไบต์ตรงกับที่เผยแพร่ล่าสุด) — เอกสารนี้สรุปสัญญา (API), กติกา และงานถัดไป ไม่ได้คัดลอกโค้ด 3 มิติทั้งหมดซ้ำ เพราะโค้ดจริงอยู่ในไฟล์แล้วและแม่นยำกว่า
@@ -732,6 +732,7 @@ body: `400 16px/1.7` · self-hosted woff2 แยก subset Thai/Latin (`fonts.cs
 - boot แบบ lazy ด้วย `IntersectionObserver` · pause render เมื่อออกนอกจอ · `setPixelRatio(min(2, dpr))` · มี `dispose()` คืน GPU memory
 - ต้องมี fallback เมื่อสร้าง WebGL ไม่ได้ (ข้อความ/ภาพนิ่ง ยังอ่านเนื้อหาได้ครบ)
 - เคารพ `prefers-reduced-motion` ทุกฉาก
+- ★Rev.26.1 ฉากใหม่ต้องบูตผ่าน `whenQuiet`/`quiet()` หรือ `deferred` (lazy.js) และลงทะเบียน `gl-pool.track` (ได้ compile แบบ async + fade-in + ปิด shader-log อัตโนมัติ) · ภาพที่สลับเข้าทีหลังต้อง `decode()` ก่อน และกล่องรอต้องสูงเท่าของจริง (ไม่ให้หน้ากระโดด) · ตรวจด้วย `npm run jank` / `npm run inp`
 - งบ WebGL context: **≤ 3 live ต่อหน้า** — ★Rev.09 คุมโดย `gl-pool.js`: ทุก `new WebGLRenderer` ต้องเรียก `track(renderer, el, {scene, redraw})` (ฉากใหม่ต้องลงทะเบียนเสมอ) · ฉากไกลจอถูก `loseContext()` แล้ว restore เมื่อกลับมา (state เดิมไม่หาย) · smoke รายงาน `webglPeak`
 - ห้ามแก้ไฟล์ three.js ที่ vendored (r170) · ถ้าจะอัปเกรด three ต้องทดสอบทุกฉาก
 
@@ -1012,6 +1013,15 @@ body: `400 16px/1.7` · self-hosted woff2 แยก subset Thai/Latin (`fonts.cs
 - ✅ **ภาพเคลื่อนไหวอาการแอร์และความรู้** (`animicons.js`): 14 อาการ (ภาพใหญ่ในการ์ดคัดกรอง + ไอคอนเล็กในรายการ) · 12 หัวข้อความรู้ · SVG + CSS ไม่ใช้ WebGL · เป็นภาพประกอบ ไม่ใช่การวินิจฉัย
 - ทดสอบ: `npm run tradein` (เป้าหมาย/บันทึก/ถาม-ตอบ) · `npm run allservices` (หมวด · ค่าเข้างาน · การ์ดวัสดุ) · `tests/enterprise.mjs` (`planMonths`) + CI
 - ⏳ รอเจ้าของ: ตัวเลขค่าเข้างานงานย่อย (ดูรายงาน) · รูปสินค้า/โลโก้วัสดุทางการพร้อมหนังสืออนุญาต · ยืนยันข้อความ "ทีมช่างประจำของบริษัท ไม่ส่งต่องานให้ผู้รับเหมาช่วง"
+
+### 7.1v ทำเสร็จ Rev.26.1 (4 ต.ค. 2569 — เจ้าของ: "ตรวจเช็คใหม่ทั้งระบบ test run และแก้ไขจุดที่ไม่ smooth ในการใช้งานทุกภาพและการเคลื่อนไหวของเว็บและทุกโมเดล")
+
+- 🔎 **เครื่องมือวัดใหม่:** `npm run jank -- a.html [w h] [ids]` (`tests/jank.mjs`: ทุก section — long task บน main thread · เฟรมช้า · layout shift · error · ล้นแนวนอน ขณะเปิดและเลื่อนผ่าน) · `npm run inp -- a.html` (`tests/inp.mjs`: เวลาจากคลิกถึงเฟรมถัดไปของปุ่มที่ใช้บ่อย 11 จุด) · ผล: ทุกปุ่ม ≤ 120 ms (เกณฑ์ดี < 200 ms)
+- ✅ **ภาพสินค้าไม่ค้างหน้า** (`product-media`): เข้ารหัสด้วย `toBlob` (async) แทน `toDataURL` · เรนเดอร์เมื่อเลิกเลื่อนจอและเบราว์เซอร์ว่าง (`lazy.quiet`) · เครื่องที่ไม่มี GPU จริง (software GL) เรนเดอร์ 720×480 เงา 1024 · ถอดรหัสภาพก่อนสลับจากภาพลายเส้น + fade-in (เดิมภาพสูง 0 px ชั่วขณะ หน้ากระโดด) · คืน GL context หลังว่าง 5 วิ (เดิม 1.5 วิ สร้าง/คืนซ้ำ)
+- ✅ **ฉาก 3 มิติบูตไม่กระตุก** (`gl-pool.track` — ใช้กับทุก renderer): ปิด `checkShaderErrors` (อ่าน log shader แบบ sync หลัง compile ทุกครั้ง — ค้าง 1–4 วิ ตอนบูตฉาก; เปิดได้ด้วย `?glcheck`) · เฟรมแรกของแต่ละ scene compile แบบ async (`compileAsync` เมื่อมี `KHR_parallel_shader_compile`; เฉพาะการวาดลงจอ — PMREM/render target ไม่ถูกหน่วง) · canvas ค่อย ๆ จางเข้าเมื่อเฟรมแรกพร้อม · **ทุกฉากบูตเมื่อเลิกเลื่อน** (`lazy.whenQuiet`: หยุดเลื่อน 220 ms + idle, ไม่เกิน 1.5 วิ) — howitworks, materials, studio, system3d, techstory, throwsim, jobguide, roomfit และทุกตัวที่ใช้ `deferred`
+- ✅ **หน้าไม่กระโดด (CLS):** แผนที่พื้นที่ให้บริการ (`areamap3d`) เดิมลบกล่องรอก่อนโหลดเสร็จ → ทั้งหน้าเลื่อนขึ้นลง (มือถือ A: CLS 0.586 → 0) · ตอนนี้กล่องรอ + คำอธิบายสีอยู่ที่เดิมจนแผนที่มาแทน
+- ✅ **ภาพเคลื่อนไหว CSS เล่นเฉพาะตอนอยู่บนจอ** (`animicons.runWhenVisible` — ไอคอนอาการ/ความรู้ การ์ดวัสดุ) · แผนรายปีสร้างอาคาร SVG ครั้งเดียวต่อการตั้งค่า แล้วแก้เฉพาะสีที่เปลี่ยน (เดิมสร้างใหม่ทุกเฟรม) + สีเปลี่ยนแบบ transition
+- ℹ️ ตัวเลข long task ในเครื่องทดสอบ (swiftshader ไม่มี GPU) ส่วนใหญ่เป็นงาน GPU จำลอง (compile shader / อ่านภาพ) — JS ของเว็บเองต่อ section < 300 ms · ต้องทดสอบมือถือจริงต่อ (B2)
 
 ### 7.2 บั๊ก / ปัญหาที่ยังค้าง (เรียงตามความสำคัญ)
 

@@ -1,5 +1,6 @@
 // SBP AirCare — Room Studio UI (shared by all three variants). Builds its own markup inside `root`,
 // styled by assets/studio.css through the variant's --s-* tokens. cfg: { theme, onOpen(model, skuIndex), sceneStart }
+import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DEMO, BRAND_BY_ID, TYPE_BY_ID, DATA, TRAVEL, CLEAN_PKGS, VAT, incVat, baht, btuFmt, h, $, $$, installOptions, cleanRate } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { toast } from './proto-ui.js';
@@ -104,7 +105,7 @@ export async function mountStudio(root, cfg = {}) {
     V.setScene(state.scene, state.p); V.setUnits({ type: state.type, n: state.n, per: state.per }); V.setDirt(dirt()); V.setCap(Math.min(1.4, th.cap / Math.max(1, th.Qset))); if (state.view !== 'room') V.pause(true);
     $$('[data-layer]', layersBar).forEach(b => V.setLayer(b.dataset.layer, b.getAttribute('aria-pressed') === 'true'));
   }
-  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); boot3D(); } }, { rootMargin: '600px 0px' });
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); whenQuiet(boot3D); } }, { rootMargin: '600px 0px' });
   io.observe(stage);
 
   /* ---------- model ---------- */

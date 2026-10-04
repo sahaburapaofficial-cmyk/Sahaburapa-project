@@ -34,7 +34,15 @@ const GUIDE = {
   vrf: `<rect x="80" y="70" width="40" height="40" rx="4" class="ai-ou"/>${[30, 90, 150].map(x => `<rect x="${x}" y="14" width="30" height="14" rx="4" class="ai-body"/><path class="ai-pipe in" d="M100 70 V45 H${x + 15} V28"/>`).join('')}`,
   area: `<circle cx="100" cy="62" r="40" class="ai-ring"/><circle cx="100" cy="62" r="5" class="ai-hq"/><path class="ai-route" d="M100 62 L132 38"/>`,
 };
-const svg = (body, cls) => { const d = h('span', { class: 'ai ' + (cls || ''), 'aria-hidden': 'true' }); d.innerHTML = `<svg viewBox="0 0 200 120">${body}</svg>`; return d; };
+// Rev.26.1 smooth: CSS animations run only while the drawing is on screen (class "run"), so off-screen icons cost nothing
+let IO = null;
+export function runWhenVisible(el) {
+  if (!el) return el;
+  if (!('IntersectionObserver' in window)) { el.classList.add('run'); return el; }
+  IO = IO || new IntersectionObserver(es => es.forEach(x => x.target.classList.toggle('run', x.isIntersecting)), { rootMargin: '60px 0px' });
+  IO.observe(el); return el;
+}
+const svg = (body, cls) => { const d = h('span', { class: 'ai ' + (cls || ''), 'aria-hidden': 'true' }); d.innerHTML = `<svg viewBox="0 0 200 120">${body}</svg>`; return runWhenVisible(d); };
 export const symAnim = (id, cls) => SYM[id] ? svg(SYM[id], cls) : null;
 export const guideAnim = (id, cls) => GUIDE[id] ? svg(GUIDE[id], cls) : null;
 export const SYM_IDS = Object.keys(SYM), GUIDE_IDS = Object.keys(GUIDE);
