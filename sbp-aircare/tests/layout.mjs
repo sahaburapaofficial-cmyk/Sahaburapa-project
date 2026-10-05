@@ -72,7 +72,8 @@ for (const v of views) {
         if (best) R.lap.push(`${path(a)}  ⟷  ${path(c)} (${Math.round(bix)}×${Math.round(biy)})`);
       }
     }
-    const hs = all.filter(el => /^H[1-6]$/.test(el.tagName)); let prev = 0;
+    // heading order counts screen-reader-only headings too (they are part of the outline), but not hidden or collapsed ones
+    const hs = [...document.querySelectorAll('h1,h2,h3,h4,h5,h6')].filter(el => !el.closest('[hidden]') && !inClosed(el) && getComputedStyle(el).display !== 'none' && el.getClientRects().length > 0); let prev = 0;
     hs.forEach(hx => { const n = +hx.tagName[1]; if (prev && n > prev + 1) R.head.push(`${hx.tagName} after H${prev}: "${hx.textContent.trim().slice(0, 40)}" ${path(hx)}`); prev = n; });
     const h1 = hs.filter(x => x.tagName === 'H1').length; if (h1 !== 1) R.head.push(`h1 × ${h1}`);
     return R;

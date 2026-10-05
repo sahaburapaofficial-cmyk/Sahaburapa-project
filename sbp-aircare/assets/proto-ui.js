@@ -330,7 +330,11 @@ function bootViewer(root, cfg = {}) {
           lines += `<path d="M${ex} ${ly} H${mx} L${v.a.x} ${v.a.y}" /><circle cx="${v.a.x}" cy="${v.a.y}" r="3.2" />`;
         });
       });
-    } else vis.forEach(({ a, el }) => { el.style.transform = `translate(${a.x}px, ${a.y}px)`; });
+    } else {
+      // Rev.31.1 layout: pins of parts that project close together (phone width, some angles) slide apart instead of stacking
+      const kept = [];
+      vis.forEach(({ a, el }) => { let x = a.x, y = a.y; for (const k of kept) { const dx = x - k.x, dy = y - k.y, d = Math.hypot(dx, dy); if (d < 32) { const ux = d > 0.5 ? dx / d : 0.8, uy = d > 0.5 ? dy / d : 0.6; x = k.x + ux * 32; y = k.y + uy * 32; } } kept.push({ x, y }); el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`; });
+    }
     if (svg) svg.innerHTML = lines;
   }
   const on = (sel, ev, fn) => $$(sel, root).forEach(b => b.addEventListener(ev, () => fn(b)));
