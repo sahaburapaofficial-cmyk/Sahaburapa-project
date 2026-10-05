@@ -494,3 +494,34 @@ html.fx-F .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my
 :root[data-lux] .at-recs .at-i{font-family:var(--mono);letter-spacing:.04em}
 :root:is([data-lux="D"],[data-lux="F"]) .at-recs li{box-shadow:inset 3px 0 0 var(--acc)}
 :root[data-lux="E"] .at-recs li{box-shadow:inset 3px 0 0 #8B7BFF}
+/* ★Rev.32 sound button (header) */
+.lx-snd{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:color-mix(in oklab,var(--panel) 80%,transparent);color:var(--ink-2);font:inherit;font-size:14px;cursor:pointer;flex:none}
+.lx-snd svg{width:20px;height:20px}
+.lx-snd .w1,.lx-snd .w2{opacity:0}.lx-snd .x{opacity:.8}
+.lx-snd[aria-pressed=true]{color:var(--acc);border-color:color-mix(in oklab,var(--acc) 55%,var(--line));box-shadow:0 0 18px -6px var(--glow,var(--acc))}
+.lx-snd[aria-pressed=true] .w1,.lx-snd[aria-pressed=true] .w2{opacity:1}.lx-snd[aria-pressed=true] .x{opacity:0}
+@media (prefers-reduced-motion:no-preference){.lx-snd[aria-pressed=true] .w2{animation:lxWave 1.6s ease-in-out infinite}@keyframes lxWave{50%{opacity:.25}}}
+@media (max-width:760px){.lx-snd{padding:0;width:40px;justify-content:center}.lx-snd span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
+/* ★Rev.32 D light & colour: a grade per chapter (warm dusk → murky → cyan scan → clean white → cool), a light leak on each cut, HUD depth */
+@property --tint{syntax:'<color>';inherits:true;initial-value:rgba(255,150,80,.16)}
+@property --tint2{syntax:'<color>';inherits:true;initial-value:rgba(255,120,60,.0)}
+.cn-stick{--tint:rgba(255,150,80,.16);--tint2:rgba(255,190,120,.10);transition:--tint 1.2s ease,--tint2 1.2s ease}
+.cn-stick[data-ch="1"]{--tint:rgba(255,170,110,.10);--tint2:rgba(120,110,90,.10)}
+.cn-stick[data-ch="2"]{--tint:rgba(70,220,255,.12);--tint2:rgba(40,120,200,.08)}
+.cn-stick[data-ch="3"]{--tint:rgba(200,240,255,.10);--tint2:rgba(99,230,255,.08)}
+.cn-stick[data-ch="4"]{--tint:rgba(99,230,255,.14);--tint2:rgba(150,200,255,.10)}
+.cn-tint{position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(90% 70% at 85% 30%,var(--tint),transparent 70%),radial-gradient(80% 80% at 10% 90%,var(--tint2),transparent 70%)}
+.cn-leak{position:absolute;inset:-20% -40%;pointer-events:none;z-index:1;opacity:0;background:linear-gradient(105deg,transparent 35%,rgba(255,196,140,.0) 40%,rgba(255,196,140,.32) 47%,rgba(140,235,255,.28) 53%,transparent 62%)}
+.cn-leak.go{animation:cnLeak 1.15s cubic-bezier(.3,.6,.2,1)}
+@keyframes cnLeak{0%{opacity:0;transform:translateX(-35%)}25%{opacity:1}100%{opacity:0;transform:translateX(35%)}}
+.cn-frame,.cn-tel,.cn-hud{translate:calc(var(--px,0) * -10px) calc(var(--py,0) * -7px);transition:translate .25s ease-out}
+.cn-tel{translate:calc(var(--px,0) * -16px) calc(var(--py,0) * -10px)}
+@media (prefers-reduced-motion:reduce){.cn-leak{display:none}.cn-frame,.cn-tel,.cn-hud{translate:none}}
+/* ★Rev.32 E: glass tilt of the consultation card · the sun's bloom */
+:root[data-lux] .at-con{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.at-bloom{transition:opacity .6s;pointer-events:none}
+/* ★Rev.32 F scan button reads as the primary action of the lab · D chapter label on a dark chip so it reads over bright cold air */
+.sp-scan{border:1px solid var(--cool);background:rgba(77,243,255,.08);color:#CFFBFF;border-radius:4px;padding:8px 16px;min-height:44px;font-size:14px;font-weight:600;letter-spacing:.02em;cursor:pointer}
+.sp-scan:hover{background:rgba(77,243,255,.16)}
+.sp-scan[aria-pressed="true"]{background:var(--cool);color:#021018;box-shadow:0 0 22px -4px rgba(77,243,255,.9)}
+.cn-k{display:inline-block;width:max-content;padding:3px 10px;background:rgba(2,8,16,.55);border-left:2px solid #63E6FF}

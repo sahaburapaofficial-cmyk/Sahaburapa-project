@@ -159,10 +159,13 @@ _sj = read(os.path.join(A, 'submit.js'))
 EP = re.search(r"const BACKEND_URL = '([^']*)'", _sj).group(1) or re.search(r"const FORMSUBMIT = '([^']*)'", _sj).group(1)
 if EP: pv = pv.replace('__SBP_ENDPOINT__', EP)
 pv = re.sub(r'<link rel="stylesheet" href="assets/([\w.-]+\.css)">', lambda m: f'<style>{css_inline(m.group(1))}</style>', pv)
+_packs = {}
+def pack(v):
+    # one gzip+base64 pack per design, shared by the testers and the showcase
+    if v not in _packs: _packs[v] = f'<script type="application/octet-stream" id="pack-{v}">' + base64.b64encode(gzip.compress(links(built[v], 'embed', v).encode(), 9)).decode() + '</script>'
+    return _packs[v]
 def tester(pv, vs, hub):
-    packs = ''.join(
-        f'<script type="application/octet-stream" id="pack-{v}">' + base64.b64encode(gzip.compress(links(built[v], 'embed', v).encode(), 9)).decode() + '</script>'
-        for v in vs)
+    packs = ''.join(pack(v) for v in vs)
     urls = dict(URLS); urls['hub'] = URLS.get(hub, URLS.get('hub', ''))
     head = '<script>window.SBP_URLS=' + json.dumps(urls) + (';window.SBP_SET=' + json.dumps(list(vs)) if vs != 'abc' else '') + '</script>'
     if vs != 'abc': pv = pv.replace('<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ A B C</title>', '<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ D E F</title>')
@@ -173,6 +176,17 @@ for vs, name in (('abc', 'index'), ('def', 'index2')):
     off = pv if vs == 'abc' else pv.replace('<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ A B C</title>', '<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ D E F</title>').replace('<body>', '<body><script>window.SBP_SET=["d","e","f"]</script>', 1)
     open(os.path.join(DIST, 'offline', f'{name}.html'), 'w', encoding='utf-8').write(off.replace('href="./"', f'href="./{name}.html"'))
     sizes['tester' if vs == 'abc' else 'tester2'] = len(art_pv.encode()) // 1024
+# ---- Rev.32 showcase: a summary of both websites (focus D · E · F) with every design live inside it (desktop / tablet / phone) ----
+sc = read(os.path.join(ROOT, 'showcase.html'))
+sc = re.sub(r'<link rel="stylesheet" href="assets/([\w.-]+\.css)">', lambda m: f'<style>{css_inline(m.group(1))}</style>', sc)
+def _img(m):
+    f = os.path.join(A, 'showcase', m.group(1))
+    return ('src="data:image/jpeg;base64,' + base64.b64encode(open(f, 'rb').read()).decode() + '"') if os.path.exists(f) else 'src=""'
+sc_art = re.sub(r'src="assets/showcase/([\w.-]+\.jpg)"', _img, sc)
+sc_art = sc_art.replace('<body>', '<body><script>window.SBP_URLS=' + json.dumps(URLS) + '</script>' + ''.join(pack(v) for v in 'defabc'), 1)
+open(os.path.join(DIST, 'art', 'showcase.html'), 'w', encoding='utf-8').write(strip_doc(sc_art))
+open(os.path.join(DIST, 'offline', 'showcase.html'), 'w', encoding='utf-8').write(re.sub(r'src="assets/showcase/([\w.-]+\.jpg)"', _img, sc))
+sizes['showcase'] = len(sc_art.encode()) // 1024
 # ---- Rev.11: multi-file site for self-hosting (GitHub Pages → dist/site) ----
 # Same pages and code as the single-file builds, but split so phones fetch and run less up front: CSS and fonts as cacheable
 # files, the price/map data as one shared script, and the JS bundled with code splitting — the scenes that are only opened

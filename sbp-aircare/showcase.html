@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ศูนย์ทดลอง SBP AirCare</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<style>
+/* Rev.32 — the showcase: one page that sums up both websites (focus on D · E · F) and opens every design live, desktop / tablet / phone.
+   layout: sticky control bar · "สรุป" = a reading column of design cards · "ทดลองใช้" = live design (scaled like a device) + a try-list beside it
+   a single dark "control room" look on purpose (the second website's world); every colour set here, not inherited */
+:root{
+  --bg:#060A12; --panel:#0D1422; --panel2:#121C2E; --ink:#E8F0FA; --ink2:#AEBED2; --ink3:#8193AA; --line:rgba(150,190,240,.16);
+  --cy:#63E6FF; --vi:#9A8CFF; --am:#FFB067; --ok:#4ED39A;
+  --D:#63E6FF; --E:#8B7BFF; --F:#4DF3FF; --A:#6FA8EE; --B:#A9C2E0; --C:#5AD0FF;
+  --sans:"IBM Plex Sans Thai",system-ui,sans-serif; --disp:"Anuphan","IBM Plex Sans Thai",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 15.5px/1.7 var(--sans);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(99,230,255,.035) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(99,230,255,.035) 1px,transparent 1px) 0 0/48px 48px,radial-gradient(70% 50% at 80% -10%,rgba(154,140,255,.18),transparent 70%),radial-gradient(60% 50% at 0% 0%,rgba(99,230,255,.12),transparent 70%)}
+[hidden]{display:none!important}
+button,select{font:inherit;color:inherit}
+a{color:var(--cy)}
+h1,h2,h3{font-family:var(--disp);margin:0;line-height:1.25;text-wrap:balance}
+p{margin:0}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:10px 16px;background:rgba(6,10,18,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:grid;line-height:1.2}.brand b{font:700 16px var(--disp)}.brand small{font:500 11.5px var(--mono);letter-spacing:.12em;color:var(--ink3)}
+.seg{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.seg button{border:0;background:transparent;min-height:36px;padding:0 14px;border-radius:999px;cursor:pointer;color:var(--ink2);font-size:14px;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);font-weight:600}
+.seg.v button{font:600 14px var(--mono);padding:0 11px}
+.seg.v button[aria-pressed=true]{background:var(--c,var(--cy));color:#03121A}
+.seg .sep{width:1px;background:var(--line);margin:6px 2px}
+.bar .sp{flex:1}
+.bar a.full{font-size:14px;min-height:36px;display:inline-flex;align-items:center}
+/* summary */
+.sum{max-width:1120px;margin:0 auto;padding:32px 16px 72px;display:grid;gap:34px;position:relative}
+.eyebrow{font:600 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cy)}
+.hero{display:grid;gap:14px;padding-top:6px}
+.hero h1{font-size:clamp(30px,5.4vw,52px);font-weight:700}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,#63E6FF,#9A8CFF 55%,#FFB067);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:17px;color:var(--ink2);max-width:70ch}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.stats span{font:500 13px var(--mono);padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink2)}
+.stats b{color:var(--ink)}
+.card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:24px;padding:22px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,var(--panel2),var(--panel));overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--c)}
+.card .txt{display:grid;gap:12px;align-content:start;min-width:0}
+.card h2{font-size:clamp(24px,3.4vw,32px)}
+.card h2 small{display:block;font:500 13px var(--mono);letter-spacing:.1em;color:var(--c);margin-bottom:4px}
+.card .shots{display:grid;gap:10px;min-width:0;align-content:start}
+.card img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line);background:#000}
+.sw{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.sw i{width:24px;height:24px;border-radius:6px;border:1px solid var(--line)}.sw span{font:500 12.5px var(--mono);color:var(--ink3)}
+.sense{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sense div{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02);display:grid;gap:2px}
+.sense b{font:600 12px var(--mono);letter-spacing:.1em;color:var(--c)}
+.sense p{font-size:14px;color:var(--ink2);line-height:1.55}
+.go{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--c);background:color-mix(in oklab,var(--c) 14%,transparent);color:var(--ink);font-weight:600;cursor:pointer;width:max-content;max-width:100%}
+.go:hover{background:color-mix(in oklab,var(--c) 26%,transparent)}
+.go.ghost{border-color:var(--line);background:transparent;font-weight:500}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.abc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.abc article{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.abc img{width:100%;height:auto;display:block;border-bottom:1px solid var(--line)}
+.abc .in{padding:14px 16px 16px;display:grid;gap:8px;align-content:start}
+.abc h3{font-size:18px}
+ul.l{margin:0;padding-left:18px;display:grid;gap:5px;color:var(--ink2);font-size:14.5px}
+ul.l b{color:var(--ink);font-weight:600}
+.sec{display:grid;gap:14px}
+.sec>h2{font-size:clamp(22px,3vw,28px)}
+.note{font-size:13.5px;color:var(--ink3)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink3);font-weight:600;font-size:13px}
+td.r{font-family:var(--mono);color:var(--ok);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+ol.todo{margin:0;padding-left:22px;display:grid;gap:6px;color:var(--ink2)}
+/* try */
+.try{display:grid;grid-template-columns:minmax(0,1fr) 340px;min-height:calc(100vh - 60px)}
+.stage{position:relative;padding:16px;min-width:0;display:grid;align-content:start;gap:10px}
+.lbl{display:flex;justify-content:space-between;gap:8px;font:500 13px var(--mono);color:var(--ink3)}
+.lbl b{color:var(--ink)}
+.screen{position:relative;overflow:hidden;border-radius:12px;border:1px solid var(--line);background:#000;margin:0 auto;box-shadow:0 30px 60px -30px rgba(0,0,0,.8),0 0 0 1px rgba(99,230,255,.06)}
+.screen.phone{border-radius:30px;border:9px solid #1b232d}
+.screen iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:#fff}
+.loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink3);font:500 14px var(--mono);letter-spacing:.08em}
+.guide{border-left:1px solid var(--line);background:var(--panel);padding:18px 16px;display:grid;gap:14px;align-content:start;overflow:auto;max-height:calc(100vh - 60px);position:sticky;top:60px}
+.guide h2{font-size:19px}
+.guide .k{font:600 12px var(--mono);letter-spacing:.12em;color:var(--c)}
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tasks li{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02)}
+.tasks li i{font:600 12px var(--mono);font-style:normal;color:var(--c);padding-top:2px}
+.tasks li b{display:block;font-size:14.5px}
+.tasks li span{font-size:13.5px;color:var(--ink2)}
+.tasks button{display:block;margin-top:6px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;min-height:32px;padding:0 10px;font-size:13px;cursor:pointer}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+@media (max-width:1060px){.try{grid-template-columns:1fr}.guide{border-left:0;border-top:1px solid var(--line);max-height:none;position:static}}
+@media (max-width:860px){.card{grid-template-columns:1fr}.abc{grid-template-columns:1fr}.sense{grid-template-columns:1fr}}
+@media (max-width:640px){.bar{position:static}.brand small{display:none}}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .6s cubic-bezier(.2,.7,.2,1) both}.card:nth-of-type(2){animation-delay:.08s}.card:nth-of-type(3){animation-delay:.16s}@keyframes in{from{opacity:.001;transform:translateY(10px)}}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><b>SBP AirCare</b><small>ศูนย์ทดลอง · 6 แบบ</small></div>
+  <div class="seg" role="group" aria-label="มุมมอง"><button type="button" data-m="sum" aria-pressed="true">สรุป</button><button type="button" data-m="try" aria-pressed="false">ทดลองใช้</button></div>
+  <div class="seg v" role="group" aria-label="เลือกแบบ" id="vs"></div>
+  <div class="seg" role="group" aria-label="ขนาดจอ" id="ds"><button type="button" data-d="desktop" aria-pressed="true">คอม</button><button type="button" data-d="tablet" aria-pressed="false">แท็บเล็ต</button><button type="button" data-d="phone" aria-pressed="false">มือถือ</button></div>
+  <span class="sp"></span>
+  <a class="full" id="full" href="./d.html" target="_blank" rel="noopener">เปิดเต็มจอ ↗</a>
+</header>
+
+<main class="sum" id="sum">
+  <section class="hero" aria-labelledby="h-top">
+    <p class="eyebrow">Rev.32 · 5 ต.ค. 2569 · บริษัท สหบูรพากรุ๊ป จำกัด</p>
+    <h1 id="h-top">เว็บไซต์ 2 ชุด 6 แบบ <em>ลองได้ทุกแบบในหน้านี้</em></h1>
+    <p class="lead">ชุดที่ 2 (D · E · F) คือภาพยนตร์โฮโลแกรม บ้านอัจฉริยะ และห้องโฮโลแกรม ครบทั้งแสง สี เสียง และการเคลื่อนไหว ชุดแรก (A · B · C) พร้อมใช้งานและเติมรายละเอียดแล้ว ทุกแบบใช้ราคา กฎธุรกิจ และระบบจองชุดเดียวกัน กด "ทดลองใช้" เพื่อเปิดเว็บจริงทีละแบบ บนจอคอม แท็บเล็ต หรือมือถือ</p>
+    <div class="stats"><span><b>6</b> แบบ · 2 เว็บไซต์</span><span><b>705</b> รุ่นแอร์พร้อมราคา</span><span>ตัวเลขบนภาพ = <b>แบบจำลอง</b> เดียวกับห้องจำลอง</span><span>เสียง <b>สังเคราะห์สด</b> เปิดเมื่อกดเท่านั้น</span></div>
+  </section>
+
+  <article class="card" style="--c:var(--D)" aria-labelledby="h-d">
+    <div class="txt">
+      <h2 id="h-d"><small>แบบ D · เว็บไซต์ชุดที่ 2</small>Holo Cinema</h2>
+      <div class="sw"><i style="background:#04060B"></i><i style="background:#63E6FF"></i><i style="background:#FFB067"></i><span>ดำลึก · ไซยาน · ส้มความร้อน</span></div>
+      <p>ภาพยนตร์สั้น 5 บทที่เล่นตามการเลื่อนจอ จากถนนยามพลบค่ำ เข้าห้องนอนคอนโด เจอแอร์ลมอ่อน เปิดดูฝุ่นข้างใน ทีมช่างล้าง แล้วห้องกลับมาเย็น</p>
+      <div class="sense">
+        <div><b>แสง</b><p>ลมเย็นเรืองจากช่องลม แสงเย็นอาบห้องหลังล้าง แสงวาบข้ามจอทุกครั้งที่เปลี่ยนบท</p></div>
+        <div><b>สี</b><p>เกรดสีต่อบท: ส้มพลบค่ำ → หม่น → ไซยานตอนสแกน → ขาวสะอาด → เย็น</p></div>
+        <div><b>เสียง</b><p>โดรนภาพยนตร์ · เสียงวูบเปลี่ยนบท · สแกน · ล็อกเป้า · ฉีดล้าง · ระฆังเมื่อห้องเย็น · ลมแรงขึ้นหลังล้าง</p></div>
+        <div><b>การเคลื่อนไหว</b><p>กล้องบินตามการเลื่อน · เป้าเล็งล็อกตัวเครื่อง · HUD ลอยตามเมาส์ · กราฟก่อน/หลังล้างวิ่งตามบท</p></div>
+      </div>
+      <div class="row"><button type="button" class="go" data-try="d">ลองแบบ D</button></div>
+    </div>
+    <div class="shots"><img src="assets/showcase/d-scan.jpg" alt="แบบ D บทที่ 3: แสงสแกนผ่านคอยล์เย็น เป้าเล็งและแผงค่าลมออก" loading="lazy"><img src="assets/showcase/d-end.jpg" alt="แบบ D บทที่ 5: ห้องเย็นลง กราฟ HUD ก่อนและหลังล้าง" loading="lazy"></div>
+  </article>
+
+  <article class="card" style="--c:var(--E)" aria-labelledby="h-e">
+    <div class="txt">
+      <h2 id="h-e"><small>แบบ E · เว็บไซต์ชุดที่ 2</small>Atelier 2050</h2>
+      <div class="sw"><i style="background:#F3F6F9"></i><i style="background:#2F47F5"></i><i style="background:linear-gradient(110deg,#5CE1FF,#8B7BFF,#FF9FD0,#FFC37A)"></i><span>มุก · น้ำเงินไฟฟ้า · ขอบโฮโลแกรม</span></div>
+      <p>ผู้ช่วยปรึกษา 4 คำถามจัดลำดับบริการพร้อมราคามาตรฐาน คู่กับห้องนั่งเล่นตลอดวันแบบบ้านอัจฉริยะ เลื่อนเวลา 06:00–22:00 แล้วดูอุณหภูมิห้องตามแบบจำลอง</p>
+      <div class="sense">
+        <div><b>แสง</b><p>แดดฟุ้งรอบดวงอาทิตย์แรงสุดช่วงเย็น · ลำแสงเข้าห้องตามมุมแดด · โคมไฟกลางคืน</p></div>
+        <div><b>สี</b><p>ท้องฟ้าเปลี่ยนตามเวลา · วงความร้อนบนพื้นจากฟ้าเป็นส้มตามอุณหภูมิห้อง</p></div>
+        <div><b>เสียง</b><p>โทนห้องเบา ๆ · ลมแอร์ตามแรงลมผ่านคอยล์ · คลิกนุ่มเมื่อตอบ · เสียงยืนยันเมื่อได้แผน</p></div>
+        <div><b>การเคลื่อนไหว</b><p>ลูกศรความร้อนเข้า/ออก · การ์ดปรึกษาเอียงตามเมาส์แบบกระจก · แผนแสดงทีละขั้น</p></div>
+      </div>
+      <div class="row"><button type="button" class="go" data-try="e">ลองแบบ E</button></div>
+    </div>
+    <div class="shots"><img src="assets/showcase/e-top.jpg" alt="แบบ E หน้าแรก: ผู้ช่วยปรึกษา และห้องนั่งเล่นพร้อมป้ายอุณหภูมิ" loading="lazy"><img src="assets/showcase/e-day.jpg" alt="ห้องนั่งเล่นแบบ E: ลูกศรความร้อนเข้าทางกระจกและแอร์ดึงออก" loading="lazy"></div>
+  </article>
+
+  <article class="card" style="--c:var(--F)" aria-labelledby="h-f">
+    <div class="txt">
+      <h2 id="h-f"><small>แบบ F · เว็บไซต์ชุดที่ 2</small>Holodeck</h2>
+      <div class="sw"><i style="background:#03050C"></i><i style="background:#9A8CFF"></i><i style="background:#4DF3FF"></i><span>กรมท่าเกือบดำ · ม่วง · ไซยาน</span></div>
+      <p>ห้องนอนคอนโดฉายขึ้นจากแท่นบนพื้นกริด หมุนดูได้รอบ ข้างกันเป็นห้องทดลองความเย็น ปรับอากาศนอก คน คอยล์ Inverter แล้วดูห้องเย็นลงตามเวลา</p>
+      <div class="sense">
+        <div><b>แสง</b><p>กรวยแสงจากแท่นฉาย · แสงเย็นจากแอร์แรงขึ้นเมื่อห้องเย็นลง</p></div>
+        <div><b>สี</b><p>ขอบห้องเปลี่ยนสีตามอุณหภูมิ: ห้องร้อน = อำพัน · ห้องเย็น = ไซยาน · แผนที่ความร้อนบนพื้น</p></div>
+        <div><b>เสียง</b><p>เสียงฮัมห้องโฮโลแกรม · เสียงสแกน · ลมแอร์ตามแรงลม (คอยล์สกปรกลมเบาลง)</p></div>
+        <div><b>การเคลื่อนไหว</b><p>ลากหมุนแล้วปล่อย ห้องหมุนต่อนิดหนึ่งแล้วหยุดนุ่ม · ระนาบสแกน · ป้ายข้อมูลโผล่เมื่อสแกนผ่าน</p></div>
+      </div>
+      <div class="row"><button type="button" class="go" data-try="f">ลองแบบ F</button></div>
+    </div>
+    <div class="shots"><img src="assets/showcase/f-scan.jpg" alt="แบบ F โหมดสแกนห้อง: ป้ายข้อมูลโฮโลแกรมและแผนที่ความร้อน" loading="lazy"><img src="assets/showcase/f-lab.jpg" alt="แบบ F ห้องโฮโลแกรมและห้องทดลองความเย็น" loading="lazy"></div>
+  </article>
+
+  <section class="sec" aria-labelledby="h-abc">
+    <p class="eyebrow">เว็บไซต์ชุดที่ 1 · พร้อมใช้งาน</p>
+    <h2 id="h-abc">A · B · C</h2>
+    <div class="abc">
+      <article style="--c:var(--A)"><img src="assets/showcase/a.jpg" alt="แบบ A หน้าแรก" loading="lazy"><div class="in"><h3>A · Bento Clean</h3><ul class="l"><li>ตัวเครื่อง 3 มิติหน้าแรกไม่โดนขอบตัด</li><li>จอรีโมตจำลองแสดงถูกต้อง</li><li>ธีมมืด: สีสถานะอ่านชัด</li></ul><button type="button" class="go ghost" data-try="a">ลองแบบ A</button></div></article>
+      <article style="--c:var(--B)"><img src="assets/showcase/b.jpg" alt="แบบ B หน้าแรก" loading="lazy"><div class="in"><h3>B · Engineering Sheet</h3><ul class="l"><li>มือถือ: ปุ่มจองขึ้นก่อนตาราง</li><li>ตารางรุ่นแอร์แท็บเล็ตไม่ตัดชื่อ</li><li>ธีมมืด: สีสถานะอ่านชัด</li></ul><button type="button" class="go ghost" data-try="b">ลองแบบ B</button></div></article>
+      <article style="--c:var(--C)"><img src="assets/showcase/c.jpg" alt="แบบ C หน้าแรก" loading="lazy"><div class="in"><h3>C · Virtual Showroom</h3><ul class="l"><li>ฉากช่างติดตั้ง: ช่างไม่โผล่ข้ามผนัง</li><li>ช่างจางลงเมื่อบังคอยล์ร้อน</li><li>ขั้นที่ดูอยู่อ่านข้อความเต็ม</li></ul><button type="button" class="go ghost" data-try="c">ลองแบบ C</button></div></article>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-all">
+    <h2 id="h-all">ทุกแบบมีครบ</h2>
+    <ul class="l">
+      <li><b>จองล้างแอร์ 3 ขั้น</b> · ใบเสนอราคา/ใบจองงานพร้อมรูปหน้างาน · คิวปกติล่วงหน้า 3 วัน คิวด่วน +500 ก่อน VAT</li>
+      <li><b>แคตตาล็อก 705 รุ่น 22 แบรนด์</b> · ศูนย์ค่าบริการ · เทิร์นแอร์เก่า · สัญญาล้างรายปีองค์กร 7 ประเภท</li>
+      <li><b>ห้องจำลอง 48 ห้อง</b> · ลองวางแอร์ในห้องของคุณ · ทีมช่าง 3 มิติ 4 ประเภทแอร์ · ผู้ช่วยตรวจอาการ 14 อาการ</li>
+      <li><b>ปรึกษาบริการ 4 คำถาม</b> · ที่อยู่แบบไปรษณีย์ + ค่าเดินทางตามระยะ · ค้นหาทั้งเว็บ Ctrl/⌘K</li>
+    </ul>
+    <p class="note">ราคาและกฎธุรกิจมาจากแหล่งเดียว (Pricebook 2569 · CLAUDE.md §6.6) รอบนี้ไม่ได้แก้ราคาหรือกฎใด ๆ</p>
+  </section>
+
+  <section class="sec" aria-labelledby="h-qa">
+    <h2 id="h-qa">ผลตรวจล่าสุด</h2>
+    <div class="tbl"><table>
+      <thead><tr><th scope="col">ชุดตรวจ</th><th scope="col">ขอบเขต</th><th scope="col">ผล</th></tr></thead>
+      <tbody id="qa"><!--QA--></tbody>
+    </table></div>
+    <p class="note">ทดสอบบน Chromium แบบไม่มีการ์ดจอ ภาพ 3 มิติช้ากว่าเครื่องจริงมาก ยังต้องลองบนมือถือจริง</p>
+  </section>
+
+  <section class="sec" aria-labelledby="h-todo">
+    <h2 id="h-todo">สิ่งที่รอจากเจ้าของ</h2>
+    <ol class="todo">
+      <li>เลือกชุดหรือแบบที่จะใช้จริง (หรือผสม เช่น ใช้ D/E/F เป็นหน้าแรกและหน้าฟีเจอร์)</li>
+      <li>ภาพหรือวิดีโอหน้างานจริงของทีม — ใส่แทนบางบทของภาพยนตร์ D ได้</li>
+      <li>ลองบนมือถือจริง 2–3 รุ่น โดยเฉพาะภาพยนตร์ D และห้องโฮโลแกรม F</li>
+      <li>ราคา FUJIVA ทุกรุ่น และรูปสินค้าจริง</li>
+      <li>Deploy ระบบรับใบจอง (Apps Script) เพื่อเปิดรับรูปและคิวสด</li>
+    </ol>
+  </section>
+</main>
+
+<main class="try" id="try" hidden>
+  <section class="stage" aria-label="เว็บที่กำลังทดลอง"><div class="lbl"><span><b id="tname">D · Holo Cinema</b></span><span id="tdev">คอม 1366</span></div><div id="screen"></div></section>
+  <aside class="guide" id="guide" aria-label="ลองทำสิ่งนี้"></aside>
+</main>
+
+<script>
+// Rev.32 showcase — packed build: each design is a gzip+base64 pack shown with srcdoc; dev server: ./x.html in the frame
+const V = {
+  d: { th: 'D · Holo Cinema', c: 'var(--D)', set: 2 }, e: { th: 'E · Atelier 2050', c: 'var(--E)', set: 2 }, f: { th: 'F · Holodeck', c: 'var(--F)', set: 2 },
+  a: { th: 'A · Bento Clean', c: 'var(--A)', set: 1 }, b: { th: 'B · Engineering Sheet', c: 'var(--B)', set: 1 }, c: { th: 'C · Virtual Showroom', c: 'var(--C)', set: 1 },
+};
+const COMMON = [['ใบเสนอราคา', 'ปุ่ม "ใบเสนอราคา" มุมขวาบน ใส่พื้นที่แล้วดูยอดก่อน VAT · VAT · รวม', ''], ['จองล้างแอร์', 'เลือกประเภท ขนาด จำนวน และวัน ดูยอดรวม', 'book']];
+const TRY = {
+  d: [['เปิดเสียง', 'กดปุ่ม "เสียง" มุมขวาบนของเว็บ (เสียงสังเคราะห์ในเครื่อง ปิดได้ทุกเมื่อ)', ''], ['เลื่อนดูภาพยนตร์ 5 บท', 'เลื่อนลงช้า ๆ กล้องบินเข้าห้อง ลมอ่อน → สแกน → ล้าง → ห้องเย็น', 'film'], ['ดูกราฟก่อน/หลังล้าง', 'มุมขวาบนของภาพ เส้นส้ม = คอยล์สกปรก เส้นฟ้า = หลังล้าง', 'film'], ['ขยับเมาส์บนภาพ', 'HUD ลอยตามเมาส์ แสงวาบทุกครั้งที่เปลี่ยนบท', 'film'], ...COMMON],
+  e: [['ตอบ 4 คำถาม', 'แอร์อยู่ที่ไหน กี่เครื่อง กังวลอะไร เมื่อไร แล้วดูแผนที่จัดลำดับให้', 'concierge'], ['เปิดเสียง', 'ปุ่ม "เสียง" มุมขวาบน แล้วตอบคำถาม จะมีเสียงคลิกและเสียงยืนยันเมื่อได้แผน', ''], ['เล่นทั้งวัน', 'ห้องนั่งเล่น: กด "เล่นทั้งวัน" ดูแดด ลูกศรความร้อน และอุณหภูมิห้อง', 'concierge'], ['ลองคอยล์สกปรก', 'กด "คอยล์สกปรก" ลมผ่านคอยล์ลดลง ห้องร้อนขึ้นช่วงบ่าย', 'concierge'], ...COMMON],
+  f: [['หมุนห้องโฮโลแกรม', 'ลากห้องแล้วปล่อย ห้องหมุนต่อนิดหนึ่งแล้วหยุดนุ่ม', 'dome'], ['สแกนห้อง', 'กด "สแกนห้อง" ป้ายข้อมูลโผล่เมื่อระนาบสแกนผ่าน', 'dome'], ['แผนที่ความร้อน', 'กด "แผนที่ความร้อน" ดูรอยลมเย็นบนพื้น', 'dome'], ['เสียงลม', 'กด "เสียงลม" ได้ยินเสียงฮัมและลมแอร์ ลองสลับ "คอยล์สกปรก" ลมจะเบาลง', 'dome'], ...COMMON],
+  a: [['เริ่มจากสิ่งที่ต้องการ', 'หน้าแรก "วันนี้ต้องการอะไร" เลือก 1 งาน', 'start'], ['ทีมช่างล้าง/ติดตั้ง', 'เลือกงาน ประเภทแอร์ แล้วกดเล่น', 'cleanflow'], ['ห้องจำลอง', 'เลือกห้องของตัวเอง ปรับขนาด ดูผลของการไม่ล้าง', 'studio'], ...COMMON],
+  b: [['ประเมินงบสัญญารายปี', 'เลือกแบบอาคาร ใส่จำนวนเครื่อง ดูแผนทั้งปี', 'b2b'], ['ลำดับการทำงาน 3 มิติ', 'ดูไฟ ลม น้ำยา น้ำทิ้งไหลตามเส้นทางจริง', 'howto'], ['ห้องจำลอง', 'เลือกห้ององค์กร ปรับขนาด', 'studio'], ...COMMON],
+  c: [['หมุนตัวเครื่อง แยกชิ้นส่วน', 'หน้าแรก: ลาก แตะชิ้นส่วน กด "ล้างเสมือนจริง"', 'top'], ['ช่างทำงาน 4 งาน', 'ล้างปกติ ล้างใหญ่ ติดตั้ง ตรวจซ่อม ทีละขั้น', 'story'], ['ห้องจำลอง', 'เลือกห้อง ปรับขนาด', 'room'], ...COMMON],
+};
+const DEV = { desktop: { w: 1366, h: 860, th: 'คอม 1366' }, tablet: { w: 820, h: 1180, th: 'แท็บเล็ต 820' }, phone: { w: 390, h: 820, th: 'มือถือ 390' } };
+const URLS = window.SBP_URLS || {};
+const PACKED = !!document.getElementById('pack-d');
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+let S = { m: 'sum', v: 'd', d: innerWidth < 700 ? 'phone' : 'desktop' };
+try { Object.assign(S, JSON.parse(sessionStorage.getItem('sbp-showcase') || '{}')); } catch (e) {}
+const save = () => { try { sessionStorage.setItem('sbp-showcase', JSON.stringify(S)); } catch (e) {} };
+const cache = {};
+async function srcFor(v) {
+  if (cache[v]) return cache[v];
+  const b = atob(document.getElementById('pack-' + v).textContent.trim()), u8 = Uint8Array.from(b, c => c.charCodeAt(0));
+  return (cache[v] = await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).text());
+}
+// design switcher: D E F | A B C
+{ const g = $('#vs'); ['d', 'e', 'f', null, 'a', 'b', 'c'].forEach(v => { if (!v) { const s = document.createElement('span'); s.className = 'sep'; g.append(s); return; } const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.textContent = v.toUpperCase(); b.style.setProperty('--c', V[v].c); b.setAttribute('aria-label', V[v].th); b.addEventListener('click', () => { S.v = v; S.m = 'try'; save(); render(); }); g.append(b); }); }
+$$('[data-m]').forEach(b => b.addEventListener('click', () => { S.m = b.dataset.m; save(); render(); }));
+$$('[data-d]').forEach(b => b.addEventListener('click', () => { S.d = b.dataset.d; save(); render(); }));
+$$('[data-try]').forEach(b => b.addEventListener('click', () => { S.v = b.dataset.try; S.m = 'try'; save(); render(); scrollTo(0, 0); }));
+addEventListener('message', e => { const g = e.data && e.data.sbpGo; if (g && V[g]) { S.v = g; S.m = 'try'; save(); render(); } });
+let frame = null, shown = '';
+function render() {
+  $$('[data-m]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === S.m)));
+  $$('#vs [data-v]').forEach(b => b.setAttribute('aria-pressed', String(S.m === 'try' && b.dataset.v === S.v)));
+  $$('[data-d]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === S.d)));
+  $('#ds').hidden = S.m !== 'try';
+  $('#sum').hidden = S.m !== 'sum'; $('#try').hidden = S.m !== 'try';
+  $('#full').href = PACKED ? (URLS[S.v] || '#') : `./${S.v}.html`; $('#full').hidden = PACKED && !URLS[S.v];
+  if (S.m !== 'try') return;
+  const key = S.v + S.d; const dev = DEV[S.d];
+  $('#tname').textContent = V[S.v].th; $('#tdev').textContent = dev.th; $('#guide').style.setProperty('--c', V[S.v].c);
+  guide();
+  if (key === shown) { fit(); return; } shown = key;
+  const box = $('#screen'); box.innerHTML = '';
+  const ifr = document.createElement('iframe'); ifr.title = 'เว็บแบบ ' + V[S.v].th; ifr.allow = 'autoplay; fullscreen';
+  const scr = document.createElement('div'); scr.className = 'screen' + (S.d === 'phone' ? ' phone' : '');
+  const ld = document.createElement('div'); ld.className = 'loading'; ld.textContent = 'กำลังเปิดแบบ ' + S.v.toUpperCase() + ' …'; scr.append(ld, ifr); box.append(scr);
+  ifr.addEventListener('load', () => { if (PACKED && !ifr.srcdoc) return; ld.remove(); });
+  if (PACKED) srcFor(S.v).then(h => { ifr.srcdoc = h; }).catch(() => { ld.textContent = 'เบราว์เซอร์นี้แตกไฟล์ไม่ได้ กรุณากด "เปิดเต็มจอ"'; }); else ifr.src = `./${S.v}.html`;
+  frame = { ifr, scr, dev }; fit();
+}
+function fit() {
+  if (!frame) return; const { ifr, scr, dev } = frame; const pad = dev === DEV.phone ? 18 : 2;
+  const bw = $('#screen').clientWidth - pad, availH = Math.max(420, innerHeight - (innerWidth < 1060 ? 150 : 110));
+  const k = Math.min(1, bw / dev.w), hh = Math.min(dev.h * k, availH);
+  ifr.style.width = dev.w + 'px'; ifr.style.height = (hh / k) + 'px'; ifr.style.transform = `scale(${k})`;
+  scr.style.width = (dev.w * k + pad) + 'px'; scr.style.height = (hh + pad) + 'px';
+}
+addEventListener('resize', () => { clearTimeout(fit._t); fit._t = setTimeout(fit, 120); });
+function jump(id) {
+  try { const w = frame.ifr.contentWindow, t = id && w.document.getElementById(id); if (!t) { if (!id) w.document.querySelector('[data-cart-btn]')?.click(); return; } t.scrollIntoView({ block: 'start' }); } catch (e) {}
+}
+function guide() {
+  const g = $('#guide'); g.innerHTML = '';
+  const k = document.createElement('p'); k.className = 'k'; k.textContent = V[S.v].set === 2 ? 'เว็บไซต์ชุดที่ 2 · HIGH-TECH' : 'เว็บไซต์ชุดที่ 1';
+  const h = document.createElement('h2'); h.textContent = 'ลองทำสิ่งนี้ใน ' + V[S.v].th;
+  const ul = document.createElement('ul'); ul.className = 'tasks';
+  TRY[S.v].forEach(([b, d, id], i) => { const li = document.createElement('li'); const n = document.createElement('i'); n.textContent = String(i + 1).padStart(2, '0'); const box = document.createElement('div'); const bb = document.createElement('b'); bb.textContent = b; const sp = document.createElement('span'); sp.textContent = d; box.append(bb, sp); const go = document.createElement('button'); go.type = 'button'; go.textContent = id ? 'ไปที่จุดนี้' : (b === 'ใบเสนอราคา' ? 'เปิดใบเสนอราคา' : 'ไปด้านบน'); go.addEventListener('click', () => b === 'เปิดเสียง' ? jumpTop() : jump(id)); box.append(go); li.append(n, box); ul.append(li); });
+  const tip = document.createElement('p'); tip.className = 'note'; tip.textContent = 'ภาพ 3 มิติในกรอบนี้ย่อตามขนาดจอที่เลือก ถ้าต้องการความลื่นเต็มที่ กด "เปิดเต็มจอ" มุมขวาบน';
+  g.append(k, h, ul, tip);
+}
+function jumpTop() { try { frame.ifr.contentWindow.scrollTo(0, 0); } catch (e) {} }
+render();
+</script>
+</body>
+</html>

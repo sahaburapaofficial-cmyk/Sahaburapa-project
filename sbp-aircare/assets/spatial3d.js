@@ -19,6 +19,7 @@ import { buildOutdoor, materialSet } from './ac3d.js';
 import { tempColor } from './airflow3d.js';
 import { h, $, baht } from './sbp-core.js';
 import { cleanFrom } from './quickclean.js';
+import { sound } from './luxsound.js';
 import { SCENE_BY_ID, defaultOrient, thermal, stepT, timeToSet, steadyT, needBtu, STD_SIZES, effects, T_SET } from './studio-model.js';
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -102,6 +103,9 @@ function createDiorama(host, labels, o) {
   const field = new THREE.Points(fgeo, fieldM); dio.add(field);
   scene.updateMatrixWorld(true);
   const vent = room.vent(new THREE.Vector3()); dio.worldToLocal(vent);
+  // ★Rev.32 light & colour follow the room temperature: hot room = amber edges, cooled room = cyan; a cool fill from the outlet while it blows
+  const cHot = new THREE.Color(0xffa060), cCool = new THREE.Color(0x4df3ff), cNow = new THREE.Color();
+  const coolF = new THREE.PointLight(0x8fe3ff, 0, 4.5, 1.6); coolF.position.copy(vent).add(new THREE.Vector3(0, -0.5, 0.8)); dio.add(coolF);
   // anchors for the HTML pins (local to the diorama)
   const anchors = { unit: vent.clone().add(new THREE.Vector3(0, 0.12, 0)), cdu: new THREE.Vector3(W / 2 - 0.75, 0.78, D / 2 + 0.75), win: new THREE.Vector3(W / 2 - 0.05, 1.5, 0.1), bed: new THREE.Vector3(-0.6, 0.75, -D / 2 + 1.2) };
   const cardAt = { room: new THREE.Vector3(-W / 2, HH + 0.05, -D / 2), need: vent.clone().add(new THREE.Vector3(0.1, 0.5, 0)), out: anchors.win.clone().add(new THREE.Vector3(0, 0.75, 0.4)), people: anchors.bed.clone().add(new THREE.Vector3(0, 0.45, 0)), jet: vent.clone().add(new THREE.Vector3(0, -0.75, 1.3)) };
@@ -111,12 +115,13 @@ function createDiorama(host, labels, o) {
   let sw = 0, sh = 0, spr = 0;   // Rev.30 smooth: GL buffers are reallocated only when the size really changed
   const size = () => { const r = host.getBoundingClientRect(); Wd = Math.max(1, Math.round(r.width)); Hd = Math.max(1, Math.round(r.height)); if (Wd === sw && Hd === sh && renderer.getPixelRatio() === spr) return; sw = Wd; sh = Hd; spr = renderer.getPixelRatio(); renderer.setSize(Wd, Hd, false); cam.aspect = Wd / Hd; orb.r = Wd / Hd < 0.9 ? 18.5 : Wd / Hd < 1.3 ? 15.5 : 13.6; cam.updateProjectionMatrix(); };
   size(); const ro = new ResizeObserver(size); ro.observe(host);
-  const io = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible) loop(); }, { rootMargin: '10% 0px' }); io.observe(host);
+  const io = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); const S = o.state(); S.vis = visible; sound.focus(visible); if (!visible) sound.air(0); if (visible) loop(); }, { rootMargin: '10% 0px' }); io.observe(host);
   // drag to turn (horizontal on touch so the page still scrolls)
   let drag = null;
-  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, th: orb.tth, ph: orb.ph }; orb.user = performance.now(); });
-  addEventListener('pointerup', () => { drag = null; });
-  addEventListener('pointermove', e => { if (!drag) return; orb.tth = clamp(drag.th - (e.clientX - drag.x) * 0.006, -1.45, 0.3); if (e.pointerType === 'mouse') orb.ph = clamp(drag.ph - (e.clientY - drag.y) * 0.004, 0.62, 1.32); orb.user = performance.now(); });
+  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, th: orb.tth, ph: orb.ph }; orb.user = performance.now(); orb.spin = 0; vel = 0; lastX = e.clientX; lastT = performance.now(); });
+  let vel = 0, lastX = 0, lastT = 0;   // ★Rev.32 motion: a flick keeps the room turning a little, then it settles
+  addEventListener('pointerup', () => { if (drag && !RM()) orb.spin = clamp(vel, -2.2, 2.2); drag = null; });
+  addEventListener('pointermove', e => { if (!drag) return; const n = performance.now(); if (lastT) vel = vel * 0.6 + 0.4 * (-(e.clientX - lastX) * 0.006) / Math.max(0.008, (n - lastT) / 1000); lastX = e.clientX; lastT = n; orb.tth = clamp(drag.th - (e.clientX - drag.x) * 0.006, -1.45, 0.3); if (e.pointerType === 'mouse') orb.ph = clamp(drag.ph - (e.clientY - drag.y) * 0.004, 0.62, 1.32); orb.user = performance.now(); });
   const v = new THREE.Vector3(), col = [0, 0, 0];
   let scanY = -9;   // height of the scan plane (room metres); the air it passes glows brighter
   function paintField(S) {
@@ -143,6 +148,7 @@ function createDiorama(host, labels, o) {
   function frame(dt) {
     t += dt;
     if (!RM() && performance.now() - orb.user > 4000) orb.tth += (-0.62 + Math.sin(t * 0.12) * 0.45 - orb.tth) * 0.01;
+    if (orb.spin) { orb.tth = clamp(orb.tth + orb.spin * dt, -1.45, 0.3); orb.spin *= Math.pow(0.04, dt); if (Math.abs(orb.spin) < 0.02 || orb.tth <= -1.45 || orb.tth >= 0.3) orb.spin = 0; orb.user = performance.now(); }
     orb.th += (orb.tth - orb.th) * Math.min(1, dt * 6);
     cam.position.set(Math.sin(orb.th) * Math.sin(orb.ph) * orb.r, Math.cos(orb.ph) * orb.r + 0.3, Math.cos(orb.th) * Math.sin(orb.ph) * orb.r);
     const bob = RM() ? 0 : Math.sin(t * 0.6) * 0.04;   // the diorama floats — the camera breathes instead of moving the room, so its shadows stay valid
@@ -156,6 +162,8 @@ function createDiorama(host, labels, o) {
     scanPlane.material.opacity = 0.07 * Math.sin(Math.min(1, sc) * Math.PI);
     if (!RM()) { streak.offset.y = -t * 0.12; padRing.scale.setScalar(1 + Math.sin(t * 1.6) * 0.04); }
     edgeM.opacity = 0.45 + Math.sin(t * 0.9) * 0.1;
+    { const kT = clamp((S.T - 24.5) / 7); cNow.copy(cCool).lerp(cHot, kT); edgeM.color.copy(cNow); ring.material.color.copy(cNow);
+      coolF.intensity += ((S.running ? 1.4 * effects(S.dirt).air * (1.15 - kT) : 0) - coolF.intensity) * Math.min(1, dt * 3); }
     room.setDirt(S.dirt);
     OU.parts && OU.parts['o-fan'] && S.running && (OU.parts['o-fan'].rotation.z -= dt * 14);
     paintField(S);
@@ -222,17 +230,6 @@ function dotTex() {
   g.fillStyle = gr; g.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(c); return t;
 }
 
-/* ---- the fan's sound (5th dimension): brown noise through a low-pass, level ∝ fan; created only on the visitor's click ---- */
-function fanSound() {
-  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
-  const ctx = new AC(), len = ctx.sampleRate * 2, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
-  let lastV = 0; for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; lastV = (lastV + 0.02 * w) / 1.02; d[i] = lastV * 3.2; }
-  const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
-  const g = ctx.createGain(); g.gain.value = 0; src.connect(lp).connect(g).connect(ctx.destination); src.start();
-  return { level(v) { g.gain.setTargetAtTime(v * 0.12, ctx.currentTime, 0.3); lp.frequency.setTargetAtTime(500 + v * 900, ctx.currentTime, 0.3); }, close() { try { ctx.close(); } catch (_) {} } };
-}
-
 /** mountSpatial(root, { go }) — the diorama, its hotspots, and the climate lab beside it */
 export function mountSpatial(root, { go = () => {} } = {}) {
   if (!root) return null;
@@ -242,7 +239,7 @@ export function mountSpatial(root, { go = () => {} } = {}) {
   const info = h('div', { class: 'sp-info', 'aria-live': 'polite' }, h('p', { class: 'sp-k' }, 'แตะจุดเรืองแสงในห้อง'), h('p', {}, 'ดูว่าแต่ละส่วนของห้องเกี่ยวกับความเย็นและค่าใช้จ่ายอย่างไร'));
   const labels = {};
   HOTS.forEach(x => { const b = h('button', { type: 'button', class: 'sp-pin', 'aria-label': x.th, onclick: () => pick(x) }, h('span', {}, x.th)); labels[x.id] = b; pins.append(b); });
-  function pick(x) { Object.values(labels).forEach(b => b.classList.toggle('sel', b === labels[x.id])); info.innerHTML = ''; info.append(h('p', { class: 'sp-k' }, x.th), h('p', {}, x.text()), h('button', { type: 'button', class: 'btn-ghost', onclick: () => go(x.go) }, x.cta)); }
+  function pick(x) { sound.cue('tick'); Object.values(labels).forEach(b => b.classList.toggle('sel', b === labels[x.id])); info.innerHTML = ''; info.append(h('p', { class: 'sp-k' }, x.th), h('p', {}, x.text()), h('button', { type: 'button', class: 'btn-ghost', onclick: () => go(x.go) }, x.cta)); }
   // climate lab
   const big = h('b', { class: 'sp-T' }), sub = h('small', {}), t25 = h('p', { class: 'sp-t25' });
   const chart = h('div', { class: 'sp-chart', 'aria-hidden': 'true' });
@@ -251,8 +248,9 @@ export function mountSpatial(root, { go = () => {} } = {}) {
   const playB = h('button', { type: 'button', class: 'sp-play', 'aria-pressed': String(S.playing) }, S.playing ? 'หยุดเวลา' : 'เดินเวลา');
   playB.addEventListener('click', () => { S.playing = !S.playing; playB.setAttribute('aria-pressed', String(S.playing)); playB.textContent = S.playing ? 'หยุดเวลา' : 'เดินเวลา'; });
   const resetB = h('button', { type: 'button', class: 'btn-ghost', onclick: () => { S.m = 0; S.T = 32; S.hist = [32]; C = makeClimate(S); draw(); } }, 'เริ่มใหม่จาก 32°C');
-  let snd = null; const sndB = h('button', { type: 'button', 'aria-pressed': 'false' }, 'เสียงลม');
-  sndB.addEventListener('click', () => { if (snd) { snd.close(); snd = null; sndB.setAttribute('aria-pressed', 'false'); } else { snd = fanSound(); sndB.setAttribute('aria-pressed', String(!!snd)); } });
+  // ★Rev.32: "เสียงลม" is the page's sound switch (luxsound) — the air you hear follows the airflow below; hum + scan sweep come with it
+  const sndB = h('button', { type: 'button', 'aria-pressed': 'false' }, 'เสียงลม');
+  sndB.addEventListener('click', () => sound.set(!sound.on)); sound.subscribe(v => sndB.setAttribute('aria-pressed', String(v)));
   const lab = h('div', { class: 'sp-lab' },
     h('div', { class: 'sp-read' }, h('div', {}, h('small', {}, 'ในห้อง (แบบจำลอง)'), big, sub), chart, t25),
     h('div', { class: 'sp-ctl' }, rng('อากาศนอกบ้าน', 29, 38, 0.5, 'out', v => v + '°C'), rng('คนในห้อง', 1, 6, 1, 'people', v => v + ' คน'),
@@ -266,9 +264,9 @@ export function mountSpatial(root, { go = () => {} } = {}) {
   const scanB = h('button', { type: 'button', class: 'sp-scan', 'aria-pressed': 'false' }, 'สแกนห้อง');
   // on phones the buttons sit under the room: bring the room back into view so the visitor sees what the button does
   const showRoom = () => { const r = stage.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ block: 'center', behavior: RM() ? 'auto' : 'smooth' }); };
-  scanB.addEventListener('click', () => { S.scan = !S.scan; S.scanReq = S.scan; scanB.setAttribute('aria-pressed', String(S.scan)); fillCards(); if (S.scan) showRoom(); });
+  scanB.addEventListener('click', () => { S.scan = !S.scan; S.scanReq = S.scan; scanB.setAttribute('aria-pressed', String(S.scan)); fillCards(); if (S.scan) { showRoom(); sound.cue('scan'); } else sound.cue('tick'); });
   const heatB = h('button', { type: 'button', 'aria-pressed': 'false' }, 'แผนที่ความร้อน');
-  heatB.addEventListener('click', () => { S.heat = !S.heat; heatB.setAttribute('aria-pressed', String(S.heat)); if (S.heat) showRoom(); });
+  heatB.addEventListener('click', () => { S.heat = !S.heat; heatB.setAttribute('aria-pressed', String(S.heat)); if (S.heat) showRoom(); sound.cue('tick'); });
   lab.querySelector('.sp-run').prepend(scanB); lab.querySelector('.sp-tg').append(heatB);
   function fillCards() {
     const fmt = n => Math.round(n).toLocaleString('en-US'), card = (el, k, v) => { el.innerHTML = ''; el.append(h('small', {}, k), h('b', {}, v)); };
@@ -287,7 +285,7 @@ export function mountSpatial(root, { go = () => {} } = {}) {
     const pts = S.hist.map((T, i) => `${(i / 90 * 300).toFixed(1)},${(110 - (T - 22) / 12 * 110).toFixed(1)}`).join(' ');
     chart.innerHTML = `<svg viewBox="0 0 300 110" preserveAspectRatio="none"><line x1="0" x2="300" y1="${110 - (T_SET - 22) / 12 * 110}" y2="${110 - (T_SET - 22) / 12 * 110}" class="sp-set"/><polyline points="${pts}" class="sp-line"/></svg>`;
     root.style.setProperty('--sp-k', clamp((S.T - 22) / 12).toFixed(3));
-    snd && snd.level(S.running ? effects(S.dirt).air : 0);
+    sound.air(S.running && S.vis !== false ? effects(S.dirt).air : 0);
   }
   const tick = dt => {
     if (!S.playing) return;

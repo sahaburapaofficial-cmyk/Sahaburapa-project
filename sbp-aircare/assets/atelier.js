@@ -11,6 +11,7 @@ import { h, $, baht, DATA, TRAVEL, VOLUME_HINT, QUEUE_RULES } from './sbp-core.j
 import { cleanFrom } from './quickclean.js';
 import { askTeam } from './contact.js';
 import { runWhenVisible } from './animicons.js';
+import { sound } from './luxsound.js';
 import { SCENE_BY_ID, defaultOrient, thermal, steadyT, effects, needBtu, STD_SIZES } from './studio-model.js';
 
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -52,16 +53,18 @@ export function mountConcierge(root, { go = () => {}, openCart = () => {}, prefi
   const TYPE_TH = [['wall', 'ติดผนัง'], ['ceiling', 'แขวนใต้ฝ้า'], ['cassette', 'สี่ทิศทาง'], ['floor', 'ตู้ตั้งพื้น']];
   const cleanTypes = () => h('div', { class: 'at-types', role: 'group', 'aria-label': 'ประเภทแอร์ที่จะล้าง' }, h('span', {}, `เปิดฟอร์มจองพร้อม ${A.units || 1} เครื่อง:`),
     TYPE_TH.map(([t, th]) => h('button', { type: 'button', onclick: () => { prefill(Object.fromEntries(TYPE_TH.map(([k]) => [k, k === t ? Number(A.units || 1) : 0]))); go('book'); } }, th)));
+  let shown = -1;
   function render() {
     store.set('sbp-concierge-v1', A);
     [...prog.children].forEach((li, i) => li.className = i < step ? 'done' : i === step ? 'on' : '');
     body.innerHTML = ''; res.innerHTML = '';
     if (step < QUESTIONS.length) {
+      shown = step;
       const q = QUESTIONS[step];
       const grp = h('div', { class: 'at-opts', role: q.one ? 'radiogroup' : 'group', 'aria-label': q.th });
       q.opts.forEach(([v, th]) => {
         const on = q.one ? A[q.id] === v : A.care.includes(v);
-        grp.append(h('button', { type: 'button', class: 'at-opt', role: q.one ? 'radio' : null, 'aria-checked': q.one ? String(on) : null, 'aria-pressed': q.one ? null : String(on), onclick: () => {
+        grp.append(h('button', { type: 'button', class: 'at-opt', role: q.one ? 'radio' : null, 'aria-checked': q.one ? String(on) : null, 'aria-pressed': q.one ? null : String(on), onclick: () => { sound.cue('tick');
           if (q.one) { A[q.id] = v; step++; } else { A.care = on ? A.care.filter(x => x !== v) : [...A.care, v]; }
           render();
         } }, th));
@@ -72,6 +75,7 @@ export function mountConcierge(root, { go = () => {}, openCart = () => {}, prefi
       return;
     }
     const plan = planFor(A);
+    if (shown !== 'plan') { shown = 'plan'; sound.cue('chime'); }   // ★Rev.32: a soft resolve when the plan appears (sound on only)
     const summary = QUESTIONS.map(q => `${q.th}: ${q.one ? (q.opts.find(o => o[0] === A[q.id]) || [, '-'])[1] : A.care.map(c => q.opts.find(o => o[0] === c)[1]).join(', ') || '-'}`).join('\n');
     res.append(h('p', { class: 'at-n' }, 'แผนบริการสำหรับคุณ'), h('h3', {}, 'สิ่งที่เราแนะนำ ตามลำดับ'),
       h('ol', { class: 'at-recs' }, plan.map((r, i) => h('li', { 'data-k': r.k, style: `--i:${i}` }, h('span', { class: 'at-i' }, String(i + 1).padStart(2, '0')),
@@ -80,7 +84,14 @@ export function mountConcierge(root, { go = () => {}, openCart = () => {}, prefi
       h('div', { class: 'at-nav' }, h('button', { type: 'button', class: 'btn-primary', onclick: () => askTeam('ปรึกษาบริการ', 'แผนบริการที่เลือกบนเว็บ\n' + summary) }, 'ให้ทีมโทรกลับพร้อมแผนนี้'),
         h('button', { type: 'button', class: 'btn-ghost', onclick: openCart }, 'ดูใบเสนอราคา'), h('button', { type: 'button', class: 'at-link', onclick: () => { step = 0; A.care = []; A.careDone = false; QUESTIONS.forEach(q => q.one && delete A[q.id]); render(); } }, 'เริ่มใหม่')));
   }
-  root.append(h('div', { class: 'at-con' }, prog, body, res));
+  const con = h('div', { class: 'at-con' }, prog, body, res);
+  root.append(con);
+  // ★Rev.32 motion (D/E/F pages, mouse only): the card tilts a little toward the pointer, like a pane of glass
+  if (document.documentElement.dataset.lux && !RM() && matchMedia('(hover:hover) and (pointer:fine)').matches) {
+    let pend = false, px = 0, py = 0;
+    con.addEventListener('pointermove', e => { const r = con.getBoundingClientRect(); px = (e.clientX - r.left) / r.width - 0.5; py = (e.clientY - r.top) / r.height - 0.5; if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; con.style.transform = `perspective(1100px) rotateX(${(-py * 3).toFixed(2)}deg) rotateY(${(px * 4).toFixed(2)}deg)`; }); }, { passive: true });
+    con.addEventListener('pointerleave', () => { con.style.transform = ''; });
+  }
   render();
   return { answers: A, plan: () => planFor(A) };
 }
@@ -108,6 +119,7 @@ const SVG = `<svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid slice" ari
   <radialGradient id="at-lamp" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".85"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>
   <linearGradient id="at-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b98d63"/><stop offset="1" stop-color="#8a6243"/></linearGradient>
   <linearGradient id="at-air" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe8ff" stop-opacity=".9"/><stop offset="1" stop-color="#bfe8ff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="at-bloomg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6dc" stop-opacity=".75"/><stop offset=".35" stop-color="#ffe2a8" stop-opacity=".28"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
   <clipPath id="at-win"><rect x="470" y="70" width="250" height="250" rx="4"/></clipPath>
 </defs>
 <g class="at-l" data-depth="0.25" clip-path="url(#at-win)">
@@ -126,6 +138,7 @@ const SVG = `<svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid slice" ari
   <rect x="456" y="326" width="278" height="10" rx="3" class="at-sill"/>
   <polygon class="at-shaft" points="470,90 720,90 560,520 120,520" fill="url(#at-shaft)"/>
 </g>
+<g class="at-l" data-depth="0.25"><circle class="at-bloom" cx="600" cy="200" r="150" fill="url(#at-bloomg)"/></g>
 <g class="at-l" data-depth="0.18">
   <path d="M0 420h800v100H0z" fill="url(#at-floor)"/>
   <g class="at-planks" stroke="rgba(60,35,18,.25)" stroke-width="1">${[...Array(9)].map((_, i) => `<path d="M${-200 + i * 140} 520L${80 + i * 80} 420"/>`).join('')}</g>
@@ -168,10 +181,12 @@ export function mountDayRoom(root) {
     h('label', { class: 'at-range' }, range), h('div', { class: 'at-tg' }, play, onB, dirtyB), status,
     h('p', { class: 'at-fine' }, `ภาพประกอบ · อุณหภูมิจากแบบจำลองห้องนั่งเล่น ${SC.w} × ${SC.d} ม. แอร์ ${CAP.toLocaleString('en-US')} BTU ของห้องจำลองบนเว็บ ไม่ใช่ค่าวัดจริง`));
   root.append(h('div', { class: 'at-room' }, art, ctl));
-  runWhenVisible(art);   // Rev.30 smooth: curtains, motes, leaves and breeze animate only while the room is on screen
+  runWhenVisible(art);
+  let seen = false;
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { seen = es.some(e => e.isIntersecting); sound.focus(seen); if (seen) paint(); else sound.air(0); }, { threshold: 0.3 }).observe(art);   // Rev.30 smooth: curtains, motes, leaves and breeze animate only while the room is on screen
   const svg = $('svg', art), s0 = $('.at-s0', art), s1 = $('.at-s1', art), sun = $('.at-sun', art), moon = $('.at-moon', art), tint = $('.at-tint', art),
     shaft = $('.at-shaft', art), glow = $('.at-glow', art), breeze = $('.at-breeze', art), lights = $('.at-lights', art), wall = $('.at-wall', art), disp = $('.at-ud', art),
-    tvOut = $('.at-tv-out', art), tvIn = $('.at-tv-in', art), tvU = $('.at-tv-u', art), rings = $('.at-rings', art),
+    bloom = $('.at-bloom', art), tvOut = $('.at-tv-out', art), tvIn = $('.at-tv-in', art), tvU = $('.at-tv-u', art), rings = $('.at-rings', art),
     flIn = $('.at-flow .in', art), flOut = $('.at-flow .out', art), flInT = $('.at-fl-in', art), flOutT = $('.at-fl-out', art);
   for (let i = 0; i < 40; i++) { const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', 446 + (i * 53) % 300); r.setAttribute('y', 270 + (i * 29) % 56); r.setAttribute('width', 3); r.setAttribute('height', 3); lights.append(r); }
   let hr = 15, on = true, dirt = 0.05;
@@ -180,6 +195,8 @@ export function mountDayRoom(root) {
     const day = clamp(Math.sin(Math.PI * (hr - 6) / 12.5)), night = 1 - clamp((hr < 12 ? hr - 5.5 : 19.5 - hr) / 1.5);
     const sx = lerp(470, 720, clamp((hr - 6) / 12.5)), sy = 300 - 230 * day;
     sun.setAttribute('cx', sx.toFixed(1)); sun.setAttribute('cy', sy.toFixed(1)); sun.style.opacity = day > 0.02 ? 1 : 0;
+    // ★Rev.32 light: the sun blooms past the window frame, strongest low in the sky (golden hour), gone at night
+    bloom.setAttribute('cx', sx.toFixed(1)); bloom.setAttribute('cy', sy.toFixed(1)); bloom.style.opacity = (day > 0.02 ? 0.5 + 0.5 * (1 - day) : 0).toFixed(2);
     moon.style.opacity = night.toFixed(2);
     // light shaft follows the sun: low sun reaches deeper into the room
     const reach = lerp(120, 520, clamp(1 - day)), base = lerp(560, 300, clamp((hr - 6) / 12.5));
@@ -197,6 +214,7 @@ export function mountDayRoom(root) {
     // ★Rev.31.1 heat flow: in through the glass (outdoor–indoor gap, stronger in the sun), out through the unit while it runs — illustration
     const kin = clamp((O - T) / 10) * (0.35 + 0.65 * day), kout = on ? effects(dirt).air * 0.9 : 0;
     flIn.style.opacity = flInT.style.opacity = kin.toFixed(2); flOut.style.opacity = flOutT.style.opacity = kout.toFixed(2);
+    if (seen) sound.air(on ? effects(dirt).air * 0.85 : 0);   // ★Rev.32 the unit's air, heard only while the room is on screen
     timeOut.textContent = `${String(Math.floor(hr)).padStart(2, '0')}:${String(Math.round((hr % 1) * 60)).padStart(2, '0')}`;
     outT.textContent = O.toFixed(1) + '°C'; inT.textContent = T.toFixed(1) + '°C';
     status.textContent = !on ? 'ปิดแอร์: ห้องร้อนตามอากาศนอกบ้าน' : T <= 25.05 ? 'ตั้ง 25°C · ห้องอยู่ที่อุณหภูมิที่ตั้งไว้' : `ตั้ง 25°C · ช่วงนี้เครื่องทำได้แค่ ${T.toFixed(1)}°C${dirt > 0.5 ? ' (คอยล์สกปรก ลมผ่านได้น้อย)' : ''}`;

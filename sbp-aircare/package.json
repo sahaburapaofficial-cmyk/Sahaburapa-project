@@ -37,7 +37,8 @@
     "boot": "node tests/boot.mjs",
     "profile": "node tests/profile.mjs",
     "layout": "node tests/layout.mjs",
-    "axe": "node tests/axe.mjs"
+    "axe": "node tests/axe.mjs",
+    "sound": "node tests/sound.mjs d.html && node tests/sound.mjs e.html && node tests/sound.mjs f.html"
   },
   "devDependencies": {
     "playwright": "1.56.0",

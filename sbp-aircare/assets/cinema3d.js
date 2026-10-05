@@ -15,6 +15,7 @@ import { createWisps } from './wisp3d.js';
 import { buildLuxRoom } from './luxroom3d.js';
 import { h } from './sbp-core.js';
 import { SCENE_BY_ID, defaultOrient, thermal, stepT, effects } from './studio-model.js';
+import { sound } from './luxsound.js';
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ss = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
@@ -105,6 +106,11 @@ function createFilm(host, o) {
   const mgeo = new THREE.BufferGeometry(); mgeo.setAttribute('position', new THREE.BufferAttribute(mpos, 3));
   const mist = new THREE.Points(mgeo, new THREE.PointsMaterial({ color: 0xdff4ff, size: 0.016, transparent: true, opacity: 0, depthWrite: false })); scene.add(mist);
   const U0 = new THREE.Vector3(); room.unitG.getWorldPosition(U0);
+  // ★Rev.32 light: cooled air lights the room — a cool fill from the outlet grows once the coil is clean; a soft glow at the outlet follows the airflow
+  const coolL = new THREE.PointLight(0x8fe3ff, 0, 5.5, 1.8); coolL.position.copy(vent).add(new THREE.Vector3(0, -0.4, 0.7)); scene.add(coolL);
+  const gc = document.createElement('canvas'); gc.width = gc.height = 64; { const g = gc.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.35, 'rgba(255,255,255,.35)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); }
+  const glowS = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), color: 0x9fe9ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+  glowS.scale.set(1.3, 0.42, 1); glowS.position.copy(vent).add(new THREE.Vector3(0, -0.06, 0.14)); scene.add(glowS);
   // ★Rev.31 holographic scan (chapter 3): a light sheet sweeps the unit and a grid lights its front — the "look inside" moment
   const scanM = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
     uniforms: { uA: { value: 0 }, uT: { value: 0 } },
@@ -142,6 +148,8 @@ function createFilm(host, o) {
     // grading: warm dusk → cool evening as the room cools
     renderer.toneMappingExposure = lerp(1.05, 0.95, ss(0.8, 1, P2));
     room.lights.warm.intensity = lerp(2.4, 1.4, ss(0.8, 1, P2));
+    coolL.intensity = 1.8 * ss(0.8, 0.97, P2) + 0.25 * ss(0.2, 0.3, P2) * (1 - ss(0.46, 0.5, P2));
+    glowS.material.opacity = 0.42 * air * (0.35 + 0.65 * cool);
     // airflow: streaks leave the vent forward and down; shorter and fainter while the coil is fouled
     wisps.begin();
     if (air > 0.01) {
@@ -233,15 +241,21 @@ export function mountCinema(root, { cta = null } = {}) {
   const telA = h('b', {}, '—'), telD = h('b', {}, '—'), telS = h('b', {}, '—');
   const tel = h('dl', { class: 'cn-tel', 'aria-hidden': 'true' }, h('dt', {}, 'ลมออก'), h('dd', {}, telA, h('i', { class: 'cn-telbar' }, h('i'))), h('dt', {}, 'ฝุ่นที่คอยล์'), h('dd', {}, telD, h('i', { class: 'cn-telbar w' }, h('i'))), h('dt', {}, 'สถานะ'), h('dd', {}, telS), h('small', {}, 'แบบจำลอง'));
   const frameHud = h('div', { class: 'cn-frame', 'aria-hidden': 'true' });
-  const stick = h('div', { class: 'cn-stick' }, stage, frameHud, ret, tel, skip, h('div', { class: 'cn-grade', 'aria-hidden': 'true' }), h('div', { class: 'cn-grain', 'aria-hidden': 'true' }),
+  const leak = h('div', { class: 'cn-leak', 'aria-hidden': 'true' });   // ★Rev.32 light leak swept across on each new chapter
+  const stick = h('div', { class: 'cn-stick', 'data-ch': '0' }, stage, h('div', { class: 'cn-tint', 'aria-hidden': 'true' }), leak, frameHud, ret, tel, skip, h('div', { class: 'cn-grade', 'aria-hidden': 'true' }), h('div', { class: 'cn-grain', 'aria-hidden': 'true' }),
     h('div', { class: 'cn-bars', 'aria-hidden': 'true' }, h('i'), h('i')), cap, hud, scrub, cta ? h('div', { class: 'cn-cta' }, cta) : null,
     h('p', { class: 'cn-note' }, 'ภาพยนตร์จำลองเพื่ออธิบาย · ตัวเลขจากแบบจำลองห้องเดียวกับห้องจำลองบนเว็บ'));
   const trk = h('div', { class: 'cn-track' + (still ? ' still' : '') }, stick);
+  // ★Rev.32 holographic depth: the HUD layers drift a few pixels against the pointer (mouse only, motion allowed)
+  if (!still && matchMedia('(hover:hover) and (pointer:fine)').matches) { let pend = false, px = 0, py = 0; stick.addEventListener('pointermove', e => { const r = stick.getBoundingClientRect(); px = (e.clientX - r.left) / r.width - 0.5; py = (e.clientY - r.top) / r.height - 0.5; if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; stick.style.setProperty('--px', px.toFixed(3)); stick.style.setProperty('--py', py.toFixed(3)); }); }, { passive: true }); }
+  // the film's sound only while the film is on screen (the bed drops, the air stops when the visitor reads on)
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { const v = es.some(e => e.isIntersecting); sound.focus(v); if (!v) sound.air(0); }, { threshold: 0.25 }).observe(trk);
   const text = h('ol', { class: 'cn-text' }, CHAPTERS.map(c => h('li', {}, h('b', {}, c.k, ' · ', c.t), ' ', c.s)));
   root.append(trk, text);
   let cur = -1, film = null;
   const btns = CHAPTERS.map((c, i) => { const b = h('button', { type: 'button', 'aria-label': `${c.k} ${c.t}`, onclick: () => goTo(c.p + 0.02) }, h('span', {}, String(i + 1).padStart(2, '0')), h('em', {}, c.t), h('i')); scrub.append(b); return b; });
-  const showCap = i => { if (i === cur) return; cur = i; const c = CHAPTERS[i]; cap.innerHTML = ''; cap.append(h('p', { class: 'cn-k' }, c.k, h('span', {}, ` / ${CHAPTERS.length}`)), h('h2', {}, c.t), h('p', { class: 'cn-s' }, c.s)); cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); btns.forEach((b, j) => b.setAttribute('aria-current', j === i ? 'step' : 'false')); };
+  let cueS = false, cueL = false, cueW = false;   // ★Rev.32 sound cues fire once per pass
+  const showCap = i => { if (i === cur) return; if (cur >= 0) { sound.cue(i === CHAPTERS.length - 1 && i > cur ? 'chime' : 'whoosh'); if (!still) { leak.classList.remove('go'); void leak.offsetWidth; leak.classList.add('go'); } } cur = i; stick.dataset.ch = String(i); const c = CHAPTERS[i]; cap.innerHTML = ''; cap.append(h('p', { class: 'cn-k' }, c.k, h('span', {}, ` / ${CHAPTERS.length}`)), h('h2', {}, c.t), h('p', { class: 'cn-s' }, c.s)); cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); btns.forEach((b, j) => b.setAttribute('aria-current', j === i ? 'step' : 'false')); };
   const onFrame = (q, f) => {
     if (f) {
       // the reticle shows only while the unit sits well inside the frame (not under the letterbox, the captions or the read-outs)
@@ -249,6 +263,11 @@ export function mountCinema(root, { cta = null } = {}) {
       ret.classList.toggle('on', on); if (on) ret.style.transform = `translate(${f.x.toFixed(1)}px,${f.y.toFixed(1)}px)`;
       ret.classList.toggle('flip', f.x > f.W - 340);
       ret.classList.toggle('lock', f.scan > 0.98 && f.wash < 0.98);
+      // ★Rev.32 sound: the scan sweep, the lock, the wash, and the air leaving the unit (weaker before cleaning)
+      if (f.scan > 0.03 && !cueS) { cueS = true; sound.cue('scan'); } else if (f.scan < 0.01) cueS = false;
+      if (f.scan > 0.98 && f.wash < 0.02 && !cueL) { cueL = true; sound.cue('lock'); } else if (f.scan < 0.9) cueL = false;
+      if (f.wash > 0.02 && f.wash < 0.9 && !cueW) { cueW = true; sound.cue('wash'); } else if (f.wash < 0.01) cueW = false;
+      sound.air(q > 0.13 ? f.air : 0);
       retLbl.textContent = f.scan > 0.98 && f.wash < 0.02 ? 'พบฝุ่นที่แผ่นกรองและคอยล์' : f.wash > 0 && f.wash < 1 ? 'กำลังล้าง' : 'คอยล์เย็น · 12,000 BTU';
       telA.textContent = Math.round(f.air * 100) + ' %'; telD.textContent = Math.round(f.dirt * 100) + ' %';
       tel.style.setProperty('--a', f.air.toFixed(3)); tel.style.setProperty('--d', f.dirt.toFixed(3));

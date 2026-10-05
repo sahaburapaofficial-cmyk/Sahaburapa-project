@@ -25,6 +25,7 @@ import { mountKnowledge } from './knowledge.js';
 import { mountJobGuide } from './jobguide.js';
 import { mountSite } from './site.js';
 import { mountQuickClean, cleanFrom } from './quickclean.js';
+import { soundButton } from './luxsound.js';
 
 const fill = (sel, ...kids) => { const el = $(sel); if (el) el.append(...kids.flat().filter(Boolean)); return el; };
 
@@ -88,6 +89,8 @@ export async function mountLux(cfg) {
   enhanceQuoteForm();
   $$('[data-ask]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); askTeam(a.dataset.ask); }));
   const CART = mountCart();
+  // ★Rev.32 sound: one header button per page (off until pressed) — D cinematic bed · E room tone · F holodeck hum
+  { const cartB = $('.hdr [data-cart-btn]'); if (cartB) cartB.before(soundButton({ D: 'cinema', E: 'room', F: 'holo' }[variant] || 'cinema')); }
   let SITE = null; const go = id => SITE ? SITE.go(id) : (document.getElementById(id) || {}).scrollIntoView?.();
   const QC = mountQuickClean($('#bookRoot'), { openCart: CART.open, onB2B: () => go('b2b') });
   { const f = cleanFrom(); if (f) $$('[data-clean-from]').forEach(x => x.textContent = baht(f)); }
