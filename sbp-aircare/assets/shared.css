@@ -1812,3 +1812,8 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 /* Rev.26.1 rendered product shot fades in over the line art (decoded first — no jump) */
 @media (prefers-reduced-motion:no-preference){.s-ph-in{animation:sph-in .4s ease-out}}
 @keyframes sph-in{from{opacity:0}to{opacity:1}}
+/* Rev.27 rate sources under the visit rules */
+.as-src{border:1px solid var(--s-line);border-radius:var(--s-r);padding:8px 14px;background:var(--s-card);font-size:13px;color:var(--s-ink-2)}
+.as-src summary{cursor:pointer;font-weight:600;color:var(--s-ink);min-height:32px;display:flex;align-items:center}
+.as-src ul{margin:4px 0;padding-left:18px;display:grid;gap:3px}.as-src p{margin:4px 0}
+@media (pointer:coarse){.as-src summary{min-height:44px}}

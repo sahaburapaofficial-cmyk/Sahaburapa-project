@@ -5,9 +5,10 @@
 //     items without a rate counted as "ประเมินหน้างาน" → opens the price centre on that tab with the search filled
 //   · visit rules, computed only from rules already published (CLAUDE.md §6.6 8, 9, 13, 22, 23): cleaning minimum (DATA.minBill) and
 //     the travel charge below it (TRAVEL.baseFee) · repair = the diagnosis visit (Pricebook) · distance · rush queue · out of hours
-//     without an amount · a visit with add-on items only = the team confirms the visit charge in the quotation (no figure until the
-//     owner approves one — the cost-based proposal is in the owner's report, never in the browser: rule 4)
+//     without an amount · ★Rev.27 a visit with small work only = per-visit minimum rates.SMALL_VISIT (owner 5 ต.ค. 2569 let Claude
+//     decide market-based rates) · relocation = removal + standard installation by size · the rate sources are listed under the rules
 import { h, baht, DATA, TRAVEL, QUEUE_RULES } from './sbp-core.js';
+import { SMALL_VISIT, RATE_SOURCES, RATE_DATE, DECIDED } from './rates.js';
 
 const rep = (...cats) => DATA.rep.filter(r => cats.some(c => c.test(r.cat))).map(r => ({ name: r.name, ex: r.rate.s, unit: r.unit }));
 const inst = (...pre) => DATA.inst.filter(i => pre.some(p => (i.cat || '').startsWith(p))).map(i => ({ name: i.name, ex: i.ex, unit: i.unit }));
@@ -41,7 +42,8 @@ export function visitRules() {
     { k: 'clean', t: 'งานล้าง', d: `ยอดงานล้างถึง ${baht(DATA.minBill)} ต่อการเข้างาน ไม่มีค่าเดินทางในพื้นที่หลัก · ต่ำกว่านั้นคิดค่าเดินทาง ${baht(TRAVEL.baseFee)} ต่อการเข้างานแทนการเติมยอด` },
     { k: 'repair', t: 'งานซ่อม / ตรวจเช็ก', d: `เริ่มจากค่าตรวจวินิจฉัย ${diag.length ? `${baht(Math.min(...diag))}–${baht(Math.max(...diag)).replace('฿', '')}` : ''} ตามประเภทแอร์ ซึ่งเป็นค่าเข้างานของงานซ่อม · ค่าซ่อมแจ้งให้อนุมัติก่อนลงมือ` },
     { k: 'install', t: 'งานติดตั้ง', d: 'ราคาติดตั้งต่อเครื่องรวมการเดินทางในพื้นที่หลัก · วัสดุส่วนเกินและงานพิเศษคิดตามรายการ' },
-    { k: 'small', t: 'งานย่อยอย่างเดียว', d: 'เช่น เปลี่ยนรีโมต เติมรางครอบท่อ ย้ายท่อน้ำทิ้ง โดยไม่มีงานล้าง ติดตั้ง หรือตรวจซ่อมในวันเดียวกัน — ทีมแจ้งค่าเข้างานในใบเสนอราคาก่อนนัด · แนะนำให้รวมกับรอบล้างครั้งถัดไปเพื่อไม่ต้องเสียค่าเข้างานแยก' },
+    { k: 'small', t: 'งานย่อยอย่างเดียว', d: `เช่น เปลี่ยนรีโมต ขนเครื่องเก่าออก เจาะผนังเพิ่ม โดยไม่มีงานล้าง ติดตั้ง หรือตรวจซ่อมในวันเดียวกัน — ยอดขั้นต่ำต่อการเข้างาน ${baht(SMALL_VISIT.minEx)} ก่อน VAT รายการที่ทำนับรวม ส่วนที่ขาดคิดเป็นค่าเข้างาน · ทำพร้อมงานล้าง ติดตั้ง หรือตรวจซ่อมในวันเดียวกัน ไม่มีค่าเข้างานนี้` },
+    { k: 'move', t: 'รื้อ / ย้ายแอร์', d: (() => { const I = c => (DATA.instByCode[c] || {}).ex; return `รื้อ (รวมเก็บน้ำยา) ติดผนัง ${baht(I('REM-W'))} · แขวน ${baht(I('REM-C'))} · สี่ทิศทาง ${baht(I('REM-K'))} · ตู้ตั้ง ${baht(I('REM-FS'))} · ย้ายแอร์ = ค่ารื้อ + ราคาติดตั้งมาตรฐานตามขนาดที่จุดใหม่ · ขนเครื่องเดิมออก ${baht(I('DISPOSE'))} ต่อเครื่อง`; })() },
     { k: 'far', t: 'นอกพื้นที่หลัก', d: `กรุงเทพฯ ระยะเกิน ${TRAVEL.freeKm} กม. หรือจังหวัดอื่นถึง ${TRAVEL.maxKm} กม. ค่าเดินทาง ${baht(TRAVEL.baseFee)} + ${TRAVEL.perKm} บาทต่อ กม. ที่เกิน ${TRAVEL.freeKm} กม. ต่อเที่ยว` },
     { k: 'time', t: 'คิวด่วนและนอกเวลา', d: `จองปกติล่วงหน้า ${QUEUE_RULES.leadDays} วัน · คิวด่วน +${baht(QUEUE_RULES.rushFeeEx)} ต่อการเข้างาน (ต้องมีคิวว่าง) · นอกเวลาทำการและวันอาทิตย์มีค่าใช้จ่ายเพิ่มเติม ทีมแจ้งในใบเสนอราคา` },
   ];
@@ -68,6 +70,9 @@ export function mountAllServices(root, { prices } = {}) {
     h('div', { class: 'as-grid' }, cards),
     h('div', { class: 'as-rules' },
       h('div', {}, h('h4', {}, 'ค่าเข้างานคิดอย่างไร'), h('dl', {}, visitRules().map(r => [h('dt', {}, r.t), h('dd', {}, r.d)]).flat())),
-      h('div', {}, h('h4', {}, 'ทุกการเข้างานได้'), h('ul', {}, EVERY.map(x => h('li', {}, x)))))));
+      h('div', {}, h('h4', {}, 'ทุกการเข้างานได้'), h('ul', {}, EVERY.map(x => h('li', {}, x))))),
+    h('details', { class: 'as-src' }, h('summary', {}, `ที่มาของอัตรางานรื้อ ย้าย น้ำยา และค่าเข้างาน (กำหนด ${RATE_DATE})`),
+      h('ul', {}, RATE_SOURCES.map(x => h('li', {}, x))),
+      h('p', {}, `${Object.keys(DECIDED).length} รายการกำหนดจากราคากลางตลาดหรืออัตราของบริษัทเองสำหรับงานเดียวกัน · ค่าย้ายแอร์ = ค่ารื้อ + ราคาติดตั้งมาตรฐานตามขนาด · รายการที่ราคาขึ้นกับอะไหล่หรือแบบงาน (คอมเพรสเซอร์ แผงคอยล์ VRF AHU นั่งร้าน เครน) ยังประเมินหน้างาน`))));
   return { open };
 }

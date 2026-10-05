@@ -1,6 +1,7 @@
 // SBP AirCare — commerce layer shared by all three prototypes:
 // product detail with install package + add-ons, full service price centre, quote basket, zone/travel fee.
 // Markup uses the "s-" classes styled in assets/shared.css through each variant's alias tokens.
+import { SMALL_VISIT } from './rates.js';   // ★Rev.27
 import { mountMatCards } from './matcards.js';
 import {
   DATA, DEMO, cleanRate, TYPES, TYPE_BY_ID, BRAND_BY_ID, CLEAN_PKGS, VAT, incVat, timeTh, TIME_NOTE, baht, btuFmt, installOptions, addonsFor,
@@ -79,12 +80,14 @@ const priceNode = (ex, unit) => ex == null
    ========================================================= */
 // Rev.18: saved quotations keep the price they were added at — re-price every line we can identify from its key against the
 // current Pricebook (rounding / new rates) whenever a saved cart loads; lines that cannot be identified keep their price
-export const PRICE_V = 18;
+export const PRICE_V = 19;   // ★Rev.27: lines priced by rates.js (removal, relocation, refrigerant per kg …)
 export function repriceLine(l) {
   const k = l.key || '', m = (re) => re.exec(k);
   let x;
   if ((x = m(/^P-(.+)$/))) { for (const md of DEMO.models) { const s = md.skus.find(s => s.sku === x[1]); if (s) return { ...l, unitEx: s.px }; } return l; }
   if ((x = m(/^(?:I|IN)-([A-Z0-9.-]+)$/)) && DATA.instByCode[x[1]]) return { ...l, unitEx: DATA.instByCode[x[1]].ex };
+  // ★Rev.27 add-on / survey lines whose item now has a standard rate become priced add-ons
+  if ((x = m(/^(A|S)-(.+?)(-FIT)?$/)) && DATA.instByCode[x[2]] && DATA.instByCode[x[2]].ex != null) return { ...l, kind: l.kind === 'survey' ? 'addon' : l.kind, key: x[1] === 'S' ? `A-${x[2]}` : l.key, unitEx: DATA.instByCode[x[2]].ex };
   if ((x = m(/^(?:QC|CL)-(.+)-(C1|C2)-(wall|ceiling|cassette|floor)-(\d+)$/))) { const r = cleanRate(x[1], x[2], x[3], +x[4]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
   if ((x = m(/^C-(.+)-(C1|C2)-(\w+)-(.+)$/))) { const r = DATA.clean.find(r => r.pkg === x[1] && r.level === x[2] && r.type === x[3] && r.range === x[4]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
   if ((x = m(/^CX-(.+)$/))) { const r = DATA.clean.find(r => r.name === x[1]); return r && r.rate.s != null ? { ...l, unitEx: r.rate.s } : l; }
@@ -110,8 +113,14 @@ export function quoteTotals(items, zone) {
   // ★Rev.20 travel: core area free when the cleaning reaches the minimum, otherwise one trip fee; distance fee outside the core area
   const tr = oneOff ? jobTravel(zone, cleanEx) : { fee: 0, small: false, label: '' };
   const travel = tr.fee, minGap = 0;
-  const totalEx = ex + travel;
-  return { ex, travel, travelLabel: tr.label, travelSmall: tr.small, travelWaived: false, travelShort: 0, units, minGap, cleanEx, totalEx, vat: Math.round(totalEx * VAT), inc: totalEx + Math.round(totalEx * VAT), surveys: items.filter(i => i.unitEx == null).length };
+  // ★Rev.27 small work only (no cleaning / installation / repair / contract line in this visit): the items count toward the
+  // per-visit minimum (rates.SMALL_VISIT) and the difference is the visit charge
+  const main = items.some(i => ['clean', 'install', 'repair', 'contract'].includes(i.group));
+  const smallEx = items.filter(i => i.group === 'addon' && i.unitEx != null).reduce((n, i) => n + i.unitEx * i.qty, 0);
+  const small = !main && items.some(i => i.group === 'addon');
+  const visit = small ? Math.max(0, SMALL_VISIT.minEx - smallEx) : 0;
+  const totalEx = ex + travel + visit;
+  return { ex, travel, travelLabel: tr.label, travelSmall: tr.small, travelWaived: false, travelShort: 0, units, minGap, cleanEx, visit, visitSmall: small, visitLabel: `${SMALL_VISIT.th} ${baht(SMALL_VISIT.minEx)}`, totalEx, vat: Math.round(totalEx * VAT), inc: totalEx + Math.round(totalEx * VAT), surveys: items.filter(i => i.unitEx == null).length };
 }
 export const cart = {
   items: [], zone: null, zoneInput: '', addr: null, subs: new Set(),   // Rev.20 addr = picked {p, d, s, z}
@@ -148,7 +157,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
   dr.addEventListener('click', e => { if (e.target === dr) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !dr.hidden) close(); });
   let sent = null;
-  const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(i.unitEx * i.qty)}`), `พื้นที่: ${cart.zoneInput || '-'}${cart.zone && cart.zone.km != null ? ` (ระยะถนนประมาณ ${cart.zone.km} กม.)` : ''}`, t.travel ? `${t.travelLabel}: ${baht(t.travel)}` : null, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].filter(x => x != null).join('\n'); };
+  const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(i.unitEx * i.qty)}`), `พื้นที่: ${cart.zoneInput || '-'}${cart.zone && cart.zone.km != null ? ` (ระยะถนนประมาณ ${cart.zone.km} กม.)` : ''}`, t.travel ? `${t.travelLabel}: ${baht(t.travel)}` : null, t.visit ? `${t.visitLabel}: ${baht(t.visit)}` : null, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].filter(x => x != null).join('\n'); };
   function render() {
     if (!sent) syncRush(cart.prefDate);   // Rev.16.1: the rush line follows the date and disappears with the last visit line
     const t = cart.totals();
@@ -215,6 +224,8 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       return h('dl', { class: 's-sum' },
         h('dt', {}, 'รวมรายการ (ก่อน VAT)'), h('dd', {}, baht(t.ex)),
         t.travel ? [h('dt', {}, t.travelLabel || 'ค่าเดินทาง'), h('dd', {}, baht(t.travel))] : null,
+        t.visit ? [h('dt', {}, t.visitLabel), h('dd', {}, baht(t.visit))] : null,
+        t.visitSmall ? h('p', { class: 's-note', style: 'grid-column:1/-1' }, t.visit ? `งานย่อยอย่างเดียวมียอดขั้นต่ำต่อการเข้างาน ${baht(SMALL_VISIT.minEx)} ก่อน VAT รายการที่ทำนับรวมแล้ว · ถ้าทำพร้อมงานล้าง ติดตั้ง หรือตรวจซ่อมในวันเดียวกัน ไม่มีค่าเข้างานนี้` : `รายการถึงยอดขั้นต่ำต่อการเข้างาน ${baht(SMALL_VISIT.minEx)} แล้ว ไม่มีค่าเข้างานเพิ่ม`) : null,
         t.travelSmall && cart.zone?.tier !== 'extended' ? h('p', { class: 's-note', style: 'grid-column:1/-1' }, `งานล้างครบ ${baht(DATA.minBill)} ก่อน VAT ไม่มีค่าเดินทางในพื้นที่หลัก (ตอนนี้ ${baht(t.cleanEx)})`) : null,
         h('dt', {}, 'VAT 7%'), h('dd', {}, baht(t.vat)),
         h('dt', { class: 'tot' }, 'รวมทั้งสิ้น'), h('dd', { class: 'tot' }, baht(t.inc)),

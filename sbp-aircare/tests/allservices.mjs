@@ -11,7 +11,8 @@ for (const [id, th, , tab, , rows] of A.GROUPS) { const R = rows(); ok(R.length 
 const S = id => A.groupSummary(A.GROUPS.find(g => g[0] === id)[5]());
 ok(S('clean').from === Math.min(...core.DATA.clean.filter(r => r.type && r.rate.s).map(r => r.rate.s)), `clean from ${S('clean').from} = lowest per-unit standard rate`);
 ok(S('diag').from === 900, 'diagnosis from ฿900');
-ok(S('move').from === null && S('doc').from === null, 'groups without a standard rate say ประเมินหน้างาน');
+ok(S('move').from === 500 && S('doc').from === null, `Rev.27 removal / relocation group priced from ${S('move').from} · documents still ประเมินหน้างาน`);
+ok(A.visitRules().some(r => r.k === 'small' && /1,000/.test(r.d)) && A.visitRules().some(r => r.k === 'move' && /1,000/.test(r.d) && /2,500/.test(r.d)), 'visit rules state the small-visit minimum and the removal rates');
 const used = new Set(A.GROUPS.flatMap(g => g[5]().map(r => r.name)));
 const missRep = core.DATA.rep.filter(r => !used.has(r.name) && !/เงื่อนไขเวลา|Mobilization/.test(r.cat))   // out of hours / mobilisation: no amount shown in the overview (rule 22, travel rules).map(r => r.cat + ': ' + r.name);
 ok(missRep.length === 0, `repair items outside every group: ${missRep.length} ${missRep.join(' | ')}`);
