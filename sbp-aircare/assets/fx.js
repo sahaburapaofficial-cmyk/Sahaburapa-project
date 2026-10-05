@@ -4,6 +4,7 @@
 //                (Teenage Engineering / technical-sheet feel)
 //   C · Showroom — the hero stage light follows the pointer, cards get a glowing gradient rim where the pointer is
 //                (Apple Vision Pro / car configurators)
+//   D · Holo Cinema — cyan scan light + lit rim · E · Atelier 2050 — holographic sheen · F · Holodeck — light grid under the pointer (Rev.31.1)
 // Only for a mouse / trackpad (hover + fine pointer), never with reduced motion; nothing animates on its own and nothing is
 // injected into content — one overlay element is moved into the card under the pointer and removed when it leaves.
 import { $ } from './sbp-core.js';
@@ -13,6 +14,10 @@ const TARGETS = {
   A: '.tile, .sx-int, .qc-type, .s-card, .cg-col, .sv2-list li, .st-air-box',
   B: '.sx-int, .qc-type, .cg-col, .sv2-list li',
   C: '.card, .panel, .sx-int, .qc-type, .cg-col, .sv2-list li, .glass',
+  // ★Rev.31.1 D/E/F: D a cyan scan light with a lit rim · E a holographic sheen · F a grid of light under the pointer
+  D: '.card, .panel, .sx-int, .qc-type, .cg-col, .sv2-list li, .at-con, .mc, .en-k',
+  E: '.card, .panel, .sx-int, .qc-type, .cg-col, .sv2-list li, .at-con, .mc, .en-k',
+  F: '.card, .panel, .sx-int, .qc-type, .cg-col, .sv2-list li, .at-con, .mc, .en-k, .sp-lab',
 };
 
 export function mountFx(variant = 'A') {

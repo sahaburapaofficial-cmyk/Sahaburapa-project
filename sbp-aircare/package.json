@@ -36,7 +36,8 @@
     "concierge": "node tests/concierge.mjs a.html && node tests/concierge.mjs b.html && node tests/concierge.mjs c.html && node tests/concierge.mjs d.html && node tests/concierge.mjs e.html && node tests/concierge.mjs f.html",
     "boot": "node tests/boot.mjs",
     "profile": "node tests/profile.mjs",
-    "layout": "node tests/layout.mjs"
+    "layout": "node tests/layout.mjs",
+    "axe": "node tests/axe.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.0",

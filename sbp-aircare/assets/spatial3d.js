@@ -37,7 +37,7 @@ export function makeClimate(s) {
   const cap = STD_SIZES.find(x => x >= needBtu({ ...p, people: SC.people }, SC)) || 12000;
   const th = thermal(p, SC, cap, s.dirt, { time: 'day', inverter: s.inv });
   th.tout = s.out;
-  return { th, cap, t25: timeToSet({ ...th }, s.start ?? 32, 120), steady: steadyT(th) };
+  return { th, cap, need: needBtu(p, SC), t25: timeToSet({ ...th }, s.start ?? 32, 120), steady: steadyT(th) };
 }
 
 const HOTS = [
@@ -81,6 +81,12 @@ function createDiorama(host, labels, o) {
   const tickPts = []; [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => { const x = sx * (W / 2 + 0.02), z = sz * (D / 2 + 0.02); tickPts.push(x, HH + 0.02, z, x - sx * 0.45, HH + 0.02, z, x, HH + 0.02, z, x, HH + 0.02, z - sz * 0.45, x, HH + 0.02, z, x, HH - 0.43, z); });
   const ticks = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(tickPts, 3)), new THREE.LineBasicMaterial({ color: 0xc9fbff, opacity: 0.95, ...ADD })); dio.add(ticks);
   const scan = new THREE.Group(); dio.add(scan);
+  // ★Rev.31.1 heat map on the floor: the air field's lowest-but-one layer, smoothed by the texture filter, redrawn ~4×/s while shown
+  const hmC = document.createElement('canvas'); hmC.width = 16; hmC.height = 14; const hmG = hmC.getContext('2d'), hmI = hmG.createImageData(16, 14);
+  const hmT = new THREE.CanvasTexture(hmC); hmT.magFilter = THREE.LinearFilter; hmT.minFilter = THREE.LinearFilter; hmT.colorSpace = THREE.SRGBColorSpace;
+  const heat = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.1, D - 0.1), new THREE.MeshBasicMaterial({ map: hmT, transparent: true, opacity: 0.0, depthWrite: false, toneMapped: false }));
+  heat.rotation.x = -Math.PI / 2; heat.position.y = 0.035; heat.renderOrder = 2; dio.add(heat);
+  let scanT0 = 0, lastHeat = -1;
   const scanPlane = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshBasicMaterial({ color: 0x4df3ff, opacity: 0.07, side: THREE.DoubleSide, ...ADD })); scanPlane.rotation.x = -Math.PI / 2; scan.add(scanPlane);
   const scanEdge = new THREE.LineLoop(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([-W / 2, 0, -D / 2, W / 2, 0, -D / 2, W / 2, 0, D / 2, -W / 2, 0, D / 2], 3)), new THREE.LineBasicMaterial({ color: 0x9ff6ff, opacity: 0.9, ...ADD })); scan.add(scanEdge);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.12, 1.0), new THREE.MeshStandardMaterial({ color: 0xc9c4bb, roughness: 0.9 })); slab.position.set(W / 2 - 0.75, 0.0, D / 2 + 0.75); dio.add(slab);
@@ -89,7 +95,7 @@ function createDiorama(host, labels, o) {
   dio.position.y = -0.9;
   // the air: a field of points coloured by temperature
   const NX = 16, NY = 7, NZ = 14, N = NX * NY * NZ;
-  const fp = new Float32Array(N * 3), fc = new Float32Array(N * 3), cell = [];
+  const fp = new Float32Array(N * 3), fc = new Float32Array(N * 3), Tc = new Float32Array(N), cell = [];
   for (let i = 0; i < NX; i++) for (let j = 0; j < NY; j++) for (let k = 0; k < NZ; k++) { const x = -W / 2 + (i + 0.5) * W / NX, y = 0.15 + (j + 0.5) * (HH - 0.3) / NY, z = -D / 2 + (k + 0.5) * D / NZ; cell.push([x, y, z, Math.random() * 6.28]); }
   const fgeo = new THREE.BufferGeometry(); fgeo.setAttribute('position', new THREE.BufferAttribute(fp, 3)); fgeo.setAttribute('color', new THREE.BufferAttribute(fc, 3));
   const fieldM = new THREE.PointsMaterial({ size: 0.19, vertexColors: true, transparent: true, opacity: 0.62, depthWrite: false, sizeAttenuation: true, map: dotTex(), alphaTest: 0.02, toneMapped: false });   // Rev.31: brighter where the scan plane passes (paintField)
@@ -98,6 +104,7 @@ function createDiorama(host, labels, o) {
   const vent = room.vent(new THREE.Vector3()); dio.worldToLocal(vent);
   // anchors for the HTML pins (local to the diorama)
   const anchors = { unit: vent.clone().add(new THREE.Vector3(0, 0.12, 0)), cdu: new THREE.Vector3(W / 2 - 0.75, 0.78, D / 2 + 0.75), win: new THREE.Vector3(W / 2 - 0.05, 1.5, 0.1), bed: new THREE.Vector3(-0.6, 0.75, -D / 2 + 1.2) };
+  const cardAt = { room: new THREE.Vector3(-W / 2, HH + 0.05, -D / 2), need: vent.clone().add(new THREE.Vector3(0.1, 0.5, 0)), out: anchors.win.clone().add(new THREE.Vector3(0, 0.75, 0.4)), people: anchors.bed.clone().add(new THREE.Vector3(0, 0.45, 0)), jet: vent.clone().add(new THREE.Vector3(0, -0.75, 1.3)) };
   const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
   const orb = { th: -0.62, ph: 1.02, r: 12.5, tth: -0.62, user: 0 };
   let Wd = 1, Hd = 1, t = 0, last = performance.now(), visible = true, raf = 0, lastShadow = -9;
@@ -125,7 +132,7 @@ function createDiorama(host, labels, o) {
           T = lerp(T, sup + 2.2 * s, Math.exp(-d2 / (0.18 + 0.25 * s)) * clamp(1.2 - s) );
         }
       }
-      tempColor(T, col);
+      Tc[n] = T; tempColor(T, col);
       const glow = 0.6 + 1.5 * Math.exp(-((y - scanY) ** 2) / 0.02);
       fc[n * 3] = col[0] * glow; fc[n * 3 + 1] = col[1] * glow; fc[n * 3 + 2] = col[2] * glow;
       const jitter = RM() ? 0 : 0.03;
@@ -143,16 +150,34 @@ function createDiorama(host, labels, o) {
     if (t - lastShadow > 3) { renderer.shadowMap.needsUpdate = true; lastShadow = t; }
     ring.material.opacity = 0.55 + Math.sin(t * 1.4) * 0.2;
     // holodeck motion: the scan plane rises through the room every 6 s; the light cone flows upward; the pad breathes
-    const sc = RM() ? 0.62 : (t % 6) / 4.2; scanY = sc <= 1 ? sc * HH : -9; scan.visible = sc <= 1; scan.position.y = Math.max(0.02, scanY);
+    const S = o.state();
+    if (S.scanReq) { S.scanReq = false; scanT0 = t; S.scanAt = t; }   // ★Rev.31.1 "สแกนห้อง": restart the sweep now
+    const sc = RM() ? (S.scan ? 1.01 : 0.62) : ((t - scanT0) % 6) / 4.2; scanY = sc <= 1 ? sc * HH : -9; scan.visible = sc <= 1; scan.position.y = Math.max(0.02, scanY);
     scanPlane.material.opacity = 0.07 * Math.sin(Math.min(1, sc) * Math.PI);
     if (!RM()) { streak.offset.y = -t * 0.12; padRing.scale.setScalar(1 + Math.sin(t * 1.6) * 0.04); }
     edgeM.opacity = 0.45 + Math.sin(t * 0.9) * 0.1;
-    const S = o.state(); room.setDirt(S.dirt);
+    room.setDirt(S.dirt);
     OU.parts && OU.parts['o-fan'] && S.running && (OU.parts['o-fan'].rotation.z -= dt * 14);
     paintField(S);
+    // heat map fades in/out; its pixels follow the field
+    heat.material.opacity += ((S.heat ? 0.72 : 0) - heat.material.opacity) * Math.min(1, dt * 5);
+    if (heat.material.opacity > 0.01 && t - lastHeat > 0.25) { lastHeat = t; for (let i = 0; i < NX; i++) for (let k = 0; k < NZ; k++) { const b0 = i * NY * NZ + k; tempColor(Math.min(Tc[b0 + NZ], Tc[b0 + 2 * NZ], Tc[b0 + 3 * NZ]), col);   /* coolest air within ~1.3 m of this floor spot → the jet's footprint shows */ const q = (k * 16 + i) * 4;   /* canvas top row = back wall (flipY) */ hmI.data[q] = Math.min(255, col[0] * 255); hmI.data[q + 1] = Math.min(255, col[1] * 255); hmI.data[q + 2] = Math.min(255, col[2] * 255); hmI.data[q + 3] = 255; } hmG.putImageData(hmI, 0, 0); hmT.needsUpdate = true; }
     renderer.render(scene, cam);
     // pins
     dio.updateMatrixWorld();
+    const cards = o.cards || {}, swept = S.scan && (RM() || t - (S.scanAt || 0) > 4.2), placed = [];
+    for (const k in cards) {
+      const c = cards[k], a = cardAt[k]; if (!c || !a) continue;
+      v.copy(a).applyMatrix4(dio.matrixWorld).project(cam);
+      const show = S.scan && v.z < 1 && (swept || scanY >= a.y - 0.05);
+      c.classList.toggle('on', show); if (!show) continue;
+      // keep cards apart: a card that would sit on one already placed slides down below it (box = CSS margin offset + measured size)
+      const x = (v.x + 1) / 2 * Wd; let y = (1 - v.y) / 2 * Hd;
+      const cw = c._w || (c._w = c.offsetWidth), ch = c._h || (c._h = c.offsetHeight), bx = x + 12, by = () => y - (Wd < 640 ? 46 : 58);
+      for (let pass = 0; pass < 4; pass++) { const hit = placed.find(q => bx < q.x + q.w + 4 && bx + cw + 4 > q.x && by() < q.y + q.h + 4 && by() + ch + 4 > q.y); if (!hit) break; y += hit.y + hit.h + 6 - by(); }
+      placed.push({ x: bx, y: by(), w: cw, h: ch });
+      c.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;
+    }
     for (const k in anchors) {
       const el = labels[k]; if (!el) continue;
       v.copy(anchors[k]).applyMatrix4(dio.matrixWorld).project(cam);
@@ -211,7 +236,7 @@ function fanSound() {
 /** mountSpatial(root, { go }) — the diorama, its hotspots, and the climate lab beside it */
 export function mountSpatial(root, { go = () => {} } = {}) {
   if (!root) return null;
-  const S = { out: 35, people: 2, dirt: 0.05, inv: true, running: true, playing: !RM(), m: 0, T: 32, hist: [32] };
+  const S = { out: 35, people: 2, dirt: 0.05, inv: true, running: true, playing: !RM(), m: 0, T: 32, hist: [32], scan: false, scanReq: false, scanAt: 0, heat: false };
   let C = makeClimate(S);
   const stage = h('div', { class: 'sp-cv' }), pins = h('div', { class: 'sp-pins' });
   const info = h('div', { class: 'sp-info', 'aria-live': 'polite' }, h('p', { class: 'sp-k' }, 'แตะจุดเรืองแสงในห้อง'), h('p', {}, 'ดูว่าแต่ละส่วนของห้องเกี่ยวกับความเย็นและค่าใช้จ่ายอย่างไร'));
@@ -235,8 +260,25 @@ export function mountSpatial(root, { go = () => {} } = {}) {
     h('div', { class: 'sp-run' }, playB, resetB),
     h('p', { class: 'sp-fine' }, 'แบบจำลองเพื่ออธิบาย · 1 วินาที = 2 นาที · อุณหภูมิห้องและเวลาถึง 25°C คำนวณด้วยสูตรเดียวกับห้องจำลองบนเว็บ สีของอากาศเป็นภาพประกอบ ไม่ใช่ค่าวัดจริง'));
   const scale = h('div', { class: 'sp-scale', 'aria-hidden': 'true' }, h('span', {}, '13°C'), h('i'), h('span', {}, '34°C'));
-  root.append(h('div', { class: 'sp-wrap' }, h('div', { class: 'sp-stage' }, stage, pins, scale, info), lab));
-  function recompute() { C = makeClimate(S); draw(); }
+  // ★Rev.31.1 scan cards: the numbers the model uses for this room, pinned where they apply (aria-hidden — the lab beside says the same in text)
+  const cardsBox = h('div', { class: 'sp-cards', 'aria-hidden': 'true' }), cards = {};
+  ['room', 'need', 'out', 'people', 'jet'].forEach(k => { cards[k] = h('div', { class: 'sp-card sp-card-' + k }); cardsBox.append(cards[k]); });
+  const scanB = h('button', { type: 'button', class: 'sp-scan', 'aria-pressed': 'false' }, 'สแกนห้อง');
+  scanB.addEventListener('click', () => { S.scan = !S.scan; S.scanReq = S.scan; scanB.setAttribute('aria-pressed', String(S.scan)); fillCards(); });
+  const heatB = h('button', { type: 'button', 'aria-pressed': 'false' }, 'แผนที่ความร้อน');
+  heatB.addEventListener('click', () => { S.heat = !S.heat; heatB.setAttribute('aria-pressed', String(S.heat)); });
+  lab.querySelector('.sp-run').prepend(scanB); lab.querySelector('.sp-tg').append(heatB);
+  function fillCards() {
+    const fmt = n => Math.round(n).toLocaleString('en-US'), card = (el, k, v) => { el.innerHTML = ''; el.append(h('small', {}, k), h('b', {}, v)); };
+    card(cards.room, 'ห้องนอน', `${W} × ${D} × ${HH} ม.`);
+    card(cards.need, 'ต้องการ', `~${fmt(C.need)} BTU · ติดตั้ง ${fmt(C.cap)}`);
+    card(cards.out, 'อากาศนอก', `${S.out}°C`);
+    card(cards.people, 'คนในห้อง', `${S.people} คน`);
+    card(cards.jet, 'ลมผ่านคอยล์', `${Math.round(effects(S.dirt).air * 100)}%`);
+    Object.values(cards).forEach(c => { c._w = c._h = 0; });   // re-measure for the overlap check
+  }
+  root.append(h('div', { class: 'sp-wrap' }, h('div', { class: 'sp-stage' }, stage, pins, cardsBox, scale, info), lab));
+  function recompute() { C = makeClimate(S); draw(); fillCards(); }
   function draw() {
     big.textContent = S.T.toFixed(1) + '°C'; sub.textContent = `นาทีที่ ${Math.floor(S.m)} · แอร์ ${C.cap.toLocaleString('en-US')} BTU ${S.inv ? 'Inverter' : 'Fixed speed'}`;
     t25.textContent = !S.running ? 'ปิดแอร์: ห้องอุ่นขึ้นตามความร้อนที่เข้ามา' : C.t25 != null ? `จาก 32°C ถึง ${T_SET}°C ราว ${Math.round(C.t25)} นาที` + (S.dirt > 0.5 ? ' (คอยล์สกปรก)' : '') : `ทำได้ต่ำสุดราว ${C.steady.toFixed(1)}°C ในสภาพนี้`;
@@ -254,6 +296,7 @@ export function mountSpatial(root, { go = () => {} } = {}) {
   };
   draw();
   if (!hasGL()) { root.classList.add('sp-nogl'); stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); let l = performance.now(); setInterval(() => { const n = performance.now(); tick(Math.min(0.5, (n - l) / 1000)); l = n; }, 250); return { state: S }; }
-  whenNear(stage, () => { try { createDiorama(stage, labels, { state: () => S, tick }); } catch (e) { root.classList.add('sp-nogl'); stage.innerHTML = ''; stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); } }, '50% 0px');
+  fillCards();
+  whenNear(stage, () => { try { createDiorama(stage, labels, { state: () => S, tick, cards }); } catch (e) { root.classList.add('sp-nogl'); stage.innerHTML = ''; stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); } }, '50% 0px');
   return { state: S, pick: id => pick(HOTS.find(x => x.id === id)) };
 }

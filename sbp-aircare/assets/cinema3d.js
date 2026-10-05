@@ -218,7 +218,12 @@ export function mountCinema(root, { cta = null } = {}) {
   const still = RM();
   const cap = h('div', { class: 'cn-cap', 'aria-live': 'polite' });
   const hudT = h('b', { class: 'cn-temp' }, '32.0°'), hudM = h('small', {}, 'แบบจำลอง · นาทีที่ 0');
-  const hud = h('div', { class: 'cn-hud', 'aria-hidden': 'true' }, h('span', {}, 'อุณหภูมิในห้อง'), hudT, hudM, h('i', { class: 'cn-bar' }, h('i')));
+  // ★Rev.31.1 HUD chart (model minutes 0–15 · 24–32 °C): dirty coil (heat) vs cleaned coil (cyan), same room, same window
+  const CW = 200, CH = 58, cx = m => 4 + m / 15 * (CW - 8), cy = T => 4 + (32 - clamp(T, 24, 32)) / 8 * (CH - 8);
+  const path = arr => arr.slice(0, 16).map((T, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)} ${cy(T).toFixed(1)}`).join('');
+  const chart = h('div', { class: 'cn-chart', 'aria-hidden': 'true', html: `<svg viewBox="0 0 ${CW} ${CH}"><path class="g" d="M4 ${cy(25)}H${CW - 4}"/><path class="d" d="${path(CURVE.dirty)}"/><path class="c" d="${path(CURVE.clean)}"/><line class="cur" y1="2" y2="${CH - 2}"/><circle r="3.6"/><text x="${CW - 4}" y="${cy(25) - 4}">25°</text></svg><p><i class="d"></i>ก่อนล้าง ${CURVE.dirty[15].toFixed(1)}° <i class="c"></i>หลังล้าง ${CURVE.clean[15].toFixed(1)}° <small>นาทีที่ 15</small></p>` });
+  const dot = chart.querySelector('circle'), cursor = chart.querySelector('line.cur');
+  const hud = h('div', { class: 'cn-hud', 'aria-hidden': 'true' }, h('span', {}, 'อุณหภูมิในห้อง'), hudT, hudM, h('i', { class: 'cn-bar' }, h('i')), chart);
   const scrub = h('nav', { class: 'cn-scrub', 'aria-label': 'บทของภาพยนตร์' });
   const stage = h('div', { class: 'cn-cv' });
   const skip = h('button', { type: 'button', class: 'cn-skip', onclick: () => { const n = root.nextElementSibling && root.nextElementSibling.querySelector('section[id]'); const t = n || root.nextElementSibling; if (t) { const y = t.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 64); scrollTo({ top: y, behavior: 'auto' }); } } }, 'ข้ามภาพยนตร์');   // Rev.30: customers who came to book do not sit through the film
@@ -255,7 +260,11 @@ export function mountCinema(root, { cta = null } = {}) {
     let T, m, d = false;
     if (q < 0.2) { T = 32; m = 0; d = true; } else if (q < 0.8) { m = Math.round(15 * ss(0.2, 0.46, q)); T = at(CURVE.dirty, 15 * ss(0.2, 0.46, q)); d = true; } else { m = Math.round(15 * ss(0.8, 0.97, q)); T = at(CURVE.clean, 15 * ss(0.8, 0.97, q)); }
     hudT.textContent = T.toFixed(1) + '°'; hudM.textContent = `แบบจำลอง · ${d ? 'ก่อนล้าง' : 'หลังล้าง'} · นาทีที่ ${m}`;
-    hud.style.setProperty('--k', clamp((32 - T) / 7).toFixed(3));   // HUD clock: 15 model minutes before and after cleaning (dirty 27.2 vs clean 25.7 °C at minute 15) hud.dataset.state = d ? 'dirty' : 'clean';
+    hud.style.setProperty('--k', clamp((32 - T) / 7).toFixed(3)); hud.dataset.state = d ? 'dirty' : 'clean';   // HUD clock: 15 model minutes before and after cleaning (dirty 27.2 vs clean 25.7 °C at minute 15) · Rev.31.1: the state assignment used to sit inside this comment
+    // ★Rev.31.1 HUD chart: both 15-minute curves of the model, the playhead rides the one being shown
+    const mm = q < 0.2 ? 0 : q < 0.8 ? 15 * ss(0.2, 0.46, q) : 15 * ss(0.8, 0.97, q);
+    dot.setAttribute('cx', cx(mm).toFixed(1)); dot.setAttribute('cy', cy(T).toFixed(1)); dot.setAttribute('class', d ? 'd' : 'c');
+    cursor.setAttribute('x1', cx(mm).toFixed(1)); cursor.setAttribute('x2', cx(mm).toFixed(1));
   };
   const progress = () => { const r = trk.getBoundingClientRect(); return clamp(-r.top / Math.max(1, r.height - innerHeight)); };
   function goTo(v) { const r = trk.getBoundingClientRect(), top = scrollY + r.top; if (still) { film && film.set(v); onFrame(v); return; } scrollTo({ top: top + v * (r.height - innerHeight), behavior: 'smooth' }); }

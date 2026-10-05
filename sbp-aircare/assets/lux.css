@@ -12,7 +12,7 @@
 /* D · Cinema */
 :root[data-lux="D"]{color-scheme:dark;--bg:#04060B;--bg-2:#070B14;--panel:#0A101C;--panel-2:#0F1828;--line:rgba(110,230,255,.16);--ink:#E9F6FF;--ink-2:#B9CCDE;--ink-3:#93A8BE;--acc:#63E6FF;--on-acc:#02111A;--cool:#63E6FF;--heat:#FFB067;--ok:#5FE3A1;--warn:#FFC266;--bad:#FF8A80;--glow:rgba(99,230,255,.45);--holo:linear-gradient(100deg,#63E6FF,#9FF3FF 40%,#FFB067);--display:'Kanit','Anuphan',sans-serif;--r:8px}
 /* E · Atelier */
-:root[data-lux="E"]{color-scheme:light;--bg:#F3F6F9;--bg-2:#EAF0F5;--panel:#FFFFFF;--panel-2:#EEF3F8;--line:rgba(30,60,120,.13);--ink:#0B1420;--ink-2:#3A4A5D;--ink-3:#536479;--acc:#2F47F5;--on-acc:#FFFFFF;--cool:#0E7FA8;--heat:#C2541E;--sage:#2E7D6B;--ok:#1D7A4B;--warn:#9C5A0B;--bad:#B0302B;--glow:rgba(47,71,245,.28);--holo:linear-gradient(110deg,#5CE1FF,#8B7BFF 35%,#FF9FD0 65%,#FFC37A);--r:24px}
+:root[data-lux="E"]{color-scheme:light;--bg:#F3F6F9;--bg-2:#EAF0F5;--panel:#FFFFFF;--panel-2:#EEF3F8;--line:rgba(30,60,120,.13);--ink:#0B1420;--ink-2:#3A4A5D;--ink-3:#536479;--acc:#2F47F5;--on-acc:#FFFFFF;--cool:#0E7FA8;--heat:#C2541E;--sage:#2E7D6B;--ok:#17683F;--warn:#9C5A0B;--bad:#B0302B;--glow:rgba(47,71,245,.28);--holo:linear-gradient(110deg,#5CE1FF,#8B7BFF 35%,#FF9FD0 65%,#FFC37A);--r:24px}
 /* F · Spatial */
 :root[data-lux="F"]{color-scheme:dark;--bg:#03050C;--bg-2:#060A16;--panel:#0A1124;--panel-2:#101A33;--line:rgba(140,123,255,.2);--ink:#EAF0FF;--ink-2:#B6C3E2;--ink-3:#909FC4;--acc:#9A8CFF;--on-acc:#0A0720;--cool:#4DF3FF;--heat:#FF9B6A;--ok:#5FE3A1;--warn:#FFC266;--bad:#FF8A80;--glow:rgba(154,140,255,.5);--holo:linear-gradient(100deg,#4DF3FF,#9A8CFF 50%,#FF7AD9);--display:'Kanit','Anuphan',sans-serif;--r:10px}
 
@@ -96,7 +96,7 @@ section.sec{padding-block:96px 0}
 .cn-cap{position:absolute;left:clamp(20px,5vw,72px);bottom:calc(clamp(28px,6vh,64px) + 70px);max-width:min(620px,86%);z-index:3;color:#F5EFE6;text-shadow:0 2px 24px rgba(0,0,0,.6)}
 .cn-cap.in{animation:cnIn .9s var(--ease) both}
 @keyframes cnIn{from{opacity:0;transform:translateY(14px);filter:blur(6px)}}
-.cn-k{font:500 12px var(--mono);letter-spacing:.3em;text-transform:uppercase;color:#7FEBFF}.cn-k span{color:rgba(255,255,255,.5)}
+.cn-k{font:500 12px var(--mono);letter-spacing:.3em;text-transform:uppercase;color:#7FEBFF;text-shadow:0 1px 14px rgba(0,0,0,.65)}.cn-k span{color:rgba(255,255,255,.5)}
 .cn-cap h2{font:300 clamp(34px,5.4vw,76px)/1.05 var(--display);letter-spacing:.01em;margin:10px 0 12px}
 .cn-s{font-size:clamp(15px,1.3vw,18px);color:rgba(245,239,230,.86);max-width:36em}
 .cn-hud{position:absolute;right:clamp(20px,4vw,56px);top:calc(clamp(28px,6vh,64px) + 22px);z-index:3;display:grid;justify-items:end;gap:2px;color:#F5EFE6;text-align:right}
@@ -454,3 +454,43 @@ html.fx-F .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my
 @media (prefers-reduced-motion:reduce){.at-rings ellipse{opacity:.5;transform:scale(.8)}}
 @media (max-width:640px){.at-tag,.at-tickl{display:none}}   /* too small to read at phone width — the read-out below has the same numbers */
 .cn-ret.flip span{left:auto;right:84px}
+/* ★Rev.31.1 info-blue token per design (modules use var(--s-info) / var(--s-info-ink)) */
+:root[data-lux="D"]{--s-info:#63E6FF;--s-info-ink:#A6F2FF}
+:root[data-lux="E"]{--s-info:#2F47F5;--s-info-ink:#1E2FB8}
+:root[data-lux="F"]{--s-info:#4DF3FF;--s-info-ink:#B9B0FF}
+/* ★Rev.31.1 D HUD chart: the model's two 15-minute curves under the temperature read-out */
+.cn-chart{margin-top:8px;padding:8px 10px 6px;background:rgba(2,10,18,.55);border:1px solid rgba(99,230,255,.25);display:grid;gap:4px;justify-items:stretch}
+.cn-chart svg{width:200px;height:58px;display:block;overflow:visible}
+.cn-chart path{fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cn-chart path.d{stroke:#FFB067}.cn-chart path.c{stroke:#63E6FF;filter:drop-shadow(0 0 3px rgba(99,230,255,.6))}
+.cn-chart path.g{stroke:rgba(255,255,255,.22);stroke-dasharray:2 4;stroke-width:1}
+.cn-chart line.cur{stroke:rgba(223,250,255,.35);stroke-width:1}
+.cn-chart circle{fill:#fff;stroke-width:2}.cn-chart circle.d{stroke:#FFB067}.cn-chart circle.c{stroke:#63E6FF}
+.cn-chart text{font:500 9px var(--mono);fill:rgba(223,250,255,.6);text-anchor:end}
+.cn-chart p{margin:0;font:500 10.5px var(--mono);color:rgba(223,250,255,.78);display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.cn-chart p i{display:inline-block;width:10px;height:2px}.cn-chart p i.d{background:#FFB067}.cn-chart p i.c{background:#63E6FF}
+.cn-chart small{color:rgba(223,250,255,.5)}
+@media (max-width:760px){.cn-chart{display:none}}
+/* ★Rev.31.1 F scan cards (holographic data pinned in the room) */
+.sp-cards{position:absolute;inset:0;pointer-events:none;z-index:2}
+.sp-card{position:absolute;left:0;top:0;display:grid;gap:1px;padding:6px 10px 7px;margin:-58px 0 0 12px;min-width:110px;background:rgba(4,12,30,.82);border:1px solid rgba(77,243,255,.55);border-left:3px solid #4DF3FF;box-shadow:0 0 22px -8px rgba(77,243,255,.7);color:#E6FDFF;opacity:0;transition:opacity .35s;white-space:nowrap}
+.sp-card::before{content:"";position:absolute;left:-15px;bottom:-12px;width:14px;height:14px;border-left:1px solid rgba(77,243,255,.7);border-bottom:1px solid rgba(77,243,255,.7);transform:skewX(-35deg)}
+.sp-card.on{opacity:1}
+.sp-card small{font:500 10.5px var(--mono);letter-spacing:.08em;color:rgba(160,250,255,.75)}
+.sp-card b{font:600 13.5px var(--mono);font-variant-numeric:tabular-nums}
+.sp-card-need{border-left-color:#9A8CFF}.sp-card-out{border-left-color:#FFB067}
+.sp-scan[aria-pressed=true]{box-shadow:0 0 0 1px #4DF3FF,0 0 24px -6px #4DF3FF}
+@media (max-width:640px){.sp-card{padding:4px 7px 5px;min-width:0;margin-top:-46px}.sp-card small{font-size:9.5px}.sp-card b{font-size:11.5px}.sp-card-people,.sp-card-room{display:none}}
+/* ★Rev.31.1 E heat flow (in through the glass, out through the unit) + plan revealed step by step like a HUD read-out (D/E/F) */
+.at-flow path{fill:none;stroke-width:3.2;stroke-linecap:round;stroke-dasharray:2 12;transition:opacity .5s}
+.at-flow .in{stroke:#FF8A4C}.at-flow .out{stroke:#3FA9FF}
+.at-flow text{transition:opacity .5s}
+@media (prefers-reduced-motion:no-preference){
+  .at-flow path{animation:atFlow 1.4s linear infinite}
+  @keyframes atFlow{to{stroke-dashoffset:-28}}
+  :root[data-lux] .at-recs li{animation:atRec .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 110ms)}
+  @keyframes atRec{from{opacity:0;transform:translateY(8px);clip-path:inset(0 0 100% 0)}to{opacity:1;transform:none;clip-path:inset(0 0 0 0)}}
+}
+:root[data-lux] .at-recs .at-i{font-family:var(--mono);letter-spacing:.04em}
+:root:is([data-lux="D"],[data-lux="F"]) .at-recs li{box-shadow:inset 3px 0 0 var(--acc)}
+:root[data-lux="E"] .at-recs li{box-shadow:inset 3px 0 0 #8B7BFF}

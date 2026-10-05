@@ -74,7 +74,7 @@ export function mountConcierge(root, { go = () => {}, openCart = () => {}, prefi
     const plan = planFor(A);
     const summary = QUESTIONS.map(q => `${q.th}: ${q.one ? (q.opts.find(o => o[0] === A[q.id]) || [, '-'])[1] : A.care.map(c => q.opts.find(o => o[0] === c)[1]).join(', ') || '-'}`).join('\n');
     res.append(h('p', { class: 'at-n' }, 'แผนบริการสำหรับคุณ'), h('h3', {}, 'สิ่งที่เราแนะนำ ตามลำดับ'),
-      h('ol', { class: 'at-recs' }, plan.map((r, i) => h('li', { 'data-k': r.k }, h('span', { class: 'at-i' }, String(i + 1).padStart(2, '0')),
+      h('ol', { class: 'at-recs' }, plan.map((r, i) => h('li', { 'data-k': r.k, style: `--i:${i}` }, h('span', { class: 'at-i' }, String(i + 1).padStart(2, '0')),
         h('div', {}, h('b', {}, r.th), h('p', {}, r.d), r.k === 'clean' && prefill ? cleanTypes() : null), r.go ? h('button', { type: 'button', class: 'btn-ghost', onclick: () => go(r.go) }, 'ไปที่ขั้นนี้') : null))),
       h('p', { class: 'at-fine' }, 'ราคามาตรฐานจาก Pricebook 2569 ก่อน VAT · ยืนยันในใบเสนอราคาอย่างเป็นทางการ'),
       h('div', { class: 'at-nav' }, h('button', { type: 'button', class: 'btn-primary', onclick: () => askTeam('ปรึกษาบริการ', 'แผนบริการที่เลือกบนเว็บ\n' + summary) }, 'ให้ทีมโทรกลับพร้อมแผนนี้'),
@@ -145,6 +145,7 @@ const SVG = `<svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid slice" ari
 </g>
 <rect class="at-tint" width="800" height="520"/>
 <g class="at-hud">
+  <g class="at-flow"><path class="in" d="M610 236C540 262 450 300 340 336"/><path class="out" d="M300 330C292 270 270 214 250 172"/><text class="at-tickl at-fl-in" x="560" y="300">ความร้อนเข้าห้อง</text><text class="at-tickl at-fl-out" x="306" y="214">แอร์ดึงออก</text></g>
   <g class="at-rings">${[0, 1, 2].map(i => `<ellipse cx="270" cy="472" rx="210" ry="30" style="animation-delay:${i * 1.3}s"/>`).join('')}</g>
   <g class="at-tag"><circle cx="650" cy="292" r="4"/><path d="M650 288V258"/><rect x="590" y="232" width="122" height="26" rx="3"/><text class="at-tv-out" x="600" y="250"></text></g>
   <g class="at-tag in"><circle cx="292" cy="300" r="4"/><path d="M292 296V268"/><rect x="226" y="242" width="132" height="26" rx="3"/><text class="at-tv-in" x="236" y="260"></text></g>
@@ -170,7 +171,8 @@ export function mountDayRoom(root) {
   runWhenVisible(art);   // Rev.30 smooth: curtains, motes, leaves and breeze animate only while the room is on screen
   const svg = $('svg', art), s0 = $('.at-s0', art), s1 = $('.at-s1', art), sun = $('.at-sun', art), moon = $('.at-moon', art), tint = $('.at-tint', art),
     shaft = $('.at-shaft', art), glow = $('.at-glow', art), breeze = $('.at-breeze', art), lights = $('.at-lights', art), wall = $('.at-wall', art), disp = $('.at-ud', art),
-    tvOut = $('.at-tv-out', art), tvIn = $('.at-tv-in', art), tvU = $('.at-tv-u', art), rings = $('.at-rings', art);
+    tvOut = $('.at-tv-out', art), tvIn = $('.at-tv-in', art), tvU = $('.at-tv-u', art), rings = $('.at-rings', art),
+    flIn = $('.at-flow .in', art), flOut = $('.at-flow .out', art), flInT = $('.at-fl-in', art), flOutT = $('.at-fl-out', art);
   for (let i = 0; i < 40; i++) { const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', 446 + (i * 53) % 300); r.setAttribute('y', 270 + (i * 29) % 56); r.setAttribute('width', 3); r.setAttribute('height', 3); lights.append(r); }
   let hr = 15, on = true, dirt = 0.05;
   function paint() {
@@ -192,6 +194,9 @@ export function mountDayRoom(root) {
     tvOut.textContent = `นอก ${O.toFixed(1)}°C`; tvIn.textContent = `ในห้อง ${T.toFixed(1)}°C`;
     tvU.textContent = on ? `ลมผ่านคอยล์ ${Math.round(effects(dirt).air * 100)}%` : 'แอร์ปิด';
     rings.style.stroke = mix('#3FA9FF', '#FF8A4C', clamp((T - 25) / 6));
+    // ★Rev.31.1 heat flow: in through the glass (outdoor–indoor gap, stronger in the sun), out through the unit while it runs — illustration
+    const kin = clamp((O - T) / 10) * (0.35 + 0.65 * day), kout = on ? effects(dirt).air * 0.9 : 0;
+    flIn.style.opacity = flInT.style.opacity = kin.toFixed(2); flOut.style.opacity = flOutT.style.opacity = kout.toFixed(2);
     timeOut.textContent = `${String(Math.floor(hr)).padStart(2, '0')}:${String(Math.round((hr % 1) * 60)).padStart(2, '0')}`;
     outT.textContent = O.toFixed(1) + '°C'; inT.textContent = T.toFixed(1) + '°C';
     status.textContent = !on ? 'ปิดแอร์: ห้องร้อนตามอากาศนอกบ้าน' : T <= 25.05 ? 'ตั้ง 25°C · ห้องอยู่ที่อุณหภูมิที่ตั้งไว้' : `ตั้ง 25°C · ช่วงนี้เครื่องทำได้แค่ ${T.toFixed(1)}°C${dirt > 0.5 ? ' (คอยล์สกปรก ลมผ่านได้น้อย)' : ''}`;
