@@ -27,6 +27,8 @@ ok(before !== after && await R.locator('.en-pkg button[aria-checked="true"]').in
 ok(/ตกลงในสัญญา/.test(await R.locator('.en-pains').innerText()) && /มีในแพ็กเกจ/.test(await R.locator('.en-pains').innerText()), 'answers say what is in the package and what is agreed in the contract');
 ok(/ประเมินหน้างาน|มีค่าใช้จ่ายเพิ่มเติม/.test(await R.locator('.en-side').innerText()) && !/นอกเวลา[^\n]*฿/.test(await R.locator('.en-side').innerText()), 'add-ons: assessed / out-of-hours without an amount');
 await R.locator('summary', { hasText: 'ร่างขอบเขตงาน' }).click();
+// Rev.28: <details> opens with a block-size transition — the content renders from the next frame
+await p.waitForFunction(() => /________/.test(document.querySelector('#entRoot .en-sow pre')?.innerText || ''), null, { timeout: 3000 }).catch(() => {});
 ok(/________/.test(await R.locator('.en-sow pre').innerText()), 'draft scope of work shows blanks for terms agreed per customer');
 await R.locator('.en-pkg button', { hasText: 'Corporate Control' }).click(); await p.waitForTimeout(100);
 // into the quotation

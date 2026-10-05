@@ -339,6 +339,9 @@ table.cmp{border-collapse:collapse;font-size:13.5px;width:100%}.cmp th,.cmp td{p
 /* Rev.09 r5 views */
 :root{--sx-pill:4px}
 @media (max-width:1100px) and (min-width:641px){html.sx-on .hdr .wrap{height:auto;grid-template-rows:58px auto}html.sx-on .hdr .nav{display:flex;grid-column:1/-1;grid-row:2;border-left:0;border-top:1px solid var(--rule);padding:0;min-height:40px}html.sx-on{scroll-padding-top:112px}}
+@media (min-width:641px){html.sx-on{--cg-top:108px}}   /* sticky 4D scene sits under the two-row header */
+/* ★Rev.28 the six numbered pages need ~730 px — on computers they get their own title-block row too (no clipped menu) */
+@media (min-width:1101px){html.sx-on .hdr .wrap{height:auto;grid-template-rows:58px auto}html.sx-on .hdr .nav{grid-column:1/-1;grid-row:2;border-left:0;border-top:1px solid var(--rule);padding:0;min-height:40px}html.sx-on{scroll-padding-top:112px}}
 .sheet .sx-about{gap:0}.sheet .sx-co,.sheet .sx-how{border:0;border-radius:0;background:none;padding:4px 0}.sheet .sx-how{border-left:1px solid var(--rule);padding-left:20px;margin-left:20px}
 @media (max-width:860px){.sheet .sx-how{border-left:0;border-top:1px solid var(--rule);margin:16px 0 0;padding:16px 0 0}}
 footer .sx-foot{padding-block:24px 8px}

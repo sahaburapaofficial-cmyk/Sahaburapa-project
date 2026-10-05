@@ -7,6 +7,9 @@
 // Rev.15: when — the queue rules of queue.js (book 3 days ahead · คิวด่วน earlier for +500 before VAT when a crew is free) with
 // the visit time, the slot that fits it and same-day limits worked out for the customer.
 import { SIZE_BANDS, cleanRate, checkZone, zoneOf, addrTh, TIER_TH, TRAVEL, travelNote, incVat, baht, h, $, $$, VOLUME_HINT, DATA, COMPANY } from './sbp-core.js';
+// ★Rev.28 total that rolls from the previous value (ease-out, motion-safe)
+let lastTot = null;
+const tween = (el, to) => { const from = lastTot ?? to; lastTot = to; if (from === to || navigator.webdriver || matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = baht(to); return; } const t0 = performance.now(), d = 420; const f = n => { const k = Math.min(1, (n - t0) / d), e = 1 - Math.pow(1 - k, 3); el.textContent = baht(Math.round(from + (to - from) * e)); if (k < 1 && el.isConnected) requestAnimationFrame(f); }; requestAnimationFrame(f); };
 import { addrPicker } from './addrpick.js';
 import { cart, quoteTotals } from './commerce.js';
 import { lineLink } from './contact.js';
@@ -139,7 +142,9 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
       if (need > 0) sum.append(h('p', { class: 'qc-fill' }, h('span', {}, `เพิ่มแอร์${l0.th}อีก ${need} เครื่อง ยอดงานล้างถึง ${baht(DATA.minBill)} ไม่มีค่าเดินทาง`),
         h('button', { type: 'button', class: 'qc-fill-b', 'aria-label': `เพิ่มแอร์${l0.th} 1 เครื่อง`, onclick: () => { st.n[l0.t] = Math.min(99, st.n[l0.t] + 1); drawTypes(); drawSum(); } }, '+1 เครื่อง'))); }
     if (items.some(i => i.group === 'rush')) sum.append(row('คิวด่วน (ถ้ามีคิวว่าง)', baht(RUSH_FEE_EX), 'warn'));
-    sum.append(h('div', { class: 'qc-total' }, h('span', {}, 'รวมทั้งสิ้น', h('small', {}, `ก่อน VAT ${baht(t.totalEx)} · VAT 7% ${baht(t.vat)}`)), h('b', {}, baht(t.inc))));
+    const tot = h('b', {}, baht(lastTot ?? t.inc));
+    sum.append(h('div', { class: 'qc-total' }, h('span', {}, 'รวมทั้งสิ้น', h('small', {}, `ก่อน VAT ${baht(t.totalEx)} · VAT 7% ${baht(t.vat)}`)), tot));
+    tween(tot, t.inc);   // ★Rev.28 the total rolls to its new value
     const notes = [];
     if (zone && zone.tier === 'out') notes.push('พื้นที่นี้เกินระยะรับงานรายเครื่อง ส่งข้อมูลได้ ทีมจะประเมินเป็นงานโครงการ');
     if (units >= VOLUME_HINT) notes.push('ตั้งแต่ 10 เครื่องขึ้นไป อาจได้อัตราพิเศษตามเงื่อนไขบริษัท ทีมขายยืนยันในใบเสนอราคา');

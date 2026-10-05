@@ -349,7 +349,7 @@ export function mountSite(cfg) {
   // Rev.11: a "แชท LINE" button on computers and tablets (phones have LINE in the bottom bar) — opens the LINE OA chat
   document.body.append(h('a', { class: 'sx-line', href: COMPANY.lineUrl, target: '_blank', rel: 'noopener', 'aria-label': `แชทกับทีมทาง LINE ${COMPANY.line}` },
     h('span', { 'aria-hidden': 'true', html: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5 1.1-.5 6-3.5 8.2-6 1.5-1.6 1.8-3.2 1.8-4.8C22 6.6 17.5 3 12 3z"/></svg>' }),
-    h('span', {}, 'แชท LINE')));
+    h('span', { class: 'sx-ll' }, 'แชท LINE')));
   const mbar = $('.mbar');
   // Rev.10: LINE OA is confirmed (@sahaservices on the company site) → the LINE button is back in the mobile bar
   if (mbar) { const ls = $$('a', mbar); if (ls[0]) { ls[0].textContent = 'ติดต่อ'; ls[0].setAttribute('href', '#contact'); } if (ls[1]) { ls[1].textContent = 'LINE'; ls[1].setAttribute('href', COMPANY.lineUrl); ls[1].setAttribute('target', '_blank'); ls[1].setAttribute('rel', 'noopener'); } }
@@ -386,7 +386,8 @@ export function mountSite(cfg) {
   const hdr = $('header.hdr');
   if (hdr && !hdr.querySelector('.sx-prog')) {
     const bar = h('div', { class: 'sx-prog', 'aria-hidden': 'true' }); hdr.append(bar); let q = 0;
-    const upd = () => { q = 0; const max = document.documentElement.scrollHeight - innerHeight; bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max).toFixed(4) : 0})`; };
+    // ★Rev.28 the header turns to frosted glass with a soft shadow once the page moves (html.sx-scrolled)
+    const upd = () => { q = 0; const max = document.documentElement.scrollHeight - innerHeight; bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max).toFixed(4) : 0})`; document.documentElement.classList.toggle('sx-scrolled', scrollY > 8); };
     addEventListener('scroll', () => { if (!q) q = requestAnimationFrame(upd); }, { passive: true }); addEventListener('resize', upd); upd();
   }
   // Rev.14: command palette (Ctrl / ⌘ K) over every page, section, model, FAQ and quick action

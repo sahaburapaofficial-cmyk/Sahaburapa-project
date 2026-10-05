@@ -3,7 +3,8 @@
 //   · the visitor gives age, type, size, compressor system, refrigerant, the problem and how many units → side by side:
 //     repair the old unit (repair lines from the Pricebook — lines without a standard rate stay "ประเมินหน้างาน", the known
 //     part is shown as "อย่างน้อย") vs. trade it in for a new inverter unit (catalogue prices of that type and size + the
-//     standard installation; taking the old unit out = "ประเมินหน้างาน") + electricity old vs new (studio-model energy())
+//     standard installation; ★Rev.27 taking the old unit out = removal (pump-down included) + carrying it away at the standard
+//     rates of rates.js, added to the total before the trade-in value) + electricity old vs new (studio-model energy())
 //   · trade-in value — Rev.24.1 (owner 3 ต.ค. 2569: "ตารางมูลค่าหาได้จากราคามาตรฐานที่ HomePro หรือเว็บขายแอร์ออนไลน์รับเทิร์น
 //     ทุกอย่างและใช้ได้เลย"): TRADE_IN.table = the Bangkok 2569 market rates for old units by size and condition (working / not
 //     working) as published by AC buy-back / trade-in shops (banoldair.simdif.com 2569 cash table 9k 900 · 12k 1,200 · 18k 1,600 ·
@@ -87,7 +88,8 @@ export const QA = [
   ['ไม่รู้อายุเครื่องหรือชนิดน้ำยา', 'เลือก "ไม่ทราบ" ได้ ป้ายข้างเครื่องมีปีผลิตและชนิดน้ำยา ทีมอ่านจากรูปให้'],
   ['ติดตั้งที่ตำแหน่งเดิมได้ไหม', 'ส่วนใหญ่ได้ ทีมตรวจขายึด แนวท่อ สายไฟ และเบรกเกอร์เดิม แล้วแจ้งในใบเสนอราคาว่าส่วนไหนใช้ต่อได้ ส่วนไหนควรเปลี่ยน'],
   ['รื้อเครื่องเดิมกับติดตั้งเครื่องใหม่วันเดียวกันไหม', 'นัดเป็นวันเดียวกันได้ ทีมเก็บน้ำยาเครื่องเดิมก่อนรื้อ ไม่ปล่อยทิ้งสู่อากาศ แล้วติดตั้งเครื่องใหม่ เวลาขึ้นกับหน้างานและจำนวนเครื่อง'],
-  ['ค่ารื้อและเก็บน้ำยาเครื่องเดิมเท่าไร', 'ยังไม่มีอัตรามาตรฐานบนเว็บ ทีมประเมินจากรูปหน้างานและแจ้งในใบเสนอราคาก่อนยืนยัน'],
+  ['ค่ารื้อและเก็บน้ำยาเครื่องเดิมเท่าไร', () => { const I = c => DATA.instByCode[c] || {}, f = c => (I(c).ex != null ? baht(I(c).ex) : 'ประเมินหน้างาน');
+    return `อัตรามาตรฐานก่อน VAT ต่อเครื่อง รวมเก็บน้ำยากลับคอยล์ร้อนแล้ว: ติดผนัง ${f('REM-W')} · แขวนใต้ฝ้า ${f('REM-C')} · สี่ทิศทาง ${f('REM-K')} · ตู้ตั้งพื้น ${f('REM-FS')} · ขนเครื่องเดิมออกจากพื้นที่ ${f('DISPOSE')} · งานสูงเกิน 3 ม. หรือเครื่องที่เข้าถึงยาก ทีมแจ้งเพิ่มในใบเสนอราคาก่อนยืนยัน`; }],
   ['ถ้าตัดสินใจซ่อมแทน', 'เริ่มจากค่าตรวจวินิจฉัย ทีมแจ้งราคาซ่อมให้อนุมัติก่อนทุกครั้ง ไม่ซ่อมก่อนลูกค้าอนุมัติ'],
   ['ข้อมูลที่กรอกเก็บไว้ที่ไหน', 'ระหว่างกรอก ข้อมูลอยู่ในเบราว์เซอร์ของเครื่องนี้เท่านั้น เมื่อกดส่งใบเสนอราคา ข้อมูลเครื่องเดิมและช่วงมูลค่าเทิร์นไปกับคำขอถึงทีมพร้อมเลขอ้างอิง เว็บไม่เก็บรูป'],
 ];
@@ -125,8 +127,10 @@ export function newSet(x) {
   const ins = (installOptions(x.type, x.btu).find(o => o.key === 'STANDARD') || {}).item || null;
   const I = c => DATA.instByCode[c];
   const rem = I({ wall: 'REM-W', ceiling: 'REM-C', cassette: 'REM-K', floor: 'REM-FS', duct: 'REM-DUCT' }[x.type]);
-  const out = [I('REF-PUMPDOWN'), rem, I('DISPOSE')].filter(Boolean).map(i => ({ name: i.name + ' (เครื่องเดิม)', ex: i.ex ?? null, unit: i.unit, qty: 1 }));
-  return { n: px.length, min: px[0] ?? null, max: px[px.length - 1] ?? null, med, install: ins ? { name: ins.name, ex: ins.ex } : null, out };
+  // ★Rev.27 the removal rate already includes the pump-down (refrigerant kept in the outdoor unit) — not charged twice
+  const out = [rem, I('DISPOSE')].filter(Boolean).map(i => ({ name: i.name + (i.code === 'DISPOSE' ? ' (เครื่องเดิม)' : ' + เก็บน้ำยา (เครื่องเดิม)'), ex: i.ex ?? null, unit: i.unit, qty: 1 }));
+  const outEx = out.every(l => l.ex != null) ? out.reduce((n, l) => n + l.ex, 0) : null;
+  return { n: px.length, min: px[0] ?? null, max: px[px.length - 1] ?? null, med, install: ins ? { name: ins.name, ex: ins.ex } : null, out, outEx };
 }
 
 /** full comparison for x = { age, type, btu, sys, ref, issue, qty, hrs, rate } */
@@ -164,7 +168,9 @@ export function tradeIn(x) {
   return {
     q, age: A, issue: I, repair: { lines: R, known, unknown }, set: N, setEx,
     energy: { old: oldYear, now: newYear, save, loss, oldInv, hrs },
-    trade: tradeValue(x), net: setEx != null && tradeValue(x) ? [setEx - tradeValue(x).hi, setEx - tradeValue(x).lo] : null,
+    // ★Rev.27 the quotation total = new unit + standard installation + taking the old unit out (when priced), minus the trade-in value
+    allEx: setEx != null ? setEx + (N.outEx || 0) : null,
+    trade: tradeValue(x), net: setEx != null && tradeValue(x) ? [setEx + (N.outEx || 0) - tradeValue(x).hi, setEx + (N.outEx || 0) - tradeValue(x).lo] : null,
     verdict, title: VERD[0], sub: VERD[1], why, special: q >= VOLUME_HINT, eligible: A.y >= TRADE_IN.minAge || I.major,
   };
 }
@@ -183,12 +189,17 @@ export function tradeInSummary(x) {
     `คำแนะนำจากหน้าเว็บ: ${R.title}`,
     R.trade ? `มูลค่าเทิร์นโดยประมาณ: ${baht(R.trade.lo)}–${baht(R.trade.hi)} ต่อเครื่อง (${R.trade.working ? 'ใช้งานได้' : 'เสีย / ต้องซ่อม'}) — ทีมยืนยันเมื่อตรวจเครื่อง` : 'มูลค่าเทิร์น: ทีมประเมินหน้างาน',
     R.repair.lines.length ? `ค่าซ่อมที่รู้ราคา: ${R.repair.unknown ? 'อย่างน้อย ' : ''}${baht(R.repair.known * q)}${R.repair.unknown ? ` + ${R.repair.unknown} รายการประเมินหน้างาน` : ''} (ก่อน VAT)` : null,
-    R.setEx != null ? `เครื่องใหม่ Inverter + ติดตั้งมาตรฐาน (ราคากลางในเว็บ): ${baht(R.setEx * q)} ก่อน VAT` : null,
+    R.allEx != null ? `เครื่องใหม่ Inverter + ติดตั้งมาตรฐาน${R.set.outEx ? ' + รื้อ/ขนเครื่องเดิม' : ''} (ราคากลางในเว็บ): ${baht(R.allEx * q)} ก่อน VAT` : null,
     R.net ? `หลังหักมูลค่าเทิร์น ≈ ${baht(R.net[0] * q)}–${baht(R.net[1] * q)} ก่อน VAT (ไม่รวมงานประเมินหน้างาน)` : null,
   ].filter(Boolean);
   return { text: lines.join('\n'), data: { q, why: x.why || [], brand: x.brand || '', model: x.model || '', type: x.type, btu: x.btu, age: x.age, sys: x.sys, ref: x.ref, issue: x.issue, verdict: R.verdict, trade: R.trade && [R.trade.lo, R.trade.hi], setEx: R.setEx, net: R.net } };
 }
 
+// ★Rev.27 relocation rate for this unit (rates.js: removal + standard installation at the new spot)
+function moveTh(x) {
+  const c = TYPE_BY_ID[x.type] && TYPE_BY_ID[x.type].code, r = DATA.inst.find(i => i.code.startsWith(`MOVE-${c}-`) && x.btu <= +i.code.split('-').pop() && x.btu >= +i.code.split('-')[2] - 1000) || DATA.inst.find(i => i.code.startsWith(`MOVE-${c}-`) && x.btu <= +i.code.split('-').pop());
+  return r ? `ย้ายแอร์ (รื้อ + ติดตั้งมาตรฐานจุดใหม่) ${baht(r.ex)} ก่อน VAT ต่อเครื่อง` : 'ใช้บริการรื้อ ย้าย และติดตั้งใหม่ (ประเมินหน้างาน)';
+}
 /** UI — the section body (#tradein) */
 export function mountTradeIn(root, { catalog, openCart } = {}) {
   if (!root) return null;
@@ -229,7 +240,7 @@ export function mountTradeIn(root, { catalog, openCart } = {}) {
     out.innerHTML = '';
     const repCard = h('div', { class: 'ti-card' + (R.verdict === 'repair' || R.verdict === 'keep' ? ' pick' : '') },
       h('h4', {}, R.issue.id === 'reno' ? 'ใช้เครื่องเดิมต่อ' : 'ซ่อมเครื่องเดิม'),
-      R.repair.lines.length ? h('ul', {}, R.repair.lines.map(l => h('li', {}, h('span', {}, l.name), priceOf(l)))) : h('p', { class: 'ti-mut' }, R.issue.id === 'reno' ? 'ไม่มีงานซ่อม · ถ้าต้องย้ายตำแหน่งตอนรีโนเวท ใช้บริการรื้อ ย้าย และติดตั้งใหม่ (ประเมินหน้างาน)' : 'เริ่มจากค่าตรวจวินิจฉัย แล้วทีมแจ้งราคาซ่อมให้อนุมัติก่อน'),
+      R.repair.lines.length ? h('ul', {}, R.repair.lines.map(l => h('li', {}, h('span', {}, l.name), priceOf(l)))) : h('p', { class: 'ti-mut' }, R.issue.id === 'reno' ? `ไม่มีงานซ่อม · ถ้าต้องย้ายตำแหน่งตอนรีโนเวท ${moveTh(st)}` : 'เริ่มจากค่าตรวจวินิจฉัย แล้วทีมแจ้งราคาซ่อมให้อนุมัติก่อน'),
       R.repair.lines.length ? h('p', { class: 'ti-sum' }, R.repair.unknown ? 'อย่างน้อย ' : 'รวม ', h('b', {}, baht(R.repair.known * q)), q > 1 ? ` (${q} เครื่อง)` : '', R.repair.unknown ? h('small', {}, ` + ${R.repair.unknown} รายการประเมินหน้างาน (ยังไม่มีราคามาตรฐาน เช่น ตัวอะไหล่หลัก)`) : null) : null,
       h('p', { class: 'ti-mut' }, `ค่าไฟโดยประมาณ ≈ ${baht(Math.round(R.energy.old / 100) * 100)} / ปี / เครื่อง (${R.energy.oldInv ? 'Inverter' : 'Fixed speed'} อายุ ${R.age.th}${R.energy.loss ? ` · ประสิทธิภาพลดตามอายุ ~${Math.round(R.energy.loss * 100)}%` : ''})`));
     const S = R.set;
@@ -240,7 +251,7 @@ export function mountTradeIn(root, { catalog, openCart } = {}) {
         S.install ? h('li', {}, h('span', {}, S.install.name), S.install.ex != null ? h('b', {}, baht(S.install.ex)) : h('em', { class: 'ti-sv' }, 'ประเมินหน้างาน')) : null,
         S.out.map(l => h('li', {}, h('span', {}, l.name), priceOf(l))),
         h('li', { class: 'ti-trade' }, h('span', {}, `มูลค่าเทิร์นเครื่องเดิม (${R.trade ? (R.trade.working ? 'ใช้งานได้' : 'เสีย / ต้องซ่อม') : '—'}) หักจากใบเสนอราคา`), R.trade ? h('b', {}, `− ${baht(R.trade.lo)}–${baht(R.trade.hi).replace('฿', '')}`) : h('em', { class: 'ti-sv' }, 'ทีมประเมินหน้างาน'))),
-      R.setEx != null ? h('p', { class: 'ti-sum' }, 'เครื่อง + ติดตั้งมาตรฐาน ', h('b', {}, baht(R.setEx * q)), q > 1 ? ` (${q} เครื่อง)` : '', h('small', {}, ' ราคากลางของรุ่นในเว็บ ก่อนหักมูลค่าเทิร์น')) : null,
+      R.allEx != null ? h('p', { class: 'ti-sum' }, S.outEx ? 'เครื่อง + ติดตั้งมาตรฐาน + รื้อเครื่องเดิม ' : 'เครื่อง + ติดตั้งมาตรฐาน ', h('b', {}, baht(R.allEx * q)), q > 1 ? ` (${q} เครื่อง)` : '', h('small', {}, ' ราคากลางของรุ่นในเว็บ ก่อนหักมูลค่าเทิร์น')) : null,
       R.net ? h('p', { class: 'ti-sum ti-net' }, 'หลังหักมูลค่าเทิร์น ≈ ', h('b', {}, `${baht(R.net[0] * q)}–${baht(R.net[1] * q).replace('฿', '')}`), h('small', {}, ' ไม่รวมงานที่ประเมินหน้างาน · มูลค่าเทิร์นยืนยันเมื่อทีมตรวจเครื่อง')) : null,
       h('p', { class: 'ti-mut' }, `ค่าไฟโดยประมาณ ≈ ${baht(Math.round(R.energy.now / 100) * 100)} / ปี / เครื่อง`, R.energy.save > 0 ? ` · ต่างจากเครื่องเดิมราว ${baht(Math.round(R.energy.save * q / 100) * 100)} / ปี${q > 1 ? ` (${q} เครื่อง)` : ''}` : ''));
     out.append(
@@ -272,7 +283,7 @@ export function mountTradeIn(root, { catalog, openCart } = {}) {
         catalog ? h('button', { type: 'button', class: 's-btn', onclick: () => {
           catalog.setType(st.type); catalog.setBtu(st.btu); const c = document.getElementById('catalog'); c && c.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } }, `ดูเครื่องใหม่ ${btuFmt(st.btu)}`) : null,
         h('button', { type: 'button', class: 's-btn ghost', onclick: () => askTeam('เทิร์นแอร์เก่า', `${S0.text.replace(/\n/g, ' · ')} · จะส่งรูปป้ายเครื่องให้ทีม`) }, 'ส่งรูปป้ายเครื่องให้ทีม')),
-      h('div', { class: 'ti-qa' }, h('h4', {}, 'คำถามก่อนเทิร์น'), h('div', { class: 'ti-qa-g' }, QA.map(([qq, a]) => h('details', {}, h('summary', {}, qq), h('p', {}, a))))),
+      h('div', { class: 'ti-qa' }, h('h4', {}, 'คำถามก่อนเทิร์น'), h('div', { class: 'ti-qa-g' }, QA.map(([qq, a]) => h('details', {}, h('summary', {}, qq), h('p', {}, typeof a === 'function' ? a() : a))))),
       h('p', { class: 'ti-note' }, `ราคาก่อน VAT ตาม Pricebook อัตรามาตรฐาน · ราคาเครื่องใหม่ = ราคากลางของรุ่น Inverter ขนาดใกล้เคียงในเว็บ · ค่าไฟเป็นประมาณการ (เปิดวันละ ${R.energy.hrs} ชม. · ${RATE.home} บาท/หน่วย · สมมติประสิทธิภาพลดลงราว 1% ต่อปีหลังปีที่ 3) ไม่ใช่การรับประกันค่าไฟ · ซ่อมทุกครั้งแจ้งราคาให้อนุมัติก่อน${R.special ? ' · จำนวนนี้อาจได้อัตราพิเศษตามเงื่อนไข ทีมขายยืนยันในใบเสนอราคา' : ''}`));
   }
   function draw() { save(); drawForm(); drawOut(); }

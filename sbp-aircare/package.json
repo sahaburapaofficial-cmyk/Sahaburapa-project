@@ -23,6 +23,7 @@
     "review": "node tests/review-fixes.mjs",
     "tradein": "node tests/tradein.mjs",
     "allservices": "node tests/allservices.mjs",
+    "rates": "node tests/rates.mjs",
     "jank": "node tests/jank.mjs",
     "inp": "node tests/inp.mjs",
     "enterprise": "node tests/enterprise.mjs && node tests/enterprise-ui.mjs a.html && node tests/enterprise-ui.mjs b.html && node tests/enterprise-ui.mjs c.html 390",

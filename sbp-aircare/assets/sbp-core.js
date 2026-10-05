@@ -4,6 +4,7 @@
 //   "ใบเสนอราคาล้างและซ่อม Final จริง.xlsx" (cleaning pricebook 3 packages × C1/C2, 86 repair items)
 // All source prices are before VAT. The site shows VAT-inclusive prices first, with the pre-VAT figure beside it.
 
+import { DECIDED, MOVE, MOVE_TH, MOVE_REPLACES, SMALL_VISIT } from './rates.js';   // ★Rev.27 decided standard rates (no imports there)
 export const VAT = 0.07;
 export const incVat = n => Math.round(n * (1 + VAT));
 // ★Rev.16 owner decision (2 ต.ค. 2569: "ราคาก่อนแวททั้งหมด ทุกราคา งานบริการให้เป็นตัวเลข round up hundred digit และระบุราคาก่อน VAT เสมอ"):
@@ -62,6 +63,23 @@ export async function loadData(url) {
   // Rev.08 owner decision: the web shows one copper spec only — O-TWO 0.70 mm. Type L / project-grade copper stays in the Pricebook (QTN/BOQ work) but is not listed on the web.
   const brand = t => t == null ? t : t.replace(/K Copper Type L/g, 'O-TWO').replace(/K Copper/g, 'O-TWO').replace(/ท่อน้ำยาทองแดง 0\.70 มม\./g, 'ท่อน้ำยาทองแดง O-TWO 0.70 มม.').replace(/ท่อ Type L หรือ Project-grade ใช้เมื่อระบุใน QTN\/BOQ;\s*ไม่รวมอัตโนมัติหากไม่ระบุ;\s*/g, '');
   DATA.inst = j.inst.map(([c, cat, n, u, p, inc, exc, w, sv]) => ({ code: c, cat: S(cat), name: brand(n), unit: S(u), ex: /^INS-/.test(c) ? up100(p) : p, inc: brand(S(inc)), exc: S(exc), warranty: S(w), survey: S(sv) })).filter(i => !/-MASS$/.test(i.code) && !/^MAT-CU-L-/.test(i.code));
+  // ★Rev.27 (owner 5 ต.ค. 2569: decide market-based rates for the lines without one) — rates.js on top of the Pricebook mirror
+  DATA.inst.forEach(i => { const d = DECIDED[i.code]; if (d && i.ex == null) Object.assign(i, { ex: up100(d.ex), decided: d.how, inc: d.note + (i.inc ? ' · ' + i.inc : '') }); });
+  {
+    const byCode = Object.fromEntries(DATA.inst.map(i => [i.code, i])), at = DATA.inst.findIndex(i => i.code === MOVE_REPLACES[0]), cat = at >= 0 ? DATA.inst[at].cat : '13 งานรื้อ ย้าย และขนย้าย';
+    const rows = [];
+    Object.entries(MOVE).forEach(([C, rc]) => {
+      const rem = byCode[rc]; if (!rem || rem.ex == null) return;
+      DATA.inst.filter(i => new RegExp(`^INS-${C}-\\d+-\\d+-STANDARD$`).test(i.code) && i.ex != null).forEach(ins => {
+        const [lo, hi] = ins.code.split('-').slice(2, 4).map(Number), f = n => n.toLocaleString('en-US');
+        rows.push({ code: `MOVE-${C}-${lo}-${hi}`, cat, name: `ย้ายแอร์${MOVE_TH[C]} ${f(lo)}–${f(hi)} BTU (รื้อ + ติดตั้งมาตรฐานจุดใหม่)`, unit: 'เครื่อง', ex: rem.ex + ins.ex, decided: 'k',
+          inc: `รื้อเครื่องเดิม (${baht(rem.ex)}: ${DECIDED[rc].note}) + ติดตั้งมาตรฐานจุดใหม่ (${baht(ins.ex)}: ท่อน้ำยาและวัสดุ 4 เมตรแรก Vacuum ทดสอบเดินเครื่อง) ในสถานที่เดียวกัน`,
+          exc: 'ไม่รวมท่อส่วนเกิน 4 เมตร ซ่อมตัวเครื่อง อะไหล่ งานสูงเกิน 3 ม. ซ่อมผนังจุดเดิม และขนย้ายข้ามสถานที่ (คิดค่าเดินทางตามระยะ)',
+          warranty: 'รับประกันงานติดตั้ง 1 ปี (เครื่องเดิมของลูกค้า) · ตัวเครื่องและอะไหล่เดิมไม่อยู่ในประกัน', survey: 'NO' });
+      });
+    });
+    if (rows.length) { DATA.inst = DATA.inst.filter(i => !MOVE_REPLACES.includes(i.code)); DATA.inst.splice(Math.max(0, Math.min(at, DATA.inst.length)), 0, ...rows); }
+  }
   DATA.instByCode = Object.fromEntries(DATA.inst.map(i => [i.code, i]));
   DATA.clean = j.clean.map(([pk, lv, ty, rg, u, s, sp, pj, w, care, doc, inc, exc, st, n]) => ({ pkg: S(pk), level: lv, ty: S(ty), type: TYPE_FROM_CLEAN[S(ty)] || null, range: S(rg), unit: S(u), rate: { s: up100(s), sp, pj, pb: s }, warranty: S(w), care: S(care), doc: S(doc), inc: S(inc), exc: S(exc), status: S(st), name: n }));
   DATA.rep = j.rep.map(([ty, n, u, s, sp, pj, w, inc, exc, st]) => ({ cat: S(ty), name: n.replace(/^ซ่อมแอร์:\s*/, ''), unit: S(u), rate: { s: up100(s), sp, pj, pb: s }, warranty: S(w), inc: S(inc), exc: S(exc), status: S(st) }));
@@ -110,10 +128,14 @@ export function addonsFor(type, btu) {
     { group: 'น้ำทิ้งและงานอื่น', items: [
       { item: I('DRAIN-PUMP-15'), qty: 'pc' }, { item: I('DRAIN-TRAP-34'), qty: 'pc' }, { item: I('FIRESTOP-4'), qty: 'pc' },
     ] },
-    { group: 'ประเมินหน้างาน (ไม่มีราคาตายตัว)', items: [
-      { item: I(rem), qty: 'flag' }, { item: I('DISPOSE'), qty: 'flag' }, { item: I('ACC-HEIGHT'), qty: 'flag' }, { item: I('SUP-STD'), qty: 'flag' },
-      { item: I('CIV-CHASE'), qty: 'flag' }, { item: I('CIV-CEIL'), qty: 'flag' }, { item: I('LOG-NIGHT'), qty: 'flag' }, { item: I('LOG-SUN'), qty: 'flag' },
-    ].filter(x => x.item) },
+    // ★Rev.27 lines that now carry a standard rate (rates.js) are picked with a quantity; the rest stay "ประเมินหน้างาน"
+    ...(() => {
+      const all = [I(rem), I('DISPOSE'), I('CIV-CORE'), I('ACC-HEIGHT'), I('SUP-STD'), I('CIV-CHASE'), I('CIV-CEIL'), I('LOG-NIGHT'), I('LOG-SUN')].filter(Boolean);
+      return [
+        { group: 'เครื่องเดิมและงานเจาะ', items: all.filter(i => i.ex != null).map(item => ({ item, qty: 'pc' })) },
+        { group: 'ประเมินหน้างาน (ไม่มีราคาตายตัว)', items: all.filter(i => i.ex == null).map(item => ({ item, qty: 'flag' })) },
+      ].filter(g => g.items.length);
+    })(),
   ];
 }
 
@@ -209,7 +231,8 @@ export const COMPANY = {
      (DATA.minBill) · งานล้างที่ยอดต่ำกว่าขั้นต่ำ → ค่าเดินทาง baseFee แทนการเติมยอดขั้นต่ำ
    · นอกพื้นที่หลัก (กรุงเทพฯ ที่ไกลกว่า freeKm หรือจังหวัดอื่น) ≤ maxKm → baseFee + perKm × กม. ที่เกิน freeKm ต่อเที่ยว (ปัดขึ้นหลักร้อย)
    · เกิน maxKm → ไม่รับรายเครื่อง (งานโครงการ / สัญญา)
-   baseFee 300 และ perKm 10 คือค่าที่เว็บประกาศอยู่แล้วจากการสำรวจร้านแอร์ (29 ก.ย. 2569) — เจ้าของยืนยันตัวเลขได้ที่นี่ที่เดียว
+   baseFee 300 และ perKm 10 มาจากการสำรวจร้านแอร์ (29 ก.ย. 2569) · ★Rev.27 ยืนยันใช้ (เจ้าของ 5 ต.ค. 2569 ให้ตัดสินจากราคากลาง:
+   ร้านแอร์คิดค่าขนย้าย/ค่ารถข้ามพื้นที่ 300–1,000 และต่างจังหวัด 10–20 บาท/กม.) — แก้ตัวเลขได้ที่นี่ที่เดียว
    ระยะ = เส้นตรงจากจุดที่ว่าการเขต/อำเภอ (หรือจุดกลางแขวง/ตำบล) × roadFactor — ค่าประมาณ ทีมยืนยันจากที่อยู่จริง */
 export const TRAVEL = {
   roadFactor: 1.35, freeKm: 30, freeProvince: 'กรุงเทพมหานคร', baseFee: 300, perKm: 10, maxKm: 150,
@@ -393,6 +416,8 @@ export const FAQ = [
   { q: 'พื้นที่ให้บริการและค่าเดินทางคิดอย่างไร', get a() { const T = TRAVEL; return `พื้นที่หลักคือกรุงเทพฯ ในระยะ ${T.freeKm} กม. จากสำนักงานใหญ่ พระราม 2 ไม่มีค่าเดินทางเมื่อยอดงานล้างถึง ${(DATA.minBill || 4500).toLocaleString('en-US')} บาท ถ้าต่ำกว่านั้นคิดค่าเดินทาง ${T.baseFee} บาทต่อการเข้างาน นอกพื้นที่หลักรับถึงประมาณ ${T.maxKm} กม. ค่าเดินทางต่อเที่ยว ${T.baseFee} บาท + ${T.perKm} บาทต่อกิโลเมตรที่เกิน ${T.freeKm} กม. (ก่อน VAT ปัดขึ้นหลักร้อย) ไกลกว่านั้นรับเป็นงานโครงการหรือสัญญา`; } },
   { q: 'รับงานระบบ VRV / VRF ไหม', a: 'รับเป็นงานโครงการแยกจากงานล้างและติดตั้งทั่วไป เพราะต้องสำรวจ ออกแบบท่อและคอนโทรล และทำ BOQ ตามอาคารจริง กด "ติดต่อสอบถาม VRV / VRF" แล้วทีมโครงการจะติดต่อกลับ' },
   { q: 'มียอดขั้นต่ำไหม', get a() { return 'งานล้างมียอดขั้นต่ำต่อการเข้าหน้างาน ' + (DATA.minBill || 4500).toLocaleString('en-US') + ` บาทก่อน VAT ถ้ายอดงานล้างต่ำกว่านี้ คิดค่าเดินทาง ${TRAVEL.baseFee} บาทต่อการเข้างาน ใบเสนอราคาเบื้องต้นแสดงให้เห็นก่อนส่งทุกครั้ง`; } },
+  { q: 'งานเล็ก ๆ อย่างเดียว เช่น ขนแอร์เก่าออก เจาะผนังเพิ่ม มีค่าเข้างานไหม', get a() { return `งานย่อยที่ไม่มีงานล้าง ติดตั้ง หรือตรวจซ่อมในวันเดียวกัน มียอดขั้นต่ำต่อการเข้างาน ${SMALL_VISIT.minEx.toLocaleString('en-US')} บาทก่อน VAT รายการที่ทำนับรวมในยอดนี้ ส่วนที่ขาดคิดเป็นค่าเข้างาน ถ้านัดพร้อมรอบล้างหรืองานติดตั้ง ไม่มีค่าเข้างานนี้`; } },
+  { q: 'ค่ารื้อและย้ายแอร์เท่าไร', get a() { const I = c => ((DATA.instByCode || {})[c] || {}).ex, f = n => n != null ? n.toLocaleString('en-US') : '-'; return `ค่ารื้อ (รวมเก็บน้ำยากลับคอยล์ร้อน) ติดผนัง ${f(I('REM-W'))} · แขวนใต้ฝ้า ${f(I('REM-C'))} · สี่ทิศทาง ${f(I('REM-K'))} · ตู้ตั้งพื้น ${f(I('REM-FS'))} บาท ก่อน VAT · ย้ายแอร์ = ค่ารื้อ + ราคาติดตั้งมาตรฐานตามขนาดที่จุดใหม่ (ติดผนัง 9,000–12,000 BTU ${f(I('MOVE-W-9000-12000'))} บาท) · ขนเครื่องเดิมออก ${f(I('DISPOSE'))} บาทต่อเครื่อง · ดูทุกขนาดในค่าบริการ หมวดรื้อ ย้าย`; } },
 ];
 
 /* ---------- utilities used by all variants ---------- */

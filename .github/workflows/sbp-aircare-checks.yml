@@ -38,5 +38,7 @@ jobs:
         run: node tests/tradein.mjs
       - name: All services overview (Pricebook groups · visit rules)
         run: node tests/allservices.mjs
+      - name: Decided standard rates (rates.js overlay · small-visit minimum)
+        run: node tests/rates.mjs
       - name: Enterprise sample contracts (Pricebook · wording rules)
         run: node tests/enterprise.mjs

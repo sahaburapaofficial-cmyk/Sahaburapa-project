@@ -32,9 +32,13 @@ ok(R.repair.known === comp.reduce((a, l) => a + (l.ex ?? 0), 0) && R.repair.unkn
 const px = core.DEMO.models.filter(m => m.type === 'wall' && m.inverter).flatMap(m => m.skus.filter(s => s.btu >= 10800 && s.btu <= 13440).map(s => s.px));
 ok(R.set.n === px.length && R.set.min === Math.min(...px) && R.set.max === Math.max(...px), `new wall 12k inverter: ${R.set.n} catalogue SKUs ${R.set.min}–${R.set.max}, median ${R.set.med}`);
 ok(R.set.install && R.set.install.ex === core.installOptions('wall', 12000).find(o => o.key === 'STANDARD').item.ex && R.setEx === R.set.med + R.set.install.ex, `set = median + standard install ${R.set.install.ex}`);
-ok(R.set.out.length === 3 && R.set.out.every(l => l.ex == null), 'pump-down / removal / take-away of the old unit stay "ประเมินหน้างาน"');
+// Rev.27 removal (pump-down included) + carrying away at the decided standard rates (rates.js), added before the trade-in value
+const RT = await import('../assets/rates.js');
+ok(R.set.out.length === 2 && R.set.out[0].ex === RT.DECIDED['REM-W'].ex && R.set.out[1].ex === RT.DECIDED['DISPOSE'].ex && R.set.outEx === 1500 && !R.set.out.some(l => /PUMPDOWN/.test(l.name)), `old unit out: removal ${R.set.out[0].ex} (pump-down included) + take-away ${R.set.out[1].ex} = ${R.set.outEx}`);
+ok(R.allEx === R.setEx + R.set.outEx, `quotation total ${R.allEx} = set ${R.setEx} + old unit out ${R.set.outEx}`);
+ok(T.QA.some(([q, a]) => /ค่ารื้อ/.test(q) && typeof a === 'function' && /1,000/.test(a()) && /2,500/.test(a())), 'Q&A quotes the removal rates');
 ok(R.trade && R.trade.lo === 300 && R.trade.hi === 700 && !R.trade.working, `12k unit with a dead compressor: trade-in ${R.trade && R.trade.lo}–${R.trade && R.trade.hi} (not working)`);
-ok(R.net && R.net[0] === R.setEx - 700 && R.net[1] === R.setEx - 300, `net after trade-in ${R.net && R.net.join('–')}`);
+ok(R.net && R.net[0] === R.allEx - 700 && R.net[1] === R.allEx - 300, `net after trade-in ${R.net && R.net.join('–')}`);
 const W = T.tradeValue({ ...base, issue: 'reno', btu: 24000 }), B = T.tradeValue({ ...base, issue: 'comp', btu: 36000 });
 ok(W.working && W.lo === 1400 && W.hi === 2200 && !B.working && B.lo === 800 && B.hi === 1800, 'table: 24k working 1,400–2,200 · 36k not working 800–1,800');
 ok(T.tradeValue({ ...base, btu: 7000 }) === null, 'below 9,000 BTU does not qualify');
