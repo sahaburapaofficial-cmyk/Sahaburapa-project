@@ -32,7 +32,10 @@
     "smoke:2:mobile": "node tests/smoke.mjs d.html 390 844 && node tests/smoke.mjs e.html 390 844 && node tests/smoke.mjs f.html 390 844",
     "textscan:2": "node tests/textscan.mjs d.html && node tests/textscan.mjs e.html && node tests/textscan.mjs f.html",
     "lux": "node tests/lux.mjs",
-    "lux:gen": "python3 tools/make-lux.py"
+    "lux:gen": "python3 tools/make-lux.py",
+    "concierge": "node tests/concierge.mjs a.html && node tests/concierge.mjs b.html && node tests/concierge.mjs c.html && node tests/concierge.mjs d.html && node tests/concierge.mjs e.html && node tests/concierge.mjs f.html",
+    "boot": "node tests/boot.mjs",
+    "profile": "node tests/profile.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.0",

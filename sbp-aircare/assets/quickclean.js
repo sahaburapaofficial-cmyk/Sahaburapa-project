@@ -171,5 +171,10 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
       h('li', { class: 'qc-step' }, h('p', { class: 'qc-n' }, h('span', {}, '3'), 'ที่ไหน · เมื่อไร'), s3)),
     sum);
   drawTypes(); drawHow(); drawSum();
-  return { focus() { root.scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); } };
+  return {
+    focus() { root.scrollIntoView({ behavior: RM() ? 'auto' : 'smooth', block: 'start' }); },
+    // Rev.30: start the form from what the customer already told us elsewhere (the design-E consultation) — counts per type only;
+    // sizes, method, area and date stay the customer's own choice on the form
+    prefill(n = {}) { let any = false; for (const t in st.n) if (n[t] != null) { st.n[t] = Math.max(0, Math.min(99, Math.round(n[t]))); any = true; } if (any) { drawTypes(); drawSum(); } return { ...st.n }; },
+  };
 }

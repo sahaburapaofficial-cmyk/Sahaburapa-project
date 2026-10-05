@@ -21,7 +21,8 @@ const ss = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 
 const lerp = (a, b, t) => a + (b - a) * t;
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // WebGL available? probe once and give the context back at once (it must not count against the gl-pool budget of 3)
-const hasGL = () => { try { const c = document.createElement('canvas'), g = c.getContext('webgl2') || c.getContext('webgl'); if (!g) return false; const x = g.getExtension('WEBGL_lose_context'); x && x.loseContext(); return true; } catch (_) { return false; } };
+// Rev.30 smooth: no probe context (creating one cost ~1 s on slow GPUs) — the API's presence decides; a failed renderer falls back below
+const hasGL = () => typeof WebGLRenderingContext !== 'undefined';
 
 // ---- the room model behind the captions (same formulas as the room studio) ----
 const SC = SCENE_BY_ID.condobed;
@@ -81,6 +82,7 @@ function createFilm(host, o) {
   renderer.setPixelRatio(Math.min(1.75, devicePixelRatio || 1));
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;   // Rev.30 smooth: shadows redraw only when something in the room moves
   const cv = renderer.domElement; cv.setAttribute('aria-hidden', 'true'); cv.style.cssText = 'display:block;width:100%;height:100%';
   host.append(cv);
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0b0f1c); scene.fog = new THREE.Fog(0x0b0f1c, 9, 26);
@@ -104,8 +106,9 @@ function createFilm(host, o) {
   const mist = new THREE.Points(mgeo, new THREE.PointsMaterial({ color: 0xdff4ff, size: 0.016, transparent: true, opacity: 0, depthWrite: false })); scene.add(mist);
   const U0 = new THREE.Vector3(); room.unitG.getWorldPosition(U0);
 
-  let W = 1, H = 1, q = o.start ?? 0, p = q, t = 0, last = performance.now(), visible = true, dirty = true, raf = 0;
-  const size = () => { const r = host.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height); renderer.setSize(W, H, false); cam.aspect = W / H; cam.fov = W / H < 0.9 ? 58 : W / H < 1.3 ? 46 : 38; cam.updateProjectionMatrix(); dirty = true; };
+  let W = 1, H = 1, q = o.start ?? 0, p = q, t = 0, last = performance.now(), visible = true, dirty = true, raf = 0, lastSet = 0, odd = false, lastOpen = -1, lastShadow = -9;
+  let sw = 0, sh = 0, spr = 0;   // Rev.30 smooth: GL buffers are reallocated only when the size really changed
+  const size = () => { const r = host.getBoundingClientRect(); W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height)); if (W === sw && H === sh && renderer.getPixelRatio() === spr) return; sw = W; sh = H; spr = renderer.getPixelRatio(); renderer.setSize(W, H, false); cam.aspect = W / H; cam.fov = W / H < 0.9 ? 58 : W / H < 1.3 ? 46 : 38; cam.updateProjectionMatrix(); dirty = true; };
   size(); const ro = new ResizeObserver(size); ro.observe(host);
   const io = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible) loop(); }, { rootMargin: '10% 0px' }); io.observe(host);
 
@@ -120,6 +123,7 @@ function createFilm(host, o) {
     const wash = ss(0.62, 0.76, P2);
     const dirt = lerp(DIRTY, CLEAN, wash);
     room.open(open); room.setDirt(dirt);
+    if (Math.abs(open - lastOpen) > 1e-4 || t - lastShadow > 3) { renderer.shadowMap.needsUpdate = true; lastOpen = open; lastShadow = t; }
     const air = effects(dirt).air * (P2 < 0.16 ? ss(0.08, 0.16, P2) : 1);
     const cool = P2 < 0.8 ? lerp(0.18, 0.42, ss(0.22, 0.45, P2)) : lerp(0.42, 1, ss(0.8, 0.97, P2));
     floor.material.uniforms.uCool.value = cool; floor.material.uniforms.uT.value = t;
@@ -170,15 +174,21 @@ function createFilm(host, o) {
     const step = now => {
       const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
       if (!visible) return;
-      const k = 1 - Math.exp(-dt * 3.2); const before = q; q += (p - q) * k; if (Math.abs(p - q) < 1e-4) q = p;
+      const k = 1 - Math.exp(-dt * 4.6); const before = q; q += (p - q) * k; if (Math.abs(p - q) < 1e-4) q = p;
       if (o.still) { if (dirty || before !== q) { frame(0); dirty = false; } return; }
-      frame(dt); raf = requestAnimationFrame(step);
+      // Rev.30: while the visitor is not scrolling (camera settled), draw every other frame — the air keeps moving, the GPU does half the work
+      const idle = Math.abs(p - q) < 1e-3 && performance.now() - lastSet > 1200;
+      if (!idle || (odd = !odd)) { frame(idle ? dt * 2 : dt); perf(idle ? dt : dt); }
+      raf = requestAnimationFrame(step);
     };
     last = performance.now(); raf = requestAnimationFrame(step);
   }
+  // Rev.30 smooth: frames slower than ~30 fps for 2 s in a row → render at 1× pixel ratio (then 0.75×) — motion before sharpness
+  let slow = 0, tier = 0;
+  const perf = dt => { if (dt <= 0) return; slow = dt > 0.034 ? slow + dt : Math.max(0, slow - dt * 0.5); if (slow > 2 && tier < 2) { tier++; slow = 0; renderer.setPixelRatio(tier === 1 ? 1 : 0.75); size(); } };
   loop();
   return {
-    set(v) { p = clamp(v); if (o.still) { q = p; dirty = true; loop(); } },
+    set(v) { p = clamp(v); lastSet = performance.now(); if (o.still) { q = p; dirty = true; loop(); } },
     jump(v) { p = q = clamp(v); dirty = true; },
     dispose() { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); G.release(); renderer.dispose(); },
   };
@@ -193,7 +203,8 @@ export function mountCinema(root, { cta = null } = {}) {
   const hud = h('div', { class: 'cn-hud', 'aria-hidden': 'true' }, h('span', {}, 'อุณหภูมิในห้อง'), hudT, hudM, h('i', { class: 'cn-bar' }, h('i')));
   const scrub = h('nav', { class: 'cn-scrub', 'aria-label': 'บทของภาพยนตร์' });
   const stage = h('div', { class: 'cn-cv' });
-  const stick = h('div', { class: 'cn-stick' }, stage, h('div', { class: 'cn-grade', 'aria-hidden': 'true' }), h('div', { class: 'cn-grain', 'aria-hidden': 'true' }),
+  const skip = h('button', { type: 'button', class: 'cn-skip', onclick: () => { const n = root.nextElementSibling && root.nextElementSibling.querySelector('section[id]'); const t = n || root.nextElementSibling; if (t) { const y = t.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 64); scrollTo({ top: y, behavior: 'auto' }); } } }, 'ข้ามภาพยนตร์');   // Rev.30: customers who came to book do not sit through the film
+  const stick = h('div', { class: 'cn-stick' }, stage, skip, h('div', { class: 'cn-grade', 'aria-hidden': 'true' }), h('div', { class: 'cn-grain', 'aria-hidden': 'true' }),
     h('div', { class: 'cn-bars', 'aria-hidden': 'true' }, h('i'), h('i')), cap, hud, scrub, cta ? h('div', { class: 'cn-cta' }, cta) : null,
     h('p', { class: 'cn-note' }, 'ภาพยนตร์จำลองเพื่ออธิบาย · ตัวเลขจากแบบจำลองห้องเดียวกับห้องจำลองบนเว็บ'));
   const trk = h('div', { class: 'cn-track' + (still ? ' still' : '') }, stick);
@@ -216,7 +227,7 @@ export function mountCinema(root, { cta = null } = {}) {
   if (!hasGL()) { trk.classList.add('poster'); onFrame(still ? 1 : 0); return { goTo }; }
   onFrame(still ? 0.9 : 0);
   whenNear(stage, () => {
-    film = createFilm(stage, { still, start: still ? 0.9 : progress(), onFrame });
+    try { film = createFilm(stage, { still, start: still ? 0.9 : progress(), onFrame }); } catch (e) { trk.classList.add('poster'); stage.innerHTML = ''; return; }
     if (still) film.set(0.9);
   }, '60% 0px');
   if (!still) addEventListener('scroll', () => { if (film) film.set(progress()); else onFrame(progress()); }, { passive: true });

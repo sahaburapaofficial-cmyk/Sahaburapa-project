@@ -10,6 +10,7 @@
 import { h, $, baht, DATA, TRAVEL, VOLUME_HINT, QUEUE_RULES } from './sbp-core.js';
 import { cleanFrom } from './quickclean.js';
 import { askTeam } from './contact.js';
+import { runWhenVisible } from './animicons.js';
 import { SCENE_BY_ID, defaultOrient, thermal, steadyT, effects, needBtu, STD_SIZES } from './studio-model.js';
 
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -41,12 +42,16 @@ export function planFor(a) {
   return out;
 }
 
-export function mountConcierge(root, { go = () => {}, openCart = () => {} } = {}) {
+export function mountConcierge(root, { go = () => {}, openCart = () => {}, prefill = null } = {}) {
   if (!root) return null;
   const A = store.get('sbp-concierge-v1', { care: [] }); A.care = A.care || [];
   const body = h('div', { class: 'at-q' }), res = h('div', { class: 'at-plan', 'aria-live': 'polite' });
   const prog = h('ol', { class: 'at-prog', 'aria-hidden': 'true' }, QUESTIONS.map(() => h('li')));
   let step = !A.place ? 0 : !A.units ? 1 : !A.careDone ? 2 : !A.when ? 3 : 4;
+  // Rev.30: one tap from the plan to a booking form already holding the number of units — the customer names the type (we do not guess it)
+  const TYPE_TH = [['wall', 'ติดผนัง'], ['ceiling', 'แขวนใต้ฝ้า'], ['cassette', 'สี่ทิศทาง'], ['floor', 'ตู้ตั้งพื้น']];
+  const cleanTypes = () => h('div', { class: 'at-types', role: 'group', 'aria-label': 'ประเภทแอร์ที่จะล้าง' }, h('span', {}, `เปิดฟอร์มจองพร้อม ${A.units || 1} เครื่อง:`),
+    TYPE_TH.map(([t, th]) => h('button', { type: 'button', onclick: () => { prefill(Object.fromEntries(TYPE_TH.map(([k]) => [k, k === t ? Number(A.units || 1) : 0]))); go('book'); } }, th)));
   function render() {
     store.set('sbp-concierge-v1', A);
     [...prog.children].forEach((li, i) => li.className = i < step ? 'done' : i === step ? 'on' : '');
@@ -70,7 +75,7 @@ export function mountConcierge(root, { go = () => {}, openCart = () => {} } = {}
     const summary = QUESTIONS.map(q => `${q.th}: ${q.one ? (q.opts.find(o => o[0] === A[q.id]) || [, '-'])[1] : A.care.map(c => q.opts.find(o => o[0] === c)[1]).join(', ') || '-'}`).join('\n');
     res.append(h('p', { class: 'at-n' }, 'แผนบริการสำหรับคุณ'), h('h3', {}, 'สิ่งที่เราแนะนำ ตามลำดับ'),
       h('ol', { class: 'at-recs' }, plan.map((r, i) => h('li', { 'data-k': r.k }, h('span', { class: 'at-i' }, String(i + 1).padStart(2, '0')),
-        h('div', {}, h('b', {}, r.th), h('p', {}, r.d)), r.go ? h('button', { type: 'button', class: 'btn-ghost', onclick: () => go(r.go) }, 'ไปที่ขั้นนี้') : null))),
+        h('div', {}, h('b', {}, r.th), h('p', {}, r.d), r.k === 'clean' && prefill ? cleanTypes() : null), r.go ? h('button', { type: 'button', class: 'btn-ghost', onclick: () => go(r.go) }, 'ไปที่ขั้นนี้') : null))),
       h('p', { class: 'at-fine' }, 'ราคามาตรฐานจาก Pricebook 2569 ก่อน VAT · ยืนยันในใบเสนอราคาอย่างเป็นทางการ'),
       h('div', { class: 'at-nav' }, h('button', { type: 'button', class: 'btn-primary', onclick: () => askTeam('ปรึกษาบริการ', 'แผนบริการที่เลือกบนเว็บ\n' + summary) }, 'ให้ทีมโทรกลับพร้อมแผนนี้'),
         h('button', { type: 'button', class: 'btn-ghost', onclick: openCart }, 'ดูใบเสนอราคา'), h('button', { type: 'button', class: 'at-link', onclick: () => { step = 0; A.care = []; A.careDone = false; QUESTIONS.forEach(q => q.one && delete A[q.id]); render(); } }, 'เริ่มใหม่')));
@@ -133,7 +138,6 @@ const SVG = `<svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid slice" ari
   <g class="at-plant"><path d="M700 430h40l-6 -48h-28z" class="at-pot"/>${[0, 1, 2, 3, 4, 5].map(i => `<path class="at-leaf" style="animation-delay:${i * 0.4}s" d="M720 384 q ${-40 + i * 16} -60 ${-30 + i * 12} -${100 + (i % 3) * 18}"/>`).join('')}</g>
 </g>
 <g class="at-l" data-depth="0.4">
-  <g class="at-motes">${[...Array(26)].map((_, i) => `<circle cx="${180 + (i * 137) % 420}" cy="${150 + (i * 89) % 300}" r="${1 + (i % 3) * 0.7}" style="animation-delay:${(i * 0.37) % 6}s;animation-duration:${6 + (i % 5)}s"/>`).join('')}</g>
   <path class="at-curtain" d="M440 40h46q-10 140 6 300q-8 70 4 120h-56z"/>
   <path class="at-curtain r" d="M760 40h-46q10 140 -6 300q8 70 -4 120h56z"/>
 </g>
@@ -143,6 +147,9 @@ const SVG = `<svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid slice" ari
 export function mountDayRoom(root) {
   if (!root) return null;
   const art = h('div', { class: 'at-art', html: SVG });
+  // Rev.30 smooth: dust in the sunlight as composited HTML dots (transform/opacity only) — animating them inside the SVG repainted the whole drawing every frame
+  const motes = h('div', { class: 'at-motes-h', 'aria-hidden': 'true' }, [...Array(14)].map((_, i) => h('i', { style: `left:${22 + (i * 37) % 52}%;top:${30 + (i * 23) % 52}%;animation-delay:${((i * 0.53) % 6).toFixed(2)}s;animation-duration:${7 + (i % 4)}s` })));
+  art.append(motes);
   const timeOut = h('b', { class: 'at-clock' }), outT = h('b'), inT = h('b'), status = h('p', { class: 'at-st' });
   const range = h('input', { type: 'range', min: '6', max: '22', step: '0.25', value: '15', 'aria-label': 'เวลาของวัน' });
   const play = h('button', { type: 'button', class: 'at-play', 'aria-pressed': 'false' }, 'เล่นทั้งวัน');
@@ -152,6 +159,7 @@ export function mountDayRoom(root) {
     h('label', { class: 'at-range' }, range), h('div', { class: 'at-tg' }, play, onB, dirtyB), status,
     h('p', { class: 'at-fine' }, `ภาพประกอบ · อุณหภูมิจากแบบจำลองห้องนั่งเล่น ${SC.w} × ${SC.d} ม. แอร์ ${CAP.toLocaleString('en-US')} BTU ของห้องจำลองบนเว็บ ไม่ใช่ค่าวัดจริง`));
   root.append(h('div', { class: 'at-room' }, art, ctl));
+  runWhenVisible(art);   // Rev.30 smooth: curtains, motes, leaves and breeze animate only while the room is on screen
   const svg = $('svg', art), s0 = $('.at-s0', art), s1 = $('.at-s1', art), sun = $('.at-sun', art), moon = $('.at-moon', art), tint = $('.at-tint', art),
     shaft = $('.at-shaft', art), glow = $('.at-glow', art), breeze = $('.at-breeze', art), lights = $('.at-lights', art), wall = $('.at-wall', art), disp = $('.at-ud', art);
   for (let i = 0; i < 40; i++) { const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', 446 + (i * 53) % 300); r.setAttribute('y', 270 + (i * 29) % 56); r.setAttribute('width', 3); r.setAttribute('height', 3); lights.append(r); }
@@ -166,7 +174,7 @@ export function mountDayRoom(root) {
     const reach = lerp(120, 520, clamp(1 - day)), base = lerp(560, 300, clamp((hr - 6) / 12.5));
     shaft.setAttribute('points', `470,90 720,90 ${base + 160},520 ${base - reach},520`); shaft.style.opacity = (day * 0.9 * (hr > 17 ? 1.2 : 1)).toFixed(2);
     tint.style.fill = night > 0.5 ? `rgba(10,14,40,${(night * 0.42).toFixed(2)})` : `rgba(255,170,90,${(hr > 16 ? (hr - 16) * 0.06 : 0).toFixed(2)})`;
-    glow.style.opacity = clamp(night * 1.1).toFixed(2); lights.style.opacity = night.toFixed(2);
+    glow.style.opacity = clamp(night * 1.1).toFixed(2); lights.style.opacity = night.toFixed(2); motes.style.opacity = (day * 0.9).toFixed(2);
     wall.style.fill = mix('#efe6d8', '#f6efe4', day);
     breeze.style.opacity = on ? (effects(dirt).air * 0.9).toFixed(2) : 0; breeze.style.setProperty('--dur', (on ? 3.2 / effects(dirt).air : 3) + 's');
     const T = roomAt(hr, dirt, on), O = outAt(hr);
@@ -189,7 +197,9 @@ export function mountDayRoom(root) {
   // pointer parallax (fine pointers, motion allowed)
   if (!RM() && matchMedia('(hover:hover) and (pointer:fine)').matches) {
     const layers = [...svg.querySelectorAll('.at-l')];
-    art.addEventListener('pointermove', e => { const r = art.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; layers.forEach(l => { const d = Number(l.dataset.depth); l.style.transform = `translate(${(-x * 40 * d).toFixed(1)}px,${(-y * 24 * d).toFixed(1)}px)`; }); });
+    // Rev.30 smooth: one layout read per frame (rAF), not one per pointer event
+    let px = 0, py = 0, pend = false;
+    art.addEventListener('pointermove', e => { const r = art.getBoundingClientRect(); px = (e.clientX - r.left) / r.width - 0.5; py = (e.clientY - r.top) / r.height - 0.5; if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; layers.forEach(l => { const d = Number(l.dataset.depth); l.style.transform = `translate(${(-px * 40 * d).toFixed(1)}px,${(-py * 24 * d).toFixed(1)}px)`; }); }); }, { passive: true });
     art.addEventListener('pointerleave', () => layers.forEach(l => l.style.transform = ''));
   }
   paint();

@@ -1,6 +1,6 @@
 # CLAUDE.md — SBP AirCare Website · Technical Handover Specification
 
-> **สถานะ:** Rev.29 · 5 ต.ค. 2569 (ดู §7.1h–7.1y · ★Rev.29 เว็บไซต์ชุดที่ 2 แบบ D · E · F) · Rev.12 ขึ้นเว็บแล้ว (PR #7) · ก่อนหน้า Rev.09 r5 (ต่อจาก Rev.08.1 — r5 = โครงเว็บตามเส้นทางลูกค้า เตรียม Beta) · เจ้าของโปรเจกต์: ธนวัฒน์ (บริษัท สหบูรพากรุ๊ป จำกัด) · repo: `sahaburapaofficial-cmyk/Sahaburapa-project` โฟลเดอร์ `sbp-aircare/` (Public · เว็บ https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/)
+> **สถานะ:** Rev.30 · 5 ต.ค. 2569 (ดู §7.1h–7.1z · ★Rev.29 เว็บไซต์ชุดที่ 2 แบบ D · E · F · ★Rev.30 ลื่นขึ้นทั้ง 6 แบบ + ปรึกษาบริการ 4 คำถาม) · Rev.12 ขึ้นเว็บแล้ว (PR #7) · ก่อนหน้า Rev.09 r5 (ต่อจาก Rev.08.1 — r5 = โครงเว็บตามเส้นทางลูกค้า เตรียม Beta) · เจ้าของโปรเจกต์: ธนวัฒน์ (บริษัท สหบูรพากรุ๊ป จำกัด) · repo: `sahaburapaofficial-cmyk/Sahaburapa-project` โฟลเดอร์ `sbp-aircare/` (Public · เว็บ https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/)
 > **เริ่มที่ [`HANDOFF.md`](HANDOFF.md)** — ภาพรวม สถานะฟีเจอร์ ตัวแปร/ไฟล์ config และ todo ล่าสุดในไฟล์เดียว · ไฟล์นี้คือสเปกเชิงลึก
 > **ไฟล์นี้คืออะไร:** เอกสารส่งมอบงานสำหรับ Claude Code (CLI) วางไว้ที่ root ของ repo — Claude Code อ่าน `CLAUDE.md` อัตโนมัติทุกครั้งที่เปิดโปรเจกต์
 > **ซอร์สโค้ดเต็ม:** อยู่ในไฟล์ `SBP-WEB-011_Prototype_Source.zip` (ทุกไฟล์ ไบต์ตรงกับที่เผยแพร่ล่าสุด) — เอกสารนี้สรุปสัญญา (API), กติกา และงานถัดไป ไม่ได้คัดลอกโค้ด 3 มิติทั้งหมดซ้ำ เพราะโค้ดจริงอยู่ในไฟล์แล้วและแม่นยำกว่า
@@ -1057,6 +1057,16 @@ body: `400 16px/1.7` · self-hosted woff2 แยก subset Thai/Latin (`fonts.cs
 - ✅ **สองเว็บไซต์ใน build เดียว** (`build.py`): `dist/art|offline|site/{d,e,f}.html` + หน้าทดสอบชุด 2 `index2.html` (`preview.html` อ่าน `SBP_SET`/`?set=def`; คะแนนเก็บแยก `sbp-preview2-v1`) · ลิงก์ "เทียบแบบ D · E · F" ในแต่ละหน้าไปหน้าทดสอบชุด 2 · sitemap เพิ่ม d/e/f/index2 · `urls*.json` key ใหม่ `d e f index2`
 - ✅ ทดสอบ: `npm run lux` (tests/lux.mjs — แผนปรึกษา ห้องตลอดวัน ห้องทดลอง + คำต้องห้าม, อยู่ใน CI) · `smoke:2` / `smoke:2:mobile` / `textscan:2` · booking · submit · enterprise-ui · acbot ผ่านทั้ง D/E/F · `tests/film-shots.mjs` ภาพ 5 ตำแหน่งของภาพยนตร์ D · WebGL peak ≤ 3 ทุกหน้า (probe WebGL คืน context ทันที)
 - ⏳ รอเจ้าของ: เลือกชุด/แบบที่จะใช้ · ภาพ/วิดีโอหน้างานจริงของทีม (ใส่แทนบางบทของภาพยนตร์ได้) · ทดสอบมือถือจริง (B2) โดยเฉพาะภาพยนตร์ D และห้องลอย F
+
+### 7.1z ทำเสร็จ Rev.30 (5 ต.ค. 2569 — เจ้าของ: "พัฒนา D E F ให้ smooth และไหลลื่นพร้อมคิดในมุมการใช้งานของลูกค้า และพัฒนา A B C จากต้นฉบับเดิม")
+
+- 🔎 **วัดก่อนแก้:** `npm run boot -- d.html` (`tests/boot.mjs` long task 12 วิแรกหลังเปิดหน้า) · `npm run profile -- f.html` (`tests/profile.mjs` CPU profile เวลาต่อฟังก์ชัน) · jank / inp เดิม · พบ: probe WebGL สร้าง context ทิ้ง ~1 วิ · ปรับขนาด GL buffer ซ้ำทุก layout · transmission ของแท่นแก้ว F เรนเดอร์ทั้งฉากซ้ำทุกเฟรม · เงาวาดใหม่ทุกเฟรมทั้งที่ห้องนิ่ง · เฟอร์นิเจอร์หลายร้อยชิ้น = draw call ละชิ้น · SVG ห้อง E ใช้ blend mode/filter ทำให้ repaint ทั้งภาพทุกเฟรม · เปิดหัวข้อความรู้ 128–237 ms (ความสูง `<details>` แบบ animate ทำ layout ทั้ง grid ทุกเฟรม) · เปลี่ยนความถี่สัญญา 121–156 ms (แผน 12 เดือนสร้างอาคารใหม่ก่อน paint)
+- ✅ **ลื่นขึ้น (ทั้ง 6 แบบ):** `gl-pool` — ฉากที่วาดช้ากว่า ~30 fps ต่อเนื่อง 2 วิ ลด pixel ratio ทีละ 0.5 (ไม่ต่ำกว่า 1) บนเครื่องที่ไม่ใช่ HQ · `shared.css` การ์ดในกริด (ความรู้ FAQ ศูนย์ราคา ร่างขอบเขต) เปิดทันทีแล้วเนื้อหาจางเข้า (ไม่ animate ความสูง) · `annualplan` วาดแผนหลังเฟรมแรก (ตัวเลขขึ้นก่อน)
+- ✅ **D:** ปุ่ม "ข้ามภาพยนตร์" · ความยาวเลื่อน 560 → 420vh (มือถือ 340vh) · กล้องตามเร็วขึ้น · ไม่เลื่อนจอ = วาดเฟรมเว้นเฟรม · ช้าต่อเนื่อง → 1× / 0.75× pixel ratio · เงาวาดเฉพาะตอนฝาหน้าขยับ · `luxroom3d.mergeStatic` รวม mesh เฟอร์นิเจอร์ตามวัสดุ (ลด 83 draw call)
+- ✅ **E:** ฝุ่นในแสงเป็น HTML บน compositor · ตัด blend mode / filter · ภาพเคลื่อนไหวหยุดเมื่ออยู่นอกจอ (`runWhenVisible`) · parallax 1 ครั้งต่อเฟรม
+- ✅ **F:** แท่นแก้วไม่ใช้ transmission · ห้องไม่ขยับ (กล้องหายใจแทน) เงาวาดครั้งเดียว · หยุดเวลา + ไม่ลาก = เฟรมเว้นเฟรม · ลด pixel ratio อัตโนมัติ · ไม่สร้าง context ทดสอบ (ทั้ง D/F ใช้ `WebGLRenderingContext` + fallback เมื่อ renderer สร้างไม่ได้) · resize เฉพาะเมื่อขนาดเปลี่ยนจริง
+- ✅ **มุมลูกค้า — ปรึกษาบริการ 4 คำถาม ทุกแบบ:** E เป็นชิ้นเด่นบนสุด · A B C D F อยู่ใต้ "วันนี้ต้องการอะไร" (`<details class="s-con">` ปิดไว้ก่อน ไม่รบกวนคนที่รู้แล้ว) · ผลแผน "ล้างแอร์ n เครื่อง" มีปุ่มประเภทแอร์ → เปิดฟอร์มจองล้างพร้อมจำนวนเครื่อง (`quickclean.prefill`) — ลูกค้าเลือกประเภทเอง ระบบไม่เดา · สไตล์พื้นฐานใน `shared.css` จาก `--s-*` (ได้สีของแต่ละแบบ)
+- ✅ ทดสอบ: `npm run concierge` (tests/concierge.mjs ทั้ง 6 แบบ: แผนจากค่าคงที่ · คิวด่วน ฿500 · ไม่มีคำต้องห้าม · เปิดฟอร์มพร้อม 3 เครื่องแขวน · ไม่มี error) · regression เต็ม 6 แบบ
 
 ### 7.2 บั๊ก / ปัญหาที่ยังค้าง (เรียงตามความสำคัญ)
 

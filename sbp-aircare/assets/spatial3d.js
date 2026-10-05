@@ -22,7 +22,8 @@ const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // WebGL available? probe once and give the context back at once (it must not count against the gl-pool budget of 3)
-const hasGL = () => { try { const c = document.createElement('canvas'), g = c.getContext('webgl2') || c.getContext('webgl'); if (!g) return false; const x = g.getExtension('WEBGL_lose_context'); x && x.loseContext(); return true; } catch (_) { return false; } };
+// Rev.30 smooth: no probe context (creating one cost ~1 s on slow GPUs) — the API's presence decides; a failed renderer falls back below
+const hasGL = () => typeof WebGLRenderingContext !== 'undefined';
 const W = 4.6, D = 4.0, HH = 2.8;   // the diorama room (m)
 
 // ---- the room model ----
@@ -47,6 +48,7 @@ function createDiorama(host, labels, o) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(1.75, devicePixelRatio || 1));
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;   // Rev.30 smooth: the room is still — shadows drawn once (and after a quality upgrade)
   const cv = renderer.domElement; cv.setAttribute('aria-hidden', 'true'); cv.style.cssText = 'display:block;width:100%;height:100%;touch-action:pan-y';
   host.append(cv);
   const scene = new THREE.Scene();
@@ -55,7 +57,7 @@ function createDiorama(host, labels, o) {
   // the diorama: the room on a glass plinth, a balcony ledge with the outdoor unit
   const dio = new THREE.Group(); scene.add(dio);
   const room = buildLuxRoom(dio, { mood: 'day', facade: false, open: true, W, D, H: HH });
-  const plinthM = new THREE.MeshPhysicalMaterial({ color: 0xdfe9ff, roughness: 0.08, metalness: 0, transmission: 0.6, thickness: 0.4, transparent: true, opacity: 0.55, clearcoat: 1 });
+  const plinthM = new THREE.MeshPhysicalMaterial({ color: 0xdfe9ff, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.5, clearcoat: 1, depthWrite: false });   // Rev.30: no transmission (it re-rendered the whole scene every frame)
   const plinth = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.75, 0.3, 96), plinthM); plinth.position.y = -0.16; dio.add(plinth);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(3.68, 0.012, 8, 160), new THREE.MeshBasicMaterial({ color: 0x8fe9ff, transparent: true, opacity: 0.8 })); ring.rotation.x = Math.PI / 2; ring.position.y = -0.005; dio.add(ring);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.12, 1.0), new THREE.MeshStandardMaterial({ color: 0xc9c4bb, roughness: 0.9 })); slab.position.set(W / 2 - 0.75, 0.0, D / 2 + 0.75); dio.add(slab);
@@ -75,8 +77,9 @@ function createDiorama(host, labels, o) {
   const anchors = { unit: vent.clone().add(new THREE.Vector3(0, 0.12, 0)), cdu: new THREE.Vector3(W / 2 - 0.75, 0.78, D / 2 + 0.75), win: new THREE.Vector3(W / 2 - 0.05, 1.5, 0.1), bed: new THREE.Vector3(-0.6, 0.75, -D / 2 + 1.2) };
   const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
   const orb = { th: -0.62, ph: 1.02, r: 12.5, tth: -0.62, user: 0 };
-  let Wd = 1, Hd = 1, t = 0, last = performance.now(), visible = true, raf = 0;
-  const size = () => { const r = host.getBoundingClientRect(); Wd = Math.max(1, r.width); Hd = Math.max(1, r.height); renderer.setSize(Wd, Hd, false); cam.aspect = Wd / Hd; orb.r = Wd / Hd < 0.9 ? 17 : Wd / Hd < 1.3 ? 14.5 : 12.5; cam.updateProjectionMatrix(); };
+  let Wd = 1, Hd = 1, t = 0, last = performance.now(), visible = true, raf = 0, lastShadow = -9;
+  let sw = 0, sh = 0, spr = 0;   // Rev.30 smooth: GL buffers are reallocated only when the size really changed
+  const size = () => { const r = host.getBoundingClientRect(); Wd = Math.max(1, Math.round(r.width)); Hd = Math.max(1, Math.round(r.height)); if (Wd === sw && Hd === sh && renderer.getPixelRatio() === spr) return; sw = Wd; sh = Hd; spr = renderer.getPixelRatio(); renderer.setSize(Wd, Hd, false); cam.aspect = Wd / Hd; orb.r = Wd / Hd < 0.9 ? 17 : Wd / Hd < 1.3 ? 14.5 : 12.5; cam.updateProjectionMatrix(); };
   size(); const ro = new ResizeObserver(size); ro.observe(host);
   const io = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible) loop(); }, { rootMargin: '10% 0px' }); io.observe(host);
   // drag to turn (horizontal on touch so the page still scrolls)
@@ -110,8 +113,9 @@ function createDiorama(host, labels, o) {
     if (!RM() && performance.now() - orb.user > 4000) orb.tth += (-0.62 + Math.sin(t * 0.12) * 0.45 - orb.tth) * 0.01;
     orb.th += (orb.tth - orb.th) * Math.min(1, dt * 6);
     cam.position.set(Math.sin(orb.th) * Math.sin(orb.ph) * orb.r, Math.cos(orb.ph) * orb.r + 0.3, Math.cos(orb.th) * Math.sin(orb.ph) * orb.r);
-    cam.lookAt(0.2, 0.1, 0.3);
-    dio.position.y = -0.9 + (RM() ? 0 : Math.sin(t * 0.6) * 0.04);   // the diorama floats
+    const bob = RM() ? 0 : Math.sin(t * 0.6) * 0.04;   // the diorama floats — the camera breathes instead of moving the room, so its shadows stay valid
+    cam.position.y -= bob; cam.lookAt(0.2, 0.1 - bob, 0.3);
+    if (t - lastShadow > 3) { renderer.shadowMap.needsUpdate = true; lastShadow = t; }
     ring.material.opacity = 0.55 + Math.sin(t * 1.4) * 0.2;
     const S = o.state(); room.setDirt(S.dirt);
     OU.parts && OU.parts['o-fan'] && S.running && (OU.parts['o-fan'].rotation.z -= dt * 14);
@@ -127,9 +131,16 @@ function createDiorama(host, labels, o) {
   }
   function loop() {
     cancelAnimationFrame(raf);
-    const step = now => { const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now; if (!visible) return; o.tick && o.tick(dt); frame(dt); raf = requestAnimationFrame(step); };
+    const step = now => { const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now; if (!visible) return; o.tick && o.tick(dt);
+      // Rev.30 smooth: nothing to animate but the drift (clock stopped, no drag for 2 s) → every other frame
+      const idle = !o.state().playing && !drag && performance.now() - orb.user > 2000;
+      if (!idle || (odd = !odd)) { frame(idle ? dt * 2 : dt); perf(dt); }
+      raf = requestAnimationFrame(step); };
     last = performance.now(); raf = requestAnimationFrame(step);
   }
+  // Rev.30 smooth: frames slower than ~30 fps for 2 s → 1× then 0.75× pixel ratio (motion before sharpness)
+  let slow = 0, tier = 0, odd = false;
+  const perf = dt => { if (dt <= 0) return; slow = dt > 0.034 ? slow + dt : Math.max(0, slow - dt * 0.5); if (slow > 2 && tier < 2) { tier++; slow = 0; renderer.setPixelRatio(tier === 1 ? 1 : 0.75); size(); } };
   loop();
   return { dispose() { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); G.release(); renderer.dispose(); } };
 }
@@ -196,6 +207,6 @@ export function mountSpatial(root, { go = () => {} } = {}) {
   };
   draw();
   if (!hasGL()) { root.classList.add('sp-nogl'); stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); let l = performance.now(); setInterval(() => { const n = performance.now(); tick(Math.min(0.5, (n - l) / 1000)); l = n; }, 250); return { state: S }; }
-  whenNear(stage, () => createDiorama(stage, labels, { state: () => S, tick }), '50% 0px');
+  whenNear(stage, () => { try { createDiorama(stage, labels, { state: () => S, tick }); } catch (e) { root.classList.add('sp-nogl'); stage.innerHTML = ''; stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); } }, '50% 0px');
   return { state: S, pick: id => pick(HOTS.find(x => x.id === id)) };
 }

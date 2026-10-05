@@ -4,7 +4,7 @@ const OUT = process.argv[2], page = process.argv[3] || 'd.html', W = +(process.a
 const b = await launch(); const p = await b.newPage({ viewport: { width: W, height: H } });
 const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
 await p.goto(`${BASE}/${page}`); await p.waitForTimeout(4000);
-for (const q of [0.03, 0.3, 0.5, 0.7, 0.97]) {
+for (const q of (process.argv[6] || "0.03,0.3,0.5,0.7,0.97").split(",").map(Number)) {
   await p.evaluate(q => { const t = document.querySelector('.cn-track'); const r = t.getBoundingClientRect(); scrollTo(0, scrollY + r.top + q * (r.height - innerHeight)); }, q);
   await p.waitForTimeout(9000);
   await p.screenshot({ path: `${OUT}/film-${W}-${q}.png` });

@@ -1854,6 +1854,11 @@ html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-r
   /* smooth disclosure for every <details> (Chromium 131+: ::details-content; others open instantly as before) */
   details::details-content{block-size:0;overflow:clip;transition:block-size var(--m-mid) var(--m-ease),content-visibility var(--m-mid) allow-discrete}
   details[open]::details-content{block-size:auto}
+  /* Rev.30 smooth: cards inside big grids (knowledge, enterprise, FAQ lists) open at once and fade their content in —
+     animating their height re-laid out the whole grid every frame (≈130–240 ms to first paint on a slow CPU) */
+  :is(.kh-card,.faq details,.s-row-d,.en-sow,.pd-include details)::details-content{transition:none;block-size:auto}
+  :is(.kh-card,.faq details,.s-row-d,.en-sow,.pd-include details)[open]>:not(summary){animation:lxFade var(--m-mid) var(--m-ease) both}
+  @keyframes lxFade{from{opacity:0;transform:translateY(6px)}}
   /* add-to-quote feedback: the quote button / pill pops and its count rolls */
   .s-bump{animation:s-bump .55s var(--m-spring)}
   .s-bump [data-cart-n],.s-qpill.s-bump b{animation:s-roll .45s var(--m-ease)}
@@ -1885,3 +1890,34 @@ body:has(.s-cart:not([hidden])) :is(.ab-fab,.sx-line){opacity:0;pointer-events:n
 header.hdr{transition:box-shadow var(--m-mid) var(--m-ease),background-color var(--m-mid) var(--m-ease)}
 html.sx-scrolled header.hdr{box-shadow:0 1px 0 color-mix(in oklab,var(--s-line,#dbe3ec) 80%,transparent),0 10px 30px -18px rgba(10,30,60,.28)}
 @supports (backdrop-filter:blur(8px)){html.sx-scrolled header.hdr{backdrop-filter:saturate(1.5) blur(12px);-webkit-backdrop-filter:saturate(1.5) blur(12px)}}
+
+/* ★Rev.30 consultation (atelier.mountConcierge) — base look from the --s-* aliases so it takes each design's palette
+   (A · B · C under the intent picker; D · E · F restyle it in lux.css) */
+.s-con{margin-top:14px;border:1px solid var(--s-line);border-radius:var(--s-r);background:var(--s-card)}
+.s-con>summary{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:14px 18px;cursor:pointer;list-style:none;min-height:48px}
+.s-con>summary::-webkit-details-marker{display:none}
+.s-con>summary::after{content:"+";margin-left:auto;color:var(--s-accent);font-size:20px;line-height:1}
+.s-con[open]>summary::after{content:"−"}
+.s-con>summary span{color:var(--s-ink-2);font-size:14.5px}
+.s-con>div{padding:0 18px 18px}
+.s-con .at-con{border:0;padding:0;box-shadow:none;background:none}
+.at-con{background:var(--s-card);border:1px solid var(--s-line);border-radius:var(--s-r);padding:22px}
+.at-prog{display:flex;gap:6px;list-style:none;margin:0 0 16px;padding:0}.at-prog li{flex:1;height:3px;border-radius:2px;background:var(--s-card-2)}.at-prog li.done{background:var(--s-accent)}.at-prog li.on{background:linear-gradient(90deg,var(--s-accent),var(--s-card-2))}
+.at-n{font-size:12.5px;letter-spacing:.12em;color:var(--s-ink-3)}
+.at-con h3{font-size:22px;margin:4px 0 14px}
+.at-opts{display:flex;flex-wrap:wrap;gap:8px}
+.at-opt{border:1px solid var(--s-line);background:var(--s-card-2);color:var(--s-ink);border-radius:999px;padding:9px 16px;min-height:44px;font-size:15px;transition:background var(--m-fast,.16s),border-color var(--m-fast,.16s)}
+.at-opt:hover{border-color:var(--s-accent)}
+.at-opt[aria-checked="true"],.at-opt[aria-pressed="true"]{background:var(--s-accent);color:var(--s-on-accent);border-color:var(--s-accent)}
+.at-nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center}
+.at-link{border:0;background:none;color:var(--s-accent);text-decoration:underline;padding:8px}
+.at-recs{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.at-recs li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:var(--s-r);background:var(--s-card-2)}
+.at-i{font-size:20px;font-weight:600;color:var(--s-accent);font-variant-numeric:tabular-nums}
+.at-recs b{font-size:16px}.at-recs p{color:var(--s-ink-2);font-size:14px}
+.at-fine{font-size:12.5px;color:var(--s-ink-3);margin-top:10px}
+.at-types{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:13px;color:var(--s-ink-3)}
+.at-types button{border:1px solid var(--s-accent);background:var(--s-card);color:var(--s-accent);border-radius:999px;padding:6px 12px;min-height:40px;font-size:13.5px}
+.at-types button:hover{background:var(--s-accent);color:var(--s-on-accent)}
+@media (max-width:520px){.at-recs li{grid-template-columns:32px minmax(0,1fr)}.at-recs li>.btn-ghost,.at-recs li>button{grid-column:1/-1}}
+@media (prefers-reduced-motion:no-preference){.at-recs li{animation:lxFade var(--m-mid,.28s) var(--m-ease,ease) both}}

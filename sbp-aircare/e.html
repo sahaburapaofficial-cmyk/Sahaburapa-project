@@ -138,7 +138,7 @@ await mountLux({
   views: {"home": ["concierge", "book", "start", "coverage"], "service": ["cleanflow", "symptoms", "standards", "howto", "prices", "quality"], "shop": ["tradein", "catalog", "studio", "fit"], "business": ["enterprise", "b2b"], "knowledge": ["learn", "inside"], "contact": ["about", "area", "faq", "quote"]},
   order: ["home", "service", "shop", "business", "knowledge", "contact"],
   labels: {"concierge": "ปรึกษาบริการ", "inside": "แอร์ทำงานอย่างไร"},
-  hero: async ({ go, CART }) => { const m = await import('./assets/atelier.js'); m.mountConcierge(document.getElementById('conRoot'), { go, openCart: CART.open }); m.mountDayRoom(document.getElementById('dayRoot')); },
+  hero: async ({ go, CART, QC }) => { const m = await import('./assets/atelier.js'); m.mountConcierge(document.getElementById('conRoot'), { go, openCart: CART.open, prefill: QC && QC.prefill }); m.mountDayRoom(document.getElementById('dayRoot')); },
 });
 </script>
 </body>

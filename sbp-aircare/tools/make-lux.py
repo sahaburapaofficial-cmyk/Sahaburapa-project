@@ -127,7 +127,7 @@ HERO = {
 
 HERO_JS = {
   'D': "hero: async ({ go }) => { const m = await import('./assets/cinema3d.js'); m.mountCinema(document.getElementById('film'), { cta: Object.assign(document.createElement('div'), { className: 'cn-ctas', innerHTML: '<a class=\"btn-primary\" href=\"#book\">จองล้างแอร์</a>' }) }); },",
-  'E': "hero: async ({ go, CART }) => { const m = await import('./assets/atelier.js'); m.mountConcierge(document.getElementById('conRoot'), { go, openCart: CART.open }); m.mountDayRoom(document.getElementById('dayRoot')); },",
+  'E': "hero: async ({ go, CART, QC }) => { const m = await import('./assets/atelier.js'); m.mountConcierge(document.getElementById('conRoot'), { go, openCart: CART.open, prefill: QC && QC.prefill }); m.mountDayRoom(document.getElementById('dayRoot')); },",
   'F': "hero: async ({ go }) => { const m = await import('./assets/spatial3d.js'); m.mountSpatial(document.getElementById('spRoot'), { go }); },",
 }
 

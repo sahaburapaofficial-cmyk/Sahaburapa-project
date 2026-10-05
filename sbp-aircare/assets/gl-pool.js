@@ -72,8 +72,17 @@ export function track(renderer, el, opts = {}) {
   let shown = false; const RMq = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (cv && cv.style && !RMq) { cv.style.opacity = '0'; cv.style.transition = 'opacity .35s ease-out'; }
   const show = () => { if (!shown) { shown = true; if (cv && cv.style) cv.style.opacity = ''; } };
+  // Rev.30 smooth (all 6 designs): on devices without the HQ path (phones, weak laptops) a scene that keeps drawing slower than
+  // ~30 fps for 2 s steps its pixel ratio down by 0.5 (never below 1) — sharp when the device copes, fluid when it does not.
+  // Only continuous animation counts (gaps > 0.25 s are on-demand redraws, not slowness).
+  const ad = { t: 0, slow: 0, floor: 1 };
+  const adapt = now => {
+    const gap = now - ad.t; ad.t = now; if (gap <= 0 || gap > 250) return;
+    ad.slow = gap > 34 ? ad.slow + gap : Math.max(0, ad.slow - gap * 0.5);
+    if (ad.slow > 2000) { ad.slow = 0; const pr = renderer.getPixelRatio(); if (pr > ad.floor + 0.01) renderer.setPixelRatio(Math.max(ad.floor, pr - 0.5)); }
+  };
   renderer.render = (s, c) => {
-    if (e.state !== 'live') return; fx && fx.prepare(s);
+    if (e.state !== 'live') return; fx ? fx.prepare(s) : adapt(performance.now());
     if (par && s && c && !ready.has(s) && renderer.getRenderTarget() === null) {   // screen frames only: PMREM / render-to-texture passes need the frame now
       if (!busy.has(s)) { busy.add(s); renderer.compileAsync(s, c).catch(() => {}).then(() => { ready.add(s); busy.delete(s); if (e.state === 'live') { render0(s, c); show(); } }); }
       return;

@@ -126,7 +126,9 @@ export function mountAnnualPlan(builderRoot, { builder } = {}) {
     raf = requestAnimationFrame(now2 => { const dt = last ? Math.min(0.1, (now2 - last) / 1000) : 0; last = now2; t = (t + dt * 12 / 24) % 12; frame(t); loop(); });
   }
   new IntersectionObserver(es => { seen = es.some(x => x.isIntersecting); last = 0; if (seen) loop(); }, { threshold: 0.15 }).observe(panel);
-  builderRoot.addEventListener('sbp:builder', ev => setup(ev.detail.e, ev.detail.state));
+  // Rev.30 smooth: the builder's numbers paint first; the 12-month plan rebuilds right after that frame (it redraws the whole building)
+  let pendingPlan = null;
+  builderRoot.addEventListener('sbp:builder', ev => { const first = !pendingPlan; pendingPlan = ev.detail; if (first) requestAnimationFrame(() => setTimeout(() => { const d = pendingPlan; pendingPlan = null; setup(d.e, d.state); }, 0)); });
   if (builder && builder.estimate) setup(builder.estimate(), builder.state());
   return { frame: tm => { t = tm; frame(tm); }, stop: () => { running = false; } };
 }

@@ -89,7 +89,7 @@ export async function mountLux(cfg) {
   $$('[data-ask]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); askTeam(a.dataset.ask); }));
   const CART = mountCart();
   let SITE = null; const go = id => SITE ? SITE.go(id) : (document.getElementById(id) || {}).scrollIntoView?.();
-  mountQuickClean($('#bookRoot'), { openCart: CART.open, onB2B: () => go('b2b') });
+  const QC = mountQuickClean($('#bookRoot'), { openCart: CART.open, onB2B: () => go('b2b') });
   { const f = cleanFrom(); if (f) $$('[data-clean-from]').forEach(x => x.textContent = baht(f)); }
   mountQuotePill(CART.open);
   if ($('#flowRoot')) mountFlow($('#flowRoot'), { room: 'studio', product: 'catalog', service: 'cleanflow', area: 'area', quote: 'quote' }, { openCart: CART.open });
@@ -98,7 +98,7 @@ export async function mountLux(cfg) {
   const drawer = $('#drawer');
   let FIT = null;
   function openProduct(m, i = 0) { const b = $('#drawerBody'); b.innerHTML = ''; b.append(productDetail(m, i, { onPick: j => openProduct(m, j), on3D: () => { closeDrawer(drawer); go('fit'); }, onFit: (mm, k) => { closeDrawer(drawer); FIT && FIT.setModel(mm, k); go('fit'); } })); if (drawer.hidden) openDrawer(drawer); }
-  const ctx = { CART, go, openProduct };
+  const ctx = { CART, go, openProduct, QC };
   // signature piece first: it is the first thing on the page
   if (cfg.hero) await cfg.hero(ctx);
   const HWX = $('#howRoot') ? mountHowItWorks($('#howRoot'), { theme: T, start: jobType === 'cassette' ? 'cassette' : 'wall', throwStyle }) : null;
@@ -159,6 +159,12 @@ export async function mountLux(cfg) {
     CART.open();
   }));
   mountTradeIn($('#tiRoot'), { catalog: cat, openCart: CART.open });
+  // Rev.30: designs without the consultation as their hero (D · F) offer it under the intent picker, like A · B · C
+  if (!$('#conRoot') && $('#startRoot')) {
+    const box = h('details', { class: 's-con' }, h('summary', {}, h('b', {}, 'ยังไม่แน่ใจว่าต้องการบริการไหน'), h('span', {}, 'ตอบ 4 ข้อ ให้เราจัดลำดับบริการที่เหมาะกับคุณ')), h('div'));
+    $('#startRoot').after(box);
+    import('./atelier.js').then(m => m.mountConcierge(box.lastChild, { go, openCart: CART.open, prefill: QC && QC.prefill }));
+  }
   SITE = mountSite({
     variant, openCart: CART.open, openProduct, views, order, labels,
     hooks: {

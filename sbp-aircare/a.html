@@ -729,7 +729,7 @@ enhanceQuoteForm();
 $$('[data-ask]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); askTeam(a.dataset.ask); }));
 const CART = mountCart();
 // Rev.11: cleaning first — quick booking on the home page + "เริ่ม ฿…" from the Pricebook
-mountQuickClean(document.getElementById('bookRoot'), { openCart: CART.open, onB2B: () => document.getElementById('b2b').scrollIntoView({ behavior: 'smooth', block: 'start' }) });
+const QC = mountQuickClean(document.getElementById('bookRoot'), { openCart: CART.open, onB2B: () => document.getElementById('b2b').scrollIntoView({ behavior: 'smooth', block: 'start' }) });
 { const f = cleanFrom(); if (f) $$('[data-clean-from]').forEach(x => x.textContent = baht(f)); }
 mountQuotePill(CART.open);
 mountFlow(document.getElementById('flowRoot'), { room: 'studio', product: 'catalog', service: 'cleanflow', area: 'area', quote: 'quote' }, { openCart: CART.open });
@@ -840,11 +840,16 @@ $$('[data-quote]').forEach(a => a.addEventListener('click', e => {
 reveal();
 // Rev.09 r5: views by customer journey (site.js) — every section keeps its id and module
 mountTradeIn($('#tiRoot'), { catalog: cat, openCart: CART.open });   // Rev.24 trade-in old AC: repair vs replace + trade-in assessment
-mountSite({
+const SITE = mountSite({
   variant: 'A', openCart: CART.open, openProduct,
   views: { home: ['hero', 'book', 'start', 'flow', 'services'], shop: ['catalog', 'tradein', 'studio', 'fit'], service: ['cleanflow', 'symptoms', 'standards', 'prices', 'quality', 'story', 'inside'], business: ['enterprise', 'b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });
+// Rev.30: "not sure what you need?" — the four-question consultation (atelier.js, same rules as design E) under the intent picker;
+// its plan links to the right section and can open the cleaning form already holding the number of units
+{ const box = h('details', { class: 's-con' }, h('summary', {}, h('b', {}, 'ยังไม่แน่ใจว่าต้องการบริการไหน'), h('span', {}, 'ตอบ 4 ข้อ ให้เราจัดลำดับบริการที่เหมาะกับคุณ')), h('div'));
+  document.getElementById('startRoot').after(box);
+  import('./assets/atelier.js').then(m => m.mountConcierge(box.lastChild, { go: id => SITE.go(id), openCart: CART.open, prefill: QC && QC.prefill })); }
 </script>
 </body>
 </html>

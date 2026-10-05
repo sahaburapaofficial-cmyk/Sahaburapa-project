@@ -9,6 +9,31 @@
 import * as THREE from './three.module.min.js';
 import { mats, F, rbox, ctex } from './roomkit3d.js';
 import { buildPremiumIndoor, materialSet } from './ac3d.js';
+import { mergeGeometries } from './BufferGeometryUtils.js';
+
+/** Rev.30 smooth: static furniture is hundreds of small meshes (slats, legs, cushions…) — one draw call each. Merge every opaque
+ *  mesh that shares a material into one mesh (in root space); lights inside the groups stay where they are. */
+function mergeStatic(root, list) {
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), rel = new THREE.Matrix4(), by = new Map();
+  list.forEach(o => o.traverse(m => {
+    if (!m.isMesh || m.isInstancedMesh || Array.isArray(m.material) || m.material.transparent) return;
+    const g0 = m.geometry; if (!g0.attributes.uv || !g0.attributes.normal) return;
+    const g = g0.index ? g0.toNonIndexed() : g0.clone();
+    Object.keys(g.attributes).forEach(k => { if (k !== 'position' && k !== 'normal' && k !== 'uv') g.deleteAttribute(k); });
+    g.clearGroups(); g.applyMatrix4(rel.multiplyMatrices(inv, m.matrixWorld));
+    const e = by.get(m.material.uuid) || { mat: m.material, gs: [], ms: [], cast: false, recv: false }; by.set(m.material.uuid, e);
+    e.gs.push(g); e.ms.push(m); e.cast ||= m.castShadow; e.recv ||= m.receiveShadow;
+  }));
+  let calls = 0;
+  by.forEach(e => {
+    if (e.ms.length < 2) { e.gs.forEach(g => g.dispose()); return; }
+    const merged = mergeGeometries(e.gs, false); e.gs.forEach(g => g.dispose()); if (!merged) return;
+    e.ms.forEach(m => m.parent && m.parent.remove(m));
+    const mm = new THREE.Mesh(merged, e.mat); mm.castShadow = e.cast; mm.receiveShadow = e.recv; root.add(mm); calls += e.ms.length - 1;
+  });
+  return calls;   // draw calls saved
+}
 
 const R = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(97531);
 
@@ -123,6 +148,8 @@ export function buildLuxRoom(scene, o = {}) {
   const lamp = F.lamp(K); lamp.position.set(W / 2 - 0.5, 0, -D / 2 + 0.5); root.add(lamp);
   const plant = F.plant(K, 1.1); plant.position.set(W / 2 - 0.45, 0, D / 2 - 0.7); root.add(plant);
   const arm = F.armchair(K); arm.position.set(1.3, 0, 0.8); arm.rotation.y = -0.6; root.add(arm);
+  const sides = root.children.filter(c => c !== bed && c.isGroup && c.position.z === -D / 2 + 0.28);
+  const saved = mergeStatic(root, [slats, right, curtain, bed, ...sides, rug, lamp, plant, arm]);
   // the wall unit — FUJIVA body (product scene)
   const M = materialSet('studio');
   const U = buildPremiumIndoor(M, { logo: true });
@@ -138,7 +165,7 @@ export function buildLuxRoom(scene, o = {}) {
   Object.assign(sun.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 0.5, far: 20 }); root.add(sun);
   const warm = new THREE.PointLight(0xffc98a, night ? 2.2 : 0.6, 6, 1.6); warm.position.set(-0.6, 2.3, 0.6); root.add(warm);
   return {
-    root, K, W, D, H, unitG, U, floor, facade, city, lights: { hemi, sun, warm },
+    root, K, W, D, H, unitG, U, floor, facade, city, lights: { hemi, sun, warm }, saved,
     /** vent (supply air outlet) in world space */
     vent(out = new THREE.Vector3()) { return out.set(0, -0.11, 0.1).applyMatrix4(unitG.matrixWorld); },
     setDirt(d) {
