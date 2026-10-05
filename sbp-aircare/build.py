@@ -89,8 +89,11 @@ import datetime
 _today = datetime.date.today().isoformat()
 open(os.path.join(DIST, 'offline', 'sitemap.xml'), 'w', encoding='utf-8').write(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + ''.join(f'  <url><loc>{SITE}{p}</loc><lastmod>{_today}</lastmod></url>\n' for p in ('', 'a.html', 'b.html', 'c.html')) + '</urlset>\n')
-VNAME = {'a': 'A · Bento', 'b': 'B · Engineering', 'c': 'C · Showroom'}
+    + ''.join(f'  <url><loc>{SITE}{p}</loc><lastmod>{_today}</lastmod></url>\n' for p in ('', 'a.html', 'b.html', 'c.html', 'index2.html', 'd.html', 'e.html', 'f.html')) + '</urlset>\n')
+VNAME = {'a': 'A · Bento', 'b': 'B · Engineering', 'c': 'C · Showroom', 'd': 'D · Cinema', 'e': 'E · Atelier', 'f': 'F · Spatial'}
+# Rev.29: two websites — A · B · C (tester index.html) and D · E · F (tester index2.html)
+ALL = 'abcdef'
+HUB = {v: ('index2' if v in 'def' else 'index') for v in ALL}
 
 def build_variant(v):
     html = read(os.path.join(ROOT, f'{v}.html'))
@@ -104,19 +107,21 @@ def build_variant(v):
     assert 'assets/' not in re.sub(r'<script type="module">.*?</script>', '', html, flags=re.S) or True
     return html
 
-def links(html, mode):
-    """mode offline: keep ./a.html etc (hub -> index.html). art: artifact URLs in a new tab. embed: tell the parent tester."""
+def links(html, mode, page='a'):
+    """mode offline: keep ./a.html etc (hub -> index.html, or index2.html for D · E · F). art: artifact URLs in a new tab.
+    embed: tell the parent tester."""
+    hub = HUB.get(page, 'index')
     if mode == 'offline':
-        return html.replace('href="./"', 'href="./index.html"').replace('<body>', '<body><script>globalThis.SBP_HUB="./index.html"</script>', 1)
+        return html.replace('href="./"', f'href="./{hub}.html"').replace('<body>', f'<body><script>globalThis.SBP_HUB="./{hub}.html"</script>', 1)
     if mode == 'art':
-        for v in 'abc':
+        for v in ALL:
             u = URLS.get(v)
             html = html.replace(f'href="./{v}.html"', f'href="{u}" target="_blank" rel="noopener"' if u else 'href="#"')
-        u = URLS.get('index')
+        u = URLS.get(hub)
         html = re.sub(r'(<body[^>]*>)', lambda m: m.group(1) + '<script>globalThis.SBP_HUB=' + json.dumps(u or '') + '</script>', html, count=1)
         return html.replace('href="./"', f'href="{u}" target="_blank" rel="noopener"' if u else 'href="#"')
     # embed inside the tester: variant links switch the tester's tab
-    for v in 'abc':
+    for v in ALL:
         html = html.replace(f'href="./{v}.html"', f'href="#" data-sbp-go="{v}"')
     html = html.replace('href="./"', 'href="#" data-sbp-go="hub"')
     html = re.sub(r'(<body[^>]*>)', lambda m: m.group(1) + '<script>globalThis.SBP_HUB=""</script>', html, count=1)
@@ -139,11 +144,11 @@ def strip_doc(html):
 
 sizes = {}
 built = {}
-for v in 'abc':
+for v in ALL:
     full = build_variant(v)
     built[v] = full
-    open(os.path.join(DIST, 'offline', f'{v}.html'), 'w', encoding='utf-8').write(links(full, 'offline'))
-    open(os.path.join(DIST, 'art', f'{v}.html'), 'w', encoding='utf-8').write(strip_doc(links(full, 'art')))
+    open(os.path.join(DIST, 'offline', f'{v}.html'), 'w', encoding='utf-8').write(links(full, 'offline', v))
+    open(os.path.join(DIST, 'art', f'{v}.html'), 'w', encoding='utf-8').write(strip_doc(links(full, 'art', v)))
     sizes[v] = len(full.encode()) // 1024
 
 # ---- tester (preview.html) with embedded variants ----
@@ -154,14 +159,20 @@ _sj = read(os.path.join(A, 'submit.js'))
 EP = re.search(r"const BACKEND_URL = '([^']*)'", _sj).group(1) or re.search(r"const FORMSUBMIT = '([^']*)'", _sj).group(1)
 if EP: pv = pv.replace('__SBP_ENDPOINT__', EP)
 pv = re.sub(r'<link rel="stylesheet" href="assets/([\w.-]+\.css)">', lambda m: f'<style>{css_inline(m.group(1))}</style>', pv)
-packs = ''.join(
-    f'<script type="application/octet-stream" id="pack-{v}">' + base64.b64encode(gzip.compress(links(built[v], 'embed').encode(), 9)).decode() + '</script>'
-    for v in 'abc')
-urls_tag = '<script>window.SBP_URLS=' + json.dumps(URLS) + '</script>'
-art_pv = pv.replace('<body>', '<body>' + urls_tag + packs, 1)
-open(os.path.join(DIST, 'art', 'index.html'), 'w', encoding='utf-8').write(strip_doc(art_pv))
-open(os.path.join(DIST, 'offline', 'index.html'), 'w', encoding='utf-8').write(pv.replace('href="./"', 'href="./index.html"'))
-sizes['tester'] = len(art_pv.encode()) // 1024
+def tester(pv, vs, hub):
+    packs = ''.join(
+        f'<script type="application/octet-stream" id="pack-{v}">' + base64.b64encode(gzip.compress(links(built[v], 'embed', v).encode(), 9)).decode() + '</script>'
+        for v in vs)
+    urls = dict(URLS); urls['hub'] = URLS.get(hub, URLS.get('hub', ''))
+    head = '<script>window.SBP_URLS=' + json.dumps(urls) + (';window.SBP_SET=' + json.dumps(list(vs)) if vs != 'abc' else '') + '</script>'
+    if vs != 'abc': pv = pv.replace('<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ A B C</title>', '<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ D E F</title>')
+    return pv.replace('<body>', '<body>' + head + packs, 1)
+for vs, name in (('abc', 'index'), ('def', 'index2')):
+    art_pv = tester(pv, vs, name)
+    open(os.path.join(DIST, 'art', f'{name}.html'), 'w', encoding='utf-8').write(strip_doc(art_pv))
+    off = pv if vs == 'abc' else pv.replace('<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ A B C</title>', '<title>ทดสอบเว็บไซต์ SBP AirCare · แบบ D E F</title>').replace('<body>', '<body><script>window.SBP_SET=["d","e","f"]</script>', 1)
+    open(os.path.join(DIST, 'offline', f'{name}.html'), 'w', encoding='utf-8').write(off.replace('href="./"', f'href="./{name}.html"'))
+    sizes['tester' if vs == 'abc' else 'tester2'] = len(art_pv.encode()) // 1024
 # ---- Rev.11: multi-file site for self-hosting (GitHub Pages → dist/site) ----
 # Same pages and code as the single-file builds, but split so phones fetch and run less up front: CSS and fonts as cacheable
 # files, the price/map data as one shared script, and the JS bundled with code splitting — the scenes that are only opened
@@ -182,32 +193,33 @@ data_js = re.sub(r'</?script>', '', DATA_TAG.replace('</script><script>', ';\n')
 dh = hashlib.sha1(data_js.encode()).hexdigest()[:10]
 open(os.path.join(SITE_DIR, 'js', f'data-{dh}.js'), 'w', encoding='utf-8').write(data_js.replace('<\\/', '</'))
 entries = {}
-for v in 'abc':
+for v in ALL:
     html = read(os.path.join(ROOT, f'{v}.html'))
     m = re.search(r'<script type="module">(.*?)</script>', html, flags=re.S)
     entries[v] = (html, m)
     open(os.path.join(ROOT, f'_entry_site_{v}.mjs'), 'w', encoding='utf-8').write(m.group(1))
 meta_path = os.path.join(ROOT, '_entry_site_meta.json')
 try:
-    subprocess.run(['npx', '--yes', 'esbuild@0.28.2', *[f'_entry_site_{v}.mjs' for v in 'abc'], '--bundle', '--splitting', '--format=esm', '--minify',
+    subprocess.run(['npx', '--yes', 'esbuild@0.28.2', *[f'_entry_site_{v}.mjs' for v in ALL], '--bundle', '--splitting', '--format=esm', '--minify',
                     '--target=es2022', '--legal-comments=none', '--log-level=warning', '--outdir=' + os.path.join(SITE_DIR, 'js'),
                     '--entry-names=[name]-[hash]', '--chunk-names=c-[hash]', '--metafile=' + meta_path], cwd=ROOT, check=True)
     meta = json.load(open(meta_path))
 finally:
-    for v in 'abc':
+    for v in ALL:
         try: os.remove(os.path.join(ROOT, f'_entry_site_{v}.mjs'))
         except OSError: pass
-out_of = {v: next(os.path.basename(k) for k, o in meta['outputs'].items() if o.get('entryPoint', '').endswith(f'_entry_site_{v}.mjs')) for v in 'abc'}
+out_of = {v: next(os.path.basename(k) for k, o in meta['outputs'].items() if o.get('entryPoint', '').endswith(f'_entry_site_{v}.mjs')) for v in ALL}
 os.remove(meta_path)
-for v in 'abc':
+for v in ALL:
     html, m = entries[v]
     tag = (f'<link rel="modulepreload" href="js/{out_of[v]}"><script src="js/data-{dh}.js"></script>'
            f'<script type="module" src="js/{out_of[v]}"></script>')
     page = html[:m.start()] + tag + html[m.end():]
-    open(os.path.join(SITE_DIR, f'{v}.html'), 'w', encoding='utf-8').write(links(page, 'offline'))
+    open(os.path.join(SITE_DIR, f'{v}.html'), 'w', encoding='utf-8').write(links(page, 'offline', v))
 site_pv = read(os.path.join(ROOT, 'preview.html'))
 if EP: site_pv = site_pv.replace('__SBP_ENDPOINT__', EP)
 open(os.path.join(SITE_DIR, 'index.html'), 'w', encoding='utf-8').write(site_pv.replace('href="./"', 'href="./index.html"'))
+open(os.path.join(SITE_DIR, 'index2.html'), 'w', encoding='utf-8').write(site_pv.replace('<body>', '<body><script>window.SBP_SET=["d","e","f"]</script>', 1).replace('href="./"', 'href="./index2.html"'))
 open(os.path.join(SITE_DIR, '.nojekyll'), 'w').close()
 site_kb = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(SITE_DIR) for f in fs) // 1024
 sizes['site_total'] = site_kb

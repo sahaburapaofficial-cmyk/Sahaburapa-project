@@ -27,7 +27,12 @@
     "jank": "node tests/jank.mjs",
     "inp": "node tests/inp.mjs",
     "enterprise": "node tests/enterprise.mjs && node tests/enterprise-ui.mjs a.html && node tests/enterprise-ui.mjs b.html && node tests/enterprise-ui.mjs c.html 390",
-    "triage": "node tests/acdiag.mjs && node tests/acbot.mjs a.html && node tests/acbot.mjs b.html && node tests/acbot.mjs c.html 390"
+    "triage": "node tests/acdiag.mjs && node tests/acbot.mjs a.html && node tests/acbot.mjs b.html && node tests/acbot.mjs c.html 390",
+    "smoke:2": "node tests/smoke.mjs d.html && node tests/smoke.mjs e.html && node tests/smoke.mjs f.html",
+    "smoke:2:mobile": "node tests/smoke.mjs d.html 390 844 && node tests/smoke.mjs e.html 390 844 && node tests/smoke.mjs f.html 390 844",
+    "textscan:2": "node tests/textscan.mjs d.html && node tests/textscan.mjs e.html && node tests/textscan.mjs f.html",
+    "lux": "node tests/lux.mjs",
+    "lux:gen": "python3 tools/make-lux.py"
   },
   "devDependencies": {
     "playwright": "1.56.0",

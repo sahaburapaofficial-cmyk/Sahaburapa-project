@@ -22,9 +22,9 @@
 <link rel="stylesheet" href="assets/fonts.css">
 <style>
 :root{--bg:#EEF2F6;--card:#FFFFFF;--card2:#F5F7FA;--ink:#10233A;--ink2:#3A4D62;--ink3:#6A7B8E;--line:#D9E1EA;--acc:#1B5AA8;--or:#E2711D;--ok:#1F8A4C;
-  --A:#1B5AA8;--B:#0E2238;--C:#0E86C2;--r:14px;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1118;--card:#121B26;--card2:#0F1720;--ink:#E8EEF5;--ink2:#C1CCD8;--ink3:#8898AA;--line:#233244;--acc:#5AA2F0;--or:#FF8A3D;--ok:#3CC47C;--A:#5AA2F0;--B:#A9C2E0;--C:#5AD0FF;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0B1118;--card:#121B26;--card2:#0F1720;--ink:#E8EEF5;--ink2:#C1CCD8;--ink3:#8898AA;--line:#233244;--acc:#5AA2F0;--or:#FF8A3D;--ok:#3CC47C;--A:#5AA2F0;--B:#A9C2E0;--C:#5AD0FF;color-scheme:dark}
+  --A:#1B5AA8;--B:#0E2238;--C:#0E86C2;--D:#9A7330;--E:#86562A;--F:#4A3ED6;--r:14px;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1118;--card:#121B26;--card2:#0F1720;--ink:#E8EEF5;--ink2:#C1CCD8;--ink3:#8898AA;--line:#233244;--acc:#5AA2F0;--or:#FF8A3D;--ok:#3CC47C;--A:#5AA2F0;--B:#A9C2E0;--C:#5AD0FF;--D:#D8B26E;--E:#D4A373;--F:#9C93FF;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B1118;--card:#121B26;--card2:#0F1720;--ink:#E8EEF5;--ink2:#C1CCD8;--ink3:#8898AA;--line:#233244;--acc:#5AA2F0;--or:#FF8A3D;--ok:#3CC47C;--A:#5AA2F0;--B:#A9C2E0;--C:#5AD0FF;--D:#D8B26E;--E:#D4A373;--F:#9C93FF;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.6 Anuphan,system-ui,sans-serif;display:grid;grid-template-rows:auto 1fr;min-height:100vh}
@@ -126,7 +126,13 @@ textarea{width:100%;min-height:84px;border-radius:10px;border:1px solid var(--li
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
-const V = { a: { th: 'A · Bento Clean', col: 'var(--A)' }, b: { th: 'B · Engineering Sheet', col: 'var(--B)' }, c: { th: 'C · Virtual Showroom', col: 'var(--C)' } };
+// Rev.29: the same tester serves both websites — A · B · C (first) and D · E · F (second: ?set=def, or SBP_SET set by the build)
+const V_ALL = { a: { th: 'A · Bento Clean', col: 'var(--A)' }, b: { th: 'B · Engineering Sheet', col: 'var(--B)' }, c: { th: 'C · Virtual Showroom', col: 'var(--C)' },
+  d: { th: 'D · Cinema', col: 'var(--D)' }, e: { th: 'E · Atelier', col: 'var(--E)' }, f: { th: 'F · Spatial', col: 'var(--F)' } };
+const SET = window.SBP_SET || (/[?&]set=def/.test(location.search) ? ['d', 'e', 'f'] : ['a', 'b', 'c']);
+const V = Object.fromEntries(SET.map(v => [v, V_ALL[v]]));
+if (SET[0] === 'd') { document.title = 'ทดสอบเว็บไซต์ชุดที่ 2 · D · E · F | SBP AirCare'; const h1 = document.querySelector('.top h1'); if (h1) h1.firstChild.textContent = 'ทดสอบเว็บไซต์ชุดที่ 2 · D · E · F'; }
+{ const g = document.getElementById('vgrp'); g.innerHTML = ''; SET.forEach((v, i) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.setAttribute('aria-pressed', String(i === 0)); b.textContent = V[v].th.replace(/ (Clean|Sheet|Virtual )/, ' ').trim(); g.append(b); }); }
 const DEV = { desktop: { w: 1366, h: 860, th: 'คอม 1366' }, tablet: { w: 820, h: 1180, th: 'แท็บเล็ต 820' }, phone: { w: 390, h: 820, th: 'มือถือ 390' } };
 const TASKS = [
   { id: 't0', h: 'start', b: 'เริ่มจากสิ่งที่ต้องการ', d: 'หน้าแรก → "วันนี้ต้องการอะไร" เลือก 1 งาน (เช่น ล้างแอร์) แล้วกด "ขั้นต่อไป" จนครบเส้นทาง' },
@@ -149,10 +155,10 @@ const CRIT = [
   { id: 'look', th: 'ความสวยงาม / ภาพลักษณ์' }, { id: 'ease', th: 'ใช้ง่าย หาของเจอ' }, { id: 'trust', th: 'น่าเชื่อถือสำหรับองค์กร' },
   { id: 'home', th: 'เหมาะกับลูกค้าบ้าน' }, { id: 'sim', th: 'ห้องจำลอง / 3D ชัดเจน' }, { id: 'mobile', th: 'ใช้บนมือถือดี' },
 ];
-const KEY = 'sbp-preview-v1';
+const KEY = SET[0] === 'd' ? 'sbp-preview2-v1' : 'sbp-preview-v1';
 const ALIAS = { c: { studio: 'room', inside: 'journey' }, b: { } };
 const hashFor = (v, h) => (ALIAS[v] && ALIAS[v][h]) || h;
-let S = { mode: 'one', v: 'a', d: innerWidth < 700 ? 'phone' : 'desktop', hash: '', done: {}, score: { a: {}, b: {}, c: {} }, note: '' };
+let S = { mode: 'one', v: SET[0], d: innerWidth < 700 ? 'phone' : 'desktop', hash: '', done: {}, score: Object.fromEntries(SET.map(v => [v, {}])), note: '' };
 try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 if (innerWidth < 700 && S.d === 'desktop') S.d = 'phone';
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
@@ -162,7 +168,7 @@ const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('
 
 // Single-file build: the three variants are embedded below as gzip+base64 packs and shown with srcdoc
 // (no page-to-page navigation needed). The multi-file prototype falls back to ./a.html etc.
-const PACKED = !!document.getElementById('pack-a');
+const PACKED = !!document.getElementById('pack-' + SET[0]);
 const URLS = window.SBP_URLS || {};
 const cache = {};
 async function srcFor(v) {
@@ -181,7 +187,7 @@ let frames = [];
 function build() {
   const st = $('#stage'); st.innerHTML = ''; frames = [];
   st.classList.toggle('cmp', S.mode === 'cmp');
-  const list = S.mode === 'cmp' ? ['a', 'b', 'c'] : [S.v];
+  const list = S.mode === 'cmp' ? SET : [S.v];
   const dev = DEV[S.mode === 'cmp' && S.d === 'desktop' ? 'phone' : S.d];
   list.forEach(v => {
     const ifr = el('iframe', { title: `ต้นแบบ ${V[v].th}`, src: PACKED ? null : `./${v}.html${S.hash ? '#' + hashFor(v, S.hash) : ''}`, loading: PACKED ? null : 'lazy' });
@@ -233,22 +239,22 @@ function openCart() { frames.forEach(f => { try { f.ifr.contentWindow.document.q
 
 function renderScore() {
   const t = $('#score'); t.innerHTML = '';
-  t.append(el('thead', {}, el('tr', {}, el('th', {}, ''), ...['a', 'b', 'c'].map(v => el('th', {}, v.toUpperCase())))));
+  t.append(el('thead', {}, el('tr', {}, el('th', {}, ''), ...SET.map(v => el('th', {}, v.toUpperCase())))));
   const tb = el('tbody');
-  CRIT.forEach(c => tb.append(el('tr', {}, el('th', { scope: 'row' }, c.th), ...['a', 'b', 'c'].map(v => {
+  CRIT.forEach(c => tb.append(el('tr', {}, el('th', { scope: 'row' }, c.th), ...SET.map(v => {
     const s = el('select', { 'aria-label': `${c.th} แบบ ${v.toUpperCase()}` }, el('option', { value: '' }, '–'), ...[1, 2, 3, 4, 5].map(n => el('option', { value: n }, String(n))));
     s.value = S.score[v][c.id] || '';
     s.addEventListener('change', () => { S.score[v][c.id] = +s.value || 0; save(); totals(); });
     return el('td', { class: 's' }, s);
   }))));
-  t.append(tb, el('tfoot', {}, el('tr', {}, el('td', {}, 'รวม (เต็ม 30)'), ...['a', 'b', 'c'].map(v => el('td', { id: `tot-${v}` }, '0')))));
+  t.append(tb, el('tfoot', {}, el('tr', {}, el('td', {}, 'รวม (เต็ม 30)'), ...SET.map(v => el('td', { id: `tot-${v}` }, '0')))));
   totals();
 }
 function sum(v) { return CRIT.reduce((n, c) => n + (S.score[v][c.id] || 0), 0); }
 function totals() {
   const bars = $('#bars'); bars.innerHTML = '';
-  ['a', 'b', 'c'].forEach(v => { const n = sum(v); $(`#tot-${v}`).textContent = n; bars.append(el('div', { class: 'bar' }, el('i', { style: `background:${V[v].col}` }, v.toUpperCase()), el('div', { class: 't' }, el('span', { style: `width:${n / 30 * 100}%;background:${V[v].col}` })), el('b', {}, `${n} / 30`))); });
-  const rated = ['a', 'b', 'c'].filter(v => sum(v) > 0);
+  SET.forEach(v => { const n = sum(v); $(`#tot-${v}`).textContent = n; bars.append(el('div', { class: 'bar' }, el('i', { style: `background:${V[v].col}` }, v.toUpperCase()), el('div', { class: 't' }, el('span', { style: `width:${n / 30 * 100}%;background:${V[v].col}` })), el('b', {}, `${n} / 30`))); });
+  const rated = SET.filter(v => sum(v) > 0);
   const vd = $('#verdict');
   if (!rated.length) { vd.textContent = 'ยังไม่มีคะแนน ลองใช้งานแล้วให้คะแนนครบทั้ง 3 แบบ'; return; }
   const best = rated.sort((x, y) => sum(y) - sum(x));
@@ -264,13 +270,13 @@ $('#reset').addEventListener('click', () => { S.score = { a: {}, b: {}, c: {} };
 // Rev.10 — testers send their scores straight to the team's Google Sheet (same Apps Script as the site forms).
 // build.py replaces the placeholder with ENDPOINT from assets/submit.js; while it is empty (or unbuilt) "ส่งผลให้ทีม" falls back to copy.
 const EP = '__SBP_ENDPOINT__'.startsWith('__') ? '' : '__SBP_ENDPOINT__';
-const report = () => ['ผลทดสอบต้นแบบเว็บ SBP AirCare', ...['a', 'b', 'c'].map(v => `${V[v].th}: ${sum(v)}/30 — ` + CRIT.map(c => `${c.th} ${S.score[v][c.id] || '-'}`).join(', ')), `ทำรายการทดลองแล้ว: ${['a', 'b', 'c', 'all'].filter(v => S.done[v]).map(v => `${v === 'all' ? 'เทียบ' : v.toUpperCase()} ${Object.values(S.done[v]).filter(Boolean).length}/${TASKS.length}`).join(' · ') || '-'}`, S.note ? `ความเห็น: ${S.note}` : '', $('#who').value.trim() ? `ผู้ทดสอบ: ${$('#who').value.trim()}` : ''].filter(Boolean);
+const report = () => ['ผลทดสอบต้นแบบเว็บ SBP AirCare', ...SET.map(v => `${V[v].th}: ${sum(v)}/30 — ` + CRIT.map(c => `${c.th} ${S.score[v][c.id] || '-'}`).join(', ')), `ทำรายการทดลองแล้ว: ${[...SET, 'all'].filter(v => S.done[v]).map(v => `${v === 'all' ? 'เทียบ' : v.toUpperCase()} ${Object.values(S.done[v]).filter(Boolean).length}/${TASKS.length}`).join(' · ') || '-'}`, S.note ? `ความเห็น: ${S.note}` : '', $('#who').value.trim() ? `ผู้ทดสอบ: ${$('#who').value.trim()}` : ''].filter(Boolean);
 $('#send').addEventListener('click', async () => {
   const msg = $('#sendmsg'), btn = $('#send');
-  if (!['a', 'b', 'c'].some(v => sum(v)) && !S.note) { msg.textContent = 'ให้คะแนนอย่างน้อย 1 แบบ หรือเขียนความเห็นก่อนส่ง'; return; }
+  if (!SET.some(v => sum(v)) && !S.note) { msg.textContent = 'ให้คะแนนอย่างน้อย 1 แบบ หรือเขียนความเห็นก่อนส่ง'; return; }
   if (!EP) { try { await navigator.clipboard.writeText(report().join('\n')); msg.textContent = 'ระบบส่งอัตโนมัติยังไม่เปิด — คัดลอกผลให้แล้ว กรุณาวางส่งทาง LINE @sahaservices'; } catch (e) { msg.textContent = 'ระบบส่งอัตโนมัติยังไม่เปิด กรุณากด "คัดลอกผลไปส่ง LINE"'; } return; }
   const ref = 'T' + Date.now().toString().slice(-7), fields = { 'ผู้ทดสอบ': $('#who').value.trim(), 'อุปกรณ์': `${DEV[S.d].th} · ${innerWidth}px`, 'ความเห็น': S.note };
-  ['a', 'b', 'c'].forEach(v => { fields[`${v.toUpperCase()} รวม/30`] = sum(v); CRIT.forEach(c => { fields[`${v.toUpperCase()} ${c.th}`] = S.score[v][c.id] || ''; }); });
+  SET.forEach(v => { fields[`${v.toUpperCase()} รวม/30`] = sum(v); CRIT.forEach(c => { fields[`${v.toUpperCase()} ${c.th}`] = S.score[v][c.id] || ''; }); });
   btn.disabled = true; msg.textContent = 'กำลังส่ง…';
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 15000);
   try {
@@ -284,7 +290,7 @@ $('#send').addEventListener('click', async () => {
   } catch (e) { msg.textContent = 'ส่งไม่สำเร็จ (การเชื่อมต่อขัดข้อง) กรุณากด "คัดลอกผลไปส่ง LINE"'; } finally { clearTimeout(t); btn.disabled = false; }
 });
 $('#copy').addEventListener('click', async () => {
-  const lines = ['ผลทดสอบต้นแบบเว็บ SBP AirCare', ...['a', 'b', 'c'].map(v => `${V[v].th}: ${sum(v)}/30 — ` + CRIT.map(c => `${c.th} ${S.score[v][c.id] || '-'}`).join(', ')), S.note ? `ความเห็น: ${S.note}` : ''].filter(Boolean);
+  const lines = ['ผลทดสอบต้นแบบเว็บ SBP AirCare', ...SET.map(v => `${V[v].th}: ${sum(v)}/30 — ` + CRIT.map(c => `${c.th} ${S.score[v][c.id] || '-'}`).join(', ')), S.note ? `ความเห็น: ${S.note}` : ''].filter(Boolean);
   try { await navigator.clipboard.writeText(lines.join('\n')); toast('คัดลอกแล้ว วางใน LINE ได้เลย'); } catch (e) { toast('คัดลอกไม่ได้ในหน้านี้'); }
 });
 build(); renderTasks(); renderScore();

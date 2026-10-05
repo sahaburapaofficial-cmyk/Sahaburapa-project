@@ -324,7 +324,7 @@ export function mountSite(cfg) {
     proto.innerHTML = ''; proto.classList.add('sx-beta');
     // Rev.20 production wording: only which design this is + the A · B · C comparison (for the owner's review), no trial notice
     proto.append(h('b', {}, `แบบเว็บไซต์ ${variant}`), h('span', { class: 'sx-bt' }, ' · ราคามาตรฐาน Pricebook 2569 ก่อน VAT'));
-    if (hub) { hub.textContent = 'เทียบแบบ A · B · C'; proto.append(' ', hub); }
+    if (hub) { hub.textContent = /^[DEF]$/.test(variant) ? 'เทียบแบบ D · E · F' : 'เทียบแบบ A · B · C'; proto.append(' ', hub); }   // Rev.29: second website D · E · F
   }
   const foot = $('footer');
   if (foot) {
