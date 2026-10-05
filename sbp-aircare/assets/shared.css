@@ -575,9 +575,9 @@ a.s-flow-c:hover{border-color:var(--s-accent);transform:translateY(-1px)}
 .tctl--glass .tk-dot{min-height:36px;border-radius:999px;font:600 12px "IBM Plex Mono",ui-monospace,monospace}
 .tctl--glass .tctl-mark{color:#8fa3b8}
 /* the unit display chip in the 3D room */
-.tsim-disp{position:absolute;left:0;top:0;z-index:3;padding:2px 9px;border-radius:7px;font:600 12px/1.5 "IBM Plex Mono",ui-monospace,monospace;background:#0e1620;color:#8fe8ff;border:1px solid rgba(143,232,255,.35);pointer-events:none;white-space:nowrap}
+.tsim-disp{position:absolute;left:0;top:0;z-index:3;width:max-content;padding:2px 9px;border-radius:7px;font:600 12px/1.5 "IBM Plex Mono",ui-monospace,monospace;background:#0e1620;color:#8fe8ff;border:1px solid rgba(143,232,255,.35);pointer-events:none;white-space:nowrap}
 .tsim-disp.off{color:#7b8794;border-color:rgba(123,135,148,.35)}
-.tsim-disp.ping{animation:tping .7s ease-out}
+.tsim-disp.tsim-ping{animation:tping .7s ease-out}
 @keyframes tping{0%{box-shadow:0 0 0 0 rgba(143,232,255,.7)}100%{box-shadow:0 0 0 14px rgba(143,232,255,0)}}
 @media (max-width:900px){.tsim-wrap{grid-template-columns:minmax(0,1fr)}.tctl{max-width:340px}}
 @media (pointer:coarse){.tctl .tk{min-height:44px}}
@@ -1010,7 +1010,7 @@ html.sx-on header nav a[aria-current="page"]{background:var(--s-accent-soft);col
 .sx-fbb{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border:1px solid currentColor;border-radius:var(--sx-pill,999px);background:transparent;color:inherit;font:inherit;font-weight:600;cursor:pointer;vertical-align:middle}
 @media (max-width:640px){.sx-bt{display:none}}
 footer .sx-foot{display:grid;grid-template-columns:1.6fr 1fr 1.3fr 1fr;gap:24px;font-size:14px;line-height:1.65;color:var(--s-ink-2)}
-.sx-foot h4{margin:0 0 8px;font-size:14px;color:var(--s-ink)}
+.sx-foot :is(h4,.sx-fh){margin:0 0 8px;font-size:14px;font-weight:600;line-height:1.4;color:var(--s-ink)}   /* Rev.31: footer group titles are h2 (no h2 → h4 skip) styled small */
 .sx-foot ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .sx-foot p{margin:0 0 6px}
 .sx-fb-brand{display:block;margin-bottom:6px;font-size:18px;color:var(--s-ink)}
@@ -1592,7 +1592,7 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 .ti-cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .ti-card{display:grid;gap:8px;align-content:start;padding:14px;border-radius:14px;border:1px solid var(--s-line);background:var(--s-card);min-width:0}
 .ti-card.pick{border:2px solid var(--s-accent);box-shadow:0 0 0 3px var(--s-accent-soft)}
-.ti-card h4{margin:0;font-size:16px}
+.ti-card h3{margin:0;font-size:16px}
 .ti-card ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .ti-card li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;border-bottom:1px dashed var(--s-line);padding-bottom:5px}
 .ti-card li span{min-width:0;color:var(--s-ink)}
@@ -1637,7 +1637,7 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 .ti-data ul{list-style:none;padding:0}
 .ti-data li{border-bottom:1px dashed var(--s-line);padding:3px 0}
 .ti-qa{display:grid;gap:6px}
-.ti-qa h4{margin:0;font-size:16px}
+.ti-qa h3{margin:0;font-size:16px}
 .ti-qa details{border:1px solid var(--s-line);border-radius:10px;padding:6px 12px;background:var(--s-card)}
 .ti-qa summary{cursor:pointer;font-weight:600;font-size:14px;min-height:32px;display:flex;align-items:center}
 .ti-qa p{margin:4px 0 6px;font-size:13.5px;line-height:1.6;color:var(--s-ink-2)}
@@ -1921,3 +1921,10 @@ html.sx-scrolled header.hdr{box-shadow:0 1px 0 color-mix(in oklab,var(--s-line,#
 .at-types button:hover{background:var(--s-accent);color:var(--s-on-accent)}
 @media (max-width:520px){.at-recs li{grid-template-columns:32px minmax(0,1fr)}.at-recs li>.btn-ghost,.at-recs li>button{grid-column:1/-1}}
 @media (prefers-reduced-motion:no-preference){.at-recs li{animation:lxFade var(--m-mid,.28s) var(--m-ease,ease) both}}
+/* ★Rev.31 layout audit: small links that act as buttons on touch screens reach the WCAG 2.2 AA 24 px target (2.5.8) with room to spare */
+@media (pointer:coarse){
+  .sx-crumb a{display:inline-flex;align-items:center;min-height:32px;padding-inline:2px}
+  .sx-beta a,.proto a{display:inline-flex;align-items:center;min-height:30px}
+  .cov2-more{display:inline-flex;align-items:center;min-height:36px}
+  .mc details>summary,.en-sow>summary,.qc-size select,.ab-acts .s-btn{min-height:44px}
+}

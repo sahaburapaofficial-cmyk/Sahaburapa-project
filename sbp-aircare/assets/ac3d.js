@@ -717,7 +717,9 @@ export function createACViewer(container, opts = {}) {
     state.target.y = lerp(state.target.y, (state.unit === 'indoor' ? -0.02 : 0) + state.explode * 0.06 + o.targetOffset[1] * (1 - state.explode * 0.5), 0.1);
     state.target.x = lerp(state.target.x, o.targetOffset[0] * (1 - state.explode * 0.3), 0.1);
     const sp = Math.sin(state.phi);
-    camera.position.set(state.target.x + state.radius * sp * Math.sin(state.theta), state.target.y + state.radius * Math.cos(state.phi), state.target.z + state.radius * sp * Math.cos(state.theta));
+    // Rev.31 layout: a squarish frame (A's hero tile) showed less width than the unit needs and cut its end — back off until it fits (hand-tuned radiusScale keeps its own framing)
+    const ar = camera.aspect, R = state.radius * (o.radiusScale === 1 && ar >= 0.9 ? Math.max(1, (1.35 / ar) ** 0.85) : 1);
+    camera.position.set(state.target.x + R * sp * Math.sin(state.theta), state.target.y + R * Math.cos(state.phi), state.target.z + R * sp * Math.cos(state.theta));
     camera.lookAt(state.target);
     // explode offsets
     const U = units[state.unit];

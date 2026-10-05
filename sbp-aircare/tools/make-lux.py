@@ -73,17 +73,17 @@ COPY = {
 }
 
 V = {
-  'D': dict(name='Cinema', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ D)', theme='#0B0D12', theme3d='dark', jobType='wall', studio='condobed', throw='remote', fit='bedroom',
+  'D': dict(name='Holo Cinema', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ D)', theme='#04060B', theme3d='dark', jobType='wall', studio='condobed', throw='remote', fit='bedroom',
             order=['home', 'service', 'shop', 'business', 'knowledge', 'contact'],
             views=dict(home=['film', 'intro', 'book', 'start', 'coverage'], service=['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop=['catalog', 'tradein', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
             labels=dict(film='ภาพยนตร์สั้น', intro='บริการของเรา', inside='ข้างในแอร์'),
             nav=[('#film', 'ภาพยนตร์'), ('#book', 'จองล้าง'), ('#cleanflow', 'ทีมช่าง'), ('#catalog', 'แอร์ทุกรุ่น'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร'), ('#area', 'พื้นที่')]),
-  'E': dict(name='Atelier', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ E)', theme='#F6F1E8', theme3d='light', jobType='ceiling', studio='living', throw='panel', fit='living',
+  'E': dict(name='Atelier 2050', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ E)', theme='#F3F6F9', theme3d='light', jobType='ceiling', studio='living', throw='panel', fit='living',
             order=['home', 'service', 'shop', 'business', 'knowledge', 'contact'],
             views=dict(home=['concierge', 'book', 'start', 'coverage'], service=['cleanflow', 'symptoms', 'standards', 'howto', 'prices', 'quality'], shop=['tradein', 'catalog', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
             labels=dict(concierge='ปรึกษาบริการ', inside='แอร์ทำงานอย่างไร'),
             nav=[('#concierge', 'ปรึกษา'), ('#book', 'จองล้าง'), ('#cleanflow', 'งานช่าง'), ('#tradein', 'รีโนเวท'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร'), ('#about', 'เกี่ยวกับเรา')]),
-  'F': dict(name='Spatial', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ F)', theme='#EEF3FA', theme3d='light', jobType='cassette', studio='openoffice', throw='glass', fit='living',
+  'F': dict(name='Holodeck', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ F)', theme='#03050C', theme3d='dark', jobType='cassette', studio='openoffice', throw='glass', fit='living',
             order=['home', 'knowledge', 'service', 'shop', 'business', 'contact'],
             views=dict(home=['dome', 'book', 'start', 'coverage'], knowledge=['inside', 'studio', 'learn'], service=['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop=['catalog', 'fit', 'tradein'], business=['enterprise', 'b2b'], contact=['about', 'area', 'faq', 'quote']),
             labels=dict(dome='ห้องทดลองความเย็น', inside='ข้างในแอร์', studio='ห้องจำลอง 48 ห้อง'),
@@ -95,7 +95,7 @@ HERO = {
 <div class="wrap">
   <section class="sec" id="intro">
     <div class="d-intro">
-      <p class="eyebrow">SBP AirCare · Cinema</p>
+      <p class="eyebrow">SBP AirCare · Holo Cinema</p>
       <h1>ล้างแอร์ที่คุณเห็นทุกขั้น<br><em>ก่อนจอง จนห้องกลับมาเย็น</em></h1>
       <p class="d-lead">ทีมช่างประจำของบริษัท สหบูรพากรุ๊ป จำกัด ล้าง ติดตั้ง และซ่อมแอร์ทุกประเภท ราคามาตรฐานจาก Pricebook ก่อน VAT แสดงก่อนส่งคำขอ</p>
       <div class="d-ctas"><a class="btn-primary" href="#book">จองล้างแอร์ · เริ่ม <span data-clean-from>฿700</span></a><a class="btn-ghost" href="#cleanflow">ดูทีมช่างทำงาน</a><a class="btn-ghost" href="#enterprise">สัญญาองค์กร</a></div>
@@ -106,9 +106,10 @@ HERO = {
   <section class="sec" id="concierge" aria-label="ปรึกษาบริการ">
     <div class="at-hero">
       <div>
-        <p class="eyebrow">SBP AirCare · Atelier</p>
+        <p class="eyebrow">SBP AirCare · Atelier 2050</p>
         <h1>ดูแลแอร์ของคุณ<br><em>อย่างที่คุณต้องการ</em></h1>
         <p class="at-lead">ตอบคำถามสี่ข้อ เราจัดลำดับบริการที่เหมาะกับบ้านหรือองค์กรของคุณ พร้อมราคามาตรฐานก่อน VAT และวิธีนัดคิว</p>
+        <h2 class="vh">ปรึกษาบริการ 4 คำถาม</h2>
         <div id="conRoot"></div>
       </div>
       <div id="dayRoot"></div>
@@ -117,8 +118,8 @@ HERO = {
   'F': '''<div class="wrap">
   <section class="sec" id="dome" aria-label="ห้องทดลองความเย็น">
     <div class="sp-head">
-      <div><p class="eyebrow">SBP AirCare · Spatial</p><h1>หมุนดูห้อง<br><em>เห็นอากาศเย็นลงตรงหน้า</em></h1>
-      <p>ห้องนอนคอนโดลอยอยู่ในมือคุณ เปิดแอร์ ปรับอากาศนอกบ้าน จำนวนคน และความสะอาดของคอยล์ แล้วดูความเย็นเดินไปทั่วห้องตามเวลา</p></div>
+      <div><p class="eyebrow">SBP AirCare · Holodeck</p><h1>ห้องโฮโลแกรม<br><em>เห็นอากาศเย็นลงตรงหน้า</em></h1>
+      <p>ห้องนอนคอนโดฉายเป็นโฮโลแกรม หมุนดูได้รอบทิศ เปิดแอร์ ปรับอากาศนอกบ้าน จำนวนคน และความสะอาดของคอยล์ แล้วดูความเย็นเดินไปทั่วห้องตามเวลา</p></div>
       <div class="d-ctas"><a class="btn-primary" href="#book">จองล้างแอร์ · เริ่ม <span data-clean-from>฿700</span></a><a class="btn-ghost" href="#inside">ข้างในแอร์</a></div>
     </div>
     <div id="spRoot"></div>
@@ -148,10 +149,10 @@ BODY = {
   'inside': '<div class="panel" id="howRoot"></div>', 'about': '<div id="aboutRoot"></div>', 'area': '<div id="areaRoot"></div>',
 }
 EXTRA_CSS = {
-  'D': '''.d-intro{max-width:880px}.d-intro h1{font:300 clamp(38px,5.6vw,80px)/1.06 var(--display);letter-spacing:.005em}.d-intro h1 em{font-style:normal;background:linear-gradient(90deg,#E8C88A,#86D6F7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  'D': '''.d-intro{max-width:880px}.d-intro h1{font:300 clamp(38px,5.6vw,80px)/1.06 var(--display);letter-spacing:.005em}.d-intro h1 em{font-style:normal;background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent}
 .d-lead{color:var(--ink-2);font-size:18px;margin:18px 0 24px;max-width:36em}.d-ctas{display:flex;gap:10px;flex-wrap:wrap}
-.d-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:48px 0 0;border-block:1px solid var(--line)}.d-facts div{padding:22px 18px;border-left:1px solid var(--line)}.d-facts div:first-child{border-left:0}
-.d-facts dt{font:500 11.5px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}.d-facts dd{margin:6px 0 0;font:300 clamp(28px,3vw,42px) var(--display);color:var(--acc)}
+.d-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:48px 0 0;border-block:1px solid var(--line);background:var(--hud)}.d-facts div{padding:22px 18px;border-left:1px solid var(--line)}.d-facts div:first-child{border-left:0}
+.d-facts dt{font:500 11.5px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}.d-facts dd{margin:6px 0 0;font:300 clamp(28px,3vw,42px) var(--display);color:var(--acc)}
 @media (max-width:640px){.d-facts{grid-template-columns:1fr 1fr}.d-facts div:nth-child(3){border-left:0}}''',
   'E': '', 'F': '.d-ctas{display:flex;gap:10px;flex-wrap:wrap}',
 }

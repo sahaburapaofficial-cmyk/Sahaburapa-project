@@ -116,7 +116,8 @@ section.s{padding-block:40px 0}
 .tools button:hover{color:var(--safety)}
 .tools button[aria-pressed="true"]:hover{color:var(--paper)}
 @media (max-width:980px){.hero{grid-template-columns:1fr}.hero .txt{border-right:0;border-bottom:1px solid var(--rule)}.draw{min-height:460px}}
-@media (max-width:560px){.hero .txt{padding:20px}.tblock{grid-template-columns:1fr 1fr}.tblock div:nth-child(3){border-left:0}.draw .frame{margin:18px 16px 0}.tblock{margin:0 16px 16px}}
+@media (max-width:560px){.hero .ctas{order:1}.hero .spec{order:2}   /* Rev.31: on phones the booking buttons come before the spec sheet (they used to sit below the first screen) */
+.hero .txt{padding:20px}.tblock{grid-template-columns:1fr 1fr}.tblock div:nth-child(3){border-left:0}.draw .frame{margin:18px 16px 0}.tblock{margin:0 16px 16px}}
 
 /* builder as schedule */
 .bgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px}
@@ -161,7 +162,7 @@ section.s{padding-block:40px 0}
 .rtbl th,.rtbl td{padding:8px 12px;border-bottom:1px solid var(--rule);text-align:left;white-space:nowrap}
 .rtbl th{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .rtbl td.m{font-family:var(--mono)}
-.st{display:inline-block;font:500 11px var(--mono);padding:1px 7px;border:1px solid}
+span.st{display:inline-block;font:500 11px var(--mono);padding:1px 7px;border:1px solid}   /* Rev.31: span only — the studio root also carries .st (studio.css) */
 .st.ok{color:var(--ok)}.st.w{color:var(--warn)}
 @media (max-width:860px){.report{grid-template-columns:1fr}.report .l{border-right:0;border-bottom:1px solid var(--rule)}}
 .ovx{overflow-x:auto}
@@ -210,7 +211,7 @@ section.s{padding-block:40px 0}
 .card .acts [aria-pressed="true"]{color:var(--safety)}
 table.rows{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed;min-width:820px}
 .rows td{padding:8px 12px;border-bottom:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:600px){.rows td{white-space:normal;overflow-wrap:anywhere}}   /* Rev.16.1: series names were cut on phones */
+@media (max-width:1100px){.rows td{white-space:normal;overflow-wrap:anywhere}}   /* Rev.16.1: series names were cut on phones · Rev.31: and on tablets (the table keeps its 820 px and scrolls in its frame) */
 .rows td:nth-child(-n+2){white-space:normal;overflow-wrap:anywhere;line-height:1.4}   /* Rev.14: model codes / series wrap instead of being cut */
 .rows td:nth-child(1){width:130px;font-family:var(--mono);font-size:12.5px}.rows td:nth-child(2){width:150px}.rows td:nth-child(4){width:110px}.rows td:nth-child(5),.rows td:nth-child(6){width:96px;text-align:right;font-family:var(--mono)}.rows td:nth-child(7){width:96px;text-align:right;font-family:var(--mono)}.rows td:nth-child(8){width:70px}
 .rows tr:hover td{background:var(--blue-l)}

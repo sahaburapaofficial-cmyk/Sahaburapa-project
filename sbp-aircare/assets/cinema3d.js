@@ -105,6 +105,18 @@ function createFilm(host, o) {
   const mgeo = new THREE.BufferGeometry(); mgeo.setAttribute('position', new THREE.BufferAttribute(mpos, 3));
   const mist = new THREE.Points(mgeo, new THREE.PointsMaterial({ color: 0xdff4ff, size: 0.016, transparent: true, opacity: 0, depthWrite: false })); scene.add(mist);
   const U0 = new THREE.Vector3(); room.unitG.getWorldPosition(U0);
+  // ★Rev.31 holographic scan (chapter 3): a light sheet sweeps the unit and a grid lights its front — the "look inside" moment
+  const scanM = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    uniforms: { uA: { value: 0 }, uT: { value: 0 } },
+    vertexShader: 'varying vec2 vU; void main(){ vU = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
+    fragmentShader: 'varying vec2 vU; uniform float uA, uT; void main(){ float e = smoothstep(0.0,0.25,vU.y)*smoothstep(1.0,0.75,vU.y); float l = 0.55 + 0.45*sin(vU.y*80.0 - uT*6.0); gl_FragColor = vec4(vec3(0.39,0.9,1.0)*l, uA*e*0.55); }' });
+  const sheet = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.5), scanM); sheet.rotation.y = Math.PI / 2; sheet.position.set(U0.x, U0.y, U0.z + 0.12); scene.add(sheet);
+  const gridM = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uA: { value: 0 }, uX: { value: -1 } },
+    vertexShader: 'varying vec2 vU; void main(){ vU = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
+    fragmentShader: 'varying vec2 vU; uniform float uA, uX; void main(){ vec2 g = abs(fract(vU*vec2(46.,14.))-0.5); float line = 1.0 - smoothstep(0.0, 0.06, min(g.x, g.y)); float seen = smoothstep(uX+0.02, uX-0.02, vU.x); float edge = exp(-pow((vU.x-uX)*30.0,2.0)); gl_FragColor = vec4(vec3(0.39,0.9,1.0), uA*(line*0.35*seen + edge*0.6)); }' });
+  const grid = new THREE.Mesh(new THREE.PlaneGeometry(0.94, 0.33), gridM); grid.position.set(U0.x, U0.y + 0.01, U0.z + 0.16); scene.add(grid);
+  const proj = new THREE.Vector3();
 
   let W = 1, H = 1, q = o.start ?? 0, p = q, t = 0, last = performance.now(), visible = true, dirty = true, raf = 0, lastSet = 0, odd = false, lastOpen = -1, lastShadow = -9;
   let sw = 0, sh = 0, spr = 0;   // Rev.30 smooth: GL buffers are reallocated only when the size really changed
@@ -166,8 +178,14 @@ function createFilm(host, o) {
       for (let i = 0; i < NM; i++) { const s = mseed[i], k = (t * 1.4 + s) % 1; mpos[i * 3] = sx + (s - 0.5) * 0.08 + k * 0.05; mpos[i * 3 + 1] = U0.y + 0.1 - k * 0.35; mpos[i * 3 + 2] = U0.z + 0.16 + k * 0.08 + ((s * 5.1) % 1) * 0.05; }
       mgeo.attributes.position.needsUpdate = true;
     }
+    // scan: 0.44 → 0.56 the sheet sweeps left → right, the grid stays lit while the panel is open, dust found turns cyan
+    const sc = ss(0.44, 0.56, P2), scanOn = P2 > 0.43 && P2 < 0.8 ? 1 - ss(0.74, 0.8, P2) : 0;
+    scanM.uniforms.uA.value = sc > 0 && sc < 1 ? 1 : 0; scanM.uniforms.uT.value = t; sheet.position.x = U0.x - 0.48 + 0.96 * sc;
+    gridM.uniforms.uA.value = scanOn; gridM.uniforms.uX.value = sc;
+    dust.material.color.setHex(sc > 0.98 && wash < 0.02 ? 0x63e6ff : 0xb59a76);
     renderer.render(scene, cam);
-    o.onFrame && o.onFrame(P2);
+    proj.copy(U0).project(cam);
+    o.onFrame && o.onFrame(P2, { x: (proj.x + 1) / 2 * W, y: (1 - proj.y) / 2 * H, vis: proj.z < 1, air: effects(dirt).air, dirt, wash, scan: sc, W, H });
   }
   function loop() {
     cancelAnimationFrame(raf);
@@ -204,7 +222,13 @@ export function mountCinema(root, { cta = null } = {}) {
   const scrub = h('nav', { class: 'cn-scrub', 'aria-label': 'บทของภาพยนตร์' });
   const stage = h('div', { class: 'cn-cv' });
   const skip = h('button', { type: 'button', class: 'cn-skip', onclick: () => { const n = root.nextElementSibling && root.nextElementSibling.querySelector('section[id]'); const t = n || root.nextElementSibling; if (t) { const y = t.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 64); scrollTo({ top: y, behavior: 'auto' }); } } }, 'ข้ามภาพยนตร์');   // Rev.30: customers who came to book do not sit through the film
-  const stick = h('div', { class: 'cn-stick' }, stage, skip, h('div', { class: 'cn-grade', 'aria-hidden': 'true' }), h('div', { class: 'cn-grain', 'aria-hidden': 'true' }),
+  // ★Rev.31 HUD: corner frame, a reticle locked on the unit, telemetry from the room model (labelled as a model)
+  const retLbl = h('span', {}, 'คอยล์เย็น · 12,000 BTU');
+  const ret = h('div', { class: 'cn-ret', 'aria-hidden': 'true' }, h('i'), retLbl);
+  const telA = h('b', {}, '—'), telD = h('b', {}, '—'), telS = h('b', {}, '—');
+  const tel = h('dl', { class: 'cn-tel', 'aria-hidden': 'true' }, h('dt', {}, 'ลมออก'), h('dd', {}, telA, h('i', { class: 'cn-telbar' }, h('i'))), h('dt', {}, 'ฝุ่นที่คอยล์'), h('dd', {}, telD, h('i', { class: 'cn-telbar w' }, h('i'))), h('dt', {}, 'สถานะ'), h('dd', {}, telS), h('small', {}, 'แบบจำลอง'));
+  const frameHud = h('div', { class: 'cn-frame', 'aria-hidden': 'true' });
+  const stick = h('div', { class: 'cn-stick' }, stage, frameHud, ret, tel, skip, h('div', { class: 'cn-grade', 'aria-hidden': 'true' }), h('div', { class: 'cn-grain', 'aria-hidden': 'true' }),
     h('div', { class: 'cn-bars', 'aria-hidden': 'true' }, h('i'), h('i')), cap, hud, scrub, cta ? h('div', { class: 'cn-cta' }, cta) : null,
     h('p', { class: 'cn-note' }, 'ภาพยนตร์จำลองเพื่ออธิบาย · ตัวเลขจากแบบจำลองห้องเดียวกับห้องจำลองบนเว็บ'));
   const trk = h('div', { class: 'cn-track' + (still ? ' still' : '') }, stick);
@@ -213,7 +237,18 @@ export function mountCinema(root, { cta = null } = {}) {
   let cur = -1, film = null;
   const btns = CHAPTERS.map((c, i) => { const b = h('button', { type: 'button', 'aria-label': `${c.k} ${c.t}`, onclick: () => goTo(c.p + 0.02) }, h('span', {}, String(i + 1).padStart(2, '0')), h('em', {}, c.t), h('i')); scrub.append(b); return b; });
   const showCap = i => { if (i === cur) return; cur = i; const c = CHAPTERS[i]; cap.innerHTML = ''; cap.append(h('p', { class: 'cn-k' }, c.k, h('span', {}, ` / ${CHAPTERS.length}`)), h('h2', {}, c.t), h('p', { class: 'cn-s' }, c.s)); cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); btns.forEach((b, j) => b.setAttribute('aria-current', j === i ? 'step' : 'false')); };
-  const onFrame = q => {
+  const onFrame = (q, f) => {
+    if (f) {
+      // the reticle shows only while the unit sits well inside the frame (not under the letterbox, the captions or the read-outs)
+      const on = f.vis && q > 0.2 && q < 0.86 && f.x > 90 && f.x < f.W - 90 && f.y > 120 && f.y < f.H - 220;
+      ret.classList.toggle('on', on); if (on) ret.style.transform = `translate(${f.x.toFixed(1)}px,${f.y.toFixed(1)}px)`;
+      ret.classList.toggle('flip', f.x > f.W - 340);
+      ret.classList.toggle('lock', f.scan > 0.98 && f.wash < 0.98);
+      retLbl.textContent = f.scan > 0.98 && f.wash < 0.02 ? 'พบฝุ่นที่แผ่นกรองและคอยล์' : f.wash > 0 && f.wash < 1 ? 'กำลังล้าง' : 'คอยล์เย็น · 12,000 BTU';
+      telA.textContent = Math.round(f.air * 100) + ' %'; telD.textContent = Math.round(f.dirt * 100) + ' %';
+      tel.style.setProperty('--a', f.air.toFixed(3)); tel.style.setProperty('--d', f.dirt.toFixed(3));
+      telS.textContent = f.wash >= 1 ? 'หลังล้าง' : f.wash > 0 ? 'กำลังล้าง' : 'ก่อนล้าง';
+    }
     let i = 0; CHAPTERS.forEach((c, j) => { if (q >= c.p - 0.001) i = j; }); showCap(i);
     btns.forEach((b, j) => { const a = CHAPTERS[j].p, z = (CHAPTERS[j + 1] || { p: 1 }).p; b.style.setProperty('--f', clamp((q - a) / (z - a)).toFixed(3)); });
     // the HUD runs the model clock: dirty unit 0→15 min across chapters 2–3, the cleaned unit 0→15 min in chapter 5 — same window, so the two read side by side

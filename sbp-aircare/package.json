@@ -35,7 +35,8 @@
     "lux:gen": "python3 tools/make-lux.py",
     "concierge": "node tests/concierge.mjs a.html && node tests/concierge.mjs b.html && node tests/concierge.mjs c.html && node tests/concierge.mjs d.html && node tests/concierge.mjs e.html && node tests/concierge.mjs f.html",
     "boot": "node tests/boot.mjs",
-    "profile": "node tests/profile.mjs"
+    "profile": "node tests/profile.mjs",
+    "layout": "node tests/layout.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.0",

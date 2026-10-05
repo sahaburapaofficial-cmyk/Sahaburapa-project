@@ -114,6 +114,8 @@ const SVG = `<svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid slice" ari
   <rect x="440" y="40" width="320" height="320" fill="url(#at-sky)"/>
   <circle class="at-sun" cx="600" cy="200" r="18" fill="#fff4d0"/>
   <circle class="at-moon" cx="660" cy="110" r="10" fill="#e8ecff"/>
+  <polyline class="at-arc" points="${[...Array(27)].map((_, i) => { const u = i / 26; return `${(470 + 250 * u).toFixed(1)},${(300 - 230 * Math.sin(Math.PI * u)).toFixed(1)}`; }).join(' ')}"/>
+  ${[6, 9, 12, 15, 18].map(hh => { const u = (hh - 6) / 12.5, x = 470 + 250 * u, y = 300 - 230 * Math.sin(Math.PI * u); return `<circle class="at-tick" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6"/><text class="at-tickl" x="${x.toFixed(1)}" y="${(y - 9).toFixed(1)}">${String(hh).padStart(2, '0')}</text>`; }).join('')}
   <path class="at-city" d="M440 330V262h22v-30h18v46h16v-62h26v40h14v-24h20v52h18v-80h30v58h12v-36h24v44h20v-56h18v70h22v24h22v36z"/>
   <g class="at-lights"></g>
 </g>
@@ -142,6 +144,12 @@ const SVG = `<svg viewBox="0 0 800 520" preserveAspectRatio="xMidYMid slice" ari
   <path class="at-curtain r" d="M760 40h-46q10 140 -6 300q8 70 -4 120h56z"/>
 </g>
 <rect class="at-tint" width="800" height="520"/>
+<g class="at-hud">
+  <g class="at-rings">${[0, 1, 2].map(i => `<ellipse cx="270" cy="472" rx="210" ry="30" style="animation-delay:${i * 1.3}s"/>`).join('')}</g>
+  <g class="at-tag"><circle cx="650" cy="292" r="4"/><path d="M650 288V258"/><rect x="590" y="232" width="122" height="26" rx="3"/><text class="at-tv-out" x="600" y="250"></text></g>
+  <g class="at-tag in"><circle cx="292" cy="300" r="4"/><path d="M292 296V268"/><rect x="226" y="242" width="132" height="26" rx="3"/><text class="at-tv-in" x="236" y="260"></text></g>
+  <g class="at-tag u"><path d="M370 120H392"/><rect x="392" y="107" width="136" height="26" rx="3"/><text class="at-tv-u" x="402" y="125"></text></g>
+</g>
 </svg>`;
 
 export function mountDayRoom(root) {
@@ -149,7 +157,7 @@ export function mountDayRoom(root) {
   const art = h('div', { class: 'at-art', html: SVG });
   // Rev.30 smooth: dust in the sunlight as composited HTML dots (transform/opacity only) — animating them inside the SVG repainted the whole drawing every frame
   const motes = h('div', { class: 'at-motes-h', 'aria-hidden': 'true' }, [...Array(14)].map((_, i) => h('i', { style: `left:${22 + (i * 37) % 52}%;top:${30 + (i * 23) % 52}%;animation-delay:${((i * 0.53) % 6).toFixed(2)}s;animation-duration:${7 + (i % 4)}s` })));
-  art.append(motes);
+  art.append(motes, h('i', { class: 'at-scanbar', 'aria-hidden': 'true' }));   // Rev.31: a slow holographic scan across the room
   const timeOut = h('b', { class: 'at-clock' }), outT = h('b'), inT = h('b'), status = h('p', { class: 'at-st' });
   const range = h('input', { type: 'range', min: '6', max: '22', step: '0.25', value: '15', 'aria-label': 'เวลาของวัน' });
   const play = h('button', { type: 'button', class: 'at-play', 'aria-pressed': 'false' }, 'เล่นทั้งวัน');
@@ -161,7 +169,8 @@ export function mountDayRoom(root) {
   root.append(h('div', { class: 'at-room' }, art, ctl));
   runWhenVisible(art);   // Rev.30 smooth: curtains, motes, leaves and breeze animate only while the room is on screen
   const svg = $('svg', art), s0 = $('.at-s0', art), s1 = $('.at-s1', art), sun = $('.at-sun', art), moon = $('.at-moon', art), tint = $('.at-tint', art),
-    shaft = $('.at-shaft', art), glow = $('.at-glow', art), breeze = $('.at-breeze', art), lights = $('.at-lights', art), wall = $('.at-wall', art), disp = $('.at-ud', art);
+    shaft = $('.at-shaft', art), glow = $('.at-glow', art), breeze = $('.at-breeze', art), lights = $('.at-lights', art), wall = $('.at-wall', art), disp = $('.at-ud', art),
+    tvOut = $('.at-tv-out', art), tvIn = $('.at-tv-in', art), tvU = $('.at-tv-u', art), rings = $('.at-rings', art);
   for (let i = 0; i < 40; i++) { const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('x', 446 + (i * 53) % 300); r.setAttribute('y', 270 + (i * 29) % 56); r.setAttribute('width', 3); r.setAttribute('height', 3); lights.append(r); }
   let hr = 15, on = true, dirt = 0.05;
   function paint() {
@@ -179,6 +188,10 @@ export function mountDayRoom(root) {
     breeze.style.opacity = on ? (effects(dirt).air * 0.9).toFixed(2) : 0; breeze.style.setProperty('--dur', (on ? 3.2 / effects(dirt).air : 3) + 's');
     const T = roomAt(hr, dirt, on), O = outAt(hr);
     disp.textContent = on ? '25' : '';
+    // Rev.31 HUD tags: the same model numbers as the read-out below, pinned where they happen
+    tvOut.textContent = `นอก ${O.toFixed(1)}°C`; tvIn.textContent = `ในห้อง ${T.toFixed(1)}°C`;
+    tvU.textContent = on ? `ลมผ่านคอยล์ ${Math.round(effects(dirt).air * 100)}%` : 'แอร์ปิด';
+    rings.style.stroke = mix('#3FA9FF', '#FF8A4C', clamp((T - 25) / 6));
     timeOut.textContent = `${String(Math.floor(hr)).padStart(2, '0')}:${String(Math.round((hr % 1) * 60)).padStart(2, '0')}`;
     outT.textContent = O.toFixed(1) + '°C'; inT.textContent = T.toFixed(1) + '°C';
     status.textContent = !on ? 'ปิดแอร์: ห้องร้อนตามอากาศนอกบ้าน' : T <= 25.05 ? 'ตั้ง 25°C · ห้องอยู่ที่อุณหภูมิที่ตั้งไว้' : `ตั้ง 25°C · ช่วงนี้เครื่องทำได้แค่ ${T.toFixed(1)}°C${dirt > 0.5 ? ' (คอยล์สกปรก ลมผ่านได้น้อย)' : ''}`;

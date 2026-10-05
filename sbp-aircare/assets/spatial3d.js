@@ -7,6 +7,9 @@
 //     coil, inverter or fixed speed. The field's shape (jet, stratification) is illustrative; the room temperature and the time to
 //     25 °C are the model's — both labelled "แบบจำลอง"
 //   · hotspots on the unit, the outdoor unit, the window and the bed open short explanations that lead to the right section
+//   · Rev.31 (owner: "D E F ต้องล้ำสมัย technology high tech และเสมือนจริงในโลกอนาคต") holodeck: the room is projected from an
+//     emitter pad on a grid floor — a light cone up to the glass plinth, cyan edges where the walls would be, a scan plane that
+//     rises through the room and lights up the air it passes, dusk light inside. Decoration only: no number comes from it
 import * as THREE from './three.module.min.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
 import { track } from './gl-pool.js';
@@ -47,7 +50,7 @@ const HOTS = [
 function createDiorama(host, labels, o) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(1.75, devicePixelRatio || 1));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.18; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;   // Rev.30 smooth: the room is still — shadows drawn once (and after a quality upgrade)
   const cv = renderer.domElement; cv.setAttribute('aria-hidden', 'true'); cv.style.cssText = 'display:block;width:100%;height:100%;touch-action:pan-y';
   host.append(cv);
@@ -56,10 +59,30 @@ function createDiorama(host, labels, o) {
   const G = track(renderer, host, { scene });
   // the diorama: the room on a glass plinth, a balcony ledge with the outdoor unit
   const dio = new THREE.Group(); scene.add(dio);
-  const room = buildLuxRoom(dio, { mood: 'day', facade: false, open: true, W, D, H: HH });
-  const plinthM = new THREE.MeshPhysicalMaterial({ color: 0xdfe9ff, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.5, clearcoat: 1, depthWrite: false });   // Rev.30: no transmission (it re-rendered the whole scene every frame)
+  const room = buildLuxRoom(dio, { mood: 'dusk', facade: false, open: true, W, D, H: HH });
+  const plinthM = new THREE.MeshPhysicalMaterial({ color: 0x0c1838, roughness: 0.12, metalness: 0.2, transparent: true, opacity: 0.72, clearcoat: 1, depthWrite: false, emissive: 0x0a1a44, emissiveIntensity: 0.6 });   // Rev.30: no transmission (it re-rendered the whole scene every frame)
   const plinth = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.75, 0.3, 96), plinthM); plinth.position.y = -0.16; dio.add(plinth);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.68, 0.012, 8, 160), new THREE.MeshBasicMaterial({ color: 0x8fe9ff, transparent: true, opacity: 0.8 })); ring.rotation.x = Math.PI / 2; ring.position.y = -0.005; dio.add(ring);
+  const ADD = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false };
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.68, 0.014, 8, 160), new THREE.MeshBasicMaterial({ color: 0x4df3ff, opacity: 0.8, ...ADD })); ring.rotation.x = Math.PI / 2; ring.position.y = -0.005; dio.add(ring);
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(3.76, 0.01, 8, 160), new THREE.MeshBasicMaterial({ color: 0x9a8cff, opacity: 0.6, ...ADD })); ring2.rotation.x = Math.PI / 2; ring2.position.y = -0.31; dio.add(ring2);
+  const polar = new THREE.PolarGridHelper(3.56, 24, 5, 96, 0x2c5fa8, 0x1b2f63); polar.position.y = -0.004; polar.material.transparent = true; polar.material.opacity = 0.55; polar.material.depthWrite = false; dio.add(polar);
+  // Rev.31 holodeck: grid floor + emitter pad + light cone + room edges + scan plane (all additive, no shadows, no extra pass)
+  scene.fog = new THREE.FogExp2(0x050816, 0.03);
+  const FLOOR = -3.3;
+  const grid = new THREE.GridHelper(48, 96, 0x4df3ff, 0x1f3478); grid.material.transparent = true; grid.material.opacity = 0.42; grid.material.depthWrite = false; grid.position.y = FLOOR; scene.add(grid);
+  const pad = new THREE.Mesh(new THREE.CircleGeometry(1.5, 64), new THREE.MeshBasicMaterial({ map: glowTex('rgba(77,243,255,1)', 'rgba(154,140,255,.35)'), opacity: 0.9, ...ADD })); pad.rotation.x = -Math.PI / 2; pad.position.y = FLOOR + 0.01; scene.add(pad);
+  const padRing = new THREE.Mesh(new THREE.RingGeometry(0.9, 0.95, 96), new THREE.MeshBasicMaterial({ color: 0x4df3ff, opacity: 0.85, side: THREE.DoubleSide, ...ADD })); padRing.rotation.x = -Math.PI / 2; padRing.position.y = FLOOR + 0.012; scene.add(padRing);
+  const beamTop = -0.9 - 0.31, beamH = beamTop - FLOOR, streak = beamTex();
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(3.55, 0.92, beamH, 72, 1, true), new THREE.MeshBasicMaterial({ map: streak, alphaMap: fadeTex(), color: 0x7fe9ff, opacity: 0.42, side: THREE.DoubleSide, ...ADD }));
+  beam.position.y = FLOOR + beamH / 2; scene.add(beam);
+  const edgeM = new THREE.LineBasicMaterial({ color: 0x4df3ff, opacity: 0.55, ...ADD });
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(W + 0.04, HH, D + 0.04)), edgeM); edges.position.y = HH / 2; dio.add(edges);
+  // corner ticks at the top of the room — the "measured" frame of the hologram
+  const tickPts = []; [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => { const x = sx * (W / 2 + 0.02), z = sz * (D / 2 + 0.02); tickPts.push(x, HH + 0.02, z, x - sx * 0.45, HH + 0.02, z, x, HH + 0.02, z, x, HH + 0.02, z - sz * 0.45, x, HH + 0.02, z, x, HH - 0.43, z); });
+  const ticks = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(tickPts, 3)), new THREE.LineBasicMaterial({ color: 0xc9fbff, opacity: 0.95, ...ADD })); dio.add(ticks);
+  const scan = new THREE.Group(); dio.add(scan);
+  const scanPlane = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshBasicMaterial({ color: 0x4df3ff, opacity: 0.07, side: THREE.DoubleSide, ...ADD })); scanPlane.rotation.x = -Math.PI / 2; scan.add(scanPlane);
+  const scanEdge = new THREE.LineLoop(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([-W / 2, 0, -D / 2, W / 2, 0, -D / 2, W / 2, 0, D / 2, -W / 2, 0, D / 2], 3)), new THREE.LineBasicMaterial({ color: 0x9ff6ff, opacity: 0.9, ...ADD })); scan.add(scanEdge);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.12, 1.0), new THREE.MeshStandardMaterial({ color: 0xc9c4bb, roughness: 0.9 })); slab.position.set(W / 2 - 0.75, 0.0, D / 2 + 0.75); dio.add(slab);
   const OU = buildOutdoor(materialSet('studio'), { logo: true }); const ou = new THREE.Group(); ou.add(OU.root); OU.root.visible = true;
   ou.position.set(W / 2 - 0.75, 0.36, D / 2 + 0.75); ou.rotation.y = -0.35; dio.add(ou);
@@ -69,7 +92,7 @@ function createDiorama(host, labels, o) {
   const fp = new Float32Array(N * 3), fc = new Float32Array(N * 3), cell = [];
   for (let i = 0; i < NX; i++) for (let j = 0; j < NY; j++) for (let k = 0; k < NZ; k++) { const x = -W / 2 + (i + 0.5) * W / NX, y = 0.15 + (j + 0.5) * (HH - 0.3) / NY, z = -D / 2 + (k + 0.5) * D / NZ; cell.push([x, y, z, Math.random() * 6.28]); }
   const fgeo = new THREE.BufferGeometry(); fgeo.setAttribute('position', new THREE.BufferAttribute(fp, 3)); fgeo.setAttribute('color', new THREE.BufferAttribute(fc, 3));
-  const fieldM = new THREE.PointsMaterial({ size: 0.2, vertexColors: true, transparent: true, opacity: 0.62, depthWrite: false, sizeAttenuation: true, map: dotTex(), alphaTest: 0.02, toneMapped: false });
+  const fieldM = new THREE.PointsMaterial({ size: 0.19, vertexColors: true, transparent: true, opacity: 0.62, depthWrite: false, sizeAttenuation: true, map: dotTex(), alphaTest: 0.02, toneMapped: false });   // Rev.31: brighter where the scan plane passes (paintField)
   const field = new THREE.Points(fgeo, fieldM); dio.add(field);
   scene.updateMatrixWorld(true);
   const vent = room.vent(new THREE.Vector3()); dio.worldToLocal(vent);
@@ -79,7 +102,7 @@ function createDiorama(host, labels, o) {
   const orb = { th: -0.62, ph: 1.02, r: 12.5, tth: -0.62, user: 0 };
   let Wd = 1, Hd = 1, t = 0, last = performance.now(), visible = true, raf = 0, lastShadow = -9;
   let sw = 0, sh = 0, spr = 0;   // Rev.30 smooth: GL buffers are reallocated only when the size really changed
-  const size = () => { const r = host.getBoundingClientRect(); Wd = Math.max(1, Math.round(r.width)); Hd = Math.max(1, Math.round(r.height)); if (Wd === sw && Hd === sh && renderer.getPixelRatio() === spr) return; sw = Wd; sh = Hd; spr = renderer.getPixelRatio(); renderer.setSize(Wd, Hd, false); cam.aspect = Wd / Hd; orb.r = Wd / Hd < 0.9 ? 17 : Wd / Hd < 1.3 ? 14.5 : 12.5; cam.updateProjectionMatrix(); };
+  const size = () => { const r = host.getBoundingClientRect(); Wd = Math.max(1, Math.round(r.width)); Hd = Math.max(1, Math.round(r.height)); if (Wd === sw && Hd === sh && renderer.getPixelRatio() === spr) return; sw = Wd; sh = Hd; spr = renderer.getPixelRatio(); renderer.setSize(Wd, Hd, false); cam.aspect = Wd / Hd; orb.r = Wd / Hd < 0.9 ? 18.5 : Wd / Hd < 1.3 ? 15.5 : 13.6; cam.updateProjectionMatrix(); };
   size(); const ro = new ResizeObserver(size); ro.observe(host);
   const io = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible) loop(); }, { rootMargin: '10% 0px' }); io.observe(host);
   // drag to turn (horizontal on touch so the page still scrolls)
@@ -88,6 +111,7 @@ function createDiorama(host, labels, o) {
   addEventListener('pointerup', () => { drag = null; });
   addEventListener('pointermove', e => { if (!drag) return; orb.tth = clamp(drag.th - (e.clientX - drag.x) * 0.006, -1.45, 0.3); if (e.pointerType === 'mouse') orb.ph = clamp(drag.ph - (e.clientY - drag.y) * 0.004, 0.62, 1.32); orb.user = performance.now(); });
   const v = new THREE.Vector3(), col = [0, 0, 0];
+  let scanY = -9;   // height of the scan plane (room metres); the air it passes glows brighter
   function paintField(S) {
     const Troom = S.T, run = S.running, air = effects(S.dirt).air, sup = run ? Troom - 11 * air : Troom;
     for (let n = 0; n < N; n++) {
@@ -102,7 +126,8 @@ function createDiorama(host, labels, o) {
         }
       }
       tempColor(T, col);
-      fc[n * 3] = col[0]; fc[n * 3 + 1] = col[1]; fc[n * 3 + 2] = col[2];
+      const glow = 0.6 + 1.5 * Math.exp(-((y - scanY) ** 2) / 0.02);
+      fc[n * 3] = col[0] * glow; fc[n * 3 + 1] = col[1] * glow; fc[n * 3 + 2] = col[2] * glow;
       const jitter = RM() ? 0 : 0.03;
       fp[n * 3] = x + Math.sin(t * 0.7 + ph) * jitter; fp[n * 3 + 1] = y + Math.cos(t * 0.5 + ph) * jitter; fp[n * 3 + 2] = z + (run ? ((t * 0.25 * air + ph) % 1) * 0.06 : 0);
     }
@@ -114,9 +139,14 @@ function createDiorama(host, labels, o) {
     orb.th += (orb.tth - orb.th) * Math.min(1, dt * 6);
     cam.position.set(Math.sin(orb.th) * Math.sin(orb.ph) * orb.r, Math.cos(orb.ph) * orb.r + 0.3, Math.cos(orb.th) * Math.sin(orb.ph) * orb.r);
     const bob = RM() ? 0 : Math.sin(t * 0.6) * 0.04;   // the diorama floats — the camera breathes instead of moving the room, so its shadows stay valid
-    cam.position.y -= bob; cam.lookAt(0.2, 0.1 - bob, 0.3);
+    cam.position.y -= bob; cam.lookAt(0.2, -0.45 - bob, 0.3);   // Rev.31: a little lower so the light cone under the plinth is in frame
     if (t - lastShadow > 3) { renderer.shadowMap.needsUpdate = true; lastShadow = t; }
     ring.material.opacity = 0.55 + Math.sin(t * 1.4) * 0.2;
+    // holodeck motion: the scan plane rises through the room every 6 s; the light cone flows upward; the pad breathes
+    const sc = RM() ? 0.62 : (t % 6) / 4.2; scanY = sc <= 1 ? sc * HH : -9; scan.visible = sc <= 1; scan.position.y = Math.max(0.02, scanY);
+    scanPlane.material.opacity = 0.07 * Math.sin(Math.min(1, sc) * Math.PI);
+    if (!RM()) { streak.offset.y = -t * 0.12; padRing.scale.setScalar(1 + Math.sin(t * 1.6) * 0.04); }
+    edgeM.opacity = 0.45 + Math.sin(t * 0.9) * 0.1;
     const S = o.state(); room.setDirt(S.dirt);
     OU.parts && OU.parts['o-fan'] && S.running && (OU.parts['o-fan'].rotation.z -= dt * 14);
     paintField(S);
@@ -143,6 +173,23 @@ function createDiorama(host, labels, o) {
   const perf = dt => { if (dt <= 0) return; slow = dt > 0.034 ? slow + dt : Math.max(0, slow - dt * 0.5); if (slow > 2 && tier < 2) { tier++; slow = 0; renderer.setPixelRatio(tier === 1 ? 1 : 0.75); size(); } };
   loop();
   return { dispose() { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); G.release(); renderer.dispose(); } };
+}
+// Rev.31 holodeck textures — a soft radial glow, upward light streaks, and a fade (bright at the emitter, gone at the plinth)
+function glowTex(a, b) {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, a); gr.addColorStop(0.35, b); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c);
+}
+function beamTex() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#1a3a66'; g.fillRect(0, 0, 256, 128);
+  for (let i = 0; i < 70; i++) { const x = Math.random() * 256, w = 0.6 + Math.random() * 1.8, y = Math.random() * 128, len = 20 + Math.random() * 70; const gr = g.createLinearGradient(0, y, 0, y + len); gr.addColorStop(0, 'rgba(160,250,255,0)'); gr.addColorStop(0.5, `rgba(160,250,255,${(0.35 + Math.random() * 0.6).toFixed(2)})`); gr.addColorStop(1, 'rgba(160,250,255,0)'); g.fillStyle = gr; g.fillRect(x, y, w, len); g.fillRect(x, y - 128, w, len); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 1); return t;
+}
+function fadeTex() {
+  const c = document.createElement('canvas'); c.width = 4; c.height = 128; const g = c.getContext('2d');
+  const gr = g.createLinearGradient(0, 128, 0, 0); gr.addColorStop(0, '#fff'); gr.addColorStop(0.55, '#666'); gr.addColorStop(0.92, '#111'); gr.addColorStop(1, '#000');
+  g.fillStyle = gr; g.fillRect(0, 0, 4, 128); return new THREE.CanvasTexture(c);
 }
 function dotTex() {
   const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');

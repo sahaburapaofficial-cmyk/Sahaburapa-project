@@ -201,7 +201,7 @@ export function createThrowSim(container, opts = {}) {
   // unit display chip (what the remote just set)
   const disp = h('div', { class: 'tsim-disp', 'aria-hidden': 'true' }); container.append(disp);
   const MODE_TH = { cool: 'เย็น', dry: 'แห้ง', fan: 'พัดลม', auto: 'อัตโน' };
-  function paintDisp(ping) { disp.className = 'tsim-disp' + (C.power ? '' : ' off'); disp.textContent = C.power ? `${MODE_TH[C.mode]} ${C.mode === 'fan' ? '' : C.temp + '°'}`.trim() : 'ปิด'; if (ping && !RM()) { disp.classList.remove('ping'); void disp.offsetWidth; disp.classList.add('ping'); } }
+  function paintDisp(ping) { disp.className = 'tsim-disp' + (C.power ? '' : ' off'); disp.textContent = C.power ? `${MODE_TH[C.mode]} ${C.mode === 'fan' ? '' : C.temp + '°'}`.trim() : 'ปิด'; if (ping && !RM()) { disp.classList.remove('tsim-ping'); void disp.offsetWidth; disp.classList.add('tsim-ping'); } }   // Rev.31: was .ping — clashed with A's status-dot class and shrank the display to a 9 px dot
   paintDisp(false);
   requestAnimationFrame(frame);
   build('wall');

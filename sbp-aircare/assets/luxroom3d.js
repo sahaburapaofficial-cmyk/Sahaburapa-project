@@ -119,7 +119,7 @@ export function buildLuxRoom(scene, o = {}) {
   glass.rotation.y = -Math.PI / 2; glass.position.set(W / 2 - 0.01, wy + wh / 2, wz); root.add(glass);
   const frameM = S(0x2c2e31, { roughness: 0.4, metalness: 0.6 });
   [[0.04, wh + 0.08, 0, -ww / 2], [0.04, wh + 0.08, 0, ww / 2], [0.04, 0.04, -wh / 2, 0], [0.04, 0.04, wh / 2, 0]].forEach(([a, b, dy, dz], i) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.06, i < 2 ? b : 0.04, i < 2 ? 0.04 : ww), frameM); m.position.set(W / 2 - 0.02, wy + wh / 2 + dy, wz + dz); right.add(m); });
-  const curtain = F.curtain(K, 0.7, H - 0.1); curtain.rotation.y = -Math.PI / 2; curtain.position.set(W / 2 - 0.12, (H - 0.1) / 2, wz - ww / 2 - 0.3); root.add(curtain);
+  const curtain = F.curtain(K, 0.7, H - 0.1); curtain.rotation.y = -Math.PI / 2; curtain.position.set(W / 2 - 0.12, 0.02, wz - ww / 2 - 0.3); root.add(curtain);   // Rev.31 fix: F.curtain() already stands on its own origin (it was lifted half a room and poked through the ceiling)
   // left wall (solid; hidden by the dollhouse cut when the camera swings left)
   const left = new THREE.Mesh(new THREE.PlaneGeometry(D, H), plasterAlt); left.rotation.y = Math.PI / 2; left.position.set(-W / 2, H / 2, 0); if (!o.open) root.add(left);
   // facade with a floor-to-ceiling opening (the cinema camera flies in through it)

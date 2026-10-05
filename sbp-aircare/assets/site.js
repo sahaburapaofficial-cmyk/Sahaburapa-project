@@ -331,9 +331,9 @@ export function mountSite(cfg) {
     foot.innerHTML = '';
     foot.append(h('div', { class: 'wrap sx-foot' },
       h('div', {}, h('b', { class: 'sx-fb-brand' }, logoImg('sbp', ''), COMPANY.brand), h('p', {}, COMPANY.th), h('p', {}, COMPANY.addr), COMPANY.hours ? h('p', {}, 'เวลาทำการ ', COMPANY.hours) : null, h('p', {}, 'โทร ', h('a', { href: COMPANY.telHref }, COMPANY.tel), ' · ', h('span', { class: 'sx-sel' }, COMPANY.email)), h('p', {}, 'LINE ', h('a', { href: COMPANY.lineUrl, target: '_blank', rel: 'noopener' }, COMPANY.line), ' · เลขผู้เสียภาษี ', COMPANY.taxId)),
-      h('div', {}, h('h4', {}, 'บริการและสินค้า'), h('ul', {}, live.filter(v => v !== 'home').map(v => h('li', {}, h('a', { href: '#' + v }, VIEWS[v].th))))),
-      h('div', {}, h('h4', {}, 'มาตรฐานบริการ'), h('ul', {}, h('li', {}, h('a', { href: '#standards' }, 'มาตรฐานงานล้างและติดตั้ง')), h('li', {}, h('a', { href: '#symptoms' }, 'เช็กอาการแอร์เสีย')), h('li', {}, h('a', { href: '#area' }, 'พื้นที่ให้บริการและค่าเดินทาง')), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))), h('p', {}, 'ราคามาตรฐานตาม Pricebook 2569 ก่อน VAT ยืนยันในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
-      h('div', {}, h('h4', {}, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: COMPANY.fbUrl, target: '_blank', rel: 'noopener' }, 'Facebook'))))));
+      h('div', {}, h('h2', { class: 'sx-fh' }, 'บริการและสินค้า'), h('ul', {}, live.filter(v => v !== 'home').map(v => h('li', {}, h('a', { href: '#' + v }, VIEWS[v].th))))),
+      h('div', {}, h('h2', { class: 'sx-fh' }, 'มาตรฐานบริการ'), h('ul', {}, h('li', {}, h('a', { href: '#standards' }, 'มาตรฐานงานล้างและติดตั้ง')), h('li', {}, h('a', { href: '#symptoms' }, 'เช็กอาการแอร์เสีย')), h('li', {}, h('a', { href: '#area' }, 'พื้นที่ให้บริการและค่าเดินทาง')), h('li', {}, h('a', { href: '#faq' }, 'คำถามที่พบบ่อย'))), h('p', {}, 'ราคามาตรฐานตาม Pricebook 2569 ก่อน VAT ยืนยันในใบเสนอราคาอย่างเป็นทางการ'), fbBtn()),
+      h('div', {}, h('h2', { class: 'sx-fh' }, 'บริษัท'), h('ul', {}, h('li', {}, h('a', { href: '#about' }, 'เกี่ยวกับเรา')), h('li', {}, h('a', { href: COMPANY.webUrl, target: '_blank', rel: 'noopener' }, COMPANY.web)), h('li', {}, h('a', { href: COMPANY.fbUrl, target: '_blank', rel: 'noopener' }, 'Facebook'))))));
   }
   // Rev.11: business facts for search engines (schema.org), built from COMPANY so the page and the data never disagree
   try {
