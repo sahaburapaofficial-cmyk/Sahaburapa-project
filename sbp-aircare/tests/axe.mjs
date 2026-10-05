@@ -18,6 +18,8 @@ for (const v of views) {
   await p.evaluate(v => { location.hash = '#' + v; }, v); await p.waitForTimeout(1500);
   await p.evaluate(async () => { const H = document.body.scrollHeight; for (let y = 0; y < H; y += innerHeight * 0.8) { scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); } scrollTo(0, 0); });
   await p.waitForTimeout(1200);
+  // Rev.33: let finite animations (view fade-in, reveals) end first — a busy machine once caught text mid-fade as low contrast
+  await p.evaluate(() => Promise.race([Promise.all(document.getAnimations().filter(a => a.playState === 'running' && isFinite(a.effect?.getComputedTiming().endTime)).map(a => a.finished.catch(() => {}))), new Promise(r => setTimeout(r, 4000))]));
   const r = await p.evaluate(async () => {
     const res = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] }, resultTypes: ['violations'] });
     return res.violations.map(x => ({ id: x.id, impact: x.impact, help: x.help, n: x.nodes.length, nodes: x.nodes.slice(0, 4).map(n => (n.target || []).join(' ') + (n.any && n.any[0] && n.any[0].message ? ' — ' + n.any[0].message.slice(0, 140) : '')) }));

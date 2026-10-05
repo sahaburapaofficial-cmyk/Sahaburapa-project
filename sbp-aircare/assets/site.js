@@ -73,6 +73,7 @@ const svgI = d => h('span', { class: 'sx-ico', 'aria-hidden': 'true', html: `<sv
  */
 export function mountSite(cfg) {
   const { variant = 'A', views, order = ['home', 'shop', 'service', 'business', 'knowledge', 'contact'], hooks = {}, openCart = () => {}, navFmt = (i, th) => th, labels = {} } = cfg;
+  document.documentElement.dataset.sxVariant = variant;   // ★Rev.33 the quotation / ticket names the design it came from (single-file builds have no a.html in the path)
   document.documentElement.classList.add('sx-on');
   const L = id => labels[id] || SEC_TH[id] || id;
   /* ---- 1 · which view each section belongs to ---- */
@@ -199,6 +200,10 @@ export function mountSite(cfg) {
     here.hidden = here.dataset.sx !== cur;
   }
   function markDone(i) { if (!J || J.done.includes(i)) return; J.done.push(i); saveJ(); paintJourney(); }
+  // ★Rev.33 the request reached the team (quotation / job ticket — commerce.js, or the contact form): the journey is complete —
+  // the strip used to read "ทำแล้ว 0 จาก 3 ขั้น" right after a booking was sent, and still pointed at the first step
+  const finishJourney = () => { if (J) stepsOf(J.k).forEach(s => markDone(s.i)); };
+  document.addEventListener('sbp:sent', finishJourney);
   function startJourney(k) {
     if (!JOURNEYS[k]) return; J = { k, done: [] }; saveJ();
     hooks[k] && hooks[k]();
@@ -298,7 +303,7 @@ export function mountSite(cfg) {
       const t = cart.totals(), items = cart.items.length ? ['', `รายการในใบเสนอราคาเบื้องต้น (${cart.items.length} รายการ · ยอดประมาณการ ${Math.round(t.inc).toLocaleString('th-TH')} บาท รวม VAT)`, ...cart.items.map(i => `• ${i.name} × ${i.qty}`)] : [];
       const hp = qf.querySelector('[name="website"]')?.value || '';
       deliver(out, 'contact', { ref, variant, fields, hp, title: 'คำขอให้ทีมติดต่อกลับ', text: [`คำขอจากเว็บไซต์ SBP AirCare (แบบ ${variant}) · เลขอ้างอิง ${ref}`, ...rows, ...items].join('\n'), subject: 'คำขอให้ทีมติดต่อกลับ' });
-      out.hidden = false; if (J) { const q = stepsOf(J.k).find(s => s.id === 'quote'); q && markDone(q.i); }
+      out.hidden = false; finishJourney();
       requestAnimationFrame(() => ORIG.call(out, { behavior: RM() ? 'auto' : 'smooth', block: 'nearest' }));
     });
   }

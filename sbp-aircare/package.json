@@ -38,7 +38,8 @@
     "profile": "node tests/profile.mjs",
     "layout": "node tests/layout.mjs",
     "axe": "node tests/axe.mjs",
-    "sound": "node tests/sound.mjs d.html && node tests/sound.mjs e.html && node tests/sound.mjs f.html"
+    "sound": "node tests/sound.mjs d.html && node tests/sound.mjs e.html && node tests/sound.mjs f.html",
+    "workflow": "node tests/workflow.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.0",

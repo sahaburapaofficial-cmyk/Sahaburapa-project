@@ -46,6 +46,9 @@ export function syncRush(date) {
   if (need !== has) cart.save();
 }
 
+// ★Rev.33 which design the request came from (site.js marks the page; D/E/F and single-file builds used to send none)
+const pageVariant = () => document.documentElement.dataset.sxVariant || ((location.pathname.match(/([a-f])\.html/) || [])[1] || '').toUpperCase();
+
 // Rev.16.1: after a job ticket is sent — keep the reference, a tentative calendar entry, chat with the team
 function afterTools(s) {
   const d = cart.prefDate, slot = cart.prefSlot || '';
@@ -157,6 +160,22 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
   dr.addEventListener('click', e => { if (e.target === dr) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !dr.hidden) close(); });
   let sent = null;
+  // ★Rev.33 (workflow check): once a request has gone, adding anything else from the site starts the next one — the panel used to keep
+  // showing the old confirmation and hid what was just added. Lines that reached the team leave the list (never sent twice) and the
+  // sent ticket's answers / photos / note / date stay with it (name and phone are kept, as "เริ่มใบใหม่" does); when it did not reach
+  // the team nothing is dropped — it goes with the new lines. A note names the earlier request. Waits while a send is in flight.
+  let prev = null;
+  const grewSince = s => cart.items.some(i => !s.snap.has(i.id) || i.qty > s.snap.get(i.id));
+  function moveOn() {
+    if (!sent || !sent.snap || sent.state === 'pending' || !grewSince(sent)) return false;
+    const s = sent; sent = null; prev = s;
+    if (s.state === 'ok') { cart.items = cart.items.flatMap(i => !s.snap.has(i.id) ? [i] : i.qty > s.snap.get(i.id) ? [{ ...i, qty: i.qty - s.snap.get(i.id) }] : []); cart.clearDraft(); cart.save(); }
+    return true;
+  }
+  // a request handed to the team (sent — or the summary box, when this page cannot send) completes the visitor's journey (site.js)
+  const handed = s => { try { document.dispatchEvent(new CustomEvent('sbp:sent', { detail: { ref: s.ref, job: s.isJob, ok: s.state === 'ok' } })); } catch (e) { /* journey strip only */ } };
+  const settle = s => { if (sent === s && moveOn() && !dr.hidden) render(); };
+  const prevNote = s => h('p', { class: 's-note s-prev' }, `${s.isJob ? 'ใบจองงาน' : 'คำขอใบเสนอราคา'} เลขอ้างอิง ${s.ref} ${s.state === 'ok' ? 'ส่งถึงทีมแล้ว · รายการด้านล่างเป็นคำขอใหม่' : 'ยังไม่ได้ส่งถึงทีมจากหน้านี้ · รายการเดิมยังอยู่ในใบนี้ ส่งรวมกับรายการใหม่ได้'}`);
   const quoteText = () => { const t = cart.totals(); return ['ใบเสนอราคาเบื้องต้น SBP AirCare', ...cart.items.map(i => `• ${i.name}${i.detail ? ' (' + i.detail + ')' : ''} × ${i.qty}${i.unitEx == null ? ' — ประเมินหน้างาน' : ' — ' + baht(i.unitEx * i.qty)}`), `พื้นที่: ${cart.zoneInput || '-'}${cart.zone && cart.zone.km != null ? ` (ระยะถนนประมาณ ${cart.zone.km} กม.)` : ''}`, t.travel ? `${t.travelLabel}: ${baht(t.travel)}` : null, t.visit ? `${t.visitLabel}: ${baht(t.visit)}` : null, `รวมทั้งสิ้น ${baht(t.inc)} (รวม VAT)`].filter(x => x != null).join('\n'); };
   function render() {
     if (!sent) syncRush(cart.prefDate);   // Rev.16.1: the rush line follows the date and disappears with the last visit line
@@ -166,38 +185,39 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     const body = h('div', { class: 's-cart-b' }); panel.append(body);
     if (sent) {
       // Rev.10: send to the team once (submit.js); without an endpoint (or inside an artifact) this is the honest hand-off box
-      if (!sent.box) { sent.box = h('div'); const variant = ((location.pathname.match(/([abc])\.html/) || [])[1] || '').toUpperCase();
+      if (!sent.box) { sent.box = h('div'); const variant = pageVariant();
         // ★Rev.21.1 (review BUG-03): the reference the team's sheet gives back replaces ours everywhere — summary, copy, LINE, calendar
         const finalRef = (s, r) => { if (!r || r === s.ref) return; s.text = withRef(s.text, s.ref, r); s.ref = r; if (sent === s) render(); };
-        const viaMail = () => { const s1 = sent; return deliver(s1.box, s1.isJob ? 'booking' : 'quote', { ref: s1.ref, variant: ((location.pathname.match(/([abc])\.html/) || [])[1] || '').toUpperCase(), fields: s1.fields, hp: s1.hp, text: s1.text, title: s1.isJob ? 'ใบจองงานของคุณ' : 'ใบเสนอราคาเบื้องต้นของคุณ', subject: s1.isJob ? 'ใบจองงาน SBP AirCare' : 'ขอใบเสนอราคา SBP AirCare', onRef: r => finalRef(s1, r) }).then(() => { if (sent === s1 && s1.isJob) s1.box.append(photoLine(s1.ref, s1.photos.length)); }); };
+        const viaMail = () => { const s1 = sent; s1.state = 'pending'; return deliver(s1.box, s1.isJob ? 'booking' : 'quote', { ref: s1.ref, variant: pageVariant(), fields: s1.fields, hp: s1.hp, text: s1.text, title: s1.isJob ? 'ใบจองงานของคุณ' : 'ใบเสนอราคาเบื้องต้นของคุณ', subject: s1.isJob ? 'ใบจองงาน SBP AirCare' : 'ขอใบเสนอราคา SBP AirCare', onRef: r => finalRef(s1, r) }).then(ok => { s1.state = ok ? 'ok' : 'fail'; if (ok || !canSend()) handed(s1); if (sent === s1 && s1.isJob) s1.box.append(photoLine(s1.ref, s1.photos.length)); settle(s1); }); };
         // Rev.16: the job ticket goes to the back office with its photos when it is connected; otherwise (or if it fails) the e-mail path
         if (sent.isJob && canReach()) {
           const s0 = sent;
           // ★Rev.21.1: "ลองส่งอีกครั้ง" sends the SAME request id — if the first try did reach the sheet (time-out after saving),
           // the back office answers with that ticket instead of making a second one (review AT-12)
           const go = () => {
-            s0.box.innerHTML = '';
+            s0.state = 'pending'; s0.box.innerHTML = '';
             s0.box.append(h('div', { class: 's-hand', role: 'status' }, h('p', {}, `กำลังส่งใบจองงาน${s0.photos.length ? ` พร้อมรูป ${s0.photos.length} รูป` : ''} · เลขอ้างอิง ${s0.ref}`)));
             sendTicket({ ref: s0.ref, rid: s0.rid, variant, page: location.pathname + location.hash, fields: s0.fields, text: s0.text, hp: s0.hp, photos: s0.photos, scope: (cart.draft.scope || []).map(x => ({ job: x.k, lines: x.r.lines, est: x.r.est })), answers: cart.draft.ans })
-              .then(r => { if (sent !== s0) return; s0.box.innerHTML = '';
+              .then(r => { s0.state = r.ok ? 'ok' : 'fail'; if (r.ok) handed(s0); if (sent !== s0) return; s0.box.innerHTML = '';
                 if (!r.ok) {   // Rev.19: when every form already goes to the back office, never post the same ticket there under a new id — hand it over or retry
                   if (ENDPOINT !== BACKEND) { viaMail(); return; }
                   s0.box.append(handoffBox({ ref: s0.ref, title: 'ใบจองงานของคุณ', text: s0.text, subject: 'ใบจองงาน SBP AirCare', note: 'ส่งอัตโนมัติไม่สำเร็จ (การเชื่อมต่อขัดข้อง) — ยังไม่ได้รับการยืนยันจากระบบ กดลองส่งอีกครั้ง (ไม่เกิดใบจองซ้ำ) หรือส่งสรุปนี้ทาง LINE / อีเมล / โทรแจ้งเลขอ้างอิง' }),
-                    h('button', { type: 'button', class: 's-btn primary s-retry', onclick: go }, 'ลองส่งอีกครั้ง'), photoLine(s0.ref, s0.photos.length)); return; }
+                    h('button', { type: 'button', class: 's-btn primary s-retry', onclick: go }, 'ลองส่งอีกครั้ง'), photoLine(s0.ref, s0.photos.length)); settle(s0); return; }
                 if (r.ref && r.ref !== s0.ref) { s0.text = withRef(s0.text, s0.ref, r.ref); s0.ref = r.ref; }   // review BUG-03: one number everywhere
                 s0.box.append(h('div', { class: 's-hand s-hand-ok', role: 'status' }, h('p', { class: 's-hand-b' }, 'ส่งถึงทีมแล้ว'), h('h3', {}, 'ใบจองงานของคุณ', h('small', {}, ` · เลขอ้างอิง ${s0.ref}`)),
                   h('p', {}, `ทีมได้รับรายละเอียด${r.photos ? `และรูป ${r.photos} รูป` : ''}แล้ว จะตรวจขอบเขตงาน แจ้งราคาส่วนเพิ่ม (ถ้ามี) และยืนยันคิวกับคุณก่อนวันนัด · ตรวจสถานะได้ด้วยเลขอ้างอิงในหน้าติดต่อเรา`),
                   h('textarea', { class: 's-hand-t', readonly: true, rows: 8, 'aria-label': 'สรุปใบจองงาน' }, s0.text)));
                 if ((r.photos || 0) < s0.photos.length) s0.box.append(photoLine(s0.ref, s0.photos.length - (r.photos || 0)));   // review BUG-06: say which photos did not arrive
-                render(); });   // the reference tools below follow the final number
+                moveOn(); render(); });   // the reference tools below follow the final number (or the next request, if one was started meanwhile)
           };
           go();
         } else viaMail(); }
       body.append(sent.box,
-        h('div', { class: 's-hand-act' }, h('button', { type: 'button', class: 's-btn ghost', onclick: () => { sent = null; render(); } }, 'กลับไปแก้รายการ'), h('button', { type: 'button', class: 's-btn ghost', onclick: () => { sent = null; cart.clear(); cart.clearDraft(); render(); } }, 'เริ่มใบใหม่')),
+        h('div', { class: 's-hand-act' }, h('button', { type: 'button', class: 's-btn ghost', onclick: () => { sent = null; render(); } }, 'กลับไปแก้รายการ'), h('button', { type: 'button', class: 's-btn ghost', onclick: () => { sent = null; prev = null; cart.clear(); cart.clearDraft(); render(); } }, 'เริ่มใบใหม่')),
         sent.isJob ? afterTools(sent) : null);
       return;
     }
+    if (!cart.items.length) prev = null; else if (prev) body.append(prevNote(prev));
     if (!cart.items.length) { body.append(h('div', { class: 's-empty' }, h('p', {}, 'ยังไม่มีรายการ'), h('p', { class: 's-note' }, 'เลือกรุ่นแอร์ในหน้าสินค้า หรือกด "เพิ่ม" ในตารางค่าบริการ'), h('button', { type: 'button', class: 's-btn', onclick: () => { close(); ($('#prices') || $('#catalog'))?.scrollIntoView({ behavior: 'smooth' }); } }, 'ไปที่ค่าบริการ'))); return; }
     const J0 = jobsIn(cart.items);
     if (J0.clean || J0.install || J0.repair) body.append(h('p', { class: 's-step' }, h('span', {}, '1'), 'รายการและราคา', h('small', {}, 'ราคาต่อรายการก่อน VAT')));
@@ -288,7 +308,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
       }
       const t = cart.totals(), sc = (D.scope || []).flatMap(x => x.r.lines), scEx = (D.scope || []).reduce((n, x) => n + x.r.est, 0);
       const tk = isJob ? ticketText(D) : '', ti = tiOf(D);   // Rev.26: the trade-in record travels with quotes and bookings
-      sent = { ref, rid: newRid(), isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
+      prev = null; sent = { state: 'pending', snap: new Map(cart.items.map(i => [i.id, i.qty])), ref, rid: newRid(), isJob, hp: f.querySelector('[name="website"]')?.value || '', photos: isJob ? D.photos.slice() : [],
         fields: { 'ชื่อ / บริษัท': v('s-q-name'), 'โทร': v('s-q-tel'), 'วันที่สะดวก': cart.prefDate || '', 'ช่วงเวลา': visit.length ? cart.prefSlot || '' : '', 'ใบกำกับภาษีในนาม': v('s-q-tax'), 'พื้นที่': cart.zoneInput || '', 'แขวง/ตำบล': cart.addr?.s || '', 'เขต/อำเภอ': cart.addr?.d || cart.zone?.district || '', 'จังหวัด': cart.addr?.p || cart.zone?.province || '', 'รหัสไปรษณีย์': cart.addr?.z || '', 'ระยะถนนประมาณ (กม.)': cart.zone?.km ?? '', 'ค่าเดินทาง (ก่อน VAT)': t.travel, 'จำนวนรายการ': cart.items.length, 'ยอดประมาณการรวม VAT': Math.round(t.inc), 'ข้อมูลเทิร์นแอร์เก่า': ti,
           ...(isJob ? { 'งาน': [jobs.clean ? `ล้าง ${jobs.clean} เครื่อง` : '', jobs.install ? `ติดตั้ง ${jobs.install} เครื่อง` : '', jobs.repair ? `ซ่อม / ตรวจเช็ก ${jobs.repair} รายการ` : ''].filter(Boolean).join(' · '), 'ขอบเขต': sc.length ? `เกินมาตรฐาน ${sc.length} จุด` : 'มาตรฐาน', 'ส่วนเพิ่มประมาณ (ก่อน VAT)': Math.round(scEx), 'จำนวนรูป': D.photos.length, 'หมายเหตุหน้างาน': D.note || '', 'ผลประเมินเบื้องต้น (ผู้ช่วย)': (jobs.repair && D.diag && D.diag.text) || '', 'ที่อยู่หน้างาน': v('s-q-addr'), 'แผนที่': v('s-q-map'), 'LINE ID': v('s-q-line'), 'สะดวกให้ติดต่อ': D.when || 'ช่วงเวลาทำการ' } : {}) },
         text: [`${isJob ? 'ใบจองงาน' : 'ขอใบเสนอราคาอย่างเป็นทางการ'} · เลขอ้างอิง ${ref}`, `ชื่อ / บริษัท: ${v('s-q-name')}`, `โทร: ${v('s-q-tel')}`, isJob && v('s-q-line') ? `LINE ID: ${v('s-q-line')}` : null, isJob ? `สะดวกให้ติดต่อ: ${D.when || 'ช่วงเวลาทำการ'}` : null, isJob ? `ที่อยู่หน้างาน: ${v('s-q-addr')}${cart.zoneInput ? ' (' + cart.zoneInput + ')' : ''}` : null, isJob && v('s-q-map') ? `แผนที่: ${v('s-q-map')}` : null, cart.prefDate ? `วันเข้างาน: ${dateTh(cart.prefDate)} (${cart.prefDate})${visit.length && cart.prefSlot ? ' · ' + cart.prefSlot : ''}` : null, v('s-q-tax') ? `ใบกำกับภาษีในนาม: ${v('s-q-tax')}` : null, '', quoteText(), tk ? '' : null, tk || null, ti ? '' : null, ti ? '— ข้อมูลเทิร์นแอร์เก่า (ทีมยืนยันมูลค่าเมื่อตรวจเครื่อง) —' : null, ti || null].filter(x => x != null).join('\n') };
@@ -304,6 +324,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     $$(buttons).forEach(b => { b.dataset.n = n; const c = $('[data-cart-n]', b); if (c) c.textContent = n; b.classList.toggle('has', n > 0); b.setAttribute('aria-label', `ใบเสนอราคา ${n} รายการ`); if (grew) bump(b); });
     if (grew) bump(document.querySelector('.s-qpill:not([hidden])')); };
   cart.subs.add(upd); upd();
+  cart.subs.add(() => { if (moveOn() && !dr.hidden) render(); });   // ★Rev.33 after the count bump, so the quote button still pops
   $$(buttons).forEach(b => b.addEventListener('click', open));
   return { open, close, render };
 }

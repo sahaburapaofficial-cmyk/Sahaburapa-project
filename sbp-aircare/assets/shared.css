@@ -1058,6 +1058,8 @@ html.sx-on .mbar:has(.s-mmenu):has(>a~a){grid-template-columns:.85fr .9fr .85fr 
 /* Rev.10 — sending requests (submit.js): received state, privacy line, bot trap */
 .s-hand-ok{border-color:var(--s-ok)}
 .s-hand-ok .s-hand-b{background:var(--s-ok);color:var(--s-card)}
+/* ★Rev.33 the request sent before this one (the cart moved on to a new request) */
+.s-prev{margin:0 0 10px;padding:8px 12px;border-left:3px solid var(--s-ok);border-radius:0 var(--s-r) var(--s-r) 0;background:var(--s-card-2);color:var(--s-ink-2)}
 .s-privacy{margin:6px 0 0;font-size:12.5px;color:var(--s-ink-3)}
 .s-hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
 /* Rev.11 — quick cleaning booking (quickclean.js): 3 steps + live total. Shared tokens only, so A / B / C each keep their look. */

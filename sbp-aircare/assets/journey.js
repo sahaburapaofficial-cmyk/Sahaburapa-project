@@ -23,6 +23,8 @@ export function mountQuotePill(openCart) {
   pill.addEventListener('click', openCart);
   const upd = () => { const n = cart.items.length; pill.hidden = !n; if (!n) return; const t = cart.totals(); pill.innerHTML = ''; pill.append(h('span', {}, `ใบเสนอราคา ${n} รายการ`), h('b', {}, baht(t.inc)), h('i', {}, 'เปิดใบเสนอราคา')); };
   cart.subs.add(upd); upd();
+  // ★Rev.33 once the request reached the team the pill says so (until the quotation changes) instead of a total that is no longer open
+  document.addEventListener('sbp:sent', e => { const r = e.detail || {}; if (!r.ok || !cart.items.length) return; pill.innerHTML = ''; pill.append(h('span', {}, r.job ? 'ส่งใบจองงานแล้ว' : 'ส่งคำขอแล้ว'), h('b', {}, r.ref || ''), h('i', {}, 'ดูสรุป')); pill.hidden = false; });
 }
 
 // mobile: the header nav is hidden, so add a "เมนู" button to the bottom bar that opens a section sheet
@@ -37,7 +39,7 @@ export function mountMobileMenu() {
   const fill = () => {
     panel.innerHTML = ''; panel.append(h('p', { class: 's-lbl' }, 'ไปที่หัวข้อ'));
     links().forEach(a => panel.append(h('a', { href: a.getAttribute('href'), 'aria-current': a.getAttribute('aria-current'), onclick: close }, a.textContent.replace(/^\d+\s*/, ''))));
-    if (hub) panel.append(h('a', { href: hub, class: 'hub', target: /^https?:/.test(hub) ? '_blank' : null }, 'เทียบแบบ A · B · C'));
+    if (hub) panel.append(h('a', { href: hub, class: 'hub', target: /^https?:/.test(hub) ? '_blank' : null }, document.documentElement.dataset.lux ? 'เทียบแบบ D · E · F' : 'เทียบแบบ A · B · C'));   // ★Rev.33 the second website's sheet named the first set
   };
   sheet.append(panel); document.body.append(sheet);
   sheet.addEventListener('click', e => { if (e.target === sheet) close(); });

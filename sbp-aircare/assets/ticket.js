@@ -64,7 +64,9 @@ export function jobsIn(items) {
   const clean = items.filter(i => i.group === 'clean' && i.unitEx != null);
   const inst = items.filter(i => i.group === 'install');
   const units = []; inst.forEach(i => { const m = INS_KEY.exec(i.key || ''); if (m) units.push({ key: i.key, name: i.name, type: INS_T[m[1]], btu: +m[3], qty: i.qty }); });
-  const surveys = inst.filter(i => i.kind === 'survey').length, addOns = inst.filter(i => i.kind !== 'survey' && !INS_KEY.test(i.key || ''));
+  // ★Rev.33 a trade-in assessment (TI-) is the same visit as the new unit it is for — counted as a unit only when no new unit is in the quotation
+  // (a product + trade-in read "ติดตั้ง 2 เครื่อง" and lost the time estimate)
+  const surveys = inst.filter(i => i.kind === 'survey' && (!/^TI-/.test(i.key || '') || !units.length)).length, addOns = inst.filter(i => i.kind !== 'survey' && !INS_KEY.test(i.key || ''));
   const codes = new Set(addOns.map(i => (/^I[NV]?-(.+)$/.exec(i.key || '') || [])[1]).filter(Boolean));
   const nUnits = units.reduce((n, u) => n + u.qty, 0) + surveys;
   return { clean: clean.reduce((n, i) => n + i.qty, 0), repair: items.filter(i => i.group === 'repair').reduce((n, i) => n + (i.unitEx == null ? 1 : i.qty), 0), install: nUnits || (addOns.length ? 1 : 0),
