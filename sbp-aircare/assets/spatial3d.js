@@ -264,9 +264,11 @@ export function mountSpatial(root, { go = () => {} } = {}) {
   const cardsBox = h('div', { class: 'sp-cards', 'aria-hidden': 'true' }), cards = {};
   ['room', 'need', 'out', 'people', 'jet'].forEach(k => { cards[k] = h('div', { class: 'sp-card sp-card-' + k }); cardsBox.append(cards[k]); });
   const scanB = h('button', { type: 'button', class: 'sp-scan', 'aria-pressed': 'false' }, 'สแกนห้อง');
-  scanB.addEventListener('click', () => { S.scan = !S.scan; S.scanReq = S.scan; scanB.setAttribute('aria-pressed', String(S.scan)); fillCards(); });
+  // on phones the buttons sit under the room: bring the room back into view so the visitor sees what the button does
+  const showRoom = () => { const r = stage.getBoundingClientRect(); if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ block: 'center', behavior: RM() ? 'auto' : 'smooth' }); };
+  scanB.addEventListener('click', () => { S.scan = !S.scan; S.scanReq = S.scan; scanB.setAttribute('aria-pressed', String(S.scan)); fillCards(); if (S.scan) showRoom(); });
   const heatB = h('button', { type: 'button', 'aria-pressed': 'false' }, 'แผนที่ความร้อน');
-  heatB.addEventListener('click', () => { S.heat = !S.heat; heatB.setAttribute('aria-pressed', String(S.heat)); });
+  heatB.addEventListener('click', () => { S.heat = !S.heat; heatB.setAttribute('aria-pressed', String(S.heat)); if (S.heat) showRoom(); });
   lab.querySelector('.sp-run').prepend(scanB); lab.querySelector('.sp-tg').append(heatB);
   function fillCards() {
     const fmt = n => Math.round(n).toLocaleString('en-US'), card = (el, k, v) => { el.innerHTML = ''; el.append(h('small', {}, k), h('b', {}, v)); };

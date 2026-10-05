@@ -42,6 +42,8 @@ else {
   const c3 = S.makeClimate({ out: 35, people: 6, dirt: 0.05, inv: true });
   ok(c3.t25 == null || c3.t25 >= c1.t25, 'more people → slower or not reached');
   ok(SM.STD_SIZES.includes(c1.cap), `unit sized from the catalogue steps (${c1.cap} BTU)`);
+  // Rev.31.1 scan card "ต้องการ ~x BTU": the studio formula for the people set, more people → more BTU
+  ok(Number.isFinite(c1.need) && c1.need > 0 && c3.need > c1.need, `scan card need from needBtu (${Math.round(c1.need)} → ${Math.round(c3.need)} BTU with 6 people)`);
 }
 console.log(fail ? `\n${fail} FAIL` : '\nALL PASS');
 process.exit(fail ? 1 : 0);
