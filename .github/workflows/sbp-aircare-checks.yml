@@ -40,5 +40,7 @@ jobs:
         run: node tests/allservices.mjs
       - name: Decided standard rates (rates.js overlay · small-visit minimum)
         run: node tests/rates.mjs
+      - name: Rev.29 second website logic (lux.mjs)
+        run: node tests/lux.mjs
       - name: Enterprise sample contracts (Pricebook · wording rules)
         run: node tests/enterprise.mjs
