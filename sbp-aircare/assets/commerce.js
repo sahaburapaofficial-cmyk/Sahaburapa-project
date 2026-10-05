@@ -297,7 +297,12 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
     body.append(f);
     body.append(h('button', { type: 'button', class: 's-btn ghost', onclick: async () => { toast((await copyText(quoteText())) ? 'คัดลอกสรุปแล้ว วางในอีเมลหรือแชตได้' : 'คัดลอกไม่ได้ในหน้านี้'); } }, 'คัดลอกสรุปรายการ'));
   }
-  const upd = () => $$(buttons).forEach(b => { const n = cart.count(); b.dataset.n = n; const c = $('[data-cart-n]', b); if (c) c.textContent = n; b.classList.toggle('has', n > 0); b.setAttribute('aria-label', `ใบเสนอราคา ${n} รายการ`); });
+  // ★Rev.28 add-to-quote feedback: the quote buttons and the floating pill pop when the count grows (CSS .s-bump, motion-safe)
+  let lastN = null;
+  const bump = el => { if (!el) return; el.classList.remove('s-bump'); void el.offsetWidth; el.classList.add('s-bump'); clearTimeout(el._bump); el._bump = setTimeout(() => el.classList.remove('s-bump'), 650); };
+  const upd = () => { const n = cart.count(), grew = lastN != null && n > lastN; lastN = n;
+    $$(buttons).forEach(b => { b.dataset.n = n; const c = $('[data-cart-n]', b); if (c) c.textContent = n; b.classList.toggle('has', n > 0); b.setAttribute('aria-label', `ใบเสนอราคา ${n} รายการ`); if (grew) bump(b); });
+    if (grew) bump(document.querySelector('.s-qpill:not([hidden])')); };
   cart.subs.add(upd); upd();
   $$(buttons).forEach(b => b.addEventListener('click', open));
   return { open, close, render };

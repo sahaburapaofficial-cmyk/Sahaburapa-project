@@ -1231,8 +1231,8 @@ html.cp-on{overflow:hidden}
 .cp-in:focus,.cp-in:focus-visible{outline:none;box-shadow:none}
 .cp-bar:focus-within{box-shadow:inset 0 -2px 0 var(--s-accent)}
 /* ---- Rev.14 · page fade + reading progress hairline ---- */
-html.sx-enter main{animation:sxIn .3s ease-out}
-@keyframes sxIn{from{opacity:.001}to{opacity:1}}
+html.sx-enter main{animation:sxIn .42s cubic-bezier(.22,.9,.24,1)}
+@keyframes sxIn{from{opacity:.001;transform:translateY(8px)}to{opacity:1;transform:none}}   /* ★Rev.28 settles into place */
 .sx-prog{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--s-accent);transform-origin:0 50%;transform:scaleX(0);pointer-events:none;z-index:1}
 @media (prefers-reduced-motion:reduce){html.sx-enter main{animation:none}}
 /* ---- Rev.14 · pointer effects (fx.js) — mouse only, never with reduced motion ---- */
@@ -1817,3 +1817,71 @@ body:has(.s-qpill:not([hidden])) .ab-fab{bottom:140px}
 .as-src summary{cursor:pointer;font-weight:600;color:var(--s-ink);min-height:32px;display:flex;align-items:center}
 .as-src ul{margin:4px 0;padding-left:18px;display:grid;gap:3px}.as-src p{margin:4px 0}
 @media (pointer:coarse){.as-src summary{min-height:44px}}
+
+/* ==========================================================================================================
+   ★Rev.28 premium motion & finish layer (owner 5 ต.ค. 2569: "UX/UI ภาพคมชัดสวยงาม animation และ motion สวยงามระดับสูงสุด")
+   one motion vocabulary for every variant: tokens · press / hover physics · layered elevation · smooth disclosure ·
+   add-to-quote feedback · crisp type. All motion off under prefers-reduced-motion. No per-section scroll reveals (§5.4).
+   ========================================================================================================== */
+:root{
+  --m-ease:cubic-bezier(.22,.9,.24,1);          /* expo-out: quick start, long soft landing */
+  --m-ease-io:cubic-bezier(.65,0,.35,1);
+  --m-spring:linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938 16.7%,1.017 19.4%,1.067,1.099 24.3%,1.108 26%,1.1,1.081 30.9%,1.03 37.1%,1.007 41.4%,.993 45.8%,.99 50%,.998 63.4%,1);
+  --m-fast:.16s;--m-mid:.28s;--m-slow:.5s;
+  --e-1:0 1px 2px rgba(10,30,60,.06),0 1px 1px rgba(10,30,60,.04);
+  --e-2:0 1px 2px rgba(10,30,60,.05),0 6px 16px -6px rgba(10,30,60,.14),0 14px 32px -16px rgba(10,30,60,.18);
+  --e-3:0 2px 4px rgba(10,30,60,.05),0 14px 30px -10px rgba(10,30,60,.20),0 30px 60px -24px rgba(10,30,60,.24);
+  interpolate-size:allow-keywords;              /* lets height:auto / width:auto animate (Chromium) */
+}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-tap-highlight-color:transparent}
+:where(h1,h2,h3){text-wrap:balance}
+:where(p,li,dd,small){text-wrap:pretty}
+:where(.s-price,.s-sum dd,.ti-sum b,.as-meta strong,[data-b-out],.tnum,.num){font-variant-numeric:tabular-nums}
+::selection{background:color-mix(in oklab,var(--s-accent,#0b74b5) 24%,transparent)}
+:where(input,textarea){caret-color:var(--s-accent,#0b74b5)}
+:where(a,button,[role=tab],summary,select,input,textarea):focus-visible{outline:2px solid var(--s-accent,#0b74b5);outline-offset:2px}
+
+@media (prefers-reduced-motion:no-preference){
+  /* press physics — every button feels physical */
+  :where(button,.s-btn,.btn-primary,.btn-soft,.s-add-btn,a.s-btn,[role=tab]){transition:transform var(--m-fast) var(--m-ease),box-shadow var(--m-mid) var(--m-ease),background-color var(--m-mid) var(--m-ease),border-color var(--m-mid) var(--m-ease),color var(--m-mid) var(--m-ease)}
+  :where(button,.s-btn,.btn-primary,.btn-soft,.s-add-btn,a.s-btn):active:not(:disabled){transform:scale(.97);transition-duration:.08s}
+  /* elevation on hover — cards rise softly (fine pointers only, no layout change) */
+  @media (hover:hover) and (pointer:fine){
+    :where(.as-card,.ti-card,.mc,.kh-card,.s-pk,.ap-list li,.yp-list li,.sg-it,.ucard,.tile.t-fuj){transition:transform var(--m-mid) var(--m-ease),box-shadow var(--m-mid) var(--m-ease),border-color var(--m-mid) var(--m-ease)}
+    :where(.as-card,.mc,.kh-card,.s-pk):hover{transform:translateY(-3px);box-shadow:var(--e-3)}
+    :where(.s-btn.primary,.btn-primary):hover{box-shadow:0 10px 24px -10px color-mix(in oklab,var(--s-accent,#c93a0a) 70%,transparent)}
+  }
+  /* smooth disclosure for every <details> (Chromium 131+: ::details-content; others open instantly as before) */
+  details::details-content{block-size:0;overflow:clip;transition:block-size var(--m-mid) var(--m-ease),content-visibility var(--m-mid) allow-discrete}
+  details[open]::details-content{block-size:auto}
+  /* add-to-quote feedback: the quote button / pill pops and its count rolls */
+  .s-bump{animation:s-bump .55s var(--m-spring)}
+  .s-bump [data-cart-n],.s-qpill.s-bump b{animation:s-roll .45s var(--m-ease)}
+  /* toasts and drawers glide instead of appearing */
+  .s-toast,.toast{animation:s-rise .4s var(--m-ease)}
+  /* rendered product shots and 3D canvases already fade in (product-media, gl-pool) */
+}
+@keyframes s-bump{0%{transform:scale(1)}30%{transform:scale(1.09)}100%{transform:scale(1)}}
+@keyframes s-roll{0%{transform:translateY(60%);opacity:0}100%{transform:none;opacity:1}}
+@keyframes s-rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+
+/* floating helpers: compact round buttons on computers, the label slides out on hover / focus (they no longer cover totals) */
+@media (min-width:761px){
+  .ab-fab,.sx-line{width:52px;min-height:52px;height:52px;padding:0;justify-content:center;gap:0;overflow:hidden;white-space:nowrap;box-shadow:var(--e-3)}
+  .ab-fab .ab-fl,.sx-line .sx-ll{max-width:0;opacity:0;overflow:hidden}
+  .ab-fab:is(:hover,:focus-visible,[aria-expanded=true]),.sx-line:is(:hover,:focus-visible){width:auto;padding:0 18px 0 15px;gap:8px}
+  .ab-fab:is(:hover,:focus-visible,[aria-expanded=true]) .ab-fl,.sx-line:is(:hover,:focus-visible) .sx-ll{max-width:200px;opacity:1}
+  .sx-line{bottom:20px}.ab-fab{bottom:84px}
+  body:has(.s-qpill:not([hidden])) .sx-line{bottom:80px}
+  body:has(.s-qpill:not([hidden])) .ab-fab{bottom:144px}
+  @media (prefers-reduced-motion:no-preference){
+    .ab-fab,.sx-line{transition:width var(--m-mid) var(--m-ease),padding var(--m-mid) var(--m-ease),gap var(--m-mid) var(--m-ease),transform var(--m-fast) var(--m-ease),box-shadow var(--m-mid) var(--m-ease)}
+    .ab-fab .ab-fl,.sx-line .sx-ll{transition:max-width var(--m-mid) var(--m-ease),opacity var(--m-fast) linear}
+  }
+}
+/* keep helpers out of the way while a drawer / dialog is open */
+body:has(.s-cart:not([hidden])) :is(.ab-fab,.sx-line){opacity:0;pointer-events:none}
+/* ★Rev.28 frosted header once the page has moved */
+header.hdr{transition:box-shadow var(--m-mid) var(--m-ease),background-color var(--m-mid) var(--m-ease)}
+html.sx-scrolled header.hdr{box-shadow:0 1px 0 color-mix(in oklab,var(--s-line,#dbe3ec) 80%,transparent),0 10px 30px -18px rgba(10,30,60,.28)}
+@supports (backdrop-filter:blur(8px)){html.sx-scrolled header.hdr{backdrop-filter:saturate(1.5) blur(12px);-webkit-backdrop-filter:saturate(1.5) blur(12px)}}

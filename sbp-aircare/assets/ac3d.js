@@ -461,7 +461,8 @@ function makeFlow(pathPts, count, colA, colB, size, xr, yr = 0.02, additive = tr
         sc[t * 3] = xs[i] * (1 + fan * 0.6); sc[t * 3 + 1] = p.y + jit[i * 2] * (1 + fan * 6); sc[t * 3 + 2] = p.z + jit[i * 2 + 1] * (1 + fan * 6);
       }
       tmp.copy(ca).lerp(cb, clamp((u0 - swap[0]) / (swap[1] - swap[0]), 0, 1)); c3[0] = tmp.r; c3[1] = tmp.g; c3[2] = tmp.b; airTint(c3, additive);
-      const a = Math.min(1, u0 * 8) * Math.min(1, (1 - u0) * 4) * (additive ? 0.34 : 0.42) * (1 - 0.45 * Math.min(1, fanH * 2)), w = wd[i] * (1 + fanH * 4);
+      // ★Rev.28 softer, airier strokes (light theme read as rain, the warm intake as flames)
+      const a = Math.min(1, u0 * 8) * Math.min(1, (1 - u0) * 4) * (additive ? 0.26 : 0.24) * (1 - 0.5 * Math.min(1, fanH * 2)), w = wd[i] * (1 + fanH * 4);
       for (let t = 0; t < K - 1; t++) {
         const f0 = 1 - t / (K - 1), f1 = 1 - (t + 1) / (K - 1);
         W.seg(sc[t * 3], sc[t * 3 + 1], sc[t * 3 + 2], sc[t * 3 + 3], sc[t * 3 + 4], sc[t * 3 + 5], c3[0], c3[1], c3[2], a * f0 * f0, a * f1 * f1, w * (0.5 + 0.5 * f0), w * (0.5 + 0.5 * f1));
@@ -578,8 +579,8 @@ export function createACViewer(container, opts = {}) {
   }
   // airflow
   const addv = o.style === 'showroom';
-  const flowIn = makeFlow([[0.36, 0.0], [0.2, 0.01], [0.15, 0.05], [0.06, 0.062], [-0.02, 0.02], [-0.08, 0.02], [-0.125, 0.06], [-0.19, 0.17], [-0.28, 0.33], [-0.36, 0.48]], 300, addv ? 0xff9a52 : 0xe2711d, addv ? 0x55d6ff : 0x1b8fd6, addv ? 0.016 : 0.011, [-0.34, 0.24], 0.016, addv);
-  const flowOut = makeFlow([[0.04, -0.62], [0.03, -0.36], [0.0, -0.13], [0.0, 0.02], [0.0, 0.12], [0.0, 0.34], [0.02, 0.62], [0.03, 0.95]], 300, addv ? 0x9fdcff : 0x1b8fd6, addv ? 0xff7a3d : 0xe2711d, addv ? 0.018 : 0.012, [-0.3, 0.1], 0.36, addv);
+  const flowIn = makeFlow([[0.36, 0.0], [0.2, 0.01], [0.15, 0.05], [0.06, 0.062], [-0.02, 0.02], [-0.08, 0.02], [-0.125, 0.06], [-0.19, 0.17], [-0.28, 0.33], [-0.36, 0.48]], 170, addv ? 0xffc29a : 0xf0a477, addv ? 0x8fe2ff : 0x5bb4e8, addv ? 0.016 : 0.011, [-0.34, 0.24], 0.016, addv);
+  const flowOut = makeFlow([[0.04, -0.62], [0.03, -0.36], [0.0, -0.13], [0.0, 0.02], [0.0, 0.12], [0.0, 0.34], [0.02, 0.62], [0.03, 0.95]], 190, addv ? 0xb8e8ff : 0x5bb4e8, addv ? 0xffb489 : 0xf0a477, addv ? 0.018 : 0.012, [-0.3, 0.1], 0.36, addv);
   const spray = makeSpray(420);
   scene.add(flowIn, flowOut, spray);
 
