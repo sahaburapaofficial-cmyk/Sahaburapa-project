@@ -1,0 +1,47 @@
+// Rev.38 — D/E/F service journeys: three doors on the home page → six-step path on the services page; every figure shown equals
+// the shared constants (clean "from" price, minimum bill, trip fee, rush fee, lead days, diagnosis fee, install from price).
+// usage: node tests/servicepath.mjs d.html [mobile]
+import { launch, BASE } from './_lib.mjs';
+const page = process.argv[2] || 'd.html', M = process.argv[3] === 'mobile';
+const b = await launch();
+const p = await (await b.newContext(M ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : { viewport: { width: 1366, height: 900 } })).newPage();
+p.setDefaultTimeout(30000);
+const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(m.text().slice(0, 160)); });
+let fail = 0; const ok = (c, m, x = '') => { console.log((c ? 'PASS ' : 'FAIL ') + m + (c ? '' : ' — ' + x)); if (!c) fail++; };
+const act = l => M ? l.tap({ timeout: 60000 }) : l.click({ timeout: 60000 });
+await p.goto(`${BASE}/${page}`); await p.waitForTimeout(3000);
+const K = await p.evaluate(async () => {
+  const c = await import('./assets/sbp-core.js'), q = await import('./assets/quickclean.js'), a = await import('./assets/acdiag.js');
+  const d = a.diagLine('wall'), ins = c.DATA.instByCode['INS-W-9000-12000-STANDARD'];
+  return { from: c.baht(q.cleanFrom()), min: c.baht(c.DATA.minBill), trip: c.baht(c.TRAVEL.baseFee), rush: c.baht(c.QUEUE_RULES.rushFeeEx), lead: c.QUEUE_RULES.leadDays, diag: d && c.baht(d.rate.s), ins: ins && c.baht(ins.ex) };
+});
+const doors = p.locator('#doors .pa-door');
+ok(await doors.count() === 3, 'home: three service doors');
+const dt = await doors.allInnerTexts();
+ok(dt[0].includes(`เริ่ม ${K.from} ก่อน VAT`), `clean door price = cleanFrom ${K.from}`, dt[0].slice(0, 200));
+ok(!K.ins || dt[1].includes(K.ins), `install door price = INS-W 9–12k standard ${K.ins}`);
+ok(!K.diag || dt[2].includes(K.diag), `repair door = diagnosis fee ${K.diag}`);
+ok(dt.every(t => /เหมาะเมื่อ/.test(t) && /เวลา/.test(t)), 'each door: meaning · when · time · price');
+await doors.nth(2).scrollIntoViewIfNeeded(); await act(doors.nth(2));
+await p.waitForFunction(() => { const s = document.getElementById('paths'); if (!s || s.closest('[hidden]')) return false; const r = s.getBoundingClientRect(); return r.top < innerHeight * 0.7 && r.bottom > 0; }, null, { timeout: 20000, polling: 250 }).catch(() => {});
+ok(await p.evaluate(() => document.documentElement.dataset.sxView) === 'service', 'repair door → services page');
+ok((await p.locator('#paths .pa-tab[aria-selected=true]').innerText()).includes('ซ่อมแอร์'), 'the repair journey is open');
+const steps = p.locator('#paths .pa-list button');
+ok(await steps.count() === 6, 'six steps');
+await act(steps.nth(3)); const t4 = await p.locator('#paths .pa-card-b').innerText();
+ok(/อนุมัติ/.test(t4), 'repair step 4: price approved before any repair (rule 13)');
+await act(p.locator('#paths .pa-tab', { hasText: 'ล้างแอร์' }));
+await act(steps.nth(1)); const t2 = await p.locator('#paths .pa-card-b').innerText();
+ok(t2.includes(K.min) && t2.includes(K.trip), `clean step 2: minimum ${K.min} and trip ${K.trip}`, t2.slice(0, 300));
+await act(steps.nth(2)); const t3 = await p.locator('#paths .pa-card-b').innerText();
+ok(t3.includes(`${K.lead} วัน`) && t3.includes(K.rush), `clean step 3: ${K.lead} days ahead, rush +${K.rush}`);
+await act(p.locator('#paths .pa-tab', { hasText: 'ติดตั้งแอร์' })); await act(steps.nth(5));
+ok(/3 ปี/.test(await p.locator('#paths .pa-card-b').innerText()), 'install step 6: warranty 3 years / 1 year (rule 10)');
+const bad = ['แก้หายแน่นอน', 'ประหยัดไฟแน่นอน', 'ปลอดเชื้อ', 'สะอาด 100%', 'รับประกันเย็น', 'ไม่มีค่าใช้จ่ายเพิ่มเติมทุกกรณี'];
+const all = await p.evaluate(() => document.getElementById('paths').innerText + document.getElementById('doors').innerText);
+ok(!bad.some(w => all.includes(w)), 'no forbidden promise wording (rule 11)');
+await act(p.locator('#paths .pa-go'));
+ok(await p.waitForFunction(() => { const s = document.getElementById('standards'); const r = s.getBoundingClientRect(); return !s.closest('[hidden]') && r.top < innerHeight && r.bottom > 0; }, null, { timeout: 20000, polling: 250 }).then(() => true, () => false), 'step button → the matching section (standards)');
+ok(!errs.length, 'no console errors / warnings', errs.slice(0, 3).join(' | '));
+ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no sideways scroll');
+await b.close(); console.log(fail ? `${page} ${fail} FAILED` : `${page} ALL PASS`); process.exit(fail ? 1 : 0);

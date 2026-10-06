@@ -43,6 +43,10 @@
     </div>
     <div id="spRoot"></div>
   </section>
+  <section class="sec" id="doors">
+    <div class="sec-h"><p class="eyebrow">Start</p><h2>เลือกบริการ แล้วดูทุกขั้น</h2><p>ล้าง ติดตั้ง ซ่อม — ความหมาย เวลา ราคาเริ่มต้น และขั้นตอนตั้งแต่จองจนเสร็จงาน</p></div>
+    <div id="doorsRoot"></div>
+  </section>
   <section class="sec" id="book">
     <div class="sec-h"><p class="eyebrow">Book · 3 steps</p><h2>จองล้างแอร์ เห็นยอดก่อนส่ง</h2><p>ราคามาตรฐาน ค่าเดินทาง ยอดขั้นต่ำ และคิวด่วน คำนวณให้ครบในหน้าเดียว</p></div>
     <div id="bookRoot"></div>
@@ -67,13 +71,13 @@
     <div class="sec-h"><p class="eyebrow">Learn</p><h2>คู่มือ 12 หัวข้อ</h2><p>อ่านสั้น ๆ แล้วลองในห้องทดลองได้ทันที</p></div>
     <div class="panel" id="learnRoot"></div>
   </section>
+  <section class="sec" id="paths">
+    <div class="sec-h"><p class="eyebrow">Service path</p><h2>หกขั้น จองจนเสร็จงาน</h2><p>เลือกบริการ ดูภาพเคลื่อนไหวและคำอธิบายของแต่ละขั้น แล้วกดไปทำขั้นนั้นได้ทันที</p></div>
+    <div id="pathsRoot"></div>
+  </section>
   <section class="sec" id="cleanflow">
     <div class="sec-h"><p class="eyebrow">Crew</p><h2>ทีมช่างทำงานจริงทีละขั้น</h2><p>ล้าง C1 · C2 · ติดตั้ง 4 ประเภทเครื่อง ในฉาก 3 มิติ</p></div>
     <div class="panel" id="cleanRoot"></div>
-  </section>
-  <section class="sec" id="symptoms">
-    <div class="sec-h"><p class="eyebrow">Diagnose</p><h2>เช็กอาการแอร์</h2><p>14 อาการ ชี้จุดที่น่าจะเสีย ประเภทงาน และราคามาตรฐาน</p></div>
-    <div class="panel" id="symRoot"></div>
   </section>
   <section class="sec" id="howto">
     <div class="sec-h"><p class="eyebrow">Service steps</p><h2>ทุกขั้นตอนบริการ</h2><p>ล้าง ติดตั้ง ซ่อม ต่อประเภทเครื่อง</p></div>
@@ -82,6 +86,10 @@
   <section class="sec" id="standards">
     <div class="sec-h"><p class="eyebrow">Standards</p><h2>มาตรฐานงาน</h2><p>ล้าง · น้ำยา · ติดตั้ง · ซ่อม · สิ่งที่ได้รับทุกงาน</p></div>
     <div class="panel" id="stdRoot"></div>
+  </section>
+  <section class="sec" id="symptoms">
+    <div class="sec-h"><p class="eyebrow">Diagnose</p><h2>เช็กอาการแอร์</h2><p>14 อาการ ชี้จุดที่น่าจะเสีย ประเภทงาน และราคามาตรฐาน</p></div>
+    <div class="panel" id="symRoot"></div>
   </section>
   <section class="sec" id="prices">
     <div class="sec-h"><p class="eyebrow">Prices</p><h2>ราคาทุกบริการ</h2><p>ค้นหาได้ ทุกแถวเพิ่มลงใบเสนอราคา ราคาก่อน VAT · VRV / VRF ติดต่อทีมโครงการแยก</p></div>
@@ -132,9 +140,9 @@
 import { mountLux } from './assets/lux-site.js';
 await mountLux({
   variant: 'F', theme: 'dark', jobType: 'cassette', studioStart: 'openoffice', throwStyle: 'glass', fitPreset: 'living',
-  views: {"home": ["dome", "book", "start", "coverage"], "knowledge": ["inside", "studio", "learn"], "service": ["cleanflow", "symptoms", "howto", "standards", "prices", "quality"], "shop": ["catalog", "fit", "tradein"], "business": ["enterprise", "b2b"], "contact": ["about", "area", "faq", "quote"]},
+  views: {"home": ["dome", "doors", "book", "start", "coverage"], "knowledge": ["inside", "studio", "learn"], "service": ["paths", "cleanflow", "howto", "standards", "symptoms", "prices", "quality"], "shop": ["catalog", "fit", "tradein"], "business": ["enterprise", "b2b"], "contact": ["about", "area", "faq", "quote"]},
   order: ["home", "knowledge", "service", "shop", "business", "contact"],
-  labels: {"dome": "ห้องทดลองความเย็น", "inside": "ข้างในแอร์", "studio": "ห้องจำลอง 48 ห้อง"},
+  labels: {"dome": "ห้องทดลองความเย็น", "inside": "ข้างในแอร์", "studio": "ห้องจำลอง 48 ห้อง", "doors": "เลือกบริการ", "paths": "ขั้นตอนบริการ"},
   hero: async ({ go }) => { const m = await import('./assets/spatial3d.js'); m.mountSpatial(document.getElementById('spRoot'), { go }); },
 });
 </script>

@@ -27,6 +27,7 @@ import { mountSite } from './site.js';
 import { mountQuickClean, cleanFrom } from './quickclean.js';
 import { soundButton } from './luxsound.js';
 import { mountDock } from './luxdock.js';
+import { mountDoors, mountPaths } from './servicepath.js';
 
 const fill = (sel, ...kids) => { const el = $(sel); if (el) el.append(...kids.flat().filter(Boolean)); return el; };
 
@@ -176,6 +177,9 @@ export async function mountLux(cfg) {
       repair: () => SVX && SVX.set('repair'),
     },
   });
+  // ★Rev.38 the three services as customer journeys: doors on the home page → the six-step path at the top of the services page
+  const PATHS = mountPaths($('#pathsRoot'), { go, openCart: CART.open, hooks: { clean: () => JOB && JOB.setJob('clean'), install: () => JOB && JOB.setJob('install') } });
+  mountDoors($('#doorsRoot'), { onPick: k => { PATHS && PATHS.show(k); go('paths'); } });
   mountDock();   // Rev.35: "ในหน้านี้" rail on wide screens
   return { ...ctx, SITE, JOB, FIT, HWX, cat };
 }

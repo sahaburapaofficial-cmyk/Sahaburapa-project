@@ -558,3 +558,108 @@ html.fx-F .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my
   .cn-scrub{left:20px;transform:none;width:calc(100% - 92px)}   /* clear of the round help button */
 }
 .cn-cap h2,.cn-cap p{text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 18px rgba(0,0,0,.45)}   /* Rev.37: legible over the bright room */
+
+/* ---------- Rev.38 the three services as customer journeys (servicepath.js) ---------- */
+.pa-doors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.pa-doors{grid-template-columns:1fr}}
+.pa-door{display:grid;gap:8px;align-content:start;text-align:left;padding:14px 14px 18px;border-radius:var(--s-r,16px);border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);font:inherit;cursor:pointer;transition:transform var(--m-mid,.25s) var(--m-ease,ease),box-shadow var(--m-mid,.25s),border-color var(--m-fast,.15s)}
+@media (hover:hover){.pa-door:hover{transform:translateY(-3px);box-shadow:var(--e-2,0 18px 40px -20px rgba(0,0,0,.5));border-color:var(--s-accent)}}
+.pa-door:focus-visible{outline:3px solid var(--s-accent);outline-offset:3px}
+.pa-door-art{display:block;border-radius:12px;overflow:hidden}
+.pa-door-art svg,.pa-art svg{display:block;width:100%;height:auto}
+.pa-door-n{font:500 11.5px var(--s-mono,monospace);letter-spacing:.14em;text-transform:uppercase;color:var(--s-ink-3,var(--s-ink-2))}
+.pa-door>b{font-size:clamp(22px,2.4vw,28px);line-height:1.2}
+.pa-door-m{color:var(--s-ink-2);font-size:14.5px;line-height:1.6}
+.pa-door-meta{display:grid;gap:4px;font-size:13.5px;color:var(--s-ink-2);border-top:1px solid var(--s-line);padding-top:8px}
+.pa-door-meta em{font-style:normal;color:var(--s-ink);font-weight:600}
+.pa-price{color:var(--s-accent);font-weight:700}
+.pa-door-go{justify-self:start;margin-top:4px;padding:8px 14px;border-radius:999px;background:var(--s-accent);color:var(--s-on-accent);font-weight:600;font-size:14px}
+/* journey */
+.pa{display:grid;gap:16px}
+.pa-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.pa-tab{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 16px 6px 6px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);font:inherit;font-weight:600;cursor:pointer}
+.pa-tab[aria-selected=true]{background:var(--s-accent);color:var(--s-on-accent);border-color:transparent}
+.pa-tab-ic{width:52px;border-radius:999px;overflow:hidden;display:block}.pa-tab-ic svg{display:block;width:100%;height:auto}
+.pa-head{display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr;gap:12px;padding:14px 16px;border:1px solid var(--s-line);border-radius:var(--s-r,16px);background:var(--s-card)}
+.pa-head small{display:block;font:500 11.5px var(--s-mono,monospace);letter-spacing:.1em;color:var(--s-ink-3,var(--s-ink-2));margin-bottom:4px}
+.pa-head p{margin:0;font-size:14.5px;color:var(--s-ink);line-height:1.6}
+@media (max-width:900px){.pa-head{grid-template-columns:1fr 1fr}.pa-head>div:first-child{grid-column:1/-1}}
+.pa-grid{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.pa-grid{grid-template-columns:1fr}}
+.pa-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:none}
+.pa-list button{display:flex;gap:10px;align-items:center;width:100%;min-height:48px;padding:8px 12px;border-radius:12px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink-2);font:inherit;font-size:14.5px;text-align:left;cursor:pointer;transition:background var(--m-fast,.15s),color var(--m-fast,.15s)}
+.pa-list button.on{color:var(--s-ink);border-color:var(--s-accent);box-shadow:inset 3px 0 0 var(--s-accent)}
+.pa-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:600 12.5px var(--s-mono,monospace);border:1px solid var(--s-line)}
+.pa-list .on .pa-n{background:var(--s-accent);color:var(--s-on-accent);border-color:transparent}
+.pa-list .done .pa-n{background:color-mix(in oklab,var(--s-accent) 22%,transparent)}
+@media (max-width:860px){.pa-list{grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory}.pa-list li{scroll-snap-align:start}}
+.pa-stage{border:1px solid var(--s-line);border-radius:var(--s-r,16px);background:var(--s-card);overflow:hidden;min-width:0}
+.pa-art{background:linear-gradient(180deg,color-mix(in oklab,var(--s-accent) 10%,var(--s-card)),var(--s-card));padding:14px 16px 6px;display:grid;place-items:center}
+.pa-art svg{width:min(100%,380px);max-height:260px}
+.pa-bar{height:3px;background:var(--s-line)}.pa-bar i{display:block;height:100%;width:0;background:var(--s-accent)}
+.pa-bar.run i{animation:paBar 6.5s linear forwards}@keyframes paBar{to{width:100%}}
+.pa-card-b{padding:16px 18px 18px;display:grid;gap:10px}
+.pa-step{margin:0;font:500 12px var(--s-mono,monospace);letter-spacing:.1em;color:var(--s-ink-3,var(--s-ink-2))}
+.pa-card-b h3{margin:0;font-size:clamp(20px,2.2vw,26px);color:var(--s-ink)}
+.pa-card-b dl{margin:0;display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 14px}
+.pa-card-b dt{font-weight:600;color:var(--s-ink);font-size:14px}.pa-card-b dd{margin:0;color:var(--s-ink-2);font-size:14.5px;line-height:1.65}
+@media (max-width:560px){.pa-card-b dl{grid-template-columns:1fr}.pa-card-b dd{margin-bottom:4px}.pa-art svg{max-height:200px}}
+.pa-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.pa-acts .pa-go{margin-left:auto}
+@media (max-width:560px){.pa-acts .pa-go{margin-left:0;width:100%}}
+/* illustration vocabulary — colours from the design tokens */
+.pa-wall{fill:color-mix(in oklab,var(--s-accent) 8%,var(--s-card))}
+.pa-body{fill:#fbfcfd;stroke:#c3ccd6;stroke-width:1.4}.pa-vent{fill:#9aa6b2}.pa-led{fill:#5ad0ff}
+.pa-bag{fill:rgba(90,170,220,.18);stroke:rgba(90,170,220,.7);stroke-width:1.4}
+.pa-drop{fill:#5ab7ee}.pa-air{fill:none;stroke:#7fd0ff;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:6 10;opacity:.85}
+.pa-spark path{fill:#ffd36b}.pa-hose{fill:none;stroke:#2b3440;stroke-width:4;stroke-linecap:round}
+.pa-plate{fill:#8b97a3}.pa-pipe,.pa-pipe2{fill:none;stroke:#b87333;stroke-width:4;stroke-linecap:round}.pa-pipe2.ext{stroke-dasharray:6 6;opacity:.7}
+.pa-trunk{fill:#f2f3f4;stroke:#c6ccd2}.pa-level rect{fill:#f2c94c}.pa-level circle{fill:#4caf50}
+.pa-gauge circle{fill:#fff;stroke:#2b3440;stroke-width:2.5}.pa-gauge .hub{fill:#2b3440}.pa-needle{stroke:#e25b2c;stroke-width:3;stroke-linecap:round}
+.pa-tickmarks{fill:none;stroke:#9aa6b2;stroke-width:3;stroke-dasharray:2 5}
+.pa-wrench path{fill:#6b7682}.pa-q{font:700 34px var(--s-mono,monospace);fill:var(--s-accent)}
+.pa-pulse circle{fill:var(--s-accent)}.pa-pulse text{fill:var(--s-on-accent);font:700 13px var(--s-mono,monospace);text-anchor:middle}
+.pa-lbl{fill:var(--s-ink-2);font:500 10px var(--s-sans,sans-serif)}.pa-lbl.dim{opacity:.75}
+.pa-sheet{fill:var(--s-card);stroke:var(--s-line);stroke-width:1.5}.pa-lines rect,.pa-txt{fill:color-mix(in oklab,var(--s-ink) 25%,transparent)}
+.pa-rule{stroke:var(--s-ink);stroke-width:2}.pa-sum{fill:var(--s-accent);font:700 12px var(--s-mono,monospace);text-anchor:end}
+.pa-cal-h{fill:var(--s-accent)}.pa-day{fill:color-mix(in oklab,var(--s-ink) 14%,transparent)}.pa-day.near{fill:color-mix(in oklab,var(--s-ink) 6%,transparent)}.pa-day.pick{fill:var(--s-accent)}
+.pa-phone{fill:#1f2730}.pa-photo{fill:#cfd8e1}.pa-mtn{fill:#8da3b8}.pa-fly{fill:none;stroke:var(--s-accent);stroke-width:2;stroke-dasharray:4 5}.pa-dot{fill:var(--s-accent)}
+.pa-ok{fill:color-mix(in oklab,#2fa86a 18%,transparent);stroke:#2fa86a;stroke-width:2}.pa-chk{fill:none;stroke:#2fa86a;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.pa-chk.sm{stroke-width:2.4}.pa-chk.big{stroke-width:5}
+.pa-timer circle{fill:none;stroke:color-mix(in oklab,var(--s-ink) 18%,transparent);stroke-width:3}.pa-arc{fill:none;stroke:var(--s-accent);stroke-width:3;stroke-linecap:round}
+.pa-card rect:first-child{fill:var(--s-card);stroke:var(--s-line);stroke-width:1.4}.pa-card.pick rect:first-child{stroke:var(--s-accent);stroke-width:2.4}.pa-card text{fill:var(--s-ink);font:700 11px var(--s-mono,monospace)}
+.pa-room{fill:none;stroke:color-mix(in oklab,var(--s-ink) 40%,transparent);stroke-width:1.5}.pa-dim{stroke:var(--s-accent);stroke-width:2;stroke-dasharray:3 3}
+.pa-ruler rect{fill:#f2c94c}.pa-ruler line{stroke:#5b4a17;stroke-width:1}
+.pa-shield{fill:color-mix(in oklab,var(--s-accent) 16%,transparent);stroke:var(--s-accent);stroke-width:2.5}
+.pa-bubble rect{fill:var(--s-accent)}.pa-bubble text{fill:var(--s-on-accent);font:700 18px var(--s-mono,monospace)}
+.pa-remote{fill:#f4f6f8;stroke:#c3ccd6}.pa-lcd{fill:#cfeefd}.pa-btn{fill:#e25b2c}.pa-breaker{fill:#e8ebee;stroke:#aab4be}.pa-toggle{fill:#2b3440}
+.pa-wait circle{fill:none;stroke:#2fa86a;stroke-width:2}
+.pa-thermo rect{fill:#fff;stroke:#aab4be}.pa-thermo circle{fill:#5ab7ee}.pa-merc{fill:#5ab7ee !important;stroke:none !important}
+/* motion — only while on screen (.run) and when motion is welcome */
+@media (prefers-reduced-motion:no-preference){
+  .run .pa-drop{animation:paDrop 1.3s calc(var(--i) * .17s) ease-in infinite}
+  @keyframes paDrop{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(34px);opacity:0}}
+  .run .pa-air{animation:paAir 1.6s calc(var(--i) * .2s) linear infinite}@keyframes paAir{to{stroke-dashoffset:-32}}
+  .run .pa-spark path{transform-box:fill-box;transform-origin:center;animation:paSpark 2.4s ease-in-out infinite}.run .pa-spark .b{animation-delay:1.2s}
+  @keyframes paSpark{0%,100%{transform:scale(.4);opacity:.2}50%{transform:scale(1);opacity:1}}
+  .run .pa-lift{animation:paLift 3.6s cubic-bezier(.2,.7,.2,1) infinite}@keyframes paLift{0%{transform:translateY(40px);opacity:.3}45%,100%{transform:translateY(0);opacity:1}}
+  .run .pa-pipe{stroke-dasharray:180;animation:paDraw 3.6s ease-out infinite}@keyframes paDraw{0%,30%{stroke-dashoffset:180}80%,100%{stroke-dashoffset:0}}
+  .run .pa-needle{transform-box:fill-box;transform-origin:50% 100%;animation:paNeedle 2.8s ease-in-out infinite}@keyframes paNeedle{0%,100%{transform:rotate(-70deg)}50%{transform:rotate(55deg)}}
+  .run .pa-wrench path{transform-box:fill-box;transform-origin:10% 50%;animation:paWrP 2.2s ease-in-out infinite}
+  @keyframes paWrP{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(16deg)}}
+  .run .pa-wrench.spin path{animation-duration:1.4s}
+  .run .pa-pulse{transform-box:fill-box;transform-origin:center;animation:paPulse 1.8s ease-in-out infinite}@keyframes paPulse{50%{transform:scale(1.12)}}
+  .run .pa-lines rect{transform-box:fill-box;transform-origin:left;animation:paLine 3s calc(var(--i,0) * .35s) ease-out infinite}@keyframes paLine{0%{transform:scaleX(0)}40%,100%{transform:scaleX(1)}}
+  .run .pa-day.pick{animation:paPick 2s ease-in-out infinite}@keyframes paPick{50%{opacity:.45}}
+  .run .pa-fly{animation:paAir 1.2s linear infinite}.run .pa-dot{animation:paPick 1.2s ease-in-out infinite}
+  .run .pa-chk{stroke-dasharray:40;animation:paChk 2.6s ease-out infinite}@keyframes paChk{0%,35%{stroke-dashoffset:40}70%,100%{stroke-dashoffset:0}}
+  .run .pa-row:nth-child(n) .pa-chk{animation-delay:calc(var(--i) * .3s)}
+  .run .pa-arc{stroke-dasharray:88;animation:paArc 5s linear infinite}@keyframes paArc{from{stroke-dashoffset:88}to{stroke-dashoffset:0}}
+  .run .pa-slide{animation:paSlide 4s ease-in-out infinite alternate}@keyframes paSlide{from{transform:translate(0,0)}to{transform:translate(52px,-18px)}}
+  .run .pa-pipe2.ext{animation:paAir 1.4s linear infinite}
+  .run .pa-bubble{transform-box:fill-box;transform-origin:left bottom;animation:paPulse 2s ease-in-out infinite}
+  .run .pa-toggle{animation:paTog 2.4s steps(1) infinite}@keyframes paTog{50%{transform:translateY(-12px)}}
+  .run .pa-btn{animation:paPick 1.6s ease-in-out infinite}
+  .run .pa-merc{transform-box:fill-box;transform-origin:bottom;animation:paMerc 3.4s ease-in-out infinite}@keyframes paMerc{0%{transform:scaleY(1)}60%,100%{transform:scaleY(.45)}}
+  .run .pa-shield{animation:paPick 2.4s ease-in-out infinite}
+  .run .pa-level circle{animation:paLvl 2.4s ease-in-out infinite}@keyframes paLvl{0%,100%{transform:translateX(-6px)}50%{transform:translateX(6px)}}
+}

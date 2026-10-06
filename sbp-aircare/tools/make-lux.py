@@ -58,6 +58,12 @@ COPY = {
   'b2b': {'D': ('ประเมินงบสัญญารายปี', 'ทั้งองค์กร ทั้งปี ในสัญญาเดียว', 'กำหนดจำนวนเครื่อง ความถี่ และพื้นที่ เห็นงบต่อปีและแผนล้าง 12 เดือนทันที'),
           'E': ('งบประมาณรายปี', 'วางงบล้างแอร์ทั้งปี', 'ใส่จำนวนเครื่องตามประเภท เห็นงบต่อปี กำลังทีม และปฏิทินล้าง 12 เดือน'),
           'F': ('Annual plan', 'งบและแผนล้างทั้งปี', 'จำนวนเครื่อง × รอบ × แพ็กเกจ → งบต่อปีและปฏิทิน 12 เดือน')},
+  'doors': {'D': ('เริ่มที่นี่', 'วันนี้ต้องการบริการไหน', 'ล้าง ติดตั้ง หรือซ่อม — แต่ละบริการหมายถึงอะไร เหมาะเมื่อไร ใช้เวลาเท่าไร ราคาเริ่มที่เท่าไร แตะเพื่อดูทุกขั้นตั้งแต่จองจนเสร็จงาน'),
+            'E': ('เริ่มที่นี่', 'สามบริการ ที่เราดูแลให้', 'ล้าง ติดตั้ง และซ่อม — ความหมาย เวลา และราคาเริ่มต้นของแต่ละบริการ แตะเพื่อดูขั้นตอนของคุณ'),
+            'F': ('Start', 'เลือกบริการ แล้วดูทุกขั้น', 'ล้าง ติดตั้ง ซ่อม — ความหมาย เวลา ราคาเริ่มต้น และขั้นตอนตั้งแต่จองจนเสร็จงาน')},
+  'paths': {'D': ('ขั้นตอนบริการ', 'จองจนเสร็จงาน ทีละขั้น', 'ล้าง ติดตั้ง ซ่อม — แต่ละขั้นมีภาพเคลื่อนไหว บอกว่าเกิดอะไรขึ้น ทำไม และคุณได้อะไร พร้อมปุ่มไปทำขั้นนั้นบนเว็บ'),
+            'E': ('ขั้นตอนบริการ', 'เส้นทางของคุณ ตั้งแต่จองจนเสร็จ', 'เลือกบริการ แล้วดูหกขั้นที่เกิดขึ้นจริง พร้อมคำอธิบายและปุ่มไปทำแต่ละขั้น'),
+            'F': ('Service path', 'หกขั้น จองจนเสร็จงาน', 'เลือกบริการ ดูภาพเคลื่อนไหวและคำอธิบายของแต่ละขั้น แล้วกดไปทำขั้นนั้นได้ทันที')},
   'learn': {'D': ('คู่มือก่อนตัดสินใจ', 'รู้จักแอร์ให้ครบ ก่อนเลือก', 'BTU ประเภทเครื่อง อินเวอร์เตอร์ รอบล้าง และงานติดตั้ง พร้อมปุ่มลองเอง'),
             'E': ('ความรู้', 'เรื่องแอร์ที่ควรรู้ ก่อนตัดสินใจ', 'อ่านสั้น ๆ แล้วลองกับเครื่องมือจำลองได้ทันที'),
             'F': ('Learn', 'คู่มือ 12 หัวข้อ', 'อ่านสั้น ๆ แล้วลองในห้องทดลองได้ทันที')},
@@ -75,18 +81,18 @@ COPY = {
 V = {
   'D': dict(name='Holo Cinema', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ D)', theme='#04060B', theme3d='dark', jobType='wall', studio='condobed', throw='remote', fit='bedroom',
             order=['home', 'service', 'shop', 'business', 'knowledge', 'contact'],
-            views=dict(home=['film', 'intro', 'book', 'start', 'coverage'], service=['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop=['catalog', 'tradein', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
-            labels=dict(film='ภาพยนตร์สั้น', intro='บริการของเรา', inside='ข้างในแอร์'),
+            views=dict(home=['film', 'intro', 'doors', 'book', 'start', 'coverage'], service=['paths', 'cleanflow', 'howto', 'standards', 'symptoms', 'prices', 'quality'], shop=['catalog', 'tradein', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
+            labels=dict(film='ภาพยนตร์สั้น', intro='บริการของเรา', inside='ข้างในแอร์', doors='เลือกบริการ', paths='ขั้นตอนบริการ'),
             nav=[('#film', 'ภาพยนตร์'), ('#book', 'จองล้าง'), ('#cleanflow', 'ทีมช่าง'), ('#catalog', 'แอร์ทุกรุ่น'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร'), ('#area', 'พื้นที่')]),
   'E': dict(name='Atelier 2050', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ E)', theme='#F3F6F9', theme3d='light', jobType='ceiling', studio='living', throw='panel', fit='living',
             order=['home', 'service', 'shop', 'business', 'knowledge', 'contact'],
-            views=dict(home=['concierge', 'book', 'start', 'coverage'], service=['cleanflow', 'symptoms', 'standards', 'howto', 'prices', 'quality'], shop=['tradein', 'catalog', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
-            labels=dict(concierge='ปรึกษาบริการ', inside='แอร์ทำงานอย่างไร'),
+            views=dict(home=['concierge', 'doors', 'book', 'start', 'coverage'], service=['paths', 'cleanflow', 'standards', 'howto', 'symptoms', 'prices', 'quality'], shop=['tradein', 'catalog', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
+            labels=dict(concierge='ปรึกษาบริการ', inside='แอร์ทำงานอย่างไร', doors='เลือกบริการ', paths='ขั้นตอนบริการ'),
             nav=[('#concierge', 'ปรึกษา'), ('#book', 'จองล้าง'), ('#cleanflow', 'งานช่าง'), ('#tradein', 'รีโนเวท'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร'), ('#about', 'เกี่ยวกับเรา')]),
   'F': dict(name='Holodeck', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ F)', theme='#03050C', theme3d='dark', jobType='cassette', studio='openoffice', throw='glass', fit='living',
             order=['home', 'knowledge', 'service', 'shop', 'business', 'contact'],
-            views=dict(home=['dome', 'book', 'start', 'coverage'], knowledge=['inside', 'studio', 'learn'], service=['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop=['catalog', 'fit', 'tradein'], business=['enterprise', 'b2b'], contact=['about', 'area', 'faq', 'quote']),
-            labels=dict(dome='ห้องทดลองความเย็น', inside='ข้างในแอร์', studio='ห้องจำลอง 48 ห้อง'),
+            views=dict(home=['dome', 'doors', 'book', 'start', 'coverage'], knowledge=['inside', 'studio', 'learn'], service=['paths', 'cleanflow', 'howto', 'standards', 'symptoms', 'prices', 'quality'], shop=['catalog', 'fit', 'tradein'], business=['enterprise', 'b2b'], contact=['about', 'area', 'faq', 'quote']),
+            labels=dict(dome='ห้องทดลองความเย็น', inside='ข้างในแอร์', studio='ห้องจำลอง 48 ห้อง', doors='เลือกบริการ', paths='ขั้นตอนบริการ'),
             nav=[('#dome', 'ห้องทดลอง'), ('#book', 'จองล้าง'), ('#inside', 'ข้างในแอร์'), ('#cleanflow', 'ทีมช่าง'), ('#catalog', 'แอร์ทุกรุ่น'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร')]),
 }
 
@@ -140,6 +146,7 @@ def sec(id_, v, body, cls='sec'):
   </section>'''
 
 BODY = {
+  'doors': '<div id="doorsRoot"></div>', 'paths': '<div id="pathsRoot"></div>',
   'book': '<div id="bookRoot"></div>', 'start': '<div id="startRoot"></div>', 'coverage': '<div id="covRoot"></div>',
   'catalog': '<div id="catalogRoot"></div>', 'tradein': '<div class="panel" id="tiRoot"></div>', 'studio': '<div id="studioRoot"></div>',
   'fit': '<div class="panel" id="fitRoot"></div>', 'cleanflow': '<div class="panel" id="cleanRoot"></div>', 'symptoms': '<div class="panel" id="symRoot"></div>',
