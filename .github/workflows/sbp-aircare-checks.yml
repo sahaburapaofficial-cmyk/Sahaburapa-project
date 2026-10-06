@@ -44,3 +44,5 @@ jobs:
         run: node tests/lux.mjs
       - name: Enterprise sample contracts (Pricebook · wording rules)
         run: node tests/enterprise.mjs
+      - name: Rev.34 accuracy (VAT · rates · travel per subdistrict · 20,000 quotations vs the owner's rules)
+        run: node tests/accuracy.mjs

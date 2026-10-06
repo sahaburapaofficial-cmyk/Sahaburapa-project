@@ -39,18 +39,18 @@ async function step(name, fn) {
   const e0 = errs.length;
   try {
     const note = await fn();
+    await closeAll();   // Rev.34: closing with the page's own buttons is part of the step — a covered × fails it (it used to fall back to Escape)
     const ow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     const ok = errs.length === e0 && ow <= 0;
     R.push({ name, ok, note: [note, ow > 0 ? `ล้นแนวนอน ${ow}px` : '', errs.length > e0 ? 'error: ' + errs.slice(e0).join(' | ') : ''].filter(Boolean).join(' · ') });
     if (!ok) await shot(name);
-  } catch (e) { R.push({ name, ok: false, note: String(e.message || e).split('\n').filter(Boolean).slice(0, 3).join(' / ').slice(0, 400) }); await shot(name); }
-  await closeAll();
+  } catch (e) { R.push({ name, ok: false, note: String(e.message || e).split('\n').filter(Boolean).slice(0, 3).join(' / ').slice(0, 400) }); await shot(name); await p.keyboard.press('Escape').catch(() => {}); await closeAll().catch(() => {}); }
 }
 async function closeAll() {   // close what a visitor left open, with the page's own close controls
   for (let i = 0; i < 3; i++) {
     const cart = vis('.s-cart .s-x'), dr = vis('#drawer [data-close]'), cp = vis('.cp-esc'), sh = vis('.s-msheet.open');
-    if (await cart.count()) { await act(cart.first()).catch(() => p.keyboard.press('Escape')); await wait(350); continue; }
-    if (await dr.count()) { await act(dr.first()).catch(() => p.keyboard.press('Escape')); await wait(350); continue; }
+    if (await cart.count()) { await act(cart.first()); await wait(350); continue; }
+    if (await dr.count()) { await act(dr.first()); await wait(350); continue; }
     if (await cp.count()) { await p.keyboard.press('Escape'); await wait(250); continue; }
     if (await sh.count()) { await p.keyboard.press('Escape'); await wait(300); continue; }
     if (await vis('#ab-panel').count()) { await act(p.locator('.ab-fab')).catch(() => {}); await wait(300); continue; }
@@ -76,11 +76,21 @@ async function sendCart() {
   const zone = p.locator('#s-cart-zone');
   if (await zone.count() && !(await zone.inputValue())) { await zone.fill('บางขุนเทียน'); await wait(500); const o = vis('.s-cart .ap-opt'); if (await o.count()) { await act(o.first()); await wait(400); } }
   for (const [id, v] of [['s-q-addr', '99/1 ถนนพระราม 2 แขวงแสมดำ'], ['s-q-name', 'ทดสอบ เวิร์กโฟลว์'], ['s-q-tel', '0812345678']]) { const f = p.locator('#' + id); if (await f.count() && !(await f.inputValue())) await f.fill(v); }
+  const shown = +((await p.locator('.s-cart .tot').last().innerText()).replace(/[^\d]/g, ''));
   const n0 = posts.length;
   await act(p.locator('.s-form button[type="submit"]')); await wait(1800);
   const msg = await p.locator('.s-cart-b').innerText();
   if (!/ส่งถึงทีมแล้ว/.test(msg)) throw new Error('not sent: ' + msg.split('\n').slice(0, 3).join(' / '));
-  return posts.slice(n0);
+  const got = posts.slice(n0); checkSent(got, shown); return got;
+}
+// Rev.34 accuracy: the amount the visitor saw is the amount the team receives (field + summary text), and the summary lists every line
+function checkSent(got, shown) {
+  for (const d of got) {
+    const f = d.fields || {}, amt = +String(f['ยอดประมาณการรวม VAT'] ?? '').replace(/[^\d]/g, '');
+    if (amt !== shown) throw new Error(`team receives ฿${amt} but the visitor saw ฿${shown}`);
+    if (!String(d.text || '').replace(/,/g, '').includes(String(shown))) throw new Error(`summary text does not carry the total ฿${shown}`);
+    if (d.variant !== V.toUpperCase()) throw new Error(`request names design "${d.variant}"`);
+  }
 }
 const fresh = async () => { await p.evaluate(() => { localStorage.clear(); sessionStorage.clear(); }); await p.reload(); await wait(2500); };   // a new visitor: the cart lives in memory too
 const toTop = () => p.evaluate(() => { const de = document.documentElement, sb = de.style.scrollBehavior; de.style.scrollBehavior = 'auto'; scrollTo(0, 0); de.style.scrollBehavior = sb; });
@@ -116,6 +126,8 @@ await step('2 จองล้างแอร์ → ใบจองงาน →
   await p.locator('#s-q-name').fill('ทดสอบ เวิร์กโฟลว์'); await p.locator('#s-q-tel').fill('0812345678');
   const n0 = posts.length;
   await act(p.locator('.s-form button[type="submit"]')); await wait(1800);
+  checkSent(posts.slice(n0), cartTot);
+  if (posts.slice(n0).some(d => +String((d.fields || {})['ค่าเดินทาง (ก่อน VAT)'] ?? 0) !== 300)) throw new Error('2 units in the core area below ฿4,500: the team should see a ฿300 trip');
   const msg = await p.locator('.s-cart-b').innerText();
   if (!/ส่งถึงทีมแล้ว/.test(msg)) throw new Error('ticket not sent: ' + msg.split('\n').slice(0, 3).join(' / '));
   const sent = posts.slice(n0).map(d => d.kind).join(',');

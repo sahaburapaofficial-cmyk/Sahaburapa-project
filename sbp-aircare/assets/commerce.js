@@ -14,6 +14,7 @@ import { productVisual } from './product-media.js';
 import { judge, bkkNow, dateTh, addDays, isOpen, LEAD_DAYS, RUSH_FEE_EX, SLOTS, fetchSlots, slotFree } from './queue.js';
 import { ticketPanel, ticketText, sendTicket, photoLine, jobsIn } from './ticket.js';
 import { canReach, ENDPOINT, BACKEND } from './submit.js';
+import { watchPanel } from './backpanel.js';
 import { breakdown, packageParts, pipeBundle, optionNote, pipeItemFor } from './costs.js';
 import { addrPicker } from './addrpick.js';
 
@@ -159,6 +160,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
   const open = () => { liveAsked = false; render(); dr.hidden = false; requestAnimationFrame(() => dr.classList.add('open')); document.body.classList.add('lock'); };
   dr.addEventListener('click', e => { if (e.target === dr) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !dr.hidden) close(); });
+  watchPanel(dr, () => !dr.hidden && dr.classList.contains('open'), close);   // ★Rev.34 Back closes the quotation instead of switching the page behind it
   let sent = null;
   // ★Rev.33 (workflow check): once a request has gone, adding anything else from the site starts the next one — the panel used to keep
   // showing the old confirmation and hid what was just added. Lines that reached the team leave the list (never sent twice) and the

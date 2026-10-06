@@ -16,7 +16,8 @@ await p.addScriptTag({ content: AXE });
 const all = {};
 for (const v of views) {
   await p.evaluate(v => { location.hash = '#' + v; }, v); await p.waitForTimeout(1500);
-  await p.evaluate(async () => { const H = document.body.scrollHeight; for (let y = 0; y < H; y += innerHeight * 0.8) { scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); } scrollTo(0, 0); });
+  // Rev.34: jump, never glide — the page's CSS smooth scrolling left axe judging mid-scroll, with the sticky header over the booking buttons
+  await p.evaluate(async () => { document.documentElement.style.scrollBehavior = 'auto'; const H = document.body.scrollHeight; for (let y = 0; y < H; y += innerHeight * 0.8) { scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); } scrollTo(0, 0); });
   await p.waitForTimeout(1200);
   // Rev.33: let finite animations (view fade-in, reveals) end first — a busy machine once caught text mid-fade as low contrast
   await p.evaluate(() => Promise.race([Promise.all(document.getAnimations().filter(a => a.playState === 'running' && isFinite(a.effect?.getComputedTiming().endTime)).map(a => a.finished.catch(() => {}))), new Promise(r => setTimeout(r, 4000))]));

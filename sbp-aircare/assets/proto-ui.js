@@ -8,6 +8,7 @@ import {
 import { attachAddr } from './addrpick.js';
 import { createACViewer, createRoomSim, PARTS } from './ac3d.js';
 import { deferred } from './lazy.js';
+import { watchPanel } from './backpanel.js';
 
 export { DEMO, TYPES, TYPE_BY_ID, BRANDS, BRAND_BY_ID, baht, btuFmt, h, $, $$, countUp, reduceMotion, PARTS, stockTh, incVat };
 
@@ -113,13 +114,14 @@ export function mountCatalog(root, cfg) {
   }
   // the address keeps #catalog only after the visitor filters (not on the first render, not while the catalog is hidden in another view — r5)
   let first = true;
-  function update() { renderFacets(); renderChips(); renderGrid(); if (first) { first = false; return; } if (!els.grid.offsetParent) return; try { history.replaceState(null, '', location.pathname + location.search + '#catalog'); } catch (e) {} }
+  function update() { renderFacets(); renderChips(); renderGrid(); if (first) { first = false; return; } if (!els.grid.offsetParent) return; try { history.replaceState(history.state, '', location.pathname + location.search + '#catalog'); } catch (e) {} }
   let t;
   els.search && els.search.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { f.q = els.search.value.trim(); page = 1; update(); }, 160); });
   els.sort && els.sort.addEventListener('change', () => { f.sort = els.sort.value; renderGrid(); });
   els.more && els.more.addEventListener('click', () => { page++; renderGrid(); });
   $$('[data-cat-view]', root).forEach(b => b.addEventListener('click', () => { view = b.dataset.catView; $$('[data-cat-view]', root).forEach(x => x.setAttribute('aria-pressed', x === b)); renderGrid(); }));
   els.sheetBtn && els.sheetBtn.addEventListener('click', () => { els.sheet.classList.add('open'); document.body.classList.add('lock'); });
+  watchPanel(els.sheet, () => els.sheet.classList.contains('open'), () => { els.sheet.classList.remove('open'); document.body.classList.remove('lock'); });   // ★Rev.34 Back closes the filter sheet
   els.sheetClose.forEach(b => b.addEventListener('click', () => { els.sheet.classList.remove('open'); document.body.classList.remove('lock'); }));
   els.sheetApply && els.sheetApply.addEventListener('click', () => { els.sheet.classList.remove('open'); document.body.classList.remove('lock'); els.grid.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' }); });
   // skeleton first, then data (demonstrates the loading state)
@@ -422,6 +424,7 @@ export function openDrawer(drawer) { drawer.hidden = false; requestAnimationFram
 export function closeDrawer(drawer) { drawer.classList.remove('open'); document.body.classList.remove('lock'); setTimeout(() => drawer.hidden = true, 260); }
 export function wireDrawers() {
   $$('[data-drawer]').forEach(d => {
+    watchPanel(d, () => !d.hidden && d.classList.contains('open'), () => closeDrawer(d));   // ★Rev.34 Back closes the product / compare drawer
     $$('[data-close]', d).forEach(b => b.addEventListener('click', () => closeDrawer(d)));
     d.addEventListener('click', e => { if (e.target === d) closeDrawer(d); });
   });

@@ -1,6 +1,7 @@
 // Small shared pieces for the customer journey: travel-fee table, quote progress pill, contact form topic (Rev.09).
 import { TRAVEL, DATA, travelFee, incVat, baht, h, $$ } from './sbp-core.js';
 import { cart } from './commerce.js';
+import { watchPanel } from './backpanel.js';
 
 // ★Rev.20 travel rule (sbp-core TRAVEL): core = Bangkok within freeKm; outside = baseFee + perKm beyond freeKm (examples from travelFee)
 export function travelTable() {
@@ -42,6 +43,7 @@ export function mountMobileMenu() {
     if (hub) panel.append(h('a', { href: hub, class: 'hub', target: /^https?:/.test(hub) ? '_blank' : null }, document.documentElement.dataset.lux ? 'เทียบแบบ D · E · F' : 'เทียบแบบ A · B · C'));   // ★Rev.33 the second website's sheet named the first set
   };
   sheet.append(panel); document.body.append(sheet);
+  watchPanel(sheet, () => !sheet.hidden && sheet.classList.contains('open'), close);   // ★Rev.34 Back closes the menu sheet
   sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
   sheet.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
   const btn = h('button', { type: 'button', class: 'btn-ghost s-mmenu', 'aria-haspopup': 'dialog' }, 'เมนู');

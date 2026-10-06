@@ -5,6 +5,7 @@
 // from the header button. Styling follows the variant: A clean card · B terminal sheet · C glass (shared.css .cp-*).
 import { QUEUE_URL } from './queue.js';
 import { cart } from './commerce.js';
+import { watchPanel } from './backpanel.js';
 import { h, $, DEMO, BRAND_BY_ID, TYPE_BY_ID, btuFmt, baht, FAQ, COMPANY, cleanRate, incVat, DATA } from './sbp-core.js';
 
 const norm = s => String(s || '').toLowerCase().replace(/[\s·\-\/,().]/g, '');
@@ -109,6 +110,7 @@ export function mountPalette(cfg) {
     input.value = ''; sel = 0; render(); requestAnimationFrame(() => input.focus());
   }
   function close(keepFocus) { if (dlg.hidden) return; dlg.hidden = true; document.documentElement.classList.remove('cp-on'); if (!keepFocus && last && last.focus) last.focus(); }
+  watchPanel(dlg, () => !dlg.hidden, () => close());   // ★Rev.34 Back closes search
   input.addEventListener('input', () => { sel = 0; render(); });
   dlg.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); close(); }

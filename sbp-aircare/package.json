@@ -39,7 +39,9 @@
     "layout": "node tests/layout.mjs",
     "axe": "node tests/axe.mjs",
     "sound": "node tests/sound.mjs d.html && node tests/sound.mjs e.html && node tests/sound.mjs f.html",
-    "workflow": "node tests/workflow.mjs"
+    "workflow": "node tests/workflow.mjs",
+    "accuracy": "node tests/accuracy.mjs",
+    "backpanel": "node tests/backpanel.mjs a.html && node tests/backpanel.mjs b.html && node tests/backpanel.mjs c.html && node tests/backpanel.mjs d.html && node tests/backpanel.mjs e.html && node tests/backpanel.mjs f.html"
   },
   "devDependencies": {
     "playwright": "1.56.0",

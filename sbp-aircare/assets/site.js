@@ -11,6 +11,7 @@ import { h, $, $$, COMPANY, DEMO, BRANDS, PROCESS, DATA, TRAVEL } from './sbp-co
 import { cart } from './commerce.js';
 import { askTeam } from './contact.js';
 import { deliver, canSend, privacyNote, honeypot } from './submit.js';
+import { panelEntry } from './backpanel.js';
 import { mountRemoteSurvey } from './survey.js';
 import { QUEUE_URL, fetchStatus } from './queue.js';
 import { mountPalette } from './palette.js';
@@ -136,7 +137,8 @@ export function mountSite(cfg) {
     if (focus && INTRO[v]) INTRO[v].h1.focus({ preventScroll: true });
   }
   const baseTitle = document.title;
-  const push = id => { try { history.pushState(null, '', '#' + id); } catch (e) { /* sandboxed: fine without history */ } };
+  // ★Rev.34 a link inside an open panel (menu sheet, quotation …) takes over the panel's history entry (backpanel.js) — no dead Back step
+  const push = id => { try { if (panelEntry()) history.replaceState(null, '', '#' + id); else history.pushState(null, '', '#' + id); } catch (e) { /* sandboxed: fine without history */ } };
   const ORIG = Element.prototype.scrollIntoView;
   // instant jump (CSS scroll-behavior:smooth on the page would otherwise animate it); older browsers without 'instant' get the CSS switched off for the call
   function instant(f, legacy) { const de = document.documentElement, sb = de.style.scrollBehavior; de.style.scrollBehavior = 'auto'; try { f(); } catch (e) { legacy(); } de.style.scrollBehavior = sb; }

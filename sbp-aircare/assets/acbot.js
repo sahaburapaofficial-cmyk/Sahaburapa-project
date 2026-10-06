@@ -9,6 +9,7 @@
 //   · brand error codes differ → never guess a code's meaning; ask for a photo of the code and the model instead
 import { COMPANY, h, baht } from './sbp-core.js';
 import { cart } from './commerce.js';
+import { watchPanel } from './backpanel.js';
 import { DEFAULTS } from './ticket.js';
 import { lineLink } from './contact.js';
 import { SYMPTOMS, symptom, matchSymptoms, diagnose, diagLine } from './acdiag.js';
@@ -136,6 +137,8 @@ export function mountAcBot({ openCart, go } = {}) {
     if (on && !started) { started = true; msg('bot', h('p', {}, 'เลือกหรือพิมพ์อาการ ผู้ช่วยบอกวิธีตรวจเบื้องต้น ถามสั้น ๆ ไม่เกิน 5 ข้อ แล้วชี้จุดที่น่าจะเสียพร้อมราคามาตรฐาน เพื่อให้ช่างเตรียมอุปกรณ์และอะไหล่ไปถูกจุด'), chips(SYMPTOMS), h('p', { class: 'ab-safe' }, SAFETY)); }
     if (on) inp.focus({ preventScroll: true }); else fab.focus({ preventScroll: true });
   }
+  watchPanel(panel, () => !panel.hidden, () => toggle(false));   // ★Rev.34 Back closes the assistant
+
   fab.addEventListener('click', () => toggle(panel.hidden));
   addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) toggle(false); });
   return {
