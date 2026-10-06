@@ -41,8 +41,11 @@ const bad = ['แก้หายแน่นอน', 'ประหยัดไ�
 const all = await p.evaluate(() => document.getElementById('paths').innerText + document.getElementById('doors').innerText);
 ok(!bad.some(w => all.includes(w)), 'no forbidden promise wording (rule 11)');
 // Rev.39/40: the step picture becomes a rendered 3D still; the customer can turn it left · front · right
-const v3 = await p.waitForFunction(() => document.querySelector('#paths img.pa-v.in') && !document.querySelector('#paths .pa-view').hidden, null, { timeout: 240000, polling: 1000 }).then(() => true, () => false);
-ok(v3, '3D still shown in the journey + angle buttons');
+// (software GL — like this test machine — keeps the line art: one still would block the page for seconds)
+const soft = await p.evaluate(() => { try { const g = document.createElement('canvas').getContext('webgl'), d = g && g.getExtension('WEBGL_debug_renderer_info'); const r = d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : ''; g && g.getExtension('WEBGL_lose_context')?.loseContext(); return /swiftshader|llvmpipe|software|basic render/i.test(r); } catch (e) { return false; } });
+const v3 = soft ? false : await p.waitForFunction(() => document.querySelector('#paths img.pa-v.in') && !document.querySelector('#paths .pa-view').hidden, null, { timeout: 60000, polling: 500 }).then(() => true, () => false);
+if (soft) ok(await p.evaluate(() => !!document.querySelector('#paths .pa-sv svg') && document.querySelector('#paths .pa-view').hidden), 'software GL: line art kept, angle buttons hidden');
+else ok(v3, '3D still shown in the journey + angle buttons');
 if (v3) { await act(p.locator('#paths .pa-view button', { hasText: 'มุมขวา' }));
   ok(await p.waitForFunction(() => document.querySelector('#paths .pa-art').dataset.want.endsWith('|1') && document.querySelector('#paths .pa-view [data-v="1"]').getAttribute('aria-pressed') === 'true', null, { timeout: 5000 }).then(() => true, () => false), 'angle button turns the still to the right view');
   ok(await p.waitForFunction(() => [...document.querySelectorAll('#paths img.pa-v.in')].some(i => !i.classList.contains('out')), null, { timeout: 240000, polling: 1000 }).then(() => true, () => false), 'right view rendered'); }

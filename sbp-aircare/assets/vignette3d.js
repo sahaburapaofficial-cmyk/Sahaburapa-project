@@ -4,7 +4,8 @@
 // glass information panels with the real figures, the site's own 3D models: FUJIVA unit, outdoor unit, tools, manifold gauges,
 // vacuum pump, copper line set). The page then moves the still with CSS (drift, light sweep, parallax) — no live WebGL left
 // running, nothing added to the ≤ 3 context budget. Shots are queued one at a time and the GL context is released when idle.
-//   vignette(key, { theme, accent, info, view }) → Promise<dataURL | null>   (null = no WebGL → the page keeps its line art)
+//   vignette(key, { theme, accent, info, view, force }) → Promise<dataURL | null>   (null = no WebGL, software GL, or a slow device →
+//   the page keeps its line art; force renders anyway — test pages only)
 //   view: −1 · 0 · 1 = the camera from the left · front · right (Rev.40: the customer turns the still to look from another side)
 //   key: door:clean · door:install · door:repair · c1…c6 · i1…i6 · r1…r6
 //   info: figures to print on the glass panels (from the shared constants — this module types no numbers of its own)
@@ -13,7 +14,7 @@ import { quiet } from './lazy.js';
 const SHOTS = {};
 let studioP = null, studioK = '', queue = Promise.resolve(), idle = 0;
 
-function studio(theme, accent) {
+function studio(theme, accent, force) {
   if (studioP && studioK !== theme + accent) { const p = studioP; studioP = null; p.then(s => s && s.dispose()); }
   if (studioP) return studioP;
   studioK = theme + accent;
@@ -28,6 +29,7 @@ function studio(theme, accent) {
     const cv = document.createElement('canvas');
     const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
     let soft = false; try { const g = r.getContext(), d = g.getExtension('WEBGL_debug_renderer_info'); soft = /swiftshader|llvmpipe|software|basic render/i.test(d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : ''); } catch (e) { /* unknown */ }
+    if (soft && !force) { r.dispose(); r.forceContextLoss(); return { soft, has: () => true, render: async () => null, dispose() {} }; }   // stop before the costly setup
     const W = soft ? 720 : 1280, H = soft ? 450 : 800;
     r.setPixelRatio(1); r.setSize(W, H, false); r.debug.checkShaderErrors = false;
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = theme === 'light' ? 1.05 : 1.12;
@@ -246,22 +248,28 @@ function studio(theme, accent) {
         try { cv.toBlob(bl => (bl && bl.type === 'image/webp') ? done(bl) : cv.toBlob(done, 'image/png'), 'image/webp', 0.9); } catch (e) { res(null); }
       });
     }
-    return { render, has: k => !!S[k], dispose() { pm.dispose(); r.dispose(); r.forceContextLoss(); } };
+    return { render, soft, has: k => !!S[k], dispose() { pm.dispose(); r.dispose(); r.forceContextLoss(); } };
   })().catch(() => null);
   return studioP;
 }
 
 /** one rendered vignette (queued, one at a time; the studio is released 6 s after the last one) */
-export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {}, view = 0 } = {}) {
+let slow = false;   // a still took too long on this device: keep the line art from now on (the page must stay responsive)
+export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {}, view = 0, force = false } = {}) {
   const id = `${theme}|${accent}|${key}|${view}`;
   if (SHOTS[id]) return Promise.resolve(SHOTS[id]);
   if (typeof WebGLRenderingContext === 'undefined') return Promise.resolve(null);
   const job = queue.then(async () => {
     if (SHOTS[id]) return SHOTS[id];
     clearTimeout(idle);
-    const st = await studio(theme, accent); if (!st || !st.has(key)) return null;
+    if (slow && !force) return null;
+    const st = await studio(theme, accent, force); if (!st || !st.has(key)) return null;
+    // software GL (no graphics card): one still blocks the page for many seconds — keep the line art instead (test pages pass force)
+    if (st.soft && !force) { slow = true; return null; }
     await quiet();   // between scrolls, when the browser is idle
+    const t0 = performance.now();
     try { SHOTS[id] = await st.render(key, info, view); } catch (e) { SHOTS[id] = null; }
+    if (performance.now() - t0 > 2500 && !force) slow = true;
     idle = setTimeout(() => { const p = studioP; studioP = null; p && p.then(s => s && s.dispose()); }, 6000);
     return SHOTS[id];
   });
