@@ -41,6 +41,8 @@
     "sound": "node tests/sound.mjs d.html && node tests/sound.mjs e.html && node tests/sound.mjs f.html",
     "workflow": "node tests/workflow.mjs",
     "accuracy": "node tests/accuracy.mjs",
+    "rev35": "node tests/rev35.mjs",
+    "rev35:ui": "node tests/rev35-ui.mjs a.html && node tests/rev35-ui.mjs b.html && node tests/rev35-ui.mjs c.html && node tests/rev35-ui.mjs d.html && node tests/rev35-ui.mjs e.html && node tests/rev35-ui.mjs f.html",
     "backpanel": "node tests/backpanel.mjs a.html && node tests/backpanel.mjs b.html && node tests/backpanel.mjs c.html && node tests/backpanel.mjs d.html && node tests/backpanel.mjs e.html && node tests/backpanel.mjs f.html"
   },
   "devDependencies": {

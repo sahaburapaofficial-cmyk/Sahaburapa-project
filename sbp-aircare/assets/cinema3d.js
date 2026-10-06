@@ -10,7 +10,7 @@
 import * as THREE from './three.module.min.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
 import { track } from './gl-pool.js';
-import { whenNear } from './lazy.js';
+import { whenNear, whenQuiet } from './lazy.js';
 import { createWisps } from './wisp3d.js';
 import { buildLuxRoom } from './luxroom3d.js';
 import { h } from './sbp-core.js';
@@ -289,10 +289,12 @@ export function mountCinema(root, { cta = null } = {}) {
   function goTo(v) { const r = trk.getBoundingClientRect(), top = scrollY + r.top; if (still) { film && film.set(v); onFrame(v); return; } scrollTo({ top: top + v * (r.height - innerHeight), behavior: 'smooth' }); }
   if (!hasGL()) { trk.classList.add('poster'); onFrame(still ? 1 : 0); return { goTo }; }
   onFrame(still ? 0.9 : 0);
-  whenNear(stage, () => {
+  // Rev.35 smooth: the film is built once the page has settled (first paint, menus, first taps answer at once) — the graded
+  // poster and the chapter captions are already on screen meanwhile
+  whenNear(stage, () => whenQuiet(() => {
     try { film = createFilm(stage, { still, start: still ? 0.9 : progress(), onFrame }); } catch (e) { trk.classList.add('poster'); stage.innerHTML = ''; return; }
     if (still) film.set(0.9);
-  }, '60% 0px');
+  }, 220, 2500), '60% 0px');
   if (!still) addEventListener('scroll', () => { if (film) film.set(progress()); else onFrame(progress()); }, { passive: true });
   return { goTo, chapters: CHAPTERS, _film: () => film };
 }

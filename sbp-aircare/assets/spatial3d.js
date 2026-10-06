@@ -13,7 +13,7 @@
 import * as THREE from './three.module.min.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
 import { track } from './gl-pool.js';
-import { whenNear } from './lazy.js';
+import { whenNear, whenQuiet } from './lazy.js';
 import { buildLuxRoom } from './luxroom3d.js';
 import { buildOutdoor, materialSet } from './ac3d.js';
 import { tempColor } from './airflow3d.js';
@@ -297,6 +297,6 @@ export function mountSpatial(root, { go = () => {} } = {}) {
   draw();
   if (!hasGL()) { root.classList.add('sp-nogl'); stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); let l = performance.now(); setInterval(() => { const n = performance.now(); tick(Math.min(0.5, (n - l) / 1000)); l = n; }, 250); return { state: S }; }
   fillCards();
-  whenNear(stage, () => { try { createDiorama(stage, labels, { state: () => S, tick, cards }); } catch (e) { root.classList.add('sp-nogl'); stage.innerHTML = ''; stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); } }, '50% 0px');
+  whenNear(stage, () => whenQuiet(() => { try { createDiorama(stage, labels, { state: () => S, tick, cards }); } catch (e) { root.classList.add('sp-nogl'); stage.innerHTML = ''; stage.append(h('p', { class: 'sp-fb' }, 'อุปกรณ์นี้เปิดภาพ 3 มิติไม่ได้ ห้องทดลองด้านข้างยังใช้งานได้ครบ')); } }, 220, 2500), '50% 0px');   // Rev.35 smooth: built once the page has settled
   return { state: S, pick: id => pick(HOTS.find(x => x.id === id)) };
 }

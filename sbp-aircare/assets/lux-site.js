@@ -26,6 +26,7 @@ import { mountJobGuide } from './jobguide.js';
 import { mountSite } from './site.js';
 import { mountQuickClean, cleanFrom } from './quickclean.js';
 import { soundButton } from './luxsound.js';
+import { mountDock } from './luxdock.js';
 
 const fill = (sel, ...kids) => { const el = $(sel); if (el) el.append(...kids.flat().filter(Boolean)); return el; };
 
@@ -175,5 +176,6 @@ export async function mountLux(cfg) {
       repair: () => SVX && SVX.set('repair'),
     },
   });
+  mountDock();   // Rev.35: "ในหน้านี้" rail on wide screens
   return { ...ctx, SITE, JOB, FIT, HWX, cat };
 }

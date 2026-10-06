@@ -463,6 +463,11 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
     <div id="bookRoot"></div>
   </section>
 
+  <section class="sec" id="myac">
+    <div class="sec-h"><div><p class="eyebrow">แอร์ของฉัน</p><h2>เครื่องไหนถึงรอบล้างแล้ว</h2><p>ใส่แอร์ที่บ้านหรือที่ทำงาน แล้วดูว่าแต่ละเครื่องฝุ่นสะสมแค่ไหน ควรล้างเมื่อไร ค่าล้างเท่าไร จองเฉพาะเครื่องที่ถึงรอบได้ในครั้งเดียว</p></div></div>
+    <div id="myacRoot"></div>
+  </section>
+
   <section class="sec" id="start">
     <div class="sec-h"><div><p class="eyebrow">เริ่มต้นที่นี่</p><h2>วันนี้ต้องการอะไร</h2><p>เลือกสิ่งที่ตรงกับคุณ ระบบพาไปทีละขั้นจนส่งคำขอ ทำต่อจากเดิมได้เมื่อกลับมา</p></div></div>
     <div id="startRoot"></div>
@@ -725,12 +730,14 @@ import { mountKnowledge } from './assets/knowledge.js';
 import { mountJobGuide } from './assets/jobguide.js';
 import { mountSite } from './assets/site.js';
 import { mountQuickClean, cleanFrom } from './assets/quickclean.js';
+import { mountMyAc } from './assets/myac.js';
 await loadData(); await loadMedia();
 enhanceQuoteForm();
 $$('[data-ask]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); askTeam(a.dataset.ask); }));
 const CART = mountCart();
 // Rev.11: cleaning first — quick booking on the home page + "เริ่ม ฿…" from the Pricebook
 const QC = mountQuickClean(document.getElementById('bookRoot'), { openCart: CART.open, onB2B: () => document.getElementById('b2b').scrollIntoView({ behavior: 'smooth', block: 'start' }) });
+mountMyAc(document.getElementById('myacRoot'), { prefill: QC && QC.prefill, go: id => document.getElementById(id).scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }) });   // ★Rev.35 A: แอร์ของฉัน
 { const f = cleanFrom(); if (f) $$('[data-clean-from]').forEach(x => x.textContent = baht(f)); }
 mountQuotePill(CART.open);
 mountFlow(document.getElementById('flowRoot'), { room: 'studio', product: 'catalog', service: 'cleanflow', area: 'area', quote: 'quote' }, { openCart: CART.open });
@@ -843,7 +850,7 @@ reveal();
 mountTradeIn($('#tiRoot'), { catalog: cat, openCart: CART.open });   // Rev.24 trade-in old AC: repair vs replace + trade-in assessment
 const SITE = mountSite({
   variant: 'A', openCart: CART.open, openProduct,
-  views: { home: ['hero', 'book', 'start', 'flow', 'services'], shop: ['catalog', 'tradein', 'studio', 'fit'], service: ['cleanflow', 'symptoms', 'standards', 'prices', 'quality', 'story', 'inside'], business: ['enterprise', 'b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['hero', 'book', 'myac', 'start', 'flow', 'services'], shop: ['catalog', 'tradein', 'studio', 'fit'], service: ['cleanflow', 'symptoms', 'standards', 'prices', 'quality', 'story', 'inside'], business: ['enterprise', 'b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });
 // Rev.30: "not sure what you need?" — the four-question consultation (atelier.js, same rules as design E) under the intent picker;

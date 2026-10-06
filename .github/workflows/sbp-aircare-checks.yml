@@ -46,3 +46,5 @@ jobs:
         run: node tests/enterprise.mjs
       - name: Rev.34 accuracy (VAT · rates · travel per subdistrict · 20,000 quotations vs the owner's rules)
         run: node tests/accuracy.mjs
+      - name: Rev.35 new pieces (BOQ totals = quotation · แอร์ของฉัน room model and rates)
+        run: node tests/rev35.mjs

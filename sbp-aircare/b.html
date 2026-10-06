@@ -167,6 +167,8 @@ span.st{display:inline-block;font:500 11px var(--mono);padding:1px 7px;border:1p
 .st.ok{color:var(--ok)}.st.w{color:var(--warn)}
 @media (max-width:860px){.report{grid-template-columns:1fr}.report .l{border-right:0;border-bottom:1px solid var(--rule)}}
 .ovx{overflow-x:auto}
+#boqRoot{padding:16px 20px 18px}
+@media (max-width:640px){#boqRoot{padding:14px 12px 16px}}
 
 /* catalog */
 .cat{display:grid;grid-template-columns:250px minmax(0,1fr)}
@@ -493,6 +495,13 @@ footer .sx-foot{padding-block:24px 8px}
     </div>
   </section>
 
+  <section class="s" id="boq">
+    <div class="sheet">
+      <div class="sheet-h"><div><p class="lbl">Sheet 01B · BOQ ฝ่ายจัดซื้อ</p><h2>ใบรายการแบบ BOQ จากใบเสนอราคาของคุณ</h2><p>ทุกรายการที่ใส่ใบเสนอราคาเรียงเป็นตาราง รหัส Pricebook · หน่วย · จำนวน · ราคาต่อหน่วย · VAT คัดลอกไปวางใน Excel เพื่อตั้งงบหรือเทียบราคาได้ทันที</p></div></div>
+      <div id="boqRoot"></div>
+    </div>
+  </section>
+
   <!-- CREW SOP: CLEANING C1 / C2 + INSTALLATION (Rev.09 r3 → r4) -->
   <section class="s" id="cleanflow">
     <div class="sheet">
@@ -677,6 +686,7 @@ import { mountRoomFit } from './assets/roomfit.js';
 import { mountKnowledge } from './assets/knowledge.js';
 import { mountJobGuide } from './assets/jobguide.js';
 import { mountSite } from './assets/site.js';
+import { mountBoq } from './assets/boq.js';
 import { mountQuickClean, cleanFrom } from './assets/quickclean.js';
 await loadData(); await loadMedia();
 enhanceQuoteForm();
@@ -698,6 +708,7 @@ TYPES.forEach(t => $('#schedBody').append(h('tr', {},
   h('td', {}, h('span', { class: 'stp' }, h('button', { type: 'button', 'data-b-step': `${t.id}:-1`, 'aria-label': 'ลด' }, '−'), h('input', { type: 'number', min: '0', id: `vb-u-${t.id}`, 'data-b-unit': t.id, 'aria-label': `จำนวน ${t.th}`, inputmode: 'numeric' }), h('button', { type: 'button', 'data-b-step': `${t.id}:1`, 'aria-label': 'เพิ่ม' }, '+'))),
   h('td', { class: 'hide-m' }, h('div', { class: 'bar' }, h('i', { 'data-b-bar': t.id }))))));
 const BLD = mountBuilder($('[data-builder]'));
+mountBoq($('#boqRoot'), { openCart: () => CART.open() });   // ★Rev.35 B: BOQ sheet for purchasing
 mountAnnualPlan($('[data-builder]'), { builder: BLD });
 mountEnterprise($('#entRoot'), { openCart: CART.open, builder: BLD });   // Rev.22 enterprise: sector pain points + sample annual contracts
 const PC = mountPriceCenter($('#priceCenter'));
@@ -785,7 +796,7 @@ const SITE = mountSite({
   variant: 'B', openCart: CART.open, openProduct,
   order: ['home', 'business', 'service', 'shop', 'knowledge', 'contact'],
   navFmt: (i, th) => `${String(i).padStart(2, '0')} ${th}`,
-  views: { home: ['hero', 'book', 'start', 'coverage', 'flow'], business: ['enterprise', 'b2b'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop: ['catalog', 'tradein', 'fit', 'studio'], knowledge: ['learn', 'inside'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['hero', 'book', 'start', 'coverage', 'flow'], business: ['enterprise', 'b2b', 'boq'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop: ['catalog', 'tradein', 'fit', 'studio'], knowledge: ['learn', 'inside'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'SOP · ลำดับการทำงานของระบบ', cleanflow: 'ทีมช่าง · SOP ล้าง / ติดตั้ง', inside: 'ข้างในแอร์ · ล้างเสมือนจริง' },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });

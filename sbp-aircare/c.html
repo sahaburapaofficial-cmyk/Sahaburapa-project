@@ -441,6 +441,12 @@ table.cmp{border-collapse:collapse;font-size:14px;width:100%}.cmp th,.cmp td{pad
     <div class="panel" id="fitRoot"></div>
   </section>
 
+  <!-- Rev.35: try a unit on a photo of your own wall -->
+  <section class="sec" id="wallfit">
+    <div class="sec-h"><p class="eyebrow">โชว์รูมที่บ้านคุณ</p><h2>ลองวางบนผนังบ้านคุณ</h2><p>ถ่ายรูปผนังที่จะติดแอร์ แล้ววางเครื่องตามสัดส่วนจริงลงบนรูป ลากไปวางตรงที่ชอบ ดูว่าเครื่องกินพื้นที่ผนังแค่ไหน ต้องเว้นที่ว่างรอบเครื่องเท่าไร และลมเย็นจะออกทางไหน</p></div>
+    <div class="panel" id="wallRoot"></div>
+  </section>
+
   <!-- CREW AT WORK: CLEANING C1 / C2 + INSTALLATION (Rev.09 r3 → r4) -->
   <section class="sec" id="cleanflow">
     <div class="sec-h"><p class="eyebrow">ทีมช่างของเรา · งานล้างและงานติดตั้ง</p><h2>ทีมช่าง 2 คน ล้างและติดตั้งแอร์ทีละขั้น ในบ้าน ร้านค้า คาเฟ่ และห้องประชุม</h2><p>เลือกงานและประเภทแอร์ แล้วกดเล่นทีละขั้น เห็นช่างส่งต่อชิ้นส่วนกันอย่างไร ล้างปกติกับล้างใหญ่ต่างกันตรงไหน ติดตั้งมาตรฐานกับพรีเมียมทดสอบอะไรเพิ่ม พร้อมราคามาตรฐานจาก Pricebook</p></div>
@@ -561,6 +567,7 @@ import { mountTradeIn } from './assets/tradein.js';
 import { travelTable, mountQuotePill, mountMobileMenu, mountFlow, enhanceQuoteForm, askTeam } from './assets/journey.js';
 import { loadMedia, productVisual } from './assets/product-media.js';
 import { mountRoomFit } from './assets/roomfit.js';
+import { mountWallFit } from './assets/wallfit.js';
 import { mountKnowledge } from './assets/knowledge.js';
 import { mountJobGuide } from './assets/jobguide.js';
 import { mountSite } from './assets/site.js';
@@ -630,6 +637,8 @@ const cat = mountCatalog($('[data-catalog]'), {
   onOpen: (m, s) => openProduct(m, m.skus.indexOf(s)),
   onCompare: items => { const b = $('#drawerBody'); b.innerHTML = ''; b.append(h('h3', { style: 'font-size:24px;margin-bottom:10px' }, 'เทียบรุ่น'), compareTable(items)); openDrawer(drawer); },
 });
+// Rev.35: try a unit on a photo of the visitor's wall → the catalog at that type and size
+mountWallFit($('#wallRoot'), { onSize: (t, b) => { cat.setType(t); cat.setBtu(b); document.getElementById('catalog').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
 const railAll = h('button', { type: 'button', 'aria-pressed': 'true', onclick: () => pickRail(null, railAll) }, 'ทั้งหมด');
 $('#rail').append(railAll, ...TYPES.map(t => { const b = h('button', { type: 'button', 'aria-pressed': 'false' }, h('span', { html: typeArt(t.id) }), t.th); b.addEventListener('click', () => pickRail(t.id, b)); return b; }));
 function pickRail(id, btn) { $$('#rail button').forEach(b => b.setAttribute('aria-pressed', b === btn)); cat.setType(id); }
@@ -661,7 +670,7 @@ reveal();
 mountTradeIn($('#tiRoot'), { catalog: cat, openCart: CART.open });   // Rev.24 trade-in old AC: repair vs replace + trade-in assessment
 const SITE = mountSite({
   variant: 'C', openCart: CART.open, openProduct,
-  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'tradein', 'room', 'fit'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], business: ['enterprise', 'b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['top', 'book', 'start', 'coverage', 'flow'], shop: ['catalog', 'tradein', 'room', 'fit', 'wallfit'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], business: ['enterprise', 'b2b'], knowledge: ['journey', 'learn'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'ช่างทำงานในบ้านจำลอง', cleanflow: 'ทีมช่างล้าง · ติดตั้ง' },
   hooks: {
     clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'),

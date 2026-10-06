@@ -405,7 +405,7 @@ html.fx-F .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my
 :root[data-lux="E"] .at-hero h1 em{background:linear-gradient(100deg,#2F47F5,#8B7BFF 50%,#E25AA6);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-lux="E"] .eyebrow{color:#2F47F5}
 @media (prefers-reduced-motion:no-preference){
-  :root[data-lux] .sec-h h2+p::before{background-size:200% 100%;animation:lxHolo 6s linear infinite}
+  :root[data-lux] .sec-h h2+p::before{background-size:200% 100%;animation:lxHolo 2.4s var(--m-ease,ease-out) 1 both}   /* Rev.35: one sweep when the section is shown (was an endless repaint on every heading) */
   @keyframes lxHolo{to{background-position:200% 0}}
 }
 /* ★Rev.31 film HUD (D) */
@@ -525,3 +525,15 @@ html.fx-F .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my
 .sp-scan:hover{background:rgba(77,243,255,.16)}
 .sp-scan[aria-pressed="true"]{background:var(--cool);color:#021018;box-shadow:0 0 22px -4px rgba(77,243,255,.9)}
 .cn-k{display:inline-block;width:max-content;padding:3px 10px;background:rgba(2,8,16,.55);border-left:2px solid #63E6FF}
+
+/* ---------- Rev.35 "ในหน้านี้" dock (luxdock.js) — wide screens only ---------- */
+.lx-dock{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:45;display:grid;gap:2px;justify-items:end;padding:8px 6px;border-radius:16px;transition:background var(--m-mid,.25s),box-shadow var(--m-mid,.25s)}
+.lx-dock a{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--s-ink-2);font-size:12.5px;min-height:28px;padding:0 4px;border-radius:999px}
+.lx-dock i{font-style:normal;font-family:var(--s-mono,monospace);font-size:10.5px;width:26px;height:20px;display:grid;place-items:center;border-radius:999px;border:1px solid var(--s-line);background:color-mix(in oklab,var(--s-card) 80%,transparent);transition:background var(--m-fast,.15s),color var(--m-fast,.15s),width var(--m-mid,.25s) var(--m-ease,ease)}
+.lx-dock span{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;transition:max-width var(--m-mid,.25s) var(--m-ease,ease),opacity var(--m-fast,.15s)}
+.lx-dock a[aria-current] i{background:var(--s-accent);color:var(--s-on-accent);border-color:transparent;width:34px}
+.lx-dock:hover,.lx-dock:focus-within{background:color-mix(in oklab,var(--s-card) 88%,transparent);box-shadow:var(--e-2,0 10px 30px -12px rgba(0,0,0,.4));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.lx-dock:hover span,.lx-dock:focus-within span{max-width:220px;opacity:1}
+.lx-dock a:hover,.lx-dock a:focus-visible{color:var(--s-ink)}.lx-dock a:focus-visible{outline:2px solid var(--s-accent);outline-offset:2px}
+@media (max-width:1299px){.lx-dock{display:none}}
+@media (prefers-reduced-motion:reduce){.lx-dock *{transition:none}}
