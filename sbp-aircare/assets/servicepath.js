@@ -10,12 +10,18 @@
 //     text, step counts of the company forms) — nothing typed in here; times are estimates with TIME_NOTE (rule 22)
 //   · no promise wording (rule 11) · repair never starts before the customer approves the price (rule 13)
 //   · animations are CSS on inline SVG, run only while on screen (runWhenVisible), still under reduced motion
+// Rev.39 (owner: "ภาพไม่สวยไม่เสมือนจริง เป็นเหมือนการ์ตูนยุคเก่า … ต้องการ high-tech / luxury / modern 3D … ข้อมูลจัดเรียงให้เป็นระเบียบ
+// … สีสัน แสง การเคลื่อนไหวเวลาคลิก เวลาเลื่อน แบบไม่หวือหวา"): every door and step shows a rendered 3D still (vignette3d.js) in place
+// of the line art (the line art stays underneath as the no-WebGL fallback and while the still renders) · key facts as chips · the
+// still drifts slowly, a soft light sweeps it, it leans with the pointer/scroll and crossfades between steps (lux.css .pa-v*)
 import { h, baht, DATA, TRAVEL, QUEUE_RULES, JOB_TIME, TIME_NOTE, timeTh, cleanRate, reduceMotion } from './sbp-core.js';
 import { cleanFrom } from './quickclean.js';
 import { cleanSteps, installSteps } from './services.js';
 import { diagLine } from './acdiag.js';
 import { FIT_RULES } from './roomfit.js';
 import { runWhenVisible } from './animicons.js';
+import { whenNear } from './lazy.js';
+import { vignette } from './vignette3d.js';
 
 /* ---------------- illustrations (inline SVG, animated by lux.css .pa-*) ---------------- */
 const U = (x, y, w = 70, cls = '') => `<g class="pa-u ${cls}" transform="translate(${x} ${y})"><rect class="pa-body" width="${w}" height="${w * 0.3}" rx="${w * 0.07}"/><rect class="pa-vent" x="${w * 0.08}" y="${w * 0.22}" width="${w * 0.84}" height="${w * 0.035}" rx="1"/><circle class="pa-led" cx="${w * 0.84}" cy="${w * 0.1}" r="${w * 0.022}"/></g>`;
@@ -69,12 +75,12 @@ function data() {
       when: 'ลมเบาลง เย็นช้า มีกลิ่น หรือถึงรอบล้าง (บ้านทั่วไป 3–6 เดือน ห้องฝุ่นมาก สัตว์เลี้ยง ติดถนน ถี่กว่านั้น)',
       time: `${timeTh(JOB_TIME.C1.wall)} ต่อเครื่อง (ติดผนัง ล้างปกติ)`, price: from != null ? `เริ่ม ${baht(from)} ก่อน VAT` : 'ดูราคาในจองล้าง',
       steps: [
-        { k: 'c1', t: 'บอกประเภทและจำนวนเครื่อง', what: 'เลือกประเภทแอร์ (ติดผนัง แขวน สี่ทิศทาง ตู้ตั้ง) ขนาด และจำนวนในหน้าจองล้าง', why: 'ราคาและเวลาของงานล้างขึ้นกับประเภทและขนาดของเครื่อง', get: 'รู้ทันทีว่างานของคุณเป็นงานแบบไหน', go: ['book', 'เริ่มจองล้าง'] },
-        { k: 'c2', t: 'เห็นราคารวมก่อนยืนยัน', what: 'ระบบรวมราคามาตรฐานจาก Pricebook ของทุกเครื่อง แสดงก่อน VAT · VAT · รวมทั้งสิ้น', why: `งานล้างมียอดขั้นต่ำ ${baht(min)} ก่อน VAT ต่อการเข้างาน ถ้าไม่ถึง คิดค่าเดินทาง ${baht(trip)} แทนการเติมยอด`, get: 'ตัวเลขชัดเจนตั้งแต่ก่อนนัด ไม่มีราคาเปลี่ยนเองหน้างาน', go: ['book', 'ดูราคาของฉัน'] },
-        { k: 'c3', t: 'เลือกวันและช่วงเวลา', what: `จองปกติล่วงหน้า ${lead} วัน เลือกเช้าหรือบ่าย · ต้องการเร็วกว่านั้นเป็นคิวด่วน +${baht(rush)} ก่อน VAT ต่อการเข้างาน`, why: 'ทีมช่างประจำจัดเส้นทางล่วงหน้า คิวด่วนต้องมีช่องว่างจริง ทีมยืนยันก่อนทุกครั้ง', get: 'ไม่มีคิวด่วน = ไม่เก็บค่าคิวด่วน', go: ['book', 'เลือกวัน'] },
-        { k: 'c4', t: 'ส่งใบจองพร้อมรูปหน้างาน', what: 'ตอบคำถามสภาพหน้างาน 1 นาที (ความสูง ตำแหน่งคอยล์ร้อน คราบหนัก) แนบรูปถ้ามี แล้วส่ง ได้เลขอ้างอิงทันที', why: 'ทีมเห็นงานนอกมาตรฐานก่อนวันงาน และแจ้งราคาส่วนเพิ่มให้คุณอนุมัติก่อนยืนยันคิว', get: 'เลขอ้างอิงไว้ติดตาม · ทีมโทรยืนยันคิวในเวลาทำการ', go: ['quote', 'เปิดใบเสนอราคา'], cart: true },
-        { k: 'c5', t: 'วันงาน: ทีมช่างทำอะไรบ้าง', what: `ล้างปกติ (C1) ${c1n} ขั้นตามแบบฟอร์มบริษัท: คลุมผ้าใบล้างแอร์ ถอดแผ่นกรองและฝาหน้า ลงน้ำยาทิ้งไว้ 5–15 นาทีตามความสกปรก ล้างด้วยน้ำแรงดัน เป่าไล่น้ำ ประกอบ ทดสอบ · ล้างใหญ่ (C2) ${c2n} ขั้น ปลดเครื่องลงมาล้าง ไม่ตัดท่อ`, why: 'น้ำและคราบลงผ้าใบไปที่ถัง ไม่เลอะห้อง · ทุกขั้นมีรายการตรวจของบริษัท', get: 'ลมผ่านคอยล์กลับมาเต็ม ห้องเย็นเร็วขึ้น', go: ['cleanflow', 'ดูทีมช่างทำงาน 3 มิติ'], hook: 'clean' },
-        { k: 'c6', t: 'หลังงาน: สรุปและรับประกัน', what: 'ช่างเปิดเครื่องทดสอบให้ดูก่อนกลับ แพ็กเกจล้างพร้อมรายงานมีภาพก่อน–หลังและเกรดสภาพเครื่อง', why: 'คุณเห็นว่าทำอะไรไปบ้าง และรู้รอบล้างครั้งต่อไป', get: cw ? `รับประกันงานล้าง: ${cw}` : 'รับประกันงานล้างตามแพ็กเกจ', go: ['standards', 'มาตรฐานงานของเรา'] },
+        { k: 'c1', f: [['เริ่ม', from != null ? `${baht(from)} ก่อน VAT` : 'ดูในจองล้าง'], ['ประเภท', 'ติดผนัง · แขวน · สี่ทิศทาง · ตู้ตั้ง']], t: 'บอกประเภทและจำนวนเครื่อง', what: 'เลือกประเภทแอร์ (ติดผนัง แขวน สี่ทิศทาง ตู้ตั้ง) ขนาด และจำนวนในหน้าจองล้าง', why: 'ราคาและเวลาของงานล้างขึ้นกับประเภทและขนาดของเครื่อง', get: 'รู้ทันทีว่างานของคุณเป็นงานแบบไหน', go: ['book', 'เริ่มจองล้าง'] },
+        { k: 'c2', f: [['ขั้นต่ำต่อการเข้างาน', `${baht(min)} ก่อน VAT`], ['ไม่ถึงขั้นต่ำ', `ค่าเดินทาง ${baht(trip)}`]], t: 'เห็นราคารวมก่อนยืนยัน', what: 'ระบบรวมราคามาตรฐานจาก Pricebook ของทุกเครื่อง แสดงก่อน VAT · VAT · รวมทั้งสิ้น', why: `งานล้างมียอดขั้นต่ำ ${baht(min)} ก่อน VAT ต่อการเข้างาน ถ้าไม่ถึง คิดค่าเดินทาง ${baht(trip)} แทนการเติมยอด`, get: 'ตัวเลขชัดเจนตั้งแต่ก่อนนัด ไม่มีราคาเปลี่ยนเองหน้างาน', go: ['book', 'ดูราคาของฉัน'] },
+        { k: 'c3', f: [['จองปกติ', `ล่วงหน้า ${lead} วัน`], ['คิวด่วน', `+${baht(rush)} ก่อน VAT`], ['ช่วงเวลา', 'เช้า · บ่าย']], t: 'เลือกวันและช่วงเวลา', what: `จองปกติล่วงหน้า ${lead} วัน เลือกเช้าหรือบ่าย · ต้องการเร็วกว่านั้นเป็นคิวด่วน +${baht(rush)} ก่อน VAT ต่อการเข้างาน`, why: 'ทีมช่างประจำจัดเส้นทางล่วงหน้า คิวด่วนต้องมีช่องว่างจริง ทีมยืนยันก่อนทุกครั้ง', get: 'ไม่มีคิวด่วน = ไม่เก็บค่าคิวด่วน', go: ['book', 'เลือกวัน'] },
+        { k: 'c4', f: [['ได้ทันที', 'เลขอ้างอิง'], ['งานนอกมาตรฐาน', 'แจ้งราคาก่อนยืนยันคิว']], t: 'ส่งใบจองพร้อมรูปหน้างาน', what: 'ตอบคำถามสภาพหน้างาน 1 นาที (ความสูง ตำแหน่งคอยล์ร้อน คราบหนัก) แนบรูปถ้ามี แล้วส่ง ได้เลขอ้างอิงทันที', why: 'ทีมเห็นงานนอกมาตรฐานก่อนวันงาน และแจ้งราคาส่วนเพิ่มให้คุณอนุมัติก่อนยืนยันคิว', get: 'เลขอ้างอิงไว้ติดตาม · ทีมโทรยืนยันคิวในเวลาทำการ', go: ['quote', 'เปิดใบเสนอราคา'], cart: true },
+        { k: 'c5', f: [['ล้างปกติ C1', `${c1n} ขั้น`], ['ล้างใหญ่ C2', `${c2n} ขั้น · ไม่ตัดท่อ`], ['น้ำยาทำงาน', '5–15 นาที']], t: 'วันงาน: ทีมช่างทำอะไรบ้าง', what: `ล้างปกติ (C1) ${c1n} ขั้นตามแบบฟอร์มบริษัท: คลุมผ้าใบล้างแอร์ ถอดแผ่นกรองและฝาหน้า ลงน้ำยาทิ้งไว้ 5–15 นาทีตามความสกปรก ล้างด้วยน้ำแรงดัน เป่าไล่น้ำ ประกอบ ทดสอบ · ล้างใหญ่ (C2) ${c2n} ขั้น ปลดเครื่องลงมาล้าง ไม่ตัดท่อ`, why: 'น้ำและคราบลงผ้าใบไปที่ถัง ไม่เลอะห้อง · ทุกขั้นมีรายการตรวจของบริษัท', get: 'ลมผ่านคอยล์กลับมาเต็ม ห้องเย็นเร็วขึ้น', go: ['cleanflow', 'ดูทีมช่างทำงาน 3 มิติ'], hook: 'clean' },
+        { k: 'c6', f: [['รับประกัน', cw || 'ตามแพ็กเกจ'], ['รายงาน', 'ภาพก่อน–หลัง · เกรดสภาพเครื่อง']], t: 'หลังงาน: สรุปและรับประกัน', what: 'ช่างเปิดเครื่องทดสอบให้ดูก่อนกลับ แพ็กเกจล้างพร้อมรายงานมีภาพก่อน–หลังและเกรดสภาพเครื่อง', why: 'คุณเห็นว่าทำอะไรไปบ้าง และรู้รอบล้างครั้งต่อไป', get: cw ? `รับประกันงานล้าง: ${cw}` : 'รับประกันงานล้างตามแพ็กเกจ', go: ['standards', 'มาตรฐานงานของเรา'] },
       ],
     },
     install: {
@@ -83,12 +89,12 @@ function data() {
       when: 'ซื้อแอร์ใหม่ ย้ายบ้าน รีโนเวท หรือเปลี่ยนเครื่องเก่า',
       time: `${timeTh(JOB_TIME.install.wall)} ต่อเครื่อง (ติดผนัง)`, price: insEx != null ? `ค่าติดตั้งเริ่ม ${baht(insEx)} ก่อน VAT` : 'ดูราคาพร้อมติดตั้งในหน้าสินค้า',
       steps: [
-        { k: 'i1', t: 'เลือกรุ่นและขนาด', what: 'ดูแอร์ 705 รุ่น 22 แบรนด์ กรองตามประเภท ขนาด BTU ราคา Inverter ไม่แน่ใจขนาด ใช้ห้องจำลองคำนวณ BTU', why: 'ขนาดที่พอดีกับห้องเย็นเร็ว ไม่ทำงานหนักเกินไป', get: 'ราคาเครื่อง + ราคาพร้อมติดตั้งในหน้าเดียว', go: ['catalog', 'ดูแอร์ทุกรุ่น'] },
-        { k: 'i2', t: 'ลองวางในห้องของคุณ', what: 'ใส่ขนาดห้อง เลือกผนัง แล้วดูเครื่องตามขนาดจริง ระยะห่างฝ้า ทิศทางลม และความยาวท่อโดยประมาณ', why: 'เห็นปัญหาก่อนวันติดตั้ง เช่น ลมเป่าหัวเตียง ท่อยาวเกิน', get: 'ตำแหน่งที่เหมาะและงบท่อส่วนเกินโดยประมาณ', go: ['fit', 'ลองวางในห้อง'] },
-        { k: 'i3', t: 'รู้ว่าราคารวมอะไร', what: `ค่าติดตั้งมาตรฐานรวมท่อและวัสดุ ${FIT_RULES.pipeIncluded} เมตรแรก ส่วนเกินคิดต่อเมตรตาม Pricebook · เลือกมาตรฐานหรือพรีเมียม`, why: 'วัสดุทุกชิ้นระบุยี่ห้อและสเปก เทียบได้ก่อนตัดสินใจ', get: 'ค่าใช้จ่ายแยกรายการ ก่อน VAT', go: ['prices', 'ดูค่าบริการทั้งหมด'] },
-        { k: 'i4', t: 'ส่งใบจองพร้อมรูปจุดติดตั้ง', what: 'ส่งรูปผนังที่จะติด ตำแหน่งคอยล์ร้อน และเบรกเกอร์ ทีมประเมินงานนอกมาตรฐาน (เจาะคอนกรีต งานที่สูง เดินสายเมน)', why: 'ลดการเรียกช่างไปดูหน้างานก่อน และไม่มีรายการเพิ่มหน้างานโดยไม่แจ้ง', get: 'ใบเสนอราคาเดียวครบทั้งเครื่องและงานติดตั้ง', go: ['quote', 'เปิดใบเสนอราคา'], cart: true },
-        { k: 'i5', t: 'วันติดตั้ง', what: `${in_n} ขั้นตามแบบฟอร์มบริษัท: ตีแนว ยึดขา เจาะผนัง ยกเครื่อง เดินท่อในราง ท่อน้ำทิ้ง สายไฟ ตรวจรั่วด้วยไนโตรเจน ทำสุญญากาศพร้อมไมครอนเกจ เปิดวาล์ว ทดสอบ เก็บงาน`, why: 'ระบบที่ไม่รั่วและไม่มีความชื้น คือสิ่งที่ทำให้แอร์ใช้งานได้นาน', get: 'งานเรียบร้อย ท่อไม่โผล่ พร้อมค่าที่วัดหลังติดตั้ง', go: ['cleanflow', 'ดูขั้นตอนติดตั้ง 3 มิติ'], hook: 'install' },
-        { k: 'i6', t: 'ส่งมอบและรับประกัน', what: 'ทดสอบการทำงานต่อหน้าคุณ ลงนามส่งมอบ พร้อมแนะนำการใช้งานและรอบล้าง', why: 'รับประกันงานติดตั้งตามใบเสนอราคา', get: 'รับประกันงานติดตั้ง 3 ปีเมื่อซื้อเครื่องกับบริษัท · 1 ปีเมื่อเป็นเครื่องที่คุณจัดหาเอง', go: ['standards', 'มาตรฐานงานติดตั้ง'] },
+        { k: 'i1', f: [['แคตตาล็อก', '705 รุ่น · 22 แบรนด์'], ['ราคา', 'เครื่อง + พร้อมติดตั้ง']], t: 'เลือกรุ่นและขนาด', what: 'ดูแอร์ 705 รุ่น 22 แบรนด์ กรองตามประเภท ขนาด BTU ราคา Inverter ไม่แน่ใจขนาด ใช้ห้องจำลองคำนวณ BTU', why: 'ขนาดที่พอดีกับห้องเย็นเร็ว ไม่ทำงานหนักเกินไป', get: 'ราคาเครื่อง + ราคาพร้อมติดตั้งในหน้าเดียว', go: ['catalog', 'ดูแอร์ทุกรุ่น'] },
+        { k: 'i2', f: [['เห็นก่อนติดตั้ง', 'ระยะฝ้า · ทิศลม · ความยาวท่อ']], t: 'ลองวางในห้องของคุณ', what: 'ใส่ขนาดห้อง เลือกผนัง แล้วดูเครื่องตามขนาดจริง ระยะห่างฝ้า ทิศทางลม และความยาวท่อโดยประมาณ', why: 'เห็นปัญหาก่อนวันติดตั้ง เช่น ลมเป่าหัวเตียง ท่อยาวเกิน', get: 'ตำแหน่งที่เหมาะและงบท่อส่วนเกินโดยประมาณ', go: ['fit', 'ลองวางในห้อง'] },
+        { k: 'i3', f: [['รวมในค่าติดตั้ง', `ท่อ ${FIT_RULES.pipeIncluded} ม. แรก`], ['ค่าติดตั้งเริ่ม', insEx != null ? `${baht(insEx)} ก่อน VAT` : 'ดูในหน้าสินค้า'], ['ทองแดง', 'O-TWO 0.70 มม.']], t: 'รู้ว่าราคารวมอะไร', what: `ค่าติดตั้งมาตรฐานรวมท่อและวัสดุ ${FIT_RULES.pipeIncluded} เมตรแรก ส่วนเกินคิดต่อเมตรตาม Pricebook · เลือกมาตรฐานหรือพรีเมียม`, why: 'วัสดุทุกชิ้นระบุยี่ห้อและสเปก เทียบได้ก่อนตัดสินใจ', get: 'ค่าใช้จ่ายแยกรายการ ก่อน VAT', go: ['prices', 'ดูค่าบริการทั้งหมด'] },
+        { k: 'i4', f: [['รูปที่ขอ', 'ผนัง · คอยล์ร้อน · เบรกเกอร์'], ['งานนอกมาตรฐาน', 'แจ้งราคาก่อน']], t: 'ส่งใบจองพร้อมรูปจุดติดตั้ง', what: 'ส่งรูปผนังที่จะติด ตำแหน่งคอยล์ร้อน และเบรกเกอร์ ทีมประเมินงานนอกมาตรฐาน (เจาะคอนกรีต งานที่สูง เดินสายเมน)', why: 'ลดการเรียกช่างไปดูหน้างานก่อน และไม่มีรายการเพิ่มหน้างานโดยไม่แจ้ง', get: 'ใบเสนอราคาเดียวครบทั้งเครื่องและงานติดตั้ง', go: ['quote', 'เปิดใบเสนอราคา'], cart: true },
+        { k: 'i5', f: [['ขั้นตอน', `${in_n} ขั้นตามแบบฟอร์ม`], ['ตรวจรั่ว', 'ไนโตรเจน'], ['สุญญากาศ', 'ไมครอนเกจ']], t: 'วันติดตั้ง', what: `${in_n} ขั้นตามแบบฟอร์มบริษัท: ตีแนว ยึดขา เจาะผนัง ยกเครื่อง เดินท่อในราง ท่อน้ำทิ้ง สายไฟ ตรวจรั่วด้วยไนโตรเจน ทำสุญญากาศพร้อมไมครอนเกจ เปิดวาล์ว ทดสอบ เก็บงาน`, why: 'ระบบที่ไม่รั่วและไม่มีความชื้น คือสิ่งที่ทำให้แอร์ใช้งานได้นาน', get: 'งานเรียบร้อย ท่อไม่โผล่ พร้อมค่าที่วัดหลังติดตั้ง', go: ['cleanflow', 'ดูขั้นตอนติดตั้ง 3 มิติ'], hook: 'install' },
+        { k: 'i6', f: [['ซื้อเครื่องกับบริษัท', 'รับประกัน 3 ปี'], ['เครื่องที่คุณจัดหา', 'รับประกัน 1 ปี']], t: 'ส่งมอบและรับประกัน', what: 'ทดสอบการทำงานต่อหน้าคุณ ลงนามส่งมอบ พร้อมแนะนำการใช้งานและรอบล้าง', why: 'รับประกันงานติดตั้งตามใบเสนอราคา', get: 'รับประกันงานติดตั้ง 3 ปีเมื่อซื้อเครื่องกับบริษัท · 1 ปีเมื่อเป็นเครื่องที่คุณจัดหาเอง', go: ['standards', 'มาตรฐานงานติดตั้ง'] },
       ],
     },
     repair: {
@@ -97,17 +103,63 @@ function data() {
       when: 'แอร์ไม่เย็น น้ำหยด เป็นน้ำแข็ง เปิดไม่ติด ไฟกะพริบ เสียงดัง เบรกเกอร์ตัด',
       time: 'ตรวจวินิจฉัยในวันนัด · เวลาซ่อมขึ้นกับอะไหล่และอาการ', price: dWall ? `ค่าตรวจวินิจฉัย ${P(dWall.rate.s)}${dBig && dBig !== dWall ? ` · แอร์ใหญ่ ${P(dBig.rate.s)}` : ''}` : 'ดูค่าตรวจในศูนย์ราคา',
       steps: [
-        { k: 'r1', t: 'บอกอาการ', what: 'เลือกอาการจาก 14 แบบ หรือพิมพ์เล่า ผู้ช่วยถามต่อ 1–5 ข้อ แล้วเรียงจุดที่น่าจะเป็นพร้อมราคามาตรฐาน', why: 'ช่างเตรียมอุปกรณ์และอะไหล่ได้ถูกจุดตั้งแต่ก่อนไป', get: 'รู้ว่าน่าจะเป็นอะไร และค่าใช้จ่ายโดยประมาณ', go: ['symptoms', 'เลือกอาการ'] },
-        { k: 'r2', t: 'ตรวจเองแบบปลอดภัยก่อน', what: 'บางอาการไม่ใช่ของเสีย เช่น ตั้งโหมดผิด แผ่นกรองตัน แบตรีโมต · ทุกคำตอบมีสิ่งที่ทำเองได้อย่างปลอดภัย และสิ่งที่ห้ามทำ', why: 'ประหยัดค่าเรียกช่างถ้าแก้ได้เอง', get: 'ถ้าเกี่ยวกับไฟฟ้า ไฟรั่ว หรือไหม้ ระบบบอกให้ปิดเบรกเกอร์และรอช่าง', go: ['symptoms', 'ดูวิธีตรวจเอง'] },
-        { k: 'r3', t: 'จองช่างตรวจ พร้อมผลประเมิน', what: 'กด "จองช่างตรวจซ่อม" จากผลประเมิน ค่าตรวจวินิจฉัยตามประเภทแอร์เข้าใบจองเอง พร้อมอาการที่คุณตอบ', why: 'ช่างอ่านผลประเมินก่อนเข้างาน', get: dWall ? `ค่าตรวจวินิจฉัยติดผนัง ${P(dWall.rate.s)}` : 'ค่าตรวจตามประเภทแอร์', go: ['quote', 'เปิดใบจอง'], cart: true },
-        { k: 'r4', t: 'วินิจฉัยและแจ้งราคา', what: 'ช่างวัดค่าไฟ น้ำยา อุณหภูมิ และตรวจชิ้นส่วนตามอาการ แล้วแจ้งสาเหตุ ทางเลือก และราคาให้คุณอนุมัติ', why: 'กฎของบริษัท: ไม่ซ่อมก่อนลูกค้าอนุมัติ', get: 'ตัดสินใจได้เองว่าจะซ่อม ล้างก่อน หรือเทียบกับเปลี่ยนเครื่อง', go: ['tradein', 'เทียบซ่อมกับเปลี่ยนเครื่อง'] },
-        { k: 'r5', t: 'ซ่อมหลังคุณอนุมัติ', what: 'ซ่อมตามรายการที่อนุมัติ งานที่ต้องเปิดระบบน้ำยาทำตามขั้นตอนเดียวกับงานติดตั้ง (ตรวจรั่ว ทำสุญญากาศ เติมน้ำยาตามสเปก)', why: 'ไม่มีรายการเพิ่มโดยไม่แจ้ง', get: 'ราคาตามที่ตกลง', go: ['prices', 'ดูราคาซ่อม 86 รายการ'] },
-        { k: 'r6', t: 'ทดสอบและรับประกัน', what: 'เปิดเครื่องทดสอบ วัดอุณหภูมิลมออกและกระแสไฟให้ดู บันทึกในรายงาน', why: 'คุณเห็นผลกับตาก่อนช่างกลับ', get: 'รับประกันตามรายการซ่อมใน Pricebook', go: ['prices', 'ดูเงื่อนไขรับประกัน'] },
+        { k: 'r1', f: [['อาการ', '14 แบบ'], ['ผู้ช่วยถามต่อ', '1–5 ข้อ']], t: 'บอกอาการ', what: 'เลือกอาการจาก 14 แบบ หรือพิมพ์เล่า ผู้ช่วยถามต่อ 1–5 ข้อ แล้วเรียงจุดที่น่าจะเป็นพร้อมราคามาตรฐาน', why: 'ช่างเตรียมอุปกรณ์และอะไหล่ได้ถูกจุดตั้งแต่ก่อนไป', get: 'รู้ว่าน่าจะเป็นอะไร และค่าใช้จ่ายโดยประมาณ', go: ['symptoms', 'เลือกอาการ'] },
+        { k: 'r2', f: [['ไฟรั่ว · ไหม้', 'ปิดเบรกเกอร์ รอช่าง']], t: 'ตรวจเองแบบปลอดภัยก่อน', what: 'บางอาการไม่ใช่ของเสีย เช่น ตั้งโหมดผิด แผ่นกรองตัน แบตรีโมต · ทุกคำตอบมีสิ่งที่ทำเองได้อย่างปลอดภัย และสิ่งที่ห้ามทำ', why: 'ประหยัดค่าเรียกช่างถ้าแก้ได้เอง', get: 'ถ้าเกี่ยวกับไฟฟ้า ไฟรั่ว หรือไหม้ ระบบบอกให้ปิดเบรกเกอร์และรอช่าง', go: ['symptoms', 'ดูวิธีตรวจเอง'] },
+        { k: 'r3', f: [['ค่าตรวจ ติดผนัง', dWall ? P(dWall.rate.s) : 'ตามประเภท'], ...(dBig && dBig !== dWall ? [['ค่าตรวจ แอร์ใหญ่', P(dBig.rate.s)]] : [])], t: 'จองช่างตรวจ พร้อมผลประเมิน', what: 'กด "จองช่างตรวจซ่อม" จากผลประเมิน ค่าตรวจวินิจฉัยตามประเภทแอร์เข้าใบจองเอง พร้อมอาการที่คุณตอบ', why: 'ช่างอ่านผลประเมินก่อนเข้างาน', get: dWall ? `ค่าตรวจวินิจฉัยติดผนัง ${P(dWall.rate.s)}` : 'ค่าตรวจตามประเภทแอร์', go: ['quote', 'เปิดใบจอง'], cart: true },
+        { k: 'r4', f: [['ก่อนซ่อม', 'คุณอนุมัติราคา'], ['ทางเลือก', 'ซ่อม · ล้าง · เปลี่ยน']], t: 'วินิจฉัยและแจ้งราคา', what: 'ช่างวัดค่าไฟ น้ำยา อุณหภูมิ และตรวจชิ้นส่วนตามอาการ แล้วแจ้งสาเหตุ ทางเลือก และราคาให้คุณอนุมัติ', why: 'กฎของบริษัท: ไม่ซ่อมก่อนลูกค้าอนุมัติ', get: 'ตัดสินใจได้เองว่าจะซ่อม ล้างก่อน หรือเทียบกับเปลี่ยนเครื่อง', go: ['tradein', 'เทียบซ่อมกับเปลี่ยนเครื่อง'] },
+        { k: 'r5', f: [['ราคา', 'ตามที่อนุมัติ'], ['เปิดระบบน้ำยา', 'ตรวจรั่ว · สุญญากาศ']], t: 'ซ่อมหลังคุณอนุมัติ', what: 'ซ่อมตามรายการที่อนุมัติ งานที่ต้องเปิดระบบน้ำยาทำตามขั้นตอนเดียวกับงานติดตั้ง (ตรวจรั่ว ทำสุญญากาศ เติมน้ำยาตามสเปก)', why: 'ไม่มีรายการเพิ่มโดยไม่แจ้ง', get: 'ราคาตามที่ตกลง', go: ['prices', 'ดูราคาซ่อม 86 รายการ'] },
+        { k: 'r6', f: [['วัดให้ดู', 'ลมออก · กระแสไฟ'], ['รับประกัน', 'ตามรายการซ่อม']], t: 'ทดสอบและรับประกัน', what: 'เปิดเครื่องทดสอบ วัดอุณหภูมิลมออกและกระแสไฟให้ดู บันทึกในรายงาน', why: 'คุณเห็นผลกับตาก่อนช่างกลับ', get: 'รับประกันตามรายการซ่อมใน Pricebook', go: ['prices', 'ดูเงื่อนไขรับประกัน'] },
       ],
     },
   };
 }
 const ORDER = ['clean', 'install', 'repair'];
+
+/* ---------------- 3D stills (Rev.39) ---------------- */
+// the look of this page: E is a light editorial site, D and F are dark; the accent is the page's own --acc
+function look() {
+  const L = document.documentElement.dataset.lux || 'D';
+  let a = ''; try { a = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(); } catch (e) { /* default */ }
+  return { theme: L === 'E' ? 'light' : 'dark', accent: /^#[0-9a-f]{6}$/i.test(a) ? a : '#63E6FF' };
+}
+// figures printed on the glass panels inside the stills — the same constants as the text
+function figures() {
+  const from = cleanFrom(), ins = DATA.instByCode && DATA.instByCode['INS-W-9000-12000-STANDARD'], dWall = diagLine('wall');
+  const r = t => { const x = cleanRate('Basic Clean', 'C1', t, 0); return x && x.rate && x.rate.s; }, w = r('wall'), c = r('ceiling');
+  const cr = cleanRate('Basic Clean', 'C1', 'wall', 0);
+  let month = ''; try { month = new Date().toLocaleDateString('th-TH', { month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }); } catch (e) { /* none */ }
+  return {
+    cleanFrom: from != null ? baht(from) : '', installFrom: ins && ins.ex != null ? baht(ins.ex) : '', diag: dWall && dWall.rate.s != null ? baht(dWall.rate.s) : '',
+    lines: [w != null && ['ล้างติดผนัง × 2', baht(w * 2)], c != null && ['ล้างแขวน × 1', baht(c)]].filter(Boolean),
+    min: baht(DATA.minBill), trip: baht(TRAVEL.baseFee), lead: QUEUE_RULES.leadDays, pipe: FIT_RULES.pipeIncluded, cleanWarranty: (cr && cr.warranty) || '', month,
+  };
+}
+let FIG = null;
+const shot = k => { const L = look(); return vignette(k, { ...L, info: FIG || (FIG = figures()) }); };
+/** put the 3D still of `k` into `box` (crossfade over whatever is there); the line art stays as the fallback */
+function still(box, k) {
+  box.dataset.want = k;
+  return shot(k).then(async src => {
+    if (!src || box.dataset.want !== k) return;
+    const im = new Image(); im.alt = ''; im.className = 'pa-v'; im.src = src;
+    try { await im.decode(); } catch (e) { return; }
+    if (box.dataset.want !== k) return;
+    box.querySelectorAll('img.pa-v').forEach(o => { o.classList.add('out'); setTimeout(() => o.remove(), 700); });
+    box.append(im); box.classList.add('has-v');
+    requestAnimationFrame(() => im.classList.add('in'));
+  });
+}
+// the still leans a little with the pointer and with the scroll position (CSS reads --mx / --my; nothing moves under reduced motion)
+function lean(el) {
+  if (reduceMotion()) return;
+  let raf = 0, mx = 0, my = 0;
+  const set = () => { raf = 0; el.style.setProperty('--mx', mx.toFixed(3)); el.style.setProperty('--my', my.toFixed(3)); };
+  const q = () => { if (!raf) raf = requestAnimationFrame(set); };
+  el.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = el.getBoundingClientRect(); mx = (e.clientX - r.left) / r.width - 0.5; my = (e.clientY - r.top) / r.height - 0.5; q(); });
+  el.addEventListener('pointerleave', () => { mx = 0; q(); });
+  addEventListener('scroll', () => { const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; my = Math.max(-0.5, Math.min(0.5, (r.top + r.height / 2) / innerHeight - 0.5)); q(); }, { passive: true });
+}
+const chips = f => h('ul', { class: 'pa-facts' }, (f || []).map(([a, b]) => h('li', {}, h('small', {}, a), h('b', {}, b))));
 
 /** the entrance: three animated doors */
 export function mountDoors(root, { onPick = () => {} } = {}) {
@@ -120,12 +172,15 @@ export function mountDoors(root, { onPick = () => {} } = {}) {
       h('span', { class: 'pa-door-n' }, String(i + 1).padStart(2, '0') + ' · ' + s.en),
       h('b', {}, s.th),
       h('span', { class: 'pa-door-m' }, s.means),
-      h('span', { class: 'pa-door-meta' }, h('span', {}, h('em', {}, 'เหมาะเมื่อ '), s.when), h('span', {}, h('em', {}, 'เวลา '), s.time), h('span', { class: 'pa-price' }, s.price)),
+      h('span', { class: 'pa-door-price' }, s.price),
+      h('span', { class: 'pa-door-meta' }, h('span', {}, h('em', {}, 'เหมาะเมื่อ'), s.when), h('span', {}, h('em', {}, 'เวลาโดยประมาณ'), s.time)),
       h('span', { class: 'pa-door-go' }, `ดูขั้นตอน${s.th}ทีละขั้น`));
     return b;
   }));
-  root.append(grid, h('p', { class: 's-note' }, TIME_NOTE));
+  root.append(grid, h('p', { class: 's-note' }, `ภาพ 3 มิติเพื่ออธิบาย · ${TIME_NOTE}`));
   runWhenVisible(grid);
+  grid.querySelectorAll('.pa-door').forEach(b => lean(b));
+  whenNear(grid, () => ORDER.reduce((p, k) => p.then(() => still(grid.querySelector(`.pa-door[data-svc="${k}"] .pa-door-art`), 'door:' + k)), Promise.resolve()));
   return {};
 }
 
@@ -137,7 +192,8 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
   const tabs = h('div', { class: 'pa-tabs', role: 'tablist', 'aria-label': 'บริการ' });
   const head = h('div', { class: 'pa-head' });
   const list = h('ol', { class: 'pa-list' });
-  const art = h('div', { class: 'pa-art', 'aria-hidden': 'true' });
+  const art = h('div', { class: 'pa-art', 'aria-hidden': 'true' }, h('div', { class: 'pa-sv' }));
+  let booted = false;
   const card = h('div', { class: 'pa-card-b', 'aria-live': 'polite' });
   const bar = h('div', { class: 'pa-bar' }, h('i'));
   const stage = h('div', { class: 'pa-stage', role: 'tabpanel' }, art, bar, card);
@@ -145,26 +201,35 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
   const RM = reduceMotion();
   const stop = () => { clearTimeout(timer); timer = 0; };
   const tick = () => { stop(); if (user || RM || !visible) return; bar.classList.remove('run'); void bar.offsetWidth; bar.classList.add('run'); timer = setTimeout(() => { i = (i + 1) % 6; draw(false); tick(); }, 6500); };
+  // the tab icons become small crops of the door stills once those are rendered
+  const tabArt = () => tabs.querySelectorAll('.pa-tab-ic').forEach(ic => { const k = ic.parentNode.dataset.svc; still(ic, 'door:' + k); });
   function draw(full = true) {
     const S = D[svc], s = S.steps[i];
     if (full) {
       tabs.innerHTML = '';
       ORDER.forEach(k => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': String(k === svc), class: 'pa-tab', 'data-svc': k, onclick: () => { svc = k; i = 0; user = true; stop(); draw(); } }, h('span', { class: 'pa-tab-ic', html: D[k].door }), D[k].th)));
+      if (booted) tabArt();
       head.innerHTML = '';
       head.append(h('div', {}, h('small', {}, `${S.en} · คืออะไร`), h('p', {}, S.means)), h('div', {}, h('small', {}, 'เหมาะเมื่อ'), h('p', {}, S.when)), h('div', {}, h('small', {}, 'เวลาโดยประมาณ'), h('p', {}, S.time)), h('div', { class: 'pa-price' }, h('small', {}, 'ราคา'), h('p', {}, S.price)));
     }
     list.innerHTML = '';
     S.steps.forEach((x, k) => list.append(h('li', {}, h('button', { type: 'button', class: k === i ? 'on' : k < i ? 'done' : '', 'aria-current': k === i ? 'step' : null, onclick: () => { i = k; user = true; stop(); draw(false); } }, h('span', { class: 'pa-n' }, String(k + 1)), h('span', {}, x.t)))));
-    art.innerHTML = ST[s.k]; art.dataset.k = s.k;
+    if (art.dataset.k !== s.k) {
+      art.querySelector('.pa-sv').innerHTML = ST[s.k]; art.dataset.k = s.k;
+      // the still of this step (then warm the next one) + a soft glow on the change
+      if (booted) { still(art, s.k).then(() => shot(S.steps[(i + 1) % 6].k)); stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse'); }
+    }
     const act = h('button', { type: 'button', class: 'btn-primary pa-go', onclick: () => { stop(); user = true; if (s.hook && hooks[s.hook]) hooks[s.hook](); if (s.cart) openCart(); else go(s.go[0]); } }, s.go[1]);
     card.innerHTML = '';
-    card.append(h('p', { class: 'pa-step' }, `${S.th} · ขั้นที่ ${i + 1} จาก 6`), h('h3', {}, s.t),
-      h('dl', {}, h('dt', {}, 'เกิดอะไรขึ้น'), h('dd', {}, s.what), h('dt', {}, 'ทำไม'), h('dd', {}, s.why), h('dt', {}, 'คุณได้อะไร'), h('dd', {}, s.get)),
+    card.append(h('p', { class: 'pa-step' }, `${S.th} · ขั้นที่ ${i + 1} จาก 6`), h('h3', {}, s.t), chips(s.f),
+      h('dl', {}, h('div', {}, h('dt', {}, 'เกิดอะไรขึ้น'), h('dd', {}, s.what)), h('div', {}, h('dt', {}, 'ทำไม'), h('dd', {}, s.why)), h('div', { class: 'pa-get' }, h('dt', {}, 'คุณได้อะไร'), h('dd', {}, s.get))),
       h('div', { class: 'pa-acts' }, h('button', { type: 'button', class: 'btn-ghost', disabled: i === 0, onclick: () => { i--; user = true; stop(); draw(false); } }, 'ขั้นก่อนหน้า'), h('button', { type: 'button', class: 'btn-ghost', disabled: i === 5, onclick: () => { i++; user = true; stop(); draw(false); } }, 'ขั้นต่อไป'), act));
   }
   root.addEventListener('keydown', e => { if (e.target.closest('.pa-list') && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); i = Math.max(0, Math.min(5, i + (e.key === 'ArrowDown' ? 1 : -1))); user = true; stop(); draw(false); list.querySelectorAll('button')[i].focus(); } });
   if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible) tick(); else stop(); }, { threshold: 0.35 }).observe(stage);
   runWhenVisible(art);
+  lean(stage);
   draw();
+  whenNear(stage, () => { booted = true; const k = art.dataset.k; still(art, k).then(() => shot(D[svc].steps[(i + 1) % 6].k)).then(tabArt); });
   return { show(k, step = 0) { if (D[k]) { svc = k; i = step; user = false; draw(); tick(); } } };
 }

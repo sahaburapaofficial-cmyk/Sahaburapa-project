@@ -1,0 +1,8 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><link rel="stylesheet" href="assets/fonts.css"><style>body{margin:0;background:#05070c;font-family:'IBM Plex Sans Thai',sans-serif;color:#fff}img{width:640px;display:block;margin:8px}</style></head><body><div id="out"></div>
+<script type="module">
+import { vignette } from './assets/vignette3d.js';
+const q = new URLSearchParams(location.search), keys = (q.get('k') || 'door:clean').split(','), theme = q.get('t') || 'dark', accent = q.get('a') || '#63E6FF';
+const info = { cleanFrom: '฿700', installFrom: '฿3,800', diag: '฿900', lines: [['ล้างติดผนัง × 2', '฿1,400'], ['ล้างแขวน × 1', '฿1,200']], min: '฿4,500', trip: '฿300', lead: 3, pipe: 4, cleanWarranty: '30 วัน', month: 'ตุลาคม 2569' };
+window.DONE = 0;
+for (const k of keys) { const src = await vignette(k, { theme, accent, info }); const im = document.createElement('img'); im.dataset.k = k; if (src) im.src = src; document.getElementById('out').append(im); window.DONE++; }
+</script></body></html>
