@@ -710,3 +710,10 @@ img.pa-v.in{opacity:1}img.pa-v.out{opacity:0}
   box-shadow:inset 0 1px 0 color-mix(in oklab,#fff 16%,transparent),inset 0 0 0 1px color-mix(in oklab,var(--s-accent) 26%,transparent)}
 :root[data-lux="D"] .ai-air.cold,:root[data-lux="F"] .ai-air.cold{stroke:#7fe6ff;filter:drop-shadow(0 0 3px rgba(99,230,255,.7))}
 :root[data-lux="D"] .ai-body,:root[data-lux="F"] .ai-body{fill:#f4f8fc;stroke:#b8c6d4}
+/* Rev.40 turn the 3D still: left · front · right */
+.pa-artw{position:relative}
+.pa-art{cursor:grab;touch-action:pan-y}
+.pa-view{position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:2px;padding:3px;border-radius:999px;background:color-mix(in oklab,var(--s-card) 78%,transparent);border:1px solid var(--s-line);backdrop-filter:blur(8px)}
+.pa-view button{min-height:32px;padding:4px 12px;border:0;border-radius:999px;background:transparent;color:var(--s-ink-2);font:inherit;font-size:13px;cursor:pointer}
+.pa-view button[aria-pressed=true]{background:var(--s-accent);color:var(--s-on-accent);font-weight:600}
+@media (pointer:coarse){.pa-view button{min-height:40px}}

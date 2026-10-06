@@ -135,15 +135,15 @@ function figures() {
   };
 }
 let FIG = null;
-const shot = k => { const L = look(); return vignette(k, { ...L, info: FIG || (FIG = figures()) }); };
+const shot = (k, view = 0) => { const L = look(); return vignette(k, { ...L, view, info: FIG || (FIG = figures()) }); };
 /** put the 3D still of `k` into `box` (crossfade over whatever is there); the line art stays as the fallback */
-function still(box, k) {
-  box.dataset.want = k;
-  return shot(k).then(async src => {
-    if (!src || box.dataset.want !== k) return;
+function still(box, k, view = 0) {
+  const want = k + '|' + view; box.dataset.want = want;
+  return shot(k, view).then(async src => {
+    if (!src || box.dataset.want !== want) return;
     const im = new Image(); im.alt = ''; im.className = 'pa-v'; im.src = src;
     try { await im.decode(); } catch (e) { return; }
-    if (box.dataset.want !== k) return;
+    if (box.dataset.want !== want) return;
     box.querySelectorAll('img.pa-v').forEach(o => { o.classList.add('out'); setTimeout(() => o.remove(), 700); });
     box.append(im); box.classList.add('has-v');
     requestAnimationFrame(() => im.classList.add('in'));
@@ -196,7 +196,13 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
   let booted = false;
   const card = h('div', { class: 'pa-card-b', 'aria-live': 'polite' });
   const bar = h('div', { class: 'pa-bar' }, h('i'));
-  const stage = h('div', { class: 'pa-stage', role: 'tabpanel' }, art, bar, card);
+  // Rev.40: turn the still — left · front · right (buttons, or drag sideways on the picture)
+  let vw = 0;
+  const VIEWS = [[-1, 'มุมซ้าย'], [0, 'ด้านหน้า'], [1, 'มุมขวา']];
+  const views = h('div', { class: 'pa-view', role: 'group', 'aria-label': 'มุมมองภาพ 3 มิติ', hidden: true }, VIEWS.map(([v, t]) => h('button', { type: 'button', 'aria-pressed': String(v === 0), 'data-v': v, onclick: () => turn(v) }, t)));
+  const turn = v => { vw = Math.max(-1, Math.min(1, v)); user = true; stop(); views.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.v === vw))); still(art, art.dataset.k, vw); };
+  { let x0 = null; art.addEventListener('pointerdown', e => { x0 = e.clientX; }); art.addEventListener('pointerup', e => { if (x0 == null || !booted) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) turn(vw + (dx < 0 ? 1 : -1)); }); }
+  const stage = h('div', { class: 'pa-stage', role: 'tabpanel' }, h('div', { class: 'pa-artw' }, art, views), bar, card);
   root.append(h('div', { class: 'pa' }, tabs, head, h('div', { class: 'pa-grid' }, list, stage)), h('p', { class: 's-note' }, `ภาพประกอบเพื่ออธิบาย · ${TIME_NOTE}`));
   const RM = reduceMotion();
   const stop = () => { clearTimeout(timer); timer = 0; };
@@ -217,7 +223,7 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
     if (art.dataset.k !== s.k) {
       art.querySelector('.pa-sv').innerHTML = ST[s.k]; art.dataset.k = s.k;
       // the still of this step (then warm the next one) + a soft glow on the change
-      if (booted) { still(art, s.k).then(() => shot(S.steps[(i + 1) % 6].k)); stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse'); }
+      if (booted) { still(art, s.k, vw).then(() => shot(S.steps[(i + 1) % 6].k, vw)); stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse'); }
     }
     const act = h('button', { type: 'button', class: 'btn-primary pa-go', onclick: () => { stop(); user = true; if (s.hook && hooks[s.hook]) hooks[s.hook](); if (s.cart) openCart(); else go(s.go[0]); } }, s.go[1]);
     card.innerHTML = '';
@@ -230,6 +236,6 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
   runWhenVisible(art);
   lean(stage);
   draw();
-  whenNear(stage, () => { booted = true; const k = art.dataset.k; still(art, k).then(() => shot(D[svc].steps[(i + 1) % 6].k)).then(tabArt); });
+  whenNear(stage, () => { booted = true; const k = art.dataset.k; still(art, k).then(ok => { if (art.classList.contains('has-v')) views.hidden = false; }).then(() => shot(D[svc].steps[(i + 1) % 6].k)).then(tabArt); });
   return { show(k, step = 0) { if (D[k]) { svc = k; i = step; user = false; draw(); tick(); } } };
 }

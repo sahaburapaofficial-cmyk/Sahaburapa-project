@@ -4,7 +4,8 @@
 // glass information panels with the real figures, the site's own 3D models: FUJIVA unit, outdoor unit, tools, manifold gauges,
 // vacuum pump, copper line set). The page then moves the still with CSS (drift, light sweep, parallax) — no live WebGL left
 // running, nothing added to the ≤ 3 context budget. Shots are queued one at a time and the GL context is released when idle.
-//   vignette(key, { theme, accent, info }) → Promise<dataURL | null>   (null = no WebGL → the page keeps its line art)
+//   vignette(key, { theme, accent, info, view }) → Promise<dataURL | null>   (null = no WebGL → the page keeps its line art)
+//   view: −1 · 0 · 1 = the camera from the left · front · right (Rev.40: the customer turns the still to look from another side)
 //   key: door:clean · door:install · door:repair · c1…c6 · i1…i6 · r1…r6
 //   info: figures to print on the glass panels (from the shared constants — this module types no numbers of its own)
 import { quiet } from './lazy.js';
@@ -42,6 +43,17 @@ function studio(theme, accent) {
     // the pedestal: lacquered disc, a thin light ring, a soft floor glow
     const ped = new THREE.Group(); scene.add(ped);
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.3, 0.09, 96), new THREE.MeshPhysicalMaterial({ color: dark ? 0x0a0e16 : 0xeeebe6, roughness: 0.62, metalness: dark ? 0.08 : 0.0, clearcoat: 0.35, clearcoatRoughness: 0.45, envMapIntensity: 0.18 }));
+    // turned top (fine concentric lathe lines, like a machined plinth) and a brushed metal band around the edge
+    { const c = document.createElement('canvas'); c.width = c.height = 1024; const g = c.getContext('2d'); g.fillStyle = dark ? '#121722' : '#f1eee9'; g.fillRect(0, 0, 1024, 1024);
+      for (let r = 8; r < 512; r += 3) { g.strokeStyle = dark ? `rgba(255,255,255,${0.012 + (r % 9 === 2 ? 0.02 : 0)})` : `rgba(0,0,0,${0.014 + (r % 9 === 2 ? 0.016 : 0)})`; g.lineWidth = 1; g.beginPath(); g.arc(512, 512, r, 0, 7); g.stroke(); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+      const top = new THREE.Mesh(new THREE.CircleGeometry(1.18, 128), new THREE.MeshPhysicalMaterial({ map: t, roughness: 0.48, metalness: dark ? 0.3 : 0.05, clearcoat: 0.5, clearcoatRoughness: 0.3, envMapIntensity: 0.25 }));
+      top.rotation.x = -Math.PI / 2; top.position.y = 0.0015; top.receiveShadow = true; ped.add(top); }
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(1.302, 1.302, 0.034, 128, 1, true), new THREE.MeshStandardMaterial({ color: dark ? 0x8d97a3 : 0xb9c0c8, metalness: 1, roughness: 0.32 }));
+    band.position.y = -0.03; ped.add(band);
+    // a soft studio light far behind the scene, for depth
+    { const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d'), lg = g.createLinearGradient(0, 0, 0, 256); lg.addColorStop(0, 'rgba(0,0,0,0)'); lg.addColorStop(0.55, `rgba(${ACC.r * 255 | 0},${ACC.g * 255 | 0},${ACC.b * 255 | 0},${dark ? 0.16 : 0.1})`); lg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = lg; g.fillRect(0, 0, 64, 256);
+      const back = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending, toneMapped: false })); back.position.set(0, 0.9, -1.9); ped.add(back); }
     disc.position.y = -0.045; disc.receiveShadow = true; ped.add(disc);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(1.27, 0.007, 8, 160), new THREE.MeshBasicMaterial({ color: ACC, toneMapped: false })); ring.rotation.x = Math.PI / 2; ring.position.y = 0.001; ped.add(ring);
     const gc = document.createElement('canvas'); gc.width = gc.height = 256; { const g = gc.getContext('2d'), rg = g.createRadialGradient(128, 128, 0, 128, 128, 128); rg.addColorStop(0, `rgba(${ACC.r * 255 | 0},${ACC.g * 255 | 0},${ACC.b * 255 | 0},.55)`); rg.addColorStop(0.55, `rgba(${ACC.r * 255 | 0},${ACC.g * 255 | 0},${ACC.b * 255 | 0},.12)`); rg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg; g.fillRect(0, 0, 256, 256); }
@@ -126,9 +138,12 @@ function studio(theme, accent) {
       const s = new THREE.Mesh(new THREE.PlaneGeometry(0.31, 0.64), new THREE.MeshBasicMaterial({ map: tex(310, 640, draw), toneMapped: false })); s.position.z = 0.016; g.add(s);
       return g;
     }
+    let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     function droplets(n, box) {
       const g = new THREE.Group(), m = new THREE.MeshPhysicalMaterial({ color: 0xbfe6ff, roughness: 0.02, metalness: 0, transparent: true, opacity: 0.75, clearcoat: 1, envMapIntensity: 1.6 });
-      for (let i = 0; i < n; i++) { const d = new THREE.Mesh(new THREE.SphereGeometry(0.012 + (i % 3) * 0.004, 16, 12), m); d.scale.y = 1.35; d.position.set(box[0] + Math.random() * (box[1] - box[0]), box[2] + Math.random() * (box[3] - box[2]), box[4] + Math.random() * (box[5] - box[4])); d.userData.noShadow = true; g.add(d); }
+      // fine spray: many small drops, each stretched along its fall like a short exposure, a few beads among them
+      const geo = new THREE.SphereGeometry(1, 12, 10);
+      for (let i = 0; i < n * 2; i++) { const bead = i % 7 === 0, r = bead ? 0.009 : 0.004 + rnd() * 0.003; const d = new THREE.Mesh(geo, m); d.scale.set(r, bead ? r * 1.3 : r * (3 + rnd() * 3), r); d.position.set(box[0] + rnd() * (box[1] - box[0]), box[2] + rnd() * (box[3] - box[2]), box[4] + rnd() * (box[5] - box[4])); d.userData.noShadow = true; g.add(d); }
       return g;
     }
     function airflow(from, n = 5, len = 1.1, cold = true) {
@@ -209,7 +224,8 @@ function studio(theme, accent) {
         g.add(glass(0.5, 0.6, (c, w, h) => { T(c, 'ลมออก', 34, 62, 28, ink2, 500); T(c, '12.4°C', 34, 150, 72, accHex, 700); T(c, 'กระแสไฟ', 34, 230, 28, ink2, 500); T(c, '5.1 A', 34, 300, 56, ink, 700); T(c, 'ตัวอย่างการบันทึก', 34, h - 30, 22, ink2, 500); }, { at: [0.6, 0.6, 0.15], ry: -0.35 })); },
     };
 
-    function render(k, info) {
+    function render(k, info, view = 0) {
+      seed = 7 + k.length * 131 + k.charCodeAt(k.length - 1);
       Object.keys(I).forEach(x => delete I[x]); Object.assign(I, info || {});
       const g = new THREE.Group(); S[k](g);
       g.traverse(o => { if (o.isMesh) { const ns = o.userData.noShadow || (o.parent && o.parent.userData.noShadow); o.castShadow = !ns; o.receiveShadow = true; } });
@@ -217,7 +233,7 @@ function studio(theme, accent) {
       const b0 = new THREE.Box3().setFromObject(g), c0 = b0.getCenter(new THREE.Vector3()), s0 = b0.getSize(new THREE.Vector3());
       ped.position.set(c0.x, b0.min.y - 0.001, c0.z); ped.scale.setScalar(Math.max(0.55, Math.max(s0.x, s0.z) * 0.46)); ped.updateMatrixWorld(true);
       const bb = b0.clone().union(new THREE.Box3().setFromObject(disc)), c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
-      const tv = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)), yaw = -0.34, pitch = 0.13;
+      const tv = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)), yaw = -0.34 + view * 0.46, pitch = 0.13;
       const dist = Math.max(sz.y / 2 / tv, Math.max(sz.x, sz.z * 0.7) / 2 / (tv * cam.aspect)) * 1.04 + sz.z * 0.3;
       cam.position.set(c.x + Math.sin(yaw) * Math.cos(pitch) * dist, c.y + Math.sin(pitch) * dist + 0.05, c.z + Math.cos(yaw) * Math.cos(pitch) * dist); cam.lookAt(c.x, c.y - sz.y * 0.07, c.z);
       key.position.set(c.x + 2.0, c.y + 3.2, c.z + 2.6); key.target.position.copy(c); fill.position.set(c.x - 3, c.y + 1, c.z + 2); fill.target.position.copy(c);
@@ -236,8 +252,8 @@ function studio(theme, accent) {
 }
 
 /** one rendered vignette (queued, one at a time; the studio is released 6 s after the last one) */
-export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {} } = {}) {
-  const id = `${theme}|${accent}|${key}`;
+export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {}, view = 0 } = {}) {
+  const id = `${theme}|${accent}|${key}|${view}`;
   if (SHOTS[id]) return Promise.resolve(SHOTS[id]);
   if (typeof WebGLRenderingContext === 'undefined') return Promise.resolve(null);
   const job = queue.then(async () => {
@@ -245,7 +261,7 @@ export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {} } 
     clearTimeout(idle);
     const st = await studio(theme, accent); if (!st || !st.has(key)) return null;
     await quiet();   // between scrolls, when the browser is idle
-    try { SHOTS[id] = await st.render(key, info); } catch (e) { SHOTS[id] = null; }
+    try { SHOTS[id] = await st.render(key, info, view); } catch (e) { SHOTS[id] = null; }
     idle = setTimeout(() => { const p = studioP; studioP = null; p && p.then(s => s && s.dispose()); }, 6000);
     return SHOTS[id];
   });
