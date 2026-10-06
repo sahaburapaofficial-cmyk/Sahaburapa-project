@@ -546,3 +546,15 @@ html.fx-F .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my
 .at-art.is-3d .at3-tag{opacity:1}
 .at-art.is-3d .at-scanbar{opacity:.35}
 @media (max-width:640px){.at3-tag{font-size:11px;padding:3px 8px}.at3-tag.u{display:none}}
+
+/* Rev.37 detail: on phones the fixed bottom bar (เมนู · ติดต่อ · LINE · ใบเสนอราคา) covered the film's chapter bar and lower
+   letterbox — everything at the bottom of the film now sits above the bar */
+@media (max-width:640px){
+  .cn-stick{--mb:calc(66px + env(safe-area-inset-bottom,0px))}
+  .cn-bars i:last-child{bottom:var(--mb)}
+  .cn-scrub{bottom:calc(var(--mb) + clamp(28px,6vh,64px) + 2px)}
+  .cn-cta{bottom:calc(var(--mb) + clamp(28px,6vh,64px) + 52px)}
+  .cn-cap{bottom:calc(var(--mb) + clamp(28px,6vh,64px) + 112px)}
+  .cn-scrub{left:20px;transform:none;width:calc(100% - 92px)}   /* clear of the round help button */
+}
+.cn-cap h2,.cn-cap p{text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 18px rgba(0,0,0,.45)}   /* Rev.37: legible over the bright room */

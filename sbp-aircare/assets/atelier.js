@@ -227,7 +227,8 @@ export function mountDayRoom(root) {
   let R3 = null;
   const host3 = h('div', { class: 'at-3d', 'aria-hidden': 'true' });
   const tag3 = { out: h('span', { class: 'at3-tag' }), room: h('span', { class: 'at3-tag in' }), unit: h('span', { class: 'at3-tag u' }) };
-  const pin = () => { if (!R3) return; [['out', 'win'], ['room', 'room'], ['unit', 'unit']].forEach(([k, a]) => { const p = R3.project(a); tag3[k].style.transform = `translate(${p.x.toFixed(0)}px,${p.y.toFixed(0)}px)`; }); if (!art.classList.contains('is-3d') && R3.ready()) art.classList.add('is-3d'); };
+  // Rev.37: tags centred on their anchor and kept inside the frame (phones clipped the outdoor tag)
+  const pin = () => { if (!R3) return; const AW = art.clientWidth, AH = art.clientHeight; [['out', 'win'], ['room', 'room'], ['unit', 'unit']].forEach(([k, a]) => { const p = R3.project(a), el = tag3[k], tw = el.offsetWidth || 90; const x = Math.max(8, Math.min(AW - tw - 8, p.x - tw / 2)), y = Math.max(22, Math.min(AH - 12, p.y)); el.style.transform = `translate(${x.toFixed(0)}px,${y.toFixed(0)}px)`; }); if (!art.classList.contains('is-3d') && R3.ready()) art.classList.add('is-3d'); };
   if (typeof WebGLRenderingContext !== 'undefined') whenNear(art, () => whenQuiet(() => import('./dayroom3d.js').then(m => {
     try { art.append(host3, tag3.out, tag3.room, tag3.unit); R3 = m.createDayRoom3D(host3, { onFrame: pin }); paint(); } catch (e) { host3.remove(); Object.values(tag3).forEach(t => t.remove()); R3 = null; }
   }).catch(() => {}), 220, 2500), '40% 0px');

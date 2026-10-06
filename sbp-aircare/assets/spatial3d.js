@@ -50,7 +50,7 @@ const HOTS = [
 
 function createDiorama(host, labels, o) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(1.75, devicePixelRatio || 1));
+  renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));   // Rev.37 sharper (tiering steps down if slow)
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.18; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;   // Rev.30 smooth: the room is still — shadows drawn once (and after a quality upgrade)
   const cv = renderer.domElement; cv.setAttribute('aria-hidden', 'true'); cv.style.cssText = 'display:block;width:100%;height:100%;touch-action:pan-y';

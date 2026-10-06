@@ -11,6 +11,7 @@
 import { h, TYPE_BY_ID, BRAND_BY_ID } from './sbp-core.js';
 import { typeArt } from './proto-ui.js';
 import { whenNear, quiet } from './lazy.js';
+import { HQ_WANTED } from './quality3d.js';
 
 let MEDIA = { models: {}, series: {}, brands: {} };
 let BASE = './assets/products/';
@@ -38,8 +39,8 @@ export const hasPhoto = (m, sku) => photosFor(m, sku).length > 0;
 // shots are kept in localStorage per render version so returning visitors see them at once.
 const SHOTS = {};
 const KEYS = ['wall', 'wall:fujiva', 'ceiling', 'cassette', 'floor'];
-const CACHE = 'sbp-shots-r26';   // Rev.13: studio-lit, higher-resolution shots → older cached shots are dropped
-try { ['sbp-shots-r11', 'sbp-shots-r12', 'sbp-shots-r13'].forEach(k => localStorage.removeItem(k)); } catch (e) { /* storage blocked */ }
+const CACHE = 'sbp-shots-r37';   // Rev.37: 1440 × 960 on capable computers   // Rev.13: studio-lit, higher-resolution shots → older cached shots are dropped
+try { ['sbp-shots-r11', 'sbp-shots-r12', 'sbp-shots-r13', 'sbp-shots-r26'].forEach(k => localStorage.removeItem(k)); } catch (e) { /* storage blocked */ }
 try { Object.assign(SHOTS, JSON.parse(localStorage.getItem(CACHE) || '{}')); } catch (e) { /* storage blocked */ }
 const saveShots = () => { try { localStorage.setItem(CACHE, JSON.stringify(SHOTS)); } catch (e) { /* full or blocked: render again next time */ } };
 let studioP = null, queue = Promise.resolve(), idle = null;
@@ -57,7 +58,7 @@ function studio() {
     // Rev.13: 1080×720 — crisp on retina cards and in the product drawer · Rev.26.1: a device without a real GPU (software GL) renders
     // 720×480 with a 1024 shadow map — 2.25× fewer pixels, so reading the shot back does not stall the page
     let soft = false; try { const g = r.getContext(), d = g.getExtension('WEBGL_debug_renderer_info'); soft = /swiftshader|llvmpipe|software|basic render/i.test(d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : ''); } catch (_) {}
-    const W = soft ? 720 : 1080, H = soft ? 480 : 720; cv.width = W; cv.height = H;
+    const big = !soft && HQ_WANTED, W = soft ? 720 : big ? 1440 : 1080, H = soft ? 480 : big ? 960 : 720;   // Rev.37 sharper: computers with a real GPU get 1440 × 960 (product drawer on a retina screen) cv.width = W; cv.height = H;
     r.setPixelRatio(1); r.setSize(W, H, false); r.debug.checkShaderErrors = false;   // Rev.26.1: no synchronous shader-log reads
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.0;
     r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;

@@ -80,7 +80,7 @@ function heatFloor(W, D) {
 
 function createFilm(host, o) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(1.75, devicePixelRatio || 1));
+  renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));   // Rev.37 sharper (the tiering below steps down if frames get slow)
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;   // Rev.30 smooth: shadows redraw only when something in the room moves

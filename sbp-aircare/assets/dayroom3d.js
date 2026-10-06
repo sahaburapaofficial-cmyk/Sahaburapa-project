@@ -51,7 +51,7 @@ const glowTex = () => ctex(128, 128, (g, w) => { const r = g.createRadialGradien
 export function createDayRoom3D(host, o = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   const HQ = hqFor(renderer);
-  renderer.setPixelRatio(Math.min(HQ ? 2 : 1.5, devicePixelRatio || 1));
+  renderer.setPixelRatio(Math.min(HQ ? 2 : 1.75, devicePixelRatio || 1));
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
   const cv = renderer.domElement; cv.setAttribute('aria-hidden', 'true'); cv.style.cssText = 'display:block;width:100%;height:100%';
@@ -100,7 +100,7 @@ export function createDayRoom3D(host, o = {}) {
   [WX0 - 0.28, WX1 + 0.22].forEach((x, i) => { const c = F.curtain({ ...K, curtain: sheer }, i ? 0.55 : 0.62, H - 0.12); c.position.set(x, 0.02, BZ + 0.12); root.add(c); curt.push(c); });
 
   // ---- furniture ----
-  const sofaM = new THREE.MeshStandardMaterial({ color: 0xffffff, map: TEX.fabric('#d6cab6'), roughness: 0.97, sheen: 0 });   // warm bouclé
+  const sofaM = new THREE.MeshStandardMaterial({ color: 0xffffff, map: TEX.fabric('#d6cab6'), roughness: 0.97 });   // warm bouclé
   const leather = new THREE.MeshStandardMaterial({ color: 0x8a5634, roughness: 0.48, metalness: 0.02 });   // cognac leather lounge chair
   const KK = { ...K, sofa: sofaM, cushion: new THREE.MeshStandardMaterial({ color: 0xffffff, map: TEX.fabric('#b9825f'), roughness: 0.95 }) };
   const sofa = F.sofa(KK, 2.5); sofa.rotation.y = Math.PI / 2; sofa.position.set(-W / 2 + 0.56, 0, -0.35); root.add(sofa);
@@ -260,6 +260,8 @@ export function createDayRoom3D(host, o = {}) {
     renderer.render(scene, cam); dirty = false;
     if (o.onFrame) o.onFrame();
   }
+  let acc = 0, odd = false, touched = 0;
+  host.addEventListener('pointermove', () => { touched = performance.now(); }, { passive: true });
   function loop() {
     cancelAnimationFrame(raf);
     const step = now => {
@@ -267,7 +269,11 @@ export function createDayRoom3D(host, o = {}) {
       if (!visible) return;
       if (st.hr !== lastHr) applyHour();
       if (RM()) { if (dirty) frame(0); raf = requestAnimationFrame(step); return; }
-      frame(dt); raf = requestAnimationFrame(step);
+      // Rev.37 smooth: without a strong GPU, the idle room (only air, dust and the camera's breath moving) is drawn every other
+      // frame — half the GPU work, motion still fluid; any pointer move or hour change goes back to every frame
+      acc += dt;
+      if (!HQ && !dirty && now - touched > 1500 && (odd = !odd)) { raf = requestAnimationFrame(step); return; }
+      frame(acc); acc = 0; raf = requestAnimationFrame(step);
     };
     last = performance.now(); raf = requestAnimationFrame(step);
   }
@@ -275,7 +281,7 @@ export function createDayRoom3D(host, o = {}) {
   const proj = new THREE.Vector3();
   const anchors = { unit: vent.clone().add(new THREE.Vector3(0.55, 0.22, 0)), win: new THREE.Vector3(1.4, 1.95, BZ - 0.2), room: new THREE.Vector3(-1.2, 1.2, -0.35) };
   return {
-    set(s) { st = { ...st, ...s }; dirty = true; },
+    set(s) { st = { ...st, ...s }; dirty = true; touched = performance.now(); },
     /** screen position (px within the host) of an anchor: unit · win · room */
     project(k) { proj.copy(anchors[k]).project(cam); return { x: (proj.x * 0.5 + 0.5) * Wd, y: (-proj.y * 0.5 + 0.5) * Hd, vis: proj.z < 1 }; },
     ready: () => cv.style.opacity !== '0',
