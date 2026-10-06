@@ -40,6 +40,13 @@ ok(/3 ปี/.test(await p.locator('#paths .pa-card-b').innerText()), 'install s
 const bad = ['แก้หายแน่นอน', 'ประหยัดไฟแน่นอน', 'ปลอดเชื้อ', 'สะอาด 100%', 'รับประกันเย็น', 'ไม่มีค่าใช้จ่ายเพิ่มเติมทุกกรณี'];
 const all = await p.evaluate(() => document.getElementById('paths').innerText + document.getElementById('doors').innerText);
 ok(!bad.some(w => all.includes(w)), 'no forbidden promise wording (rule 11)');
+// Rev.39/40: the step picture becomes a rendered 3D still; the customer can turn it left · front · right
+const v3 = await p.waitForFunction(() => document.querySelector('#paths img.pa-v.in') && !document.querySelector('#paths .pa-view').hidden, null, { timeout: 240000, polling: 1000 }).then(() => true, () => false);
+ok(v3, '3D still shown in the journey + angle buttons');
+if (v3) { await act(p.locator('#paths .pa-view button', { hasText: 'มุมขวา' }));
+  ok(await p.waitForFunction(() => document.querySelector('#paths .pa-art').dataset.want.endsWith('|1') && document.querySelector('#paths .pa-view [data-v="1"]').getAttribute('aria-pressed') === 'true', null, { timeout: 5000 }).then(() => true, () => false), 'angle button turns the still to the right view');
+  ok(await p.waitForFunction(() => [...document.querySelectorAll('#paths img.pa-v.in')].some(i => !i.classList.contains('out')), null, { timeout: 240000, polling: 1000 }).then(() => true, () => false), 'right view rendered'); }
+ok((await p.locator('#paths .pa-facts li').count()) >= 1, 'key facts shown as chips');
 await act(p.locator('#paths .pa-go'));
 ok(await p.waitForFunction(() => { const s = document.getElementById('standards'); const r = s.getBoundingClientRect(); return !s.closest('[hidden]') && r.top < innerHeight && r.bottom > 0; }, null, { timeout: 20000, polling: 250 }).then(() => true, () => false), 'step button → the matching section (standards)');
 ok(!errs.length, 'no console errors / warnings', errs.slice(0, 3).join(' | '));

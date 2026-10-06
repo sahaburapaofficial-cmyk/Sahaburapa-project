@@ -44,10 +44,10 @@ function studio(theme, accent) {
     const ped = new THREE.Group(); scene.add(ped);
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.3, 0.09, 96), new THREE.MeshPhysicalMaterial({ color: dark ? 0x0a0e16 : 0xeeebe6, roughness: 0.62, metalness: dark ? 0.08 : 0.0, clearcoat: 0.35, clearcoatRoughness: 0.45, envMapIntensity: 0.18 }));
     // turned top (fine concentric lathe lines, like a machined plinth) and a brushed metal band around the edge
-    { const c = document.createElement('canvas'); c.width = c.height = 1024; const g = c.getContext('2d'); g.fillStyle = dark ? '#121722' : '#f1eee9'; g.fillRect(0, 0, 1024, 1024);
+    { const c = document.createElement('canvas'); c.width = c.height = 1024; const g = c.getContext('2d'); g.fillStyle = dark ? '#0d121b' : '#ece8e2'; g.fillRect(0, 0, 1024, 1024);
       for (let r = 8; r < 512; r += 3) { g.strokeStyle = dark ? `rgba(255,255,255,${0.012 + (r % 9 === 2 ? 0.02 : 0)})` : `rgba(0,0,0,${0.014 + (r % 9 === 2 ? 0.016 : 0)})`; g.lineWidth = 1; g.beginPath(); g.arc(512, 512, r, 0, 7); g.stroke(); }
       const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
-      const top = new THREE.Mesh(new THREE.CircleGeometry(1.18, 128), new THREE.MeshPhysicalMaterial({ map: t, roughness: 0.48, metalness: dark ? 0.3 : 0.05, clearcoat: 0.5, clearcoatRoughness: 0.3, envMapIntensity: 0.25 }));
+      const top = new THREE.Mesh(new THREE.CircleGeometry(1.18, 128), new THREE.MeshPhysicalMaterial({ map: t, roughness: 0.66, metalness: dark ? 0.12 : 0.0, clearcoat: 0.25, clearcoatRoughness: 0.5, envMapIntensity: 0.07, specularIntensity: 0.35 }));
       top.rotation.x = -Math.PI / 2; top.position.y = 0.0015; top.receiveShadow = true; ped.add(top); }
     const band = new THREE.Mesh(new THREE.CylinderGeometry(1.302, 1.302, 0.034, 128, 1, true), new THREE.MeshStandardMaterial({ color: dark ? 0x8d97a3 : 0xb9c0c8, metalness: 1, roughness: 0.32 }));
     band.position.y = -0.03; ped.add(band);
