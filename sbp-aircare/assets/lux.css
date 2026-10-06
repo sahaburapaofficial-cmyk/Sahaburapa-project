@@ -537,3 +537,12 @@ html.fx-F .fx-spot{background:radial-gradient(360px circle at var(--mx) var(--my
 .lx-dock a:hover,.lx-dock a:focus-visible{color:var(--s-ink)}.lx-dock a:focus-visible{outline:2px solid var(--s-accent);outline-offset:2px}
 @media (max-width:1299px){.lx-dock{display:none}}
 @media (prefers-reduced-motion:reduce){.lx-dock *{transition:none}}
+
+/* ---------- Rev.36 E · the day room in 3D (dayroom3d.js) — the drawing stays underneath as the fallback ---------- */
+.at-3d{position:absolute;inset:0;z-index:1}
+.at-art.is-3d>svg,.at-art.is-3d .at-motes-h{opacity:0;transition:opacity .6s}
+.at3-tag{position:absolute;left:0;top:0;z-index:2;pointer-events:none;white-space:nowrap;margin:-14px 0 0 0;padding:4px 10px;border-radius:999px;font:600 12.5px/1.3 var(--s-mono,monospace);color:#fff;background:rgba(14,20,40,.55);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .5s}
+.at3-tag.in{background:rgba(47,71,245,.6)}.at3-tag.u{background:rgba(30,120,170,.55)}
+.at-art.is-3d .at3-tag{opacity:1}
+.at-art.is-3d .at-scanbar{opacity:.35}
+@media (max-width:640px){.at3-tag{font-size:11px;padding:3px 8px}.at3-tag.u{display:none}}

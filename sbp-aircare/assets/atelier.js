@@ -12,6 +12,7 @@ import { cleanFrom } from './quickclean.js';
 import { askTeam } from './contact.js';
 import { runWhenVisible } from './animicons.js';
 import { sound } from './luxsound.js';
+import { whenNear, whenQuiet } from './lazy.js';
 import { SCENE_BY_ID, defaultOrient, thermal, steadyT, effects, needBtu, STD_SIZES } from './studio-model.js';
 
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -219,7 +220,17 @@ export function mountDayRoom(root) {
     outT.textContent = O.toFixed(1) + '°C'; inT.textContent = T.toFixed(1) + '°C';
     status.textContent = !on ? 'ปิดแอร์: ห้องร้อนตามอากาศนอกบ้าน' : T <= 25.05 ? 'ตั้ง 25°C · ห้องอยู่ที่อุณหภูมิที่ตั้งไว้' : `ตั้ง 25°C · ช่วงนี้เครื่องทำได้แค่ ${T.toFixed(1)}°C${dirt > 0.5 ? ' (คอยล์สกปรก ลมผ่านได้น้อย)' : ''}`;
     root.style.setProperty('--at-warm', clamp((T - 24) / 8).toFixed(2));
+    if (R3) { R3.set({ hr, on, dirt }); tag3.out.textContent = tvOut.textContent; tag3.room.textContent = tvIn.textContent; tag3.unit.textContent = tvU.textContent; }
   }
+  // ★Rev.36 realism: the room is rendered in 3D (dayroom3d.js) — real sunlight, window shadows, light shaft, sky and city through
+  // the day — booted once near the screen and the page is quiet; the drawing above stays as the fallback (no WebGL / failure)
+  let R3 = null;
+  const host3 = h('div', { class: 'at-3d', 'aria-hidden': 'true' });
+  const tag3 = { out: h('span', { class: 'at3-tag' }), room: h('span', { class: 'at3-tag in' }), unit: h('span', { class: 'at3-tag u' }) };
+  const pin = () => { if (!R3) return; [['out', 'win'], ['room', 'room'], ['unit', 'unit']].forEach(([k, a]) => { const p = R3.project(a); tag3[k].style.transform = `translate(${p.x.toFixed(0)}px,${p.y.toFixed(0)}px)`; }); if (!art.classList.contains('is-3d') && R3.ready()) art.classList.add('is-3d'); };
+  if (typeof WebGLRenderingContext !== 'undefined') whenNear(art, () => whenQuiet(() => import('./dayroom3d.js').then(m => {
+    try { art.append(host3, tag3.out, tag3.room, tag3.unit); R3 = m.createDayRoom3D(host3, { onFrame: pin }); paint(); } catch (e) { host3.remove(); Object.values(tag3).forEach(t => t.remove()); R3 = null; }
+  }).catch(() => {}), 220, 2500), '40% 0px');
   range.addEventListener('input', () => { hr = Number(range.value); paint(); });
   onB.addEventListener('click', () => { on = !on; onB.setAttribute('aria-pressed', on); paint(); });
   dirtyB.addEventListener('click', () => { dirt = dirt > 0.5 ? 0.05 : 0.85; dirtyB.setAttribute('aria-pressed', dirt > 0.5); paint(); });

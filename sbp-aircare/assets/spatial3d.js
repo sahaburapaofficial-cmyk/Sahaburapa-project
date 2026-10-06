@@ -99,7 +99,7 @@ function createDiorama(host, labels, o) {
   const fp = new Float32Array(N * 3), fc = new Float32Array(N * 3), Tc = new Float32Array(N), cell = [];
   for (let i = 0; i < NX; i++) for (let j = 0; j < NY; j++) for (let k = 0; k < NZ; k++) { const x = -W / 2 + (i + 0.5) * W / NX, y = 0.15 + (j + 0.5) * (HH - 0.3) / NY, z = -D / 2 + (k + 0.5) * D / NZ; cell.push([x, y, z, Math.random() * 6.28]); }
   const fgeo = new THREE.BufferGeometry(); fgeo.setAttribute('position', new THREE.BufferAttribute(fp, 3)); fgeo.setAttribute('color', new THREE.BufferAttribute(fc, 3));
-  const fieldM = new THREE.PointsMaterial({ size: 0.19, vertexColors: true, transparent: true, opacity: 0.62, depthWrite: false, sizeAttenuation: true, map: dotTex(), alphaTest: 0.02, toneMapped: false });   // Rev.31: brighter where the scan plane passes (paintField)
+  const fieldM = new THREE.PointsMaterial({ size: 0.66, vertexColors: true, transparent: true, opacity: 0.11, depthWrite: false, sizeAttenuation: true, map: hazeTex(), blending: THREE.AdditiveBlending, toneMapped: false });   // ★Rev.36 realism: a soft glowing volume of air (large faint additive puffs) instead of a confetti of crisp dots   // Rev.31: brighter where the scan plane passes (paintField)
   const field = new THREE.Points(fgeo, fieldM); dio.add(field);
   scene.updateMatrixWorld(true);
   const vent = room.vent(new THREE.Vector3()); dio.worldToLocal(vent);
@@ -223,6 +223,11 @@ function fadeTex() {
   const c = document.createElement('canvas'); c.width = 4; c.height = 128; const g = c.getContext('2d');
   const gr = g.createLinearGradient(0, 128, 0, 0); gr.addColorStop(0, '#fff'); gr.addColorStop(0.55, '#666'); gr.addColorStop(0.92, '#111'); gr.addColorStop(1, '#000');
   g.fillStyle = gr; g.fillRect(0, 0, 4, 128); return new THREE.CanvasTexture(c);
+}
+function hazeTex() {   // Rev.36: a very soft falloff, no visible edge or core — puffs blend into one haze
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,.45)'); gr.addColorStop(0.3, 'rgba(255,255,255,.32)'); gr.addColorStop(0.65, 'rgba(255,255,255,.1)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
 }
 function dotTex() {
   const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');

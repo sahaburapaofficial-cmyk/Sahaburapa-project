@@ -120,7 +120,7 @@ function createFilm(host, o) {
   const gridM = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     uniforms: { uA: { value: 0 }, uX: { value: -1 } },
     vertexShader: 'varying vec2 vU; void main(){ vU = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
-    fragmentShader: 'varying vec2 vU; uniform float uA, uX; void main(){ vec2 g = abs(fract(vU*vec2(46.,14.))-0.5); float line = 1.0 - smoothstep(0.0, 0.06, min(g.x, g.y)); float seen = smoothstep(uX+0.02, uX-0.02, vU.x); float edge = exp(-pow((vU.x-uX)*30.0,2.0)); gl_FragColor = vec4(vec3(0.39,0.9,1.0), uA*(line*0.35*seen + edge*0.6)); }' });
+    fragmentShader: 'varying vec2 vU; uniform float uA, uX; void main(){ vec2 g = abs(fract(vU*vec2(46.,14.))-0.5); float line = 1.0 - smoothstep(0.0, 0.06, min(g.x, g.y)); float seen = smoothstep(uX+0.02, uX-0.02, vU.x); float edge = exp(-pow((vU.x-uX)*30.0,2.0)); gl_FragColor = vec4(vec3(0.39,0.9,1.0), uA*(line*0.14*seen + edge*0.6)); }' });
   const grid = new THREE.Mesh(new THREE.PlaneGeometry(0.94, 0.33), gridM); grid.position.set(U0.x, U0.y + 0.01, U0.z + 0.16); scene.add(grid);
   const proj = new THREE.Vector3();
 

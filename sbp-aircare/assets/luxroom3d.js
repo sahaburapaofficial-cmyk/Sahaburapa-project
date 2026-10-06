@@ -13,7 +13,7 @@ import { mergeGeometries } from './BufferGeometryUtils.js';
 
 /** Rev.30 smooth: static furniture is hundreds of small meshes (slats, legs, cushions…) — one draw call each. Merge every opaque
  *  mesh that shares a material into one mesh (in root space); lights inside the groups stay where they are. */
-function mergeStatic(root, list) {
+export function mergeStatic(root, list) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), rel = new THREE.Matrix4(), by = new Map();
   list.forEach(o => o.traverse(m => {
@@ -65,23 +65,42 @@ export function cityTex(mood = 'dusk') {
   });
 }
 
-/** building facade around the room's window: a grid of other apartments, a cut-out where the camera enters */
+/** building facade around the room's window — Rev.36 realism: drawn at true scale (14 × 10 m on the texture): 3 m floors with
+ *  slab bands, 2.6 m glass bays with slim mullions, balcony rails; at night some apartments lit (warm ceiling light falling down
+ *  the room, sheer curtains, a lamp), others dark glass reflecting the sky; by day glass reflecting sky and the city */
 function facadeTex(hole, night) {
-  return ctex(1024, 1024, (g, w, h) => {
-    // concrete with fine board marks, recessed window bands, slab edges — a quiet high-rise, not a grid of lamps
-    g.fillStyle = night ? '#191c23' : '#d6d0c6'; g.fillRect(0, 0, w, h);
-    for (let i = 0; i < 2200; i++) { g.fillStyle = `rgba(${night ? '255,255,255' : '0,0,0'},${(R() * 0.03).toFixed(3)})`; g.fillRect(R() * w, R() * h, 2, 1); }
-    const rowH = 74, colW = 92;
-    for (let y = 8; y < h; y += rowH) {
-      g.fillStyle = night ? '#252a33' : '#c6bfb3'; g.fillRect(0, y + rowH - 12, w, 12);   // slab edge
-      for (let x = 6; x < w; x += colW) {
-        const lit = night && R() < 0.26, warm = 190 + R() * 50 | 0;
-        const gr = g.createLinearGradient(0, y, 0, y + rowH - 16);
-        if (lit) { gr.addColorStop(0, `rgba(255,${warm},${120 + R() * 50 | 0},.75)`); gr.addColorStop(1, `rgba(255,${warm - 30},90,.45)`); }
-        else { gr.addColorStop(0, night ? '#10141c' : '#7d8c9a'); gr.addColorStop(1, night ? '#0a0d13' : '#5f6f7e'); }
-        g.fillStyle = gr; g.fillRect(x, y + 6, colW - 10, rowH - 24);
-        g.fillStyle = night ? 'rgba(160,190,255,.06)' : 'rgba(255,255,255,.25)'; g.fillRect(x, y + 6, (colW - 10) * 0.35, rowH - 24);   // sky reflection
+  return ctex(1536, 1100, (g, w, h) => {
+    const mx = w / 14, my = h / 10, X = m => m * mx, Y = m => h - m * my;   // metres → px (y from the ground of the texture up)
+    g.fillStyle = night ? '#1a1c21' : '#cfc8bc'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(${night ? '255,255,255' : '0,0,0'},${(R() * 0.035).toFixed(3)})`; g.fillRect(R() * w, R() * h, 2, 1); }
+    const bayW = 2.6, gap = 0.35, floorH = 3, slab = 0.4;
+    for (let fl = -1; fl < 4; fl++) {
+      const y0 = 0.4 + fl * floorH;   // the hero opening sits on floor 0 (sill 0.4)
+      for (let bx = 7 - 1.3 - 5 * (bayW + gap); bx < 14; bx += bayW + gap) {
+        const x0 = bx, gx = X(x0), gy = Y(y0 + 2.4), gw = X(bayW), gh = 2.4 * my;
+        const lit = night && R() < 0.42, warm = 200 + R() * 40 | 0;
+        let gr = g.createLinearGradient(0, gy, 0, gy + gh);
+        if (lit) { gr.addColorStop(0, `rgb(255,${warm},${150 + R() * 40 | 0})`); gr.addColorStop(0.35, `rgb(${200 + R() * 30 | 0},${150 + R() * 30 | 0},${100 + R() * 20 | 0})`); gr.addColorStop(1, '#5a4535'); }
+        else if (night) { gr.addColorStop(0, '#1d2537'); gr.addColorStop(1, '#0c1018'); }
+        else { gr.addColorStop(0, '#9fb6cc'); gr.addColorStop(0.5, '#7891a8'); gr.addColorStop(1, '#4e6276'); }
+        g.fillStyle = gr; g.fillRect(gx, gy, gw, gh);
+        if (lit) {   // room depth: a back wall band, a lamp glow, sheer curtains drawn part-way
+          g.fillStyle = 'rgba(70,45,30,.35)'; g.fillRect(gx, gy + gh * 0.72, gw, gh * 0.28);
+          if (R() < 0.5) { const lx = gx + gw * (0.2 + R() * 0.6), rg = g.createRadialGradient(lx, gy + gh * 0.55, 0, lx, gy + gh * 0.55, gh * 0.4); rg.addColorStop(0, 'rgba(255,220,160,.8)'); rg.addColorStop(1, 'rgba(255,220,160,0)'); g.fillStyle = rg; g.fillRect(gx, gy, gw, gh); }
+          const cw = gw * (0.15 + R() * 0.35); g.fillStyle = 'rgba(245,232,210,.55)'; g.fillRect(R() < 0.5 ? gx : gx + gw - cw, gy, cw, gh);
+        }
+        // reflection streak + mullions + frame
+        g.fillStyle = night ? 'rgba(140,170,255,.06)' : 'rgba(255,255,255,.22)'; g.beginPath(); g.moveTo(gx + gw * 0.1, gy); g.lineTo(gx + gw * 0.38, gy); g.lineTo(gx + gw * 0.12, gy + gh); g.lineTo(gx - gw * 0.16, gy + gh); g.closePath(); g.fill();
+        g.fillStyle = night ? '#2b2621' : '#4b3a2a';
+        [0, 0.5, 1].forEach(f => g.fillRect(gx + gw * f - 3, gy, 6, gh)); g.fillRect(gx, gy, gw, 5); g.fillRect(gx, gy + gh - 5, gw, 5);
+        // balcony glass rail in front of the lower part
+        g.fillStyle = night ? 'rgba(170,200,255,.07)' : 'rgba(220,235,250,.25)'; g.fillRect(gx - 4, Y(y0 + 1.0), gw + 8, 0.95 * my);
+        g.fillStyle = night ? '#3a3631' : '#8a7a68'; g.fillRect(gx - 4, Y(y0 + 1.0), gw + 8, 3);
       }
+      // slab edge with a soft shadow under it
+      const sy = Y(y0 + floorH - 0.2);
+      g.fillStyle = night ? '#2a2c32' : '#e3ddd3'; g.fillRect(0, sy - slab * my * 0.5, w, slab * my * 0.5);
+      const sg = g.createLinearGradient(0, sy, 0, sy + 18); sg.addColorStop(0, 'rgba(0,0,0,.35)'); sg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = sg; g.fillRect(0, sy, w, 18);
     }
     g.clearRect(hole[0] * w, hole[1] * h, hole[2] * w, hole[3] * h);
   });
@@ -127,7 +146,7 @@ export function buildLuxRoom(scene, o = {}) {
   if (o.facade !== false) {
     const FW = 14, FH = 10, hole = [(FW / 2 - 1.3) / FW, (FH - 0.4 - 2.4) / FH, 2.6 / FW, 2.4 / FH];   // opening 2.6 × 2.4 m, sill 0.4
     const t = facadeTex(hole, night); t.colorSpace = THREE.SRGBColorSpace;
-    facade = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: night ? 0xffffff : 0x000000, emissiveIntensity: night ? 0.32 : 0, alphaTest: 0.5, transparent: false, side: THREE.DoubleSide, roughness: 0.9 }));
+    facade = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: night ? 0xffffff : 0x000000, emissiveIntensity: night ? 0.55 : 0, alphaTest: 0.5, transparent: false, side: THREE.DoubleSide, roughness: 0.9 }));
     facade.position.set(0, FH / 2, D / 2);   // canvas top = plane top, so the opening's sill lands at y = 0.4 and its head at 2.8
     root.add(facade);
     // the opening: bronze frame, a centre mullion, two sliding glass panes (the camera passes between them)
