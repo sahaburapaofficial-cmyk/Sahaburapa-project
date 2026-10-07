@@ -58,12 +58,16 @@ async function closeAll() {   // close what a visitor left open, with the page's
   }
 }
 const viewNow = () => p.evaluate(() => { const s = [...document.querySelectorAll('[data-sx]')].find(x => !x.hidden && x.getClientRects().length); return s ? s.dataset.sx : ''; });
-const VIEW_TH = { home: 'หน้าแรก', shop: 'ซื้อแอร์', service: 'ล้าง · ติดตั้ง · ซ่อม', business: 'สำหรับองค์กร', knowledge: 'ความรู้', contact: 'ติดต่อเรา' };
+const VIEW_TH = { home: 'หน้าแรก', shop: 'ซื้อแอร์', service: 'ล้าง · ติดตั้ง · ซ่อม', business: 'สำหรับองค์กร', knowledge: 'ความรู้', contact: 'ติดต่อเรา',
+  clean: 'ล้างแอร์', install: 'ซื้อ · ติดตั้ง', repair: 'ซ่อม', help: 'ราคา · ความรู้ · ติดต่อ' };
+// Rev.46: D/F are organised by service — the same journeys live on clean / install / repair / help pages
+let SPLIT = false; const ALIAS = { shop: 'install', service: 'clean', knowledge: 'help', contact: 'help' };
 async function goView(k) {   // through the menu a visitor sees
+  if (SPLIT && ALIAS[k]) k = ALIAS[k];
   if (M) {
     await act(p.locator('.mbar .s-mmenu')); await p.locator('.s-msheet.open').waitFor();
-    await act(p.locator('.s-msheet a', { hasText: VIEW_TH[k] }).first());
-  } else await act(vis('header nav a').filter({ hasText: VIEW_TH[k] }).first());
+    await act(p.locator(`.s-msheet a[href="#${k}"]`).first());
+  } else await act(vis(`header nav a[href="#${k}"]`).first());
   await wait(900);
   const now = await viewNow(); if (now !== k) throw new Error(`menu → ${k}: page shows "${now}"`);
 }
@@ -99,10 +103,11 @@ const toTop = () => p.evaluate(() => { const de = document.documentElement, sb =
 const reach = sel => p.waitForFunction(s => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(); return r.top < innerHeight * 0.6 && r.bottom > innerHeight * 0.3; }, sel, { timeout: 15000 }).then(() => true, () => false);
 
 await p.goto(`${BASE}/${page}`); await fresh();
+SPLIT = await p.evaluate(() => !!document.getElementById('pathsRepair'));
 
 await step('1 หน้าแรกและเมนู 6 หน้า', async () => {
   if (!(await p.locator('h1').first().isVisible())) throw new Error('no visible h1');
-  for (const k of ['shop', 'service', 'business', 'knowledge', 'contact', 'home']) await goView(k);
+  for (const k of SPLIT ? ['install', 'clean', 'repair', 'business', 'help', 'home'] : ['shop', 'service', 'business', 'knowledge', 'contact', 'home']) await goView(k);
   await goView('contact'); await p.goBack(); await wait(900);
   const back = await viewNow(); if (back !== 'home') throw new Error(`back button → "${back}" (expected home)`);
   return '6 หน้า + ปุ่มย้อนกลับ';
