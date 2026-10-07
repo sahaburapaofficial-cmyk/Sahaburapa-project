@@ -4,6 +4,7 @@
 //     a tripped breaker, on/off cycling, noise rings, odour, short air, a stuck louver, water at the outdoor unit, a fast meter, a
 //     calendar) — illustrations only, never a diagnosis; the triage text beside it stays the source
 //   · SVG + CSS (shared.css .ai-*): no WebGL, no extra context, still under prefers-reduced-motion
+import { aiFill } from './aiart.js';
 import { h } from './sbp-core.js';
 
 const UNIT = `<rect x="40" y="18" width="120" height="40" rx="10" class="ai-body"/><rect x="48" y="50" width="104" height="5" rx="2.5" class="ai-vent"/><rect x="130" y="26" width="16" height="8" rx="2" class="ai-disp"/>`;
@@ -43,6 +44,7 @@ export function runWhenVisible(el) {
   IO.observe(el); return el;
 }
 const svg = (body, cls) => { const d = h('span', { class: 'ai ' + (cls || ''), 'aria-hidden': 'true' }); d.innerHTML = `<svg viewBox="0 0 200 120">${body}</svg>`; return runWhenVisible(d); };
-export const symAnim = (id, cls) => SYM[id] ? svg(SYM[id], cls) : null;
+// Rev.42: the big symptom picture takes an AI image from slot sym:<id> when one is set (aiart.js)
+export const symAnim = (id, cls) => { if (!SYM[id]) return null; const e = svg(SYM[id], cls); if (cls === 'big') aiFill(e, 'sym:' + id); return e; };
 export const guideAnim = (id, cls) => GUIDE[id] ? svg(GUIDE[id], cls) : null;
 export const SYM_IDS = Object.keys(SYM), GUIDE_IDS = Object.keys(GUIDE);

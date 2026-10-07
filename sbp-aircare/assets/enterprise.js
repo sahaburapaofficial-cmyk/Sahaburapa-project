@@ -14,6 +14,9 @@ const fill = t => t.replace('{min}', baht(DATA.minBill)).replace('{fee}', baht(T
 import { cart } from './commerce.js';
 import { askTeam, copyText } from './contact.js';
 import { toast } from './proto-ui.js';
+import { aiFill } from './aiart.js';
+// Rev.42: a picture of the building type when slot ent:<id> is set (hidden otherwise)
+const entAi = id => { const f = h('div', { class: 'en-ai-pic', hidden: true }); aiFill(f, 'ent:' + id).then(ok => { f.hidden = !ok; }); return f; };
 
 // what every promise below rests on: P = in the package / company form already · D = agreed in the contract (filled per customer)
 const P = 'pkg', D = 'deal';
@@ -242,7 +245,7 @@ export function mountEnterprise(root, { openCart, builder } = {}) {
     const adds = s.addOns.map(k => addOn(k, (pkgOver || s.sample.pkg))).filter(Boolean);
     panel.append(
       h('div', { class: 'en-main' },
-        h('div', { class: 'en-hd' }, icon(ICON[s.id]), h('div', {}, h('h3', {}, s.th), h('p', {}, s.who))),
+        h('div', { class: 'en-hd' }, icon(ICON[s.id]), h('div', {}, h('h3', {}, s.th), h('p', {}, s.who))), entAi(s.id),
         h('ol', { class: 'en-pains' }, s.pains.map(([pain, fix, kind]) => h('li', {},
           h('p', { class: 'en-pain' }, pain),
           h('p', { class: 'en-fix' }, fill(fix), h('span', { class: 'en-tag ' + kind }, kind === P ? 'มีในแพ็กเกจ / แบบฟอร์มบริษัท' : 'ตกลงในสัญญา'))))),

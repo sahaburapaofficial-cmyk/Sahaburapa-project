@@ -721,3 +721,6 @@ img.pa-v.in{opacity:1}img.pa-v.out{opacity:0}
 .pa-ai-tag{position:absolute;left:10px;top:10px;z-index:3;padding:3px 9px;border-radius:999px;font:500 11.5px var(--s-mono,monospace);letter-spacing:.04em;color:#fff;background:rgba(8,12,20,.62);backdrop-filter:blur(6px)}
 .pa-tab-ic .pa-ai-tag{display:none}
 img.pa-v.ai{object-fit:cover}
+/* Rev.42 hero film band (slot hero:D|E|F) */
+.lx-ai-hero{position:relative;aspect-ratio:21/9;border-radius:var(--s-r,16px);margin-bottom:20px;border:1px solid var(--s-line);background:var(--s-card)}
+@media (max-width:640px){.lx-ai-hero{aspect-ratio:16/10}}

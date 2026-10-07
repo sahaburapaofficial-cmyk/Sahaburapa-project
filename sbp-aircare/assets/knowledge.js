@@ -4,6 +4,9 @@
 // so a guide can never disagree with the calculator next to it. Wording follows the banned-claims list (CLAUDE.md §6.6 #11).
 // Owner / tech lead to review the copy; data corrections flow in through the constants.
 import { guideAnim } from './animicons.js';   // Rev.26
+import { aiFill } from './aiart.js';
+// Rev.42: an AI picture at the top of an opened topic when slot kn:<id> is set (hidden otherwise)
+const kAi = id => { const f = h('div', { class: 'kh-ai-pic', hidden: true }); aiFill(f, 'kn:' + id).then(ok => { f.hidden = !ok; }); return f; };
 import { h, $$, recommendBtu, btuFmt, baht, incVat, DATA, PRICING, TRAVEL, VRF_NOTE } from './sbp-core.js';
 import { PKG_INFO, METHOD_INFO } from './commerce.js';
 import { FIT_RULES } from './roomfit.js';
@@ -103,7 +106,7 @@ export function mountKnowledge(root, { ids = {} } = {}) {
       const tries = g.try.filter(([, k]) => k.startsWith('ask:') || ids[k] || document.getElementById(k));
       grid.append(h('details', { class: 'kh-card', id: `kh-${g.id}` },
         h('summary', {}, guideAnim(g.id, 'kh-ai'), h('span', { class: 'kh-aud' }, g.aud === 'biz' ? 'องค์กร' : g.aud === 'home' ? 'บ้าน' : 'ทุกคน', ` · อ่าน ${g.min} นาที`), h('b', {}, g.th), h('small', {}, g.lead)),
-        h('div', { class: 'kh-body' }, g.body(), tries.length ? h('div', { class: 'kh-try' }, h('span', {}, 'ลองเอง:'), tries.map(([th, k]) => h('button', { type: 'button', class: 's-btn', onclick: () => go(k) }, th))) : null)));
+        h('div', { class: 'kh-body' }, kAi(g.id), g.body(), tries.length ? h('div', { class: 'kh-try' }, h('span', {}, 'ลองเอง:'), tries.map(([th, k]) => h('button', { type: 'button', class: 's-btn', onclick: () => go(k) }, th))) : null)));
     });
   }
   draw();
