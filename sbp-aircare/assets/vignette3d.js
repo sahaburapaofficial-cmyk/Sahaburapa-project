@@ -22,7 +22,7 @@ function studio(theme, accent, force) {
     const THREE = await import('./three.module.min.js');
     await (await import('./brand3d.js')).logosReady();
     const { buildPremiumIndoor, buildOutdoor, materialSet } = await import('./ac3d.js');
-    const { buildCeilingUnit, buildCassetteUnit } = await import('./units3d.js');
+    const { buildCeilingUnit, buildCassetteUnit, buildFloorUnit } = await import('./units3d.js');
     const { handTools } = await import('./tech3d.js');
     const { RoomEnvironment } = await import('./RoomEnvironment.js');
     try { await document.fonts.ready; } catch (e) { /* fonts optional */ }
@@ -92,12 +92,12 @@ function studio(theme, accent, force) {
     }
     const ink = dark ? '#eaf3ff' : '#101a2a', ink2 = dark ? 'rgba(220,235,255,.72)' : 'rgba(16,26,42,.66)';
     const T = (g, s, x, y, size, col = ink, weight = 600, align = 'left') => { g.font = `${weight} ${size}px ${FONT}`; g.fillStyle = col; g.textAlign = align; g.textBaseline = 'alphabetic'; g.fillText(s, x, y); };
-    const unit = (type = 'wall') => {
-      const U = type === 'ceiling' ? buildCeilingUnit(M, { interior: false, rod: 0 }) : type === 'cassette' ? buildCassetteUnit(M, { interior: false, rod: 0 }) : buildPremiumIndoor(M, { logo: true });
+    const unit = (type = 'wall', logo = true) => {
+      const U = type === 'ceiling' ? buildCeilingUnit(M, { interior: false, rod: 0 }) : type === 'cassette' ? buildCassetteUnit(M, { interior: false, rod: 0 }) : type === 'floor' ? buildFloorUnit(M, {}) : buildPremiumIndoor(M, { logo });
       if (U.parts && U.parts.hangers) U.parts.hangers.visible = false;
       return U;
     };
-    const outdoor = () => buildOutdoor(M, { logo: true }).root;
+    const outdoor = (logo = true) => buildOutdoor(M, { logo }).root;
     const tools = handTools();
     const tool = (name, s = 1.6) => { const t = tools[name].clone(); t.visible = true; t.scale.setScalar(s); return t; };
     const mat = (c, x = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.4, ...x });
@@ -165,6 +165,30 @@ function studio(theme, accent, force) {
     }
     const chip = (g, x, y, s, fill = accHex, col = dark ? '#03121a' : '#ffffff', size = 26) => { g.font = `700 ${size}px ${FONT}`; const w = g.measureText(s).width + size * 1.1; g.fillStyle = fill; rr(g, x, y - size, w, size * 1.5, size * 0.75); g.fill(); T(g, s, x + size * 0.55, y + size * 0.28, size, col, 700); return w; };
 
+    /* ---------- Rev.45 extra pieces for the symptom / knowledge / type / material / building scenes ---------- */
+    const box = (w, h, d, m, x, y, z, ry = 0) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y + h / 2, z); b.rotation.y = ry; return b; };
+    const cylM = (r, h, m, x, y, z, seg = 32, r2) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r2 ?? r, h, seg), m); c.position.set(x, y + h / 2, z); return c; };
+    const wallM = mat(dark ? 0x1d2533 : 0xe9e5de, { roughness: 0.92 }), glassM = new THREE.MeshPhysicalMaterial({ color: dark ? 0x6fb7e8 : 0x9cc8ea, roughness: 0.08, metalness: 0.2, transparent: true, opacity: 0.55 });
+    const whiteM = mat(0xf2f4f6, { roughness: 0.45 }), darkM = mat(0x23282f, { roughness: 0.5 }), redM = mat(0xd8452c, { roughness: 0.45 }), blueM = mat(0x2f7fd0, { roughness: 0.4 });
+    const glowM = c => new THREE.MeshBasicMaterial({ color: c, toneMapped: false, transparent: true, opacity: 0.9 });
+    const backWall = (w = 1.7, h = 1.25) => { const m = box(w, h, 0.06, wallM, 0, 0, -0.38); m.userData.noShadow = true; return m; };
+    const wallUnit = (g, logo = false, y = 0.86) => { g.add(backWall()); const U = unit('wall', logo); U.root.position.set(0, y, -0.24); g.add(U.root); return U; };
+    const puddle = (x, z, r = 0.22) => { const m = new THREE.Mesh(new THREE.CircleGeometry(r, 40), new THREE.MeshPhysicalMaterial({ color: 0x8fd0ff, roughness: 0.02, transparent: true, opacity: 0.55, clearcoat: 1 })); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.004, z); m.scale.y = 0.6; m.userData.noShadow = true; return m; };
+    const crystals = (n, box3) => { const g = new THREE.Group(), m = new THREE.MeshPhysicalMaterial({ color: 0xeaf8ff, roughness: 0.15, transmission: 0, transparent: true, opacity: 0.85, clearcoat: 1 }); for (let i = 0; i < n; i++) { const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.012 + rnd() * 0.02), m); c.position.set(box3[0] + rnd() * (box3[1] - box3[0]), box3[2] + rnd() * (box3[3] - box3[2]), box3[4] + rnd() * (box3[5] - box3[4])); c.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3); c.scale.y = 1.6; g.add(c); } return g; };
+    const rings = (x, y, z, n = 3, c = ACC) => { const g = new THREE.Group(); for (let i = 0; i < n; i++) { const t = new THREE.Mesh(new THREE.TorusGeometry(0.16 + i * 0.12, 0.006, 8, 64, Math.PI * 0.9), glowM(c)); t.material.opacity = 0.75 - i * 0.2; t.position.set(x, y, z); t.rotation.set(0, Math.PI / 2, -Math.PI * 0.45); g.add(t); } return g; };
+    const haze = (from, c, n = 4) => { const g = new THREE.Group(); for (let i = 0; i < n; i++) { const pts = [new THREE.Vector3(from.x - 0.2 + i * 0.13, from.y, from.z), new THREE.Vector3(from.x - 0.15 + i * 0.13 + 0.06, from.y - 0.2, from.z + 0.25), new THREE.Vector3(from.x - 0.2 + i * 0.13 - 0.04, from.y - 0.42, from.z + 0.5), new THREE.Vector3(from.x - 0.2 + i * 0.13 + 0.05, from.y - 0.6, from.z + 0.7)]; const t = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.018, 8), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.35, depthWrite: false, toneMapped: false })); t.userData.noShadow = true; g.add(t); } return g; };
+    const thermo = (x, y, z, hot = true) => { const g = new THREE.Group(); g.add(cylM(0.022, 0.42, mat(0xffffff, { roughness: 0.1, transparent: true, opacity: 0.6 }), 0, 0.04, 0, 20)); g.add(cylM(0.011, hot ? 0.34 : 0.16, mat(hot ? 0xe0452a : 0x2f7fd0), 0, 0.05, 0, 12)); const b = new THREE.Mesh(new THREE.SphereGeometry(0.04, 20, 14), mat(hot ? 0xe0452a : 0x2f7fd0)); b.position.y = 0.04; g.add(b); g.position.set(x, y, z); return g; };
+    const panelBox = (x, y, z, tripped = 1) => { const g = new THREE.Group(); g.add(box(0.5, 0.62, 0.12, mat(0xe3e7ea, { roughness: 0.4, metalness: 0.2 }), 0, 0, 0)); for (let i = 0; i < 4; i++) { g.add(box(0.07, 0.16, 0.05, mat(0xf7f8f9), -0.15 + i * 0.1, 0.36, 0.07)); g.add(box(0.035, 0.05, 0.03, i === tripped ? redM : darkM, -0.15 + i * 0.1, i === tripped ? 0.38 : 0.45, 0.1)); } g.position.set(x, y, z); return g; };
+    const clock = (x, y, z) => { const g = new THREE.Group(); const f = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.03, 48), whiteM); f.rotation.x = Math.PI / 2; g.add(f); const rim = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.012, 8, 48), chrome); g.add(rim); [[0.1, 0.4], [0.13, 2.2]].forEach(([l, a]) => { const hnd = box(0.012, l, 0.006, darkM, 0, 0, 0.02); hnd.position.y = 0; hnd.geometry.translate(0, l / 2 - 0.005, 0); hnd.rotation.z = -a; g.add(hnd); }); g.position.set(x, y, z); return g; };
+    const coins = (x, z, n = 6) => { const g = new THREE.Group(); for (let i = 0; i < n; i++) g.add(cylM(0.06, 0.012, mat(0xd8b24a, { metalness: 1, roughness: 0.3 }), x + (i % 2) * 0.004, i * 0.013, z, 32)); return g; };
+    const paper = (w, h, x, y, z, rx = -Math.PI / 2, ry = 0) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat(0xfbfbf8, { roughness: 0.9, side: THREE.DoubleSide })); m.rotation.set(rx, ry, 0); m.position.set(x, y, z); return m; };
+    const lines = (w, h, n, x, y, z, rx = -Math.PI / 2) => { const g = new THREE.Group(); for (let i = 0; i < n; i++) { const l = new THREE.Mesh(new THREE.PlaneGeometry(w * (i % 3 === 2 ? 0.5 : 0.8), 0.008), mat(0x9aa6b2)); l.position.set(x - w * 0.05, y + 0.001, z - h / 2 + 0.06 + i * (h - 0.1) / n); l.rotation.x = rx; g.add(l); } return g; };
+    const building = (w, h, d, floors, x, z, m = whiteM, opt = {}) => { const g = new THREE.Group(); g.add(box(w, h, d, m, 0, 0, 0)); for (let f = 0; f < floors; f++) { const y = (f + 0.35) * h / floors; g.add(box(w + 0.004, h / floors * 0.42, d + 0.004, glassM, 0, y, 0)); if (opt.balcony) g.add(box(w + 0.04, 0.012, d + 0.04, m, 0, y - 0.01, 0)); } g.add(box(w * 1.02, 0.02, d * 1.02, darkM, 0, h, 0)); g.position.set(x, 0, z); return g; };
+    const pin = (x, z) => { const g = new THREE.Group(); const c = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.16, 24), redM); c.rotation.x = Math.PI; c.position.y = 0.08; g.add(c); const b = new THREE.Mesh(new THREE.SphereGeometry(0.055, 24, 18), redM); b.position.y = 0.19; g.add(b); const r = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.006, 8, 64), glowM(ACC)); r.rotation.x = Math.PI / 2; r.position.y = 0.006; g.add(r); g.position.set(x, 0, z); return g; };
+    const insulTube = (pts, r = 0.035) => new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, r, 20), mat(0x1a1c1f, { roughness: 0.95 }));
+    const pipe = (pts, r, m) => new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, r, 16), m);
+    const P3 = (x, y, z) => new THREE.Vector3(x, y, z);
+
     /* ---------- the scenes ---------- */
     const I = {};   // info figures for the current render (set per call)
     const S = {
@@ -181,6 +205,55 @@ function studio(theme, accent, force) {
         const mf = manifold(); mf.scale.setScalar(0.8); mf.position.set(-0.85, 0.3, 0.3); mf.rotation.y = 0.5; g.add(mf);
         const gun = tool('gun', 1.5); gun.position.set(0.25, 0.08, 0.45); gun.rotation.set(Math.PI / 2, 0, 0.9); g.add(gun);
         const c = coil(2.2, 0.16, 0.012); c.position.set(-0.35, 0, 0.45); g.add(c); },
+      /* Rev.45 — symptoms (a customer's own unit: no brand, rule 20) */
+      'sym:warm': g => { wallUnit(g); g.add(airflow(P3(0, 0.74, -0.12), 6, 0.9, false)); g.add(thermo(0.62, 0.15, 0.25, true)); },
+      'sym:drip': g => { wallUnit(g); g.add(droplets(14, [-0.3, 0.3, 0.12, 0.68, -0.15, -0.05])); g.add(puddle(0, -0.05)); },
+      'sym:ice': g => { wallUnit(g); g.add(crystals(70, [-0.42, 0.42, 0.7, 0.8, -0.16, -0.08])); g.add(airflow(P3(0, 0.74, -0.12), 4, 0.5)); },
+      'sym:dead': g => { wallUnit(g); const rm = tool('remote', 3.2); rm.position.set(0.45, 0.32, 0.3); rm.rotation.set(-0.6, -0.4, 0.2); g.add(rm); },
+      'sym:code': g => { wallUnit(g); for (let i = 0; i < 3; i++) { const l = new THREE.Mesh(new THREE.SphereGeometry(0.03 + i * 0.03, 20, 14), glowM(0xff4a3a)); l.material.opacity = 0.9 - i * 0.3; l.position.set(0.26, 1.0, -0.06); g.add(l); } },
+      'sym:trip': g => { g.add(backWall()); g.add(panelBox(0, 0.4, -0.3, 1)); for (let i = 0; i < 3; i++) { const z = new THREE.Mesh(new THREE.TorusGeometry(0.05 + i * 0.03, 0.005, 6, 6), glowM(0xffc23a)); z.position.set(-0.06, 0.95, -0.2); z.rotation.z = i; g.add(z); } },
+      'sym:cycle': g => { wallUnit(g); g.add(clock(0.6, 0.45, -0.3)); },
+      'sym:noise': g => { const O = outdoor(false); O.scale.setScalar(0.62); O.position.set(-0.2, 0.0, -0.1); O.rotation.y = 0.35; g.add(O); g.add(rings(0.35, 0.3, 0.0, 3)); },
+      'sym:smell': g => { wallUnit(g); g.add(haze(P3(0, 0.72, -0.1), 0x8ab86a, 4)); },
+      'sym:weak': g => { wallUnit(g); const f = box(0.55, 0.03, 0.26, mat(0x8a7a66, { roughness: 1 }), 0.35, 0.02, 0.25, -0.3); g.add(f); g.add(airflow(P3(0, 0.74, -0.12), 2, 0.35)); },
+      'sym:swing': g => { const U = wallUnit(g); const fl = box(0.7, 0.012, 0.08, whiteM, 0, 0.7, -0.08); fl.rotation.x = 0.9; g.add(fl); },
+      'sym:cduwater': g => { const O = outdoor(false); O.scale.setScalar(0.62); O.position.set(0, 0.12, -0.1); g.add(O); g.add(box(0.7, 0.12, 0.42, mat(0x8b939b, { metalness: 0.6, roughness: 0.4 }), 0, 0, -0.1)); g.add(droplets(10, [-0.25, 0.25, 0.02, 0.1, 0.08, 0.14])); g.add(puddle(0, 0.25, 0.26)); },
+      'sym:bill': g => { g.add(paper(0.36, 0.5, -0.2, 0.01, 0.1, -Math.PI / 2, 0.3)); g.add(lines(0.36, 0.5, 7, -0.2, 0.01, 0.1)); g.add(coins(0.25, 0.15, 7)); g.add(coins(0.38, -0.02, 4)); const m = box(0.3, 0.42, 0.14, mat(0xe8eaec, { roughness: 0.4 }), 0.1, 0, -0.32); g.add(m); g.add(cylM(0.07, 0.02, glowM(ACC), 0.1, 0.25, -0.24, 32)); },
+      'sym:care': g => { wallUnit(g, false, 0.92); const c = box(0.42, 0.42, 0.03, whiteM, 0.55, 0.22, -0.3); g.add(c); for (let i = 0; i < 16; i++) g.add(box(0.07, 0.05, 0.005, i === 9 ? glowM(ACC) : mat(0xdfe5ea), 0.43 + (i % 4) * 0.08, 0.27 + Math.floor(i / 4) * 0.075, -0.28)); },
+      /* knowledge topics */
+      'kn:btu': g => { const room = new THREE.Group(); room.add(box(1.3, 0.03, 0.95, mat(0xb78b5e, { roughness: 0.6 }), 0, 0, 0)); room.add(box(1.3, 0.7, 0.03, wallM, 0, 0, -0.48)); room.add(box(0.03, 0.7, 0.95, wallM, -0.65, 0, 0)); const U = unit(); U.root.scale.setScalar(0.32); U.root.position.set(0, 0.58, -0.45); room.add(U.root); room.add(airflow(P3(0, 0.54, -0.42), 4, 0.6)); room.add(box(0.5, 0.008, 0.02, glowM(ACC), 0, 0.03, 0.47)); room.add(box(0.02, 0.008, 0.9, glowM(ACC), 0.64, 0.03, 0)); g.add(room); },
+      'kn:types': g => { [['wall', -0.75, 0.55, 0.5], ['ceiling', -0.15, 0.62, 0.42], ['cassette', 0.45, 0.6, 0.42], ['floor', 0.95, 0, 0.42]].forEach(([t, x, y, sc]) => { const U = unit(t); U.root.scale.setScalar(sc); U.root.position.set(x, y, 0); if (t === 'cassette') U.root.rotation.x = -0.8; g.add(U.root); }); },
+      'kn:inverter': g => { g.add(cylM(0.17, 0.42, mat(0x2b3138, { metalness: 0.6, roughness: 0.35 }), -0.3, 0, 0, 40)); g.add(cylM(0.17, 0.04, mat(0x3a424b, { metalness: 0.6 }), -0.3, 0.42, 0, 40)); g.add(pipe([P3(-0.3, 0.46, 0), P3(-0.3, 0.6, 0), P3(-0.05, 0.62, 0.05)], 0.016, copperM)); g.add(box(0.5, 0.025, 0.36, mat(0x1f6b3a, { roughness: 0.5 }), 0.3, 0.02, 0.05)); g.add(box(0.14, 0.03, 0.14, darkM, 0.3, 0.045, 0.05)); for (let i = 0; i < 8; i++) g.add(box(0.03, 0.02, 0.05, mat(0xc9cdd1, { metalness: 0.8 }), 0.12 + (i % 4) * 0.12, 0.045, -0.08 + Math.floor(i / 4) * 0.27)); g.add(box(0.12, 0.012, 0.012, glowM(ACC), 0.3, 0.08, 0.05)); },
+      'kn:clean': g => { wallUnit(g, true); g.add(droplets(24, [-0.32, 0.32, 0.25, 0.7, -0.12, 0.05])); const gun = tool('gun', 1.6); gun.position.set(0.55, 0.55, 0.2); gun.rotation.set(0.2, -0.6, 0.9); g.add(gun); },
+      'kn:c1c2': g => { const U = unit(); U.root.scale.setScalar(0.62); U.root.position.set(-0.35, 0.05, 0); g.add(U.root); [0, 1, 2].forEach(i => g.add(box(0.36, 0.012, 0.22, i === 2 ? mat(0xf2f4f6) : mat(0x9fb3c6, { roughness: 0.8 }), 0.35 + (i % 2) * 0.1, 0.012 * i, -0.15 + i * 0.25, 0.2))); },
+      'kn:install': g => { g.add(backWall(2.0, 1.3)); const U = unit(); U.root.position.set(-0.35, 0.95, -0.24); g.add(U.root); g.add(box(0.08, 0.06, 0.06, whiteM, 0.12, 0.98, -0.32)); g.add(box(0.06, 0.95, 0.06, whiteM, 0.18, 0.05, -0.32)); const O = outdoor(); O.scale.setScalar(0.45); O.position.set(0.6, 0, -0.15); g.add(O); },
+      'kn:place': g => { const room = new THREE.Group(); room.add(box(1.4, 0.03, 1.0, mat(0xc9a77e, { roughness: 0.6 }), 0, 0, 0)); room.add(box(1.4, 0.75, 0.03, wallM, 0, 0, -0.5)); const U = unit(); U.root.scale.setScalar(0.34); U.root.position.set(-0.25, 0.62, -0.47); room.add(U.root); room.add(airflow(P3(-0.25, 0.58, -0.44), 4, 0.75)); room.add(box(0.7, 0.2, 0.3, mat(0x8d99a8, { roughness: 0.95 }), 0.2, 0.03, 0.28)); room.add(box(0.7, 0.22, 0.08, mat(0x8d99a8, { roughness: 0.95 }), 0.2, 0.23, 0.42)); g.add(room); },
+      'kn:contract': g => { [0, 1, 2].forEach(i => { const U = unit(); U.root.scale.setScalar(0.42); U.root.position.set(-0.55 + i * 0.4, 0.15 + i * 0.12, -0.1 - i * 0.05); g.add(U.root); }); const t = tool('tablet', 2.2); t.position.set(0.55, 0.12, 0.25); t.rotation.set(-0.9, -0.3, 0); g.add(t); },
+      'kn:packages': g => { [[0.28, 0.2], [0.32, 0.3], [0.36, 0.42]].forEach(([w, h], i) => { g.add(box(w, h, w * 0.8, mat(0xeef1f4, { roughness: 0.5 }), -0.45 + i * 0.45, 0, 0)); g.add(box(w + 0.004, 0.03, w * 0.8 + 0.004, glowM(ACC), -0.45 + i * 0.45, h * 0.6, 0)); }); },
+      'kn:docs': g => { for (let i = 0; i < 5; i++) g.add(paper(0.42, 0.56, -0.15 + i * 0.006, 0.006 + i * 0.008, 0.05 - i * 0.004, -Math.PI / 2, 0.05 * i)); g.add(lines(0.42, 0.56, 8, -0.126, 0.05, 0.034)); const t = tool('tablet', 2.0); t.position.set(0.42, 0.06, 0.05); t.rotation.set(-1.3, 0.3, 0); g.add(t); },
+      'kn:vrf': g => { g.add(box(1.8, 0.05, 0.8, mat(0x9aa3ad, { roughness: 0.8 }), 0, 0, 0)); [0, 1, 2].forEach(i => { const O = outdoor(); O.scale.setScalar(0.5); O.position.set(-0.6 + i * 0.6, 0.05, 0); g.add(O); }); },
+      'kn:area': g => { for (let i = 0; i < 16; i++) { const x = -0.75 + (i % 4) * 0.5, z = -0.6 + Math.floor(i / 4) * 0.4, h = 0.08 + rnd() * 0.35; if (i !== 6) g.add(building(0.2, h, 0.2, Math.max(1, Math.round(h * 12)), x + rnd() * 0.08, z, whiteM)); } g.add(pin(0.25, 0.0)); },
+      /* AC types (product scenes — FUJIVA unit allowed) */
+      'type:wall': g => { const U = unit('wall'); U.root.position.set(0, 0.25, 0); g.add(U.root); },
+      'type:ceiling': g => { const U = unit('ceiling'); U.root.position.set(0, 0.2, 0); g.add(U.root); },
+      'type:cassette': g => { const U = unit('cassette'); U.root.position.set(0, 0.35, 0); U.root.rotation.x = -0.7; g.add(U.root); },
+      'type:floor': g => { const U = unit('floor'); g.add(U.root); },
+      /* materials (generic pieces, no logos — rule 14) */
+      'mat:copper': g => { const c1 = coil(3.0, 0.26, 0.012); c1.position.set(-0.05, 0, 0); g.add(c1); const c2 = coil(2.4, 0.34, 0.018); c2.position.set(-0.05, 0, 0); g.add(c2); },
+      'mat:insul': g => { g.add(insulTube([P3(-0.6, 0.06, 0.1), P3(-0.1, 0.06, 0.15), P3(0.3, 0.12, -0.05), P3(0.6, 0.06, -0.2)], 0.04)); const c = pipe([P3(0.6, 0.06, -0.2), P3(0.72, 0.06, -0.27)], 0.02, copperM); g.add(c); g.add(insulTube([P3(-0.6, 0.05, 0.3), P3(0.2, 0.05, 0.35), P3(0.6, 0.05, 0.15)], 0.03)); },
+      'mat:duct': g => { g.add(box(1.0, 0.08, 0.1, whiteM, -0.1, 0, 0)); g.add(box(0.1, 0.5, 0.1, whiteM, 0.45, 0, 0)); g.add(box(0.12, 0.12, 0.12, mat(0xeceff1), 0.45, 0, 0)); g.add(box(0.55, 0.08, 0.1, whiteM, -0.2, 0, 0.35, 0.3)); },
+      'mat:cable': g => { [[0x8a5a2b, 0], [0x2f7fd0, 0.05], [0x3fa34d, 0.1]].forEach(([c, dz], i) => { const pts = []; for (let k = 0; k <= 80; k++) { const a = k / 80 * Math.PI * 5; pts.push(P3(Math.cos(a) * (0.26 - i * 0.04), 0.03 + k * 0.0012, Math.sin(a) * (0.26 - i * 0.04))); } g.add(pipe(pts, 0.012, mat(c, { roughness: 0.5 }))); }); },
+      'mat:drain': g => { const pm = mat(0x3f8fd6, { roughness: 0.4 }); g.add(pipe([P3(-0.6, 0.05, 0), P3(0.4, 0.05, 0)], 0.03, pm)); g.add(pipe([P3(0.4, 0.05, 0), P3(0.48, 0.05, 0), P3(0.5, 0.12, 0), P3(0.5, 0.5, 0)], 0.03, pm)); g.add(pipe([P3(-0.5, 0.04, 0.3), P3(0.3, 0.04, 0.3)], 0.022, pm)); },
+      'mat:mount': g => { const st = mat(0x8e979f, { metalness: 0.8, roughness: 0.35 }); [-0.3, 0.3].forEach(x => { g.add(box(0.05, 0.6, 0.04, st, x, 0, -0.25)); g.add(box(0.05, 0.04, 0.6, st, x, 0.08, 0.02)); g.add(cylM(0.045, 0.03, darkM, x, 0.12, 0.1, 24)); }); },
+      'mat:rcbo': g => { [0, 1, 2].forEach(i => { g.add(box(0.12, 0.3, 0.2, mat(0xf4f5f6, { roughness: 0.35 }), -0.2 + i * 0.14, 0, 0)); g.add(box(0.05, 0.06, 0.02, i === 1 ? glowM(ACC) : darkM, -0.2 + i * 0.14, 0.2, 0.11)); }); g.add(box(0.5, 0.03, 0.06, chrome, -0.06, 0.12, -0.1)); },
+      /* enterprise building types */
+      'ent:office': g => { g.add(building(0.5, 1.2, 0.5, 12, 0, 0)); g.add(building(0.36, 0.6, 0.36, 6, 0.55, 0.15)); },
+      'ent:chain': g => { [-0.6, 0, 0.6].forEach((x, i) => { g.add(building(0.42, 0.34, 0.36, 1, x, 0)); g.add(box(0.44, 0.04, 0.1, glowM(ACC), x, 0.26, 0.2)); }); },
+      'ent:condo': g => { g.add(building(0.36, 1.35, 0.36, 18, -0.15, 0, whiteM, { balcony: true })); g.add(building(0.32, 0.95, 0.32, 13, 0.35, 0.1, whiteM, { balcony: true })); },
+      'ent:hospital': g => { g.add(building(1.2, 0.5, 0.5, 4, 0, 0)); [0, 1].forEach(r => g.add(box(r ? 0.16 : 0.05, r ? 0.05 : 0.16, 0.02, redM, 0, 0.6 - (r ? 0 : 0.055), 0.26))); g.add(box(0.3, 0.12, 0.3, whiteM, 0, 0.5, 0)); },
+      'ent:school': g => { g.add(building(1.1, 0.42, 0.42, 2, 0, 0)); g.add(cylM(0.008, 0.9, chrome, 0.7, 0, 0.2, 8)); g.add(box(0.18, 0.1, 0.005, mat(0x2f5fb0), 0.79, 0.78, 0.2)); g.add(box(0.9, 0.01, 0.4, mat(0x4f8a57, { roughness: 0.9 }), 0, 0, 0.45)); },
+      'ent:hotel': g => { g.add(building(0.7, 1.1, 0.4, 14, 0, -0.1)); g.add(box(0.6, 0.02, 0.32, mat(0x3fb4e6, { roughness: 0.05 }), 0.1, 0, 0.35)); },
+      'ent:factory': g => { const sh = mat(0xd9dde1, { roughness: 0.6, metalness: 0.3 }); g.add(box(1.2, 0.36, 0.7, sh, 0, 0, 0)); const tri = new THREE.Shape(); tri.moveTo(0, 0); tri.lineTo(0.3, 0); tri.lineTo(0.3, 0.16); tri.closePath(); const tg = new THREE.ExtrudeGeometry(tri, { depth: 0.7, bevelEnabled: false }); tg.translate(0, 0, -0.35); for (let i = 0; i < 4; i++) { const r = new THREE.Mesh(tg, sh); r.position.set(-0.6 + i * 0.3, 0.36, 0); g.add(r); g.add(box(0.012, 0.15, 0.68, glassM, -0.3 + i * 0.3 - 0.006, 0.36, 0)); } g.add(cylM(0.05, 0.85, mat(0x8a929a), 0.5, 0, -0.25, 20)); },
       c1: g => { ['wall', 'ceiling', 'cassette'].forEach((t, i) => { const U = unit(t); U.root.scale.setScalar(t === 'wall' ? 0.62 : 0.5); U.root.position.set(-0.62 + i * 0.62, t === 'cassette' ? 0.3 : 0.32, 0); if (t === 'cassette') U.root.rotation.x = -0.9; g.add(U.root); });
         g.add(glass(0.36, 0.22, (c, w, h) => { T(c, '× 3', w / 2, h * 0.62, 120, accHex, 700, 'center'); }, { at: [0.62, 0.62, 0.25], ry: -0.3 })); },
       c2: g => { g.add(glass(0.86, 1.0, (c, w, h) => { T(c, 'ใบเสนอราคา', 40, 70, 40, accHex, 700); T(c, 'ราคามาตรฐาน · ก่อน VAT', 40, 112, 26, ink2, 500);

@@ -8,6 +8,7 @@
 //     unit, no fake "our team" photos: every AI image is labelled ภาพประกอบ (AI) on the page (rules 14, 15, 20)
 //   · dev reads the manifest + files; build.py writes the images into ai/embed.js as data URIs for the one-file pages
 import EMBED from './ai/embed.js';
+import { stillFor } from './stills.js';
 let P = null;
 export function aiArt() {
   if (P) return P;
@@ -26,7 +27,9 @@ const RM = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').m
 /** Rev.42: put the AI image / video of `key` into `host` (cover, fades in, labelled). Resolves true when the slot is filled. */
 export function aiFill(host, key, { label = 'ภาพประกอบ (AI)' } = {}) {
   if (!host) return Promise.resolve(false);
-  return aiArt().then(m => m[key] ? fillMedia(host, m[key], label) : false);
+  // Rev.45 (owner: "D และ F … ใช้รูปที่เป็นมิติเท่านั้น"): no AI picture → this design's pre-rendered 3D still, if it has one
+  const V = (document.documentElement.dataset.lux || '').toUpperCase();
+  return aiArt().then(m => m[key] ? fillMedia(host, m[key], label) : V ? stillFor(V, key, null).then(src => src ? fillMedia(host, { src }, '') : false) : false);
 }
 /** put one picture or film { src, kind, poster } into `host` (used by AI slots and by the pre-rendered 3D film) */
 export function fillMedia(host, a, label) {
@@ -40,8 +43,8 @@ export function fillMedia(host, a, label) {
       if (!RM()) { el.autoplay = true; const io = 'IntersectionObserver' in window && new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? el.play().catch(() => {}) : el.pause()), { threshold: 0.2 }); io && io.observe(el); }
     } else { el = new Image(); el.decoding = 'async'; el.src = a.src; }
     el.className = 'ai-fill'; el.alt = ''; el.setAttribute('aria-hidden', 'true');
-    const tag = document.createElement('span'); tag.className = 'ai-fill-tag'; tag.textContent = label;
-    host.classList.add('ai-has'); host.append(el, tag);
+    host.classList.add('ai-has'); host.append(el);
+    if (label) { const tag = document.createElement('span'); tag.className = 'ai-fill-tag'; tag.textContent = label; host.append(tag); }
     const on = () => el.classList.add('in'); a.kind === 'video' ? el.addEventListener('loadeddata', on, { once: true }) : (el.decode ? el.decode().then(on, on) : on());
     if (a.kind === 'video' && a.poster) { host.style.backgroundImage = `url("${a.poster}")`; host.style.backgroundSize = 'cover'; host.style.backgroundPosition = 'center'; }
     return true;

@@ -16,6 +16,9 @@ import { lineLink } from './contact.js';
 import { typeArt } from './proto-ui.js';
 import { judge, SLOTS, RUSH_FEE_EX, LEAD_DAYS, bkkNow, addDays, dateTh, fetchSlots, slotFree, isOpen } from './queue.js';
 import { timeTh, TIME_NOTE } from './sbp-core.js';
+import { aiFill } from './aiart.js';
+// Rev.45: the type picture — D · F show a 3D still of the unit type (slot type:<id>), others keep the line art
+const qcArt = t => { const e = h('div', { class: 'qc-art', html: typeArt(t, 'qc-svg') }); aiFill(e, 'type:' + t); return e; };
 
 const TYPES_QC = [['wall', 'ติดผนัง', 'บ้าน คอนโด ห้องนอน'], ['ceiling', 'แขวนใต้ฝ้า', 'ร้านค้า สำนักงาน'], ['cassette', 'สี่ทิศทาง', 'คาเฟ่ ร้านอาหาร'], ['floor', 'ตู้ตั้งพื้น', 'ห้องประชุม โถง']];
 export const PKG_TH = {
@@ -59,7 +62,7 @@ export function mountQuickClean(root, { openCart = () => {}, onB2B } = {}) {
       const sizes = sizesFor(t);
       const sel = h('select', { 'aria-label': `ขนาด ${th}`, onchange: e => { st.size[t] = +e.target.value; drawSum(); } }, sizes.map(b => h('option', { value: b.id, selected: b.id === st.size[t] }, sizeNum(t, b))));
       s1.append(h('div', { class: 'qc-type' + (n ? ' on' : '') },
-        h('div', { class: 'qc-art', html: typeArt(t, 'qc-svg') }),
+        qcArt(t),
         h('div', { class: 'qc-tt' }, h('b', {}, th), h('small', {}, where)),
         h('div', { class: 'qc-stp' }, h('button', { type: 'button', 'aria-label': `ลด ${th}`, disabled: !n, onclick: step(-1) }, '−'), out, h('button', { type: 'button', 'aria-label': `เพิ่ม ${th}`, onclick: step(1) }, '+')),
         n ? h('label', { class: 'qc-size' }, h('span', {}, 'ขนาด (BTU)'), sel) : null));

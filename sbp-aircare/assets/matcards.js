@@ -10,6 +10,7 @@
 import { h } from './sbp-core.js';
 import { MATS } from './matdata.js';
 import { runWhenVisible } from './animicons.js';
+import { aiFill } from './aiart.js';
 
 export const MAT_PHOTOS = {};   // e.g. { copper: 'assets/materials/o-two.webp' } — official photos with permission only
 // what the customer can check on site (from the spec text: printed brand, thickness, colours, slope, test button)
@@ -49,7 +50,7 @@ export function mountMatCards(root) {
   if (!root) return null;
   const grid = h('div', { class: 'mc-grid' });
   MATS.forEach(m => {
-    const art = h('div', { class: 'mc-art', 'aria-hidden': 'true' }); art.innerHTML = `<svg viewBox="0 0 240 140">${ART[m.id] || ''}</svg>`; runWhenVisible(art);
+    const art = h('div', { class: 'mc-art', 'aria-hidden': 'true' }); art.innerHTML = `<svg viewBox="0 0 240 140">${ART[m.id] || ''}</svg>`; runWhenVisible(art); aiFill(art, 'mat:' + m.id);   // Rev.45: D · F show a 3D still of the material
     const photo = MAT_PHOTOS[m.id] ? h('img', { class: 'mc-photo', src: MAT_PHOTOS[m.id], alt: `${m.brand} ${m.th}`, loading: 'lazy' }) : null;
     grid.append(h('article', { class: 'mc', 'data-m': m.id },
       photo || art, photo ? art : null,

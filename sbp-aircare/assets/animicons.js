@@ -45,6 +45,6 @@ export function runWhenVisible(el) {
 }
 const svg = (body, cls) => { const d = h('span', { class: 'ai ' + (cls || ''), 'aria-hidden': 'true' }); d.innerHTML = `<svg viewBox="0 0 200 120">${body}</svg>`; return runWhenVisible(d); };
 // Rev.42: the big symptom picture takes an AI image from slot sym:<id> when one is set (aiart.js)
-export const symAnim = (id, cls) => { if (!SYM[id]) return null; const e = svg(SYM[id], cls); if (cls === 'big') aiFill(e, 'sym:' + id); return e; };
-export const guideAnim = (id, cls) => GUIDE[id] ? svg(GUIDE[id], cls) : null;
+export const symAnim = (id, cls) => { if (!SYM[id]) return null; const e = svg(SYM[id], cls); aiFill(e, 'sym:' + id); return e; };
+export const guideAnim = (id, cls) => { if (!GUIDE[id]) return null; const e = svg(GUIDE[id], cls); aiFill(e, 'kn:' + id); return e; };
 export const SYM_IDS = Object.keys(SYM), GUIDE_IDS = Object.keys(GUIDE);

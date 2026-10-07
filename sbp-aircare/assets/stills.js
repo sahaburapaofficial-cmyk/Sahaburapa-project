@@ -14,6 +14,7 @@ const load = () => P || (P = EMBED ? Promise.resolve(EMBED)
     if (m.film) { out.film = {}; for (const V in m.film) out.film[V] = { kind: 'video', src: base + m.film[V].file, poster: base + m.film[V].poster }; }
     return out;
   }).catch(() => null));
-export const stillFor = (V, key, fig) => load().then(m => (m && m.fig === fig && m[V] && m[V][key]) || null);
+// fig = null for pictures that print no figures (symptoms, topics, types, materials, buildings): no price check needed
+export const stillFor = (V, key, fig) => load().then(m => (m && (fig == null || m.fig === fig) && m[V] && m[V][key]) || null);
 /** the 3D hero film of a design (tools/render-film.mjs) → { kind: 'video', src, poster } | null */
 export const filmFor = V => load().then(m => (m && m.film && m.film[V]) || null);

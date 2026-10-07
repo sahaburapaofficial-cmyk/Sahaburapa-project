@@ -7,8 +7,13 @@ import { launch, BASE } from '../tests/_lib.mjs';
 import fs from 'node:fs';
 const OUT = new URL('../assets/stills/', import.meta.url);
 const LOOK = { D: ['dark', '#63E6FF'], E: ['light', '#2F47F5'], F: ['dark', '#9A8CFF'] };
-const vs = (process.argv[2] || 'DEF').split(''), only = process.argv[3] ? process.argv[3].split(',') : null;
-const KEYS = only || ['door:clean', 'door:install', 'door:repair', ...['c', 'i', 'r'].flatMap(s => [1, 2, 3, 4, 5, 6].map(i => s + i))];
+const vs = (process.argv[2] || 'DF').split(''), only = process.argv[3] ? process.argv[3].split(',') : null;
+const KEYS = only || ['door:clean', 'door:install', 'door:repair', ...['c', 'i', 'r'].flatMap(s => [1, 2, 3, 4, 5, 6].map(i => s + i)),
+  // Rev.45: D · F show every picture in 3D — symptoms, knowledge topics, unit types, materials, building types
+  ...'warm drip ice dead code trip cycle noise smell weak swing cduwater bill care'.split(' ').map(k => 'sym:' + k),
+  ...'btu types inverter clean c1c2 install place contract packages docs vrf area'.split(' ').map(k => 'kn:' + k),
+  ...'wall ceiling cassette floor'.split(' ').map(k => 'type:' + k), ...'copper insul duct cable drain mount rcbo'.split(' ').map(k => 'mat:' + k),
+  ...'office chain condo hospital school hotel factory'.split(' ').map(k => 'ent:' + k)];
 const manFile = new URL('manifest.json', OUT);
 const man = fs.existsSync(manFile) ? JSON.parse(fs.readFileSync(manFile, 'utf8')) : {};
 const b = await launch(); const p = await b.newPage();
