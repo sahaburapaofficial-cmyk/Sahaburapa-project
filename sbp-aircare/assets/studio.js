@@ -4,7 +4,7 @@ import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DEMO, BRAND_BY_ID, TYPE_BY_ID, DATA, TRAVEL, CLEAN_PKGS, VAT, incVat, baht, btuFmt, h, $, $$, installOptions, cleanRate } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { toast } from './proto-ui.js';
-import { SCENE_GROUPS, SCENES, SCENE_BY_ID, TYPE_RULES, STD_SIZES, needBtu, btuBreakdown, recommendUnits, dirtFrom, effects, cleanInterval, dirtTh, thermal, stepT, timeToSet, steadyT, T_START, T_SET, ORIENT, GLASS, defaultOrient, dustRate, RISK, energy, RATE, EFF, LOAD_F, SET_REF, SET_RANGE, SET_PER_DEG, PETS, LOCS, PM_STD_24H, envF, clogRisk } from './studio-model.js';
+import { SCENE_GROUPS, SCENES, SCENE_BY_ID, TYPE_RULES, STD_SIZES, needBtu, btuBreakdown, recommendUnits, dirtFrom, effects, cleanInterval, dirtTh, thermal, stepT, timeToSet, steadyT, T_START, T_SET, ORIENT, ORIENT_BY_ID, GLASS, defaultOrient, dustRate, RISK, energy, RATE, EFF, LOAD_F, SET_REF, SET_RANGE, SET_PER_DEG, PETS, LOCS, PM_STD_24H, envF, clogRisk } from './studio-model.js';
 
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TYPE_ORDER = ['wall', 'ceiling', 'cassette', 'floor', 'duct'];
@@ -78,7 +78,18 @@ export async function mountStudio(root, cfg = {}) {
   const energyCard = h('section', { class: 'st-energy' });
   const envCard = h('section', { class: 'st-air', 'aria-label': 'สภาพแวดล้อมรอบห้อง' });
   const reco = h('div', { class: 'st-reco' });
-  root.append(h('div', { class: 'st-top' }, groupBar, sceneBar, riskBar), h('div', { class: 'st-main' }, stage, panel), kpis, bd, note, envCard, energyCard, reco,
+  // Rev.44 cfg.sheet (D · E · F): a room spec sheet in labelled cells under the scene, and the long explanations folded into
+  // headed sections that open on demand — the same content and numbers, shorter to scan (A · B · C keep the original layout)
+  const facts = h('div', { class: 'st-facts', 'aria-live': 'polite' });
+  const fold = (title, hint, ...kids) => h('details', { class: 'st-fold' }, h('summary', {}, h('b', {}, title), hint ? h('small', {}, hint) : null), ...kids);
+  if (cfg.sheet) root.classList.add('st-sheet');
+  const DISC = 'ภาพและตัวเลขในห้องจำลองเป็นแบบจำลองเพื่ออธิบายหลักการ (ขนาด BTU ใช้สูตรประมาณตามพื้นที่และการใช้งาน ผลของฝุ่นเป็นค่าประกอบการอธิบาย) ไม่ใช่ค่าที่วัดจากเครื่องจริง ขนาดและจำนวนเครื่องต้องยืนยันจากการสำรวจหน้างาน เวลาในแบบจำลองเร่ง 1 วินาที = 1 นาที';
+  if (cfg.sheet) root.append(h('div', { class: 'st-top' }, groupBar, sceneBar, riskBar), h('div', { class: 'st-main' }, stage, panel), facts, kpis, note,
+    fold('ที่มาของ BTU', 'พื้นที่ แดด คน เครื่องใช้ไฟฟ้า แยกเป็นส่วน', bd),
+    fold('ค่าไฟต่อเดือน', 'ล้างแล้ว กับ ไม่ได้ล้าง · ทุกประเภทเครื่องสำหรับห้องนี้', energyCard),
+    fold('สภาพแวดล้อมรอบห้อง', 'สัตว์เลี้ยง ที่ตั้ง ค่าฝุ่น PM2.5 → รอบล้าง', envCard),
+    reco, fold('ที่มาของตัวเลขและข้อจำกัด', '', h('p', { class: 's-note st-disc' }, DISC)));
+  else root.append(h('div', { class: 'st-top' }, groupBar, sceneBar, riskBar), h('div', { class: 'st-main' }, stage, panel), kpis, bd, note, envCard, energyCard, reco,
     h('p', { class: 's-note st-disc' }, 'ภาพและตัวเลขในห้องจำลองเป็นแบบจำลองเพื่ออธิบายหลักการ (ขนาด BTU ใช้สูตรประมาณตามพื้นที่และการใช้งาน ผลของฝุ่นเป็นค่าประกอบการอธิบาย) ไม่ใช่ค่าที่วัดจากเครื่องจริง ขนาดและจำนวนเครื่องต้องยืนยันจากการสำรวจหน้างาน เวลาในแบบจำลองเร่ง 1 วินาที = 1 นาที'));
 
   /* ---------- scenes ---------- */
@@ -126,7 +137,7 @@ export async function mountStudio(root, cfg = {}) {
     state.need = need; state.rec = rec;
     V && V.setCap(Math.min(1.4, th.cap / Math.max(1, th.Qset)));
     V && V.setDirt(dirt());
-    renderControls(); renderKpis(); renderBd(); renderNote(); renderRisk(); renderEnv(); renderEnergy(); renderReco(); drawInside(true); updateCycle();
+    renderControls(); renderFacts(); renderKpis(); renderBd(); renderNote(); renderRisk(); renderEnv(); renderEnergy(); renderReco(); drawInside(true); updateCycle();
   }
   function tick(dt) {
     if (!th) return;
@@ -198,6 +209,27 @@ export async function mountStudio(root, cfg = {}) {
     cfg.onScene && cfg.onScene(s);
   }
 
+  /* ---------- Rev.44 room spec sheet (cfg.sheet) ---------- */
+  function renderFacts() {
+    if (!cfg.sheet) return;
+    const p = state.p, area = p.w * p.d, total = state.n * state.per, o = ORIENT_BY_ID[p.orient];
+    const ratio = total / state.need, fit = ratio < 0.95 ? ['bad', 'เล็กไป'] : ratio > 1.6 ? ['warn', 'ใหญ่เกิน'] : ['ok', 'พอดี'];
+    const cell = (k, v, sub, cls = '') => h('div', { class: 'st-fc ' + cls }, h('small', {}, k), h('b', {}, v), sub ? h('span', {}, sub) : null);
+    facts.innerHTML = '';
+    facts.append(
+      h('div', { class: 'st-fg' }, h('h4', {}, 'ห้อง'),
+        cell('ขนาด', `${p.w} × ${p.d} ม.`, `สูง ${p.h} ม.`),
+        cell('พื้นที่', `${(Math.round(area * 10) / 10).toLocaleString('en-US')} ตร.ม.`, `${Math.round(area * p.h).toLocaleString('en-US')} ลบ.ม.`),
+        cell('คน', `${p.people} คน`),
+        cell('เครื่องใช้ไฟฟ้า', `${p.equip.toLocaleString('en-US')} W`),
+        cell('แดด', p.closed ? 'ไม่มีหน้าต่าง' : (o ? o.th : '-'), p.closed ? 'ห้องปิดทึบ' : GLASS[p.sun] ? GLASS[p.sun].th : '')),
+      h('div', { class: 'st-fg' }, h('h4', {}, 'ความเย็น'),
+        cell('ต้องการ', btuFmt(state.need), `${Math.round(state.need / Math.max(1, area)).toLocaleString('en-US')} BTU/ตร.ม.`),
+        cell('ประเภท', TYPE_RULES[state.type].th),
+        cell('ที่เลือก', `${state.n} × ${btuFmt(state.per)}`, state.n > 1 ? `รวม ${btuFmt(total)}` : ''),
+        cell('ความพอดี', fit[1], `${Math.round(ratio * 100)}% ของที่ต้องการ`, fit[0])));
+  }
+
   /* ---------- KPIs ---------- */
   function renderKpis() {
     const d = dirt(), e = effects(d), ci = cleanInterval(dustNow());
@@ -206,12 +238,12 @@ export async function mountStudio(root, cfg = {}) {
     const tc = timeToSet(thClean), tn = timeToSet(th), ss = steadyT(th);
     kpis.innerHTML = '';
     const card = (lbl, big, sub, cls = '') => h('div', { class: 'st-kpi ' + cls }, h('span', { class: 'st-lbl' }, lbl), h('b', {}, big), sub ? h('small', {}, sub) : null);
-    kpis.append(
-      card('ห้องนี้ต้องการประมาณ', btuFmt(state.need), `เลือกไว้ ${state.n} × ${btuFmt(state.per)}${state.n > 1 ? ` = ${btuFmt(total)}` : ''} · ${fit[1]}`, fit[0]),
+    kpis.append(...[
+      cfg.sheet ? null : card('ห้องนี้ต้องการประมาณ', btuFmt(state.need), `เลือกไว้ ${state.n} × ${btuFmt(state.per)}${state.n > 1 ? ` = ${btuFmt(total)}` : ''} · ${fit[1]}`, fit[0]),
       card(`เย็นถึง ${T_SET}°C (จาก ${th.tStart}°C · นอก ${th.tout}°C)`, tn != null ? `${Math.round(tn)} นาที` : `ไม่ถึง`, tc != null ? (tn != null ? `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที${tn - tc >= 1 ? ` · ช้าลง ${Math.round(tn - tc)} นาที` : ''}` : `ถ้าเครื่องสะอาด ${Math.round(tc)} นาที · ตอนนี้ค้างที่ ~${ss.toFixed(1)}°C`) : 'เครื่องเล็กเกินห้อง แม้สะอาดก็ไม่ถึง', tn == null ? 'bad' : tn - (tc || tn) > 8 ? 'warn' : 'ok'),
       card('ผลของฝุ่นสะสม (แบบจำลอง)', `ลม −${Math.round((1 - e.air) * 100)}%`, `ความเย็นที่ได้ −${Math.round((1 - e.cap) * 100)}% · ไฟฟ้าต่อความเย็น +${Math.round((e.power - 1) * 100)}%`, d > 0.6 ? 'bad' : d > 0.35 ? 'warn' : 'ok'),
       card('รอบล้างที่แนะนำสำหรับห้องนี้', `ทุก ${ci.months} เดือน`, `${ci.visits} ครั้ง/ปี · ปรับตามสภาพจริงหลังตรวจครั้งแรก`),
-    );
+    ].filter(Boolean));
   }
   const BD_COL = { base: '#1b6fc2', sun: '#f0a020', roof: '#f06a28', people: '#6b7a8c', equip: '#c0392b' };
   function renderBd() {

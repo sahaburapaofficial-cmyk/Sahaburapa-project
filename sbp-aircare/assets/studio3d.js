@@ -74,12 +74,15 @@ function palette(theme) {
   if (theme === 'blueprint') {
     const L = c => new THREE.MeshLambertMaterial({ color: c, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
     const w = L(0xf7f9fc), b = L(0xe8eef6), a = L(0xdfe8f4);
-    return { theme, edges: true, wood: b, wood2: a, fabric: a, fabric2: b, white: w, dark: L(0xc7d4e6), metal: b, glass: new THREE.MeshLambertMaterial({ color: 0xcfe0f3, transparent: true, opacity: 0.5 }), accent: L(0xf4c9a8), green: L(0xd5e6d8), screen: L(0x9fb3cf), skin: L(0xd9e2ee), person: L(0x9fb3cf), rack: L(0xc7d4e6), machine: L(0xdfe8f4), yellow: L(0xf4e2a8), shell: w, edgeMat: new THREE.LineBasicMaterial({ color: 0x123f7b, transparent: true, opacity: 0.45 }) };
+    return { seam: b, shade: w, canvas: a, theme, edges: true, wood: b, wood2: a, fabric: a, fabric2: b, white: w, dark: L(0xc7d4e6), metal: b, glass: new THREE.MeshLambertMaterial({ color: 0xcfe0f3, transparent: true, opacity: 0.5 }), accent: L(0xf4c9a8), green: L(0xd5e6d8), screen: L(0x9fb3cf), skin: L(0xd9e2ee), person: L(0x9fb3cf), rack: L(0xc7d4e6), machine: L(0xdfe8f4), yellow: L(0xf4e2a8), shell: w, edgeMat: new THREE.LineBasicMaterial({ color: 0x123f7b, transparent: true, opacity: 0.45 }) };
   }
   const dark = theme === 'dark';
   return {
     theme, edges: false,
-    wood: S(0x9b7653, { roughness: 0.6 }), wood2: S(0x6e5440, { roughness: 0.55 }), fabric: S(dark ? 0x5b6675 : 0x8d99a8, { roughness: 0.95 }), fabric2: S(0xd9d2c7, { roughness: 0.95 }),
+    wood: S(0xffffff, { roughness: 0.55, map: fineTex('wood', '#9b7653') }), wood2: S(0xffffff, { roughness: 0.5, map: fineTex('wood', '#6e5440') }),
+    fabric: S(0xffffff, { roughness: 0.95, map: fineTex('fabric', dark ? '#5b6675' : '#8d99a8') }), fabric2: S(0xffffff, { roughness: 0.95, map: fineTex('fabric', '#d9d2c7') }),
+    seam: S(0x2a221c, { roughness: 0.8 }), shade: S(0xf3e6cf, { roughness: 0.9, emissive: 0x6b5a3a, emissiveIntensity: 0.35 }),
+    canvas: S(0xffffff, { roughness: 0.85, map: canvasTex(256, 160, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#d9c7a8'); gr.addColorStop(0.5, '#8aa3b8'); gr.addColorStop(1, '#3f5a70'); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.arc(w * 0.68, h * 0.38, 26, 0, 7); g.fill(); g.fillStyle = 'rgba(30,40,50,.35)'; g.beginPath(); g.moveTo(0, h); g.lineTo(w * 0.35, h * 0.55); g.lineTo(w * 0.6, h); g.fill(); }) }),
     white: S(0xf3f4f6, { roughness: 0.5 }), dark: S(0x2c3139, { roughness: 0.5 }), metal: S(0xaab3bd, { metalness: 0.6, roughness: 0.35 }),
     glass: new THREE.MeshPhysicalMaterial({ color: 0xbfe3ff, transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0 }),
     accent: S(0xe2711d, { roughness: 0.6 }), green: S(0x4f8a57, { roughness: 0.9 }), screen: new THREE.MeshBasicMaterial({ color: dark ? 0x3aa6ff : 0x1c2a3a }),
@@ -90,11 +93,41 @@ function palette(theme) {
 
 /* ---------------- furniture builders ---------------- */
 // Each builder gets a context and pushes meshes + heat spots + seats. Coordinates: back wall z=-d/2, left wall x=-w/2, floor y=0.
+// Rev.44 (owner 7 ต.ค. 2569: "ห้องจำลองต้องปรับแก้ให้เสมือนจริง Furniture detail ความคมชัดรายละเอียดแต่ละชิ้น"): every furniture box gets
+// softly rounded edges (cached extrusion), tall cabinets get door seams and handles, wood and fabric carry fine grain / weave textures
+const RB = new Map();
+function roundedBox(w, h, d, r) {
+  const k = [w, h, d, r].map(v => Math.round(v * 1000)).join('|'); if (RB.has(k)) return RB.get(k);
+  const s = new THREE.Shape(), x = w / 2 - r, y = h / 2 - r;
+  s.moveTo(-x, -h / 2); s.lineTo(x, -h / 2); s.quadraticCurveTo(w / 2, -h / 2, w / 2, -y); s.lineTo(w / 2, y); s.quadraticCurveTo(w / 2, h / 2, x, h / 2);
+  s.lineTo(-x, h / 2); s.quadraticCurveTo(-w / 2, h / 2, -w / 2, y); s.lineTo(-w / 2, -y); s.quadraticCurveTo(-w / 2, -h / 2, -x, -h / 2);
+  const geo = new THREE.ExtrudeGeometry(s, { depth: Math.max(0.001, d - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: 0, bevelSegments: 2, curveSegments: 3 });
+  geo.translate(0, 0, -(d - 2 * r) / 2); geo.computeVertexNormals(); RB.set(k, geo); return geo;
+}
+const fineTex = (() => { const c = {}; return (kind, base) => c[kind + base] || (c[kind + base] = canvasTex(256, 256, (g, w, h) => {
+  const col = new THREE.Color(base), hex = k => '#' + col.clone().offsetHSL(0, 0, k).getHexString();
+  g.fillStyle = hex(0); g.fillRect(0, 0, w, h);
+  if (kind === 'wood') { for (let i = 0; i < 70; i++) { g.strokeStyle = hex((Math.random() - 0.5) * 0.08); g.lineWidth = 0.6 + Math.random() * 1.6; g.beginPath(); const y = Math.random() * h; g.moveTo(0, y); for (let x = 0; x <= w; x += 16) g.lineTo(x, y + Math.sin(x / 40 + i) * 3); g.stroke(); } }
+  else { for (let y = 0; y < h; y += 2) for (let x = 0; x < w; x += 2) if ((x + y) % 4 === 0) { g.fillStyle = hex((Math.random() - 0.5) * 0.06); g.fillRect(x, y, 2, 2); } }
+}), c[kind + base].wrapS = c[kind + base].wrapT = THREE.RepeatWrapping, c[kind + base]); })();
 function Kit(g, P) {
   const add = m => { m.castShadow = true; m.receiveShadow = true; g.add(m); if (P.edges && m.geometry) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 30), P.edgeMat); e.position.copy(m.position); e.rotation.copy(m.rotation); e.scale.copy(m.scale); g.add(e); } return m; };
   return {
     g, add,
-    box: (w, h, d, mat, x, y, z, ry = 0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y + h / 2, z); m.rotation.y = ry; return add(m); },
+    box: (w, h, d, mat, x, y, z, ry = 0) => {
+      const mn = Math.min(w, h, d), r = P.edges || mn < 0.03 ? 0 : Math.min(0.03, mn * 0.16);
+      const m = new THREE.Mesh(r ? roundedBox(w, h, d, r) : new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y + h / 2, z); m.rotation.y = ry; add(m);
+      // tall cabinet / wardrobe: door seams every ~0.5 m and bar handles, on both broad faces (the one against the wall stays hidden)
+      if (!P.edges && h >= 1.4 && Math.min(w, d) >= 0.35 && Math.max(w, d) >= 0.5 && (mat === P.wood || mat === P.wood2 || mat === P.white)) {
+        const alongX = w >= d, L = alongX ? w : d, n = Math.max(1, Math.round(L / 0.5)), T = alongX ? d : w;
+        for (const sgn of [-1, 1]) for (let i = 0; i <= n; i++) {
+          const u = -L / 2 + i * L / n, f = sgn * (T / 2 + 0.002);
+          if (i > 0 && i < n) { const seam = new THREE.Mesh(new THREE.BoxGeometry(alongX ? 0.006 : 0.004, h - 0.08, alongX ? 0.004 : 0.006), P.seam); seam.position.set(alongX ? u : f, h / 2, alongX ? f : u); m.add(seam); }
+          if (i < n && n > 1 ? i % 2 === 0 : i === 0) { const hu = n > 1 ? u + L / n * 0.92 : L / 2 - 0.08, hd = new THREE.Mesh(new THREE.BoxGeometry(alongX ? 0.018 : 0.02, 0.26, alongX ? 0.02 : 0.018), P.metal); hd.position.set(alongX ? hu : f + sgn * 0.01, 0.05, alongX ? f + sgn * 0.01 : hu); m.add(hd); }
+        }
+      }
+      return m;
+    },
     cyl: (r, h, mat, x, y, z, seg = 18, r2) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r2 ?? r, h, seg), mat); m.position.set(x, y + h / 2, z); return add(m); },
     sph: (r, mat, x, y, z) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), mat); m.position.set(x, y, z); return add(m); },
   };
@@ -116,6 +149,9 @@ function seatRows(g, K, P, x0, z0, cols, rows, dx, dz, step, seats, mat = P.fabr
 function chair(K, P, x, z, ry = 0, mat = P.fabric) { const c = Math.cos(ry), s = Math.sin(ry); K.box(0.46, 0.08, 0.46, mat, x, 0.42, z, ry); K.box(0.46, 0.45, 0.07, mat, x - s * 0.2, 0.5, z - c * 0.2, ry); K.cyl(0.03, 0.42, P.metal, x, 0, z, 8); }
 function desk(K, P, x, z, w = 1.4, d = 0.7, ry = 0, screens = 1) { K.box(w, 0.04, d, P.white, x, 0.72, z, ry); K.box(0.04, 0.72, d * 0.9, P.metal, x - w / 2 + 0.05, 0, z, ry); K.box(0.04, 0.72, d * 0.9, P.metal, x + w / 2 - 0.05, 0, z, ry);
   for (let i = 0; i < screens; i++) { const off = (i - (screens - 1) / 2) * 0.58; K.box(0.54, 0.34, 0.03, P.screen, x + Math.cos(ry) * off, 0.9, z - Math.cos(ry) * d * 0.3 + Math.sin(ry) * off * 0, ry); } }
+// Rev.44 small things that make a room read as lived-in: bedside lamp, framed art on a wall
+function lamp(K, P, x, y, z) { K.cyl(0.07, 0.03, P.metal, x, y, z, 16); K.cyl(0.012, 0.3, P.metal, x, y + 0.03, z, 8); K.cyl(0.09, 0.16, P.shade, x, y + 0.3, z, 20, 0.13); }
+function art(K, P, x, y, z, w = 0.8, hh = 0.55, ry = 0) { K.box(w, hh, 0.03, P.wood2, x, y, z, ry); K.box(w - 0.08, hh - 0.08, 0.01, P.canvas, x + Math.sin(ry) * 0.018, y + 0.04, z + Math.cos(ry) * 0.018, ry); }
 function plant(K, P, x, z, s = 1) { K.cyl(0.16 * s, 0.34 * s, P.white, x, 0, z, 14, 0.12 * s); K.sph(0.32 * s, P.green, x, 0.62 * s, z); }
 function shelf(K, P, x, z, w, h, d, ry = 0, mat = P.wood) { K.box(w, h, d, mat, x, 0, z, ry); }
 function rack(K, P, x, z) { K.box(0.6, 2.0, 1.0, P.rack, x, 0, z); for (let i = 0; i < 6; i++) K.box(0.5, 0.02, 0.02, P.accent, x, 0.3 + i * 0.28, z + 0.51); }
@@ -126,13 +162,14 @@ const FURN = {
     K.box(1.8, 0.32, 2.05, P.wood, bx, 0, bz); K.box(1.72, 0.2, 1.95, P.white, bx, 0.32, bz); K.box(1.72, 0.06, 1.2, P.fabric, bx, 0.52, bz + 0.35); K.box(1.8, 0.9, 0.08, P.wood2, bx, 0, -d / 2 + 0.05);
     K.box(0.6, 0.12, 0.35, P.fabric2, bx - 0.42, 0.52, bz - 0.72); K.box(0.6, 0.12, 0.35, P.fabric2, bx + 0.42, 0.52, bz - 0.72);
     K.box(0.45, 0.5, 0.4, P.wood2, bx - 1.2, 0, -d / 2 + 0.25); K.box(0.45, 0.5, 0.4, P.wood2, bx + 1.2, 0, -d / 2 + 0.25);
+    lamp(K, P, bx - 1.2, 0.5, -d / 2 + 0.25); lamp(K, P, bx + 1.2, 0.5, -d / 2 + 0.25); art(K, P, bx, 1.35, -d / 2 + 0.03, 1.1, 0.6);
     K.box(0.6, 2.2, 1.4, P.wood, -w / 2 + 0.32, 0, d / 2 - 0.8); K.box(1.6, 0.01, 1.2, P.fabric, bx - 0.2, 0, bz + 1.5);
     return { seats: [[bx - 0.4, bz + 0.2, 'lie'], [bx + 0.4, bz + 0.2, 'lie'], [-w * 0.1, d * 0.3]], heat: [] }; },
   master(K, P, S) { const r = FURN.bedroom(K, P, S); const { w, d } = S; K.box(1.6, 0.5, 0.45, P.wood2, w / 2 - 1.0, 0, d / 2 - 0.4); K.box(1.3, 0.75, 0.05, P.screen, w / 2 - 1.0, 0.8, d / 2 - 0.4); chair(K, P, w / 2 - 1.1, -d / 2 + 0.9, -0.6, P.fabric2); plant(K, P, w / 2 - 0.4, -d / 2 + 0.4); return r; },
   living(K, P, S) { const { w, d } = S;
     K.box(2.4, 0.45, 0.45, P.wood2, w * 0.1, 0, -d / 2 + 0.28); K.box(1.9, 1.05, 0.05, P.screen, w * 0.1, 0.9, -d / 2 + 0.12);
     const sz = d * 0.22; K.box(2.6, 0.42, 0.95, P.fabric, w * 0.1, 0, sz); K.box(2.6, 0.45, 0.2, P.fabric, w * 0.1, 0.42, sz + 0.38); K.box(0.95, 0.42, 1.8, P.fabric, w * 0.1 + 1.75, 0, sz - 0.4);
-    K.box(1.1, 0.38, 0.6, P.wood, w * 0.1, 0, sz - 1.1); K.box(2.6, 0.01, 1.9, P.fabric2, w * 0.1, 0, sz - 0.9); chair(K, P, -w / 2 + 1.1, sz - 0.9, 1.3, P.fabric2);
+    K.box(1.1, 0.38, 0.6, P.wood, w * 0.1, 0, sz - 1.1); art(K, P, w * 0.1, 1.55, d / 2 - 0.03, 1.4, 0.8, Math.PI); lamp(K, P, w * 0.1 - 1.6, 0, sz + 0.2); K.box(2.6, 0.01, 1.9, P.fabric2, w * 0.1, 0, sz - 0.9); chair(K, P, -w / 2 + 1.1, sz - 0.9, 1.3, P.fabric2);
     plant(K, P, w / 2 - 0.45, -d / 2 + 0.45, 1.2); plant(K, P, -w / 2 + 0.5, -d / 2 + 0.5); K.box(0.4, 2.0, 1.2, P.wood, w / 2 - 0.3, 0, d * 0.05);
     return { seats: [[w * 0.1 - 0.7, sz, 'sit', Math.PI], [w * 0.1, sz, 'sit', Math.PI], [w * 0.1 + 0.7, sz, 'sit', Math.PI], [w * 0.1 + 1.75, sz - 0.7, 'sit', -Math.PI / 2], [-w / 2 + 1.1, sz - 0.9, 'sit', 1.3], [0, d * 0.4]], heat: [{ x: w * 0.1, z: -d / 2 + 0.4, r: 0.6, a: 0.6, lab: 'ทีวี' }] }; },
   kitchen(K, P, S) { const { w, d } = S; const cx = -w / 2 + 0.33;

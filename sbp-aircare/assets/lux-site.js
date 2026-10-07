@@ -109,7 +109,7 @@ export async function mountLux(cfg) {
   // signature piece first: it is the first thing on the page
   if (cfg.hero) await cfg.hero(ctx);
   const HWX = $('#howRoot') ? mountHowItWorks($('#howRoot'), { theme: T, start: jobType === 'cassette' ? 'cassette' : 'wall', throwStyle }) : null;
-  if ($('#studioRoot')) mountStudio($('#studioRoot'), { theme: T, sceneStart: studioStart, onOpen: (m, i) => openProduct(m, i) });
+  if ($('#studioRoot')) mountStudio($('#studioRoot'), { theme: T, sceneStart: studioStart, sheet: true, onOpen: (m, i) => openProduct(m, i) });
   FIT = $('#fitRoot') ? mountRoomFit($('#fitRoot'), { theme: T, preset: fitPreset, onOpenModel: (m, i) => openProduct(m, i) }) : null;
   const JOB = $('#cleanRoot') ? mountJobGuide($('#cleanRoot'), { theme: T, start: 'C1', type: jobType }) : null;
   if ($('#learnRoot')) mountKnowledge($('#learnRoot'), { ids: { cleanflow: 'cleanflow', fit: 'fit', studio: 'studio', howto: 'howto', catalog: 'catalog', inside: 'howto', prices: 'prices', quality: 'quality', b2b: 'b2b', area: 'area', quote: 'quote' } });

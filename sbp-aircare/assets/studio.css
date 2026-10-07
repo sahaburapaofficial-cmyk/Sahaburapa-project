@@ -233,3 +233,26 @@
 .st-en-t td.ok{color:var(--s-ok);font-weight:600}.st-en-nf{color:var(--s-ink-3);font-weight:400}
 .st-src{font-size:12px}
 @media (pointer:coarse){.st-air-pet{grid-template-columns:1fr 44px 40px 44px}.st-air-pet button{min-height:44px}}
+
+/* ---------- Rev.44 room spec sheet (cfg.sheet · D/E/F): labelled cells, folded explanations ---------- */
+.st-facts{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-top:14px}
+.st-fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;align-content:start;padding:12px;border:1px solid var(--s-line);border-radius:var(--s-r,14px);background:var(--s-card)}
+.st-fg h4{grid-column:1/-1;margin:0 0 2px;font:600 12px var(--s-mono,monospace);letter-spacing:.12em;text-transform:uppercase;color:var(--s-ink-3,var(--s-ink-2))}
+.st-fc{display:grid;gap:1px;padding:8px 10px;border-radius:10px;background:var(--s-card-2,var(--s-card));min-width:0}
+.st-fc small{font-size:11.5px;color:var(--s-ink-3,var(--s-ink-2))}
+.st-fc b{font-size:16px;color:var(--s-ink);font-variant-numeric:tabular-nums;line-height:1.3}
+.st-fc span{font-size:12px;color:var(--s-ink-2)}
+.st-fc.ok{box-shadow:inset 3px 0 0 var(--s-ok)}.st-fc.warn{box-shadow:inset 3px 0 0 var(--s-warn)}.st-fc.bad{box-shadow:inset 3px 0 0 var(--s-bad)}
+@media (max-width:860px){.st-facts{grid-template-columns:1fr}}
+@media (max-width:420px){.st-fg{grid-template-columns:1fr 1fr}}
+.st-fold{margin-top:12px;border:1px solid var(--s-line);border-radius:var(--s-r,14px);background:var(--s-card)}
+.st-fold>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:14px 44px 14px 16px;position:relative;min-height:48px}
+.st-fold>summary::-webkit-details-marker{display:none}
+.st-fold>summary::after{content:'';position:absolute;right:18px;top:50%;width:9px;height:9px;border-right:2px solid var(--s-ink-2);border-bottom:2px solid var(--s-ink-2);transform:translateY(-70%) rotate(45deg);transition:transform var(--m-fast,.15s)}
+.st-fold[open]>summary::after{transform:translateY(-30%) rotate(-135deg)}
+.st-fold>summary b{font-size:16px;color:var(--s-ink)}.st-fold>summary small{color:var(--s-ink-2);font-size:13px}
+.st-fold>summary:focus-visible{outline:3px solid var(--s-accent);outline-offset:2px;border-radius:var(--s-r,14px)}
+.st-fold>:not(summary){margin:0 14px 14px}
+.st-sheet .st-fold .st-energy,.st-sheet .st-fold .st-air,.st-sheet .st-fold .st-bd{border:0;background:transparent;padding:0;box-shadow:none}
+.st-sheet .st-reco{margin-top:12px}
+@media (min-width:981px){.st-sheet .st-main>.st-stage{position:sticky;top:84px;align-self:start}}
