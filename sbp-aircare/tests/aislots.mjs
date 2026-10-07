@@ -30,7 +30,8 @@ ok(await wait(() => document.querySelector('#symptoms .ai.big.ai-has img.ai-fill
 // 4 knowledge topic
 await p.evaluate(() => { const d = document.getElementById('kh-btu'); d.scrollIntoView(); d.open = true; });
 ok(await wait(() => { const f = document.querySelector('#kh-btu .kh-ai-pic'); return f && !f.hidden && f.querySelector('img.ai-fill'); }), 'kn:btu picture at the top of the opened topic');
-ok(await p.evaluate(() => { const f = document.querySelector('#kh-types .kh-ai-pic'); return !f || f.hidden; }), 'empty knowledge slot stays hidden');
+// Rev.45: in D · F a slot without an AI picture shows this design's pre-rendered 3D still (no label); elsewhere it stays hidden
+ok(await wait(V => { const f = document.querySelector('#kh-types .kh-ai-pic'); return 'DF'.includes(V) ? f && !f.hidden && f.querySelector('img.ai-fill') && !f.querySelector('.ai-fill-tag') : !f || f.hidden; }, V), 'knowledge slot without AI picture: 3D still in D/F, hidden elsewhere');
 // 5 enterprise sector
 await p.evaluate(() => document.getElementById('enterprise').scrollIntoView()); await p.waitForTimeout(500);
 await p.locator('#en-tab-hospital').click();
