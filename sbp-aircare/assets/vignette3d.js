@@ -240,8 +240,8 @@ function studio(theme, accent, force) {
 
     function render(k, info, view = 0, size = null) {
       if (size) { r.setSize(size[0], size[1], false); cam.aspect = size[0] / size[1]; } else { r.setSize(W, H, false); cam.aspect = W / H; } cam.updateProjectionMatrix();
-      scene.background = size ? backdrop : null;   // sized renders are film frames: opaque
-      if (backGlow) backGlow.visible = !size;
+      scene.background = backdrop;   // Rev.43: opaque studio backdrop for stills and film frames alike (smaller files, photo-like)
+      if (backGlow) backGlow.visible = false;
       seed = 7 + k.length * 131 + k.charCodeAt(k.length - 1);
       Object.keys(I).forEach(x => delete I[x]); Object.assign(I, info || {});
       const g = new THREE.Group(); S[k](g);
@@ -260,7 +260,7 @@ function studio(theme, accent, force) {
       scene.remove(g); g.traverse(o => { if (o.isMesh) { o.geometry.dispose(); const ms = Array.isArray(o.material) ? o.material : [o.material]; ms.forEach(m => { if (m.map && m.map.isCanvasTexture) m.map.dispose(); }); } });
       return new Promise(res => {
         const done = blob => { if (!blob || blob.size < 6000) return res(null); const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(blob); };
-        try { cv.toBlob(bl => (bl && bl.type === 'image/webp') ? done(bl) : cv.toBlob(done, 'image/png'), 'image/webp', 0.9); } catch (e) { res(null); }
+        try { cv.toBlob(bl => (bl && bl.type === 'image/webp') ? done(bl) : cv.toBlob(done, 'image/png'), 'image/webp', 0.84); } catch (e) { res(null); }
       });
     }
     return { render, soft, has: k => !!S[k], dispose() { pm.dispose(); r.dispose(); r.forceContextLoss(); } };

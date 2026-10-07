@@ -197,7 +197,10 @@ pv = re.sub(r'<link rel="stylesheet" href="assets/([\w.-]+\.css)">', lambda m: f
 _packs = {}
 def pack(v):
     # one gzip+base64 pack per design, shared by the testers and the showcase
-    if v not in _packs: _packs[v] = f'<script type="application/octet-stream" id="pack-{v}">' + base64.b64encode(gzip.compress(links(built[v], 'embed', v).encode(), 9)).decode() + '</script>'
+    # Rev.43: the testers / showcase embed every design at once — drop the pre-rendered stills and films there (each design's own
+    # page keeps them; inside the tester the pictures render live or show the line art) so the hub pages stay under 16 MB
+    lite = lambda h: re.sub(r'data:(?:image/webp|video/mp4);base64,[A-Za-z0-9+/=]{2000,}', '', h)
+    if v not in _packs: _packs[v] = f'<script type="application/octet-stream" id="pack-{v}">' + base64.b64encode(gzip.compress(lite(links(built[v], 'embed', v)).encode(), 9)).decode() + '</script>'
     return _packs[v]
 def tester(pv, vs, hub):
     packs = ''.join(pack(v) for v in vs)

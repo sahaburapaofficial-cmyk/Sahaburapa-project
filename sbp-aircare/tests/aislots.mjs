@@ -40,7 +40,7 @@ await p.unroute('**/assets/ai/manifest.json'); await p.route('**/assets/ai/manif
 await p.goto(`${BASE}/${page}`); await p.waitForTimeout(2500); await p.locator('#doors').scrollIntoViewIfNeeded();
 ok(await wait(() => { const b = document.querySelector('#doors .lx-ai-hero'); return b && !b.hidden && b.querySelector('video.ai-fill') && /3 มิติ/.test(b.querySelector('.ai-fill-tag').textContent); }), `3D film of ${V} in the band (label ภาพจำลอง 3 มิติ)`);
 ok(await wait(() => [...document.querySelectorAll('#doors .pa-door-art')].every(a => a.classList.contains('has-v') && !a.classList.contains('is-ai') && a.querySelector('img.pa-v.in'))), 'all three doors show the pre-rendered stills');
-ok(await wait(() => { const im = document.querySelector('#doors .pa-door-art img.pa-v'); return im && im.src.includes(`/assets/stills/${V}-`); }), `stills are this design's own (${V}-…)`);
+ok(await wait(V => { const im = document.querySelector('#doors .pa-door-art img.pa-v'); return im && im.src.includes(`/assets/stills/${V}-`); }, V), `stills are this design's own (${V}-…)`);
 ok(!errs.length, 'no console errors', errs.slice(0, 3).join(' | '));
 ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no sideways scroll');
 await b.close(); console.log(fail ? `${page} ${fail} FAILED` : `${page} ALL PASS`); process.exit(fail ? 1 : 0);

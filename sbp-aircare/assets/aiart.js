@@ -30,7 +30,7 @@ export function aiFill(host, key, { label = 'ภาพประกอบ (AI)' }
 }
 /** put one picture or film { src, kind, poster } into `host` (used by AI slots and by the pre-rendered 3D film) */
 export function fillMedia(host, a, label) {
-  if (!host || !a) return false;
+  if (!host || !a || !a.src) return false;
   if (host.querySelector(':scope > .ai-fill')) return true;
   {
     let el;
