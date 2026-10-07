@@ -184,7 +184,7 @@ export async function mountLux(cfg) {
   mountDoors($('#doorsRoot'), { onPick: k => { PATHS && PATHS.show(k); go('paths'); } });
   // Rev.42/43: a full-width film band above the service doors — an AI film/image from slot hero:<variant> (aiart.js), otherwise the
   // pre-rendered 3D film of this design (stills.js, tools/render-film.mjs); hidden when neither exists
-  { const d = $('#doors'); if (d) { const band = h('div', { class: 'lx-ai-hero', hidden: true }); d.prepend(band); aiFill(band, 'hero:' + variant).then(ok => ok || filmFor(String(variant).toUpperCase()).then(f => fillMedia(band, f, 'ภาพจำลอง 3 มิติ'))).then(ok => { band.hidden = !ok; }); } }
+  { const d = $('#doorsRoot'); if (d) { const band = h('div', { class: 'lx-ai-hero', hidden: true }); d.before(band); aiFill(band, 'hero:' + variant).then(ok => ok || filmFor(String(variant).toUpperCase()).then(f => fillMedia(band, f, 'ภาพจำลอง 3 มิติ'))).then(ok => { band.hidden = !ok; }); } }
   mountDock();   // Rev.35: "ในหน้านี้" rail on wide screens
   return { ...ctx, SITE, JOB, FIT, HWX, cat };
 }
