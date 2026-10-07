@@ -53,14 +53,20 @@ function studio(theme, accent, force) {
       top.rotation.x = -Math.PI / 2; top.position.y = 0.0015; top.receiveShadow = true; ped.add(top); }
     const band = new THREE.Mesh(new THREE.CylinderGeometry(1.302, 1.302, 0.034, 128, 1, true), new THREE.MeshStandardMaterial({ color: dark ? 0x8d97a3 : 0xb9c0c8, metalness: 1, roughness: 0.32 }));
     band.position.y = -0.03; ped.add(band);
-    // a soft studio light far behind the scene, for depth
+    // a soft studio light far behind the scene, for depth (stills only — film frames have their own backdrop)
+    let backGlow = null;
     { const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d'), lg = g.createLinearGradient(0, 0, 0, 256); lg.addColorStop(0, 'rgba(0,0,0,0)'); lg.addColorStop(0.55, `rgba(${ACC.r * 255 | 0},${ACC.g * 255 | 0},${ACC.b * 255 | 0},${dark ? 0.16 : 0.1})`); lg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = lg; g.fillRect(0, 0, 64, 256);
-      const back = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending, toneMapped: false })); back.position.set(0, 0.9, -1.9); ped.add(back); }
+      const back = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending, toneMapped: false })); back.position.set(0, 0.9, -1.9); ped.add(back); backGlow = back; }
     disc.position.y = -0.045; disc.receiveShadow = true; ped.add(disc);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(1.27, 0.007, 8, 160), new THREE.MeshBasicMaterial({ color: ACC, toneMapped: false })); ring.rotation.x = Math.PI / 2; ring.position.y = 0.001; ped.add(ring);
     const gc = document.createElement('canvas'); gc.width = gc.height = 256; { const g = gc.getContext('2d'), rg = g.createRadialGradient(128, 128, 0, 128, 128, 128); rg.addColorStop(0, `rgba(${ACC.r * 255 | 0},${ACC.g * 255 | 0},${ACC.b * 255 | 0},.55)`); rg.addColorStop(0.55, `rgba(${ACC.r * 255 | 0},${ACC.g * 255 | 0},${ACC.b * 255 | 0},.12)`); rg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg; g.fillRect(0, 0, 256, 256); }
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 3.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(gc), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
     glow.rotation.x = -Math.PI / 2; glow.position.y = -0.088; ped.add(glow);
+    // an opaque studio backdrop for the film frames (video has no transparency): deep navy / soft ivory with the accent glowing low
+    const backdrop = (() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 512; const g = c.getContext('2d');
+      const lg = g.createLinearGradient(0, 0, 0, 512); lg.addColorStop(0, dark ? '#05080f' : '#f6f8fb'); lg.addColorStop(1, dark ? '#0b1220' : '#e6edf5'); g.fillStyle = lg; g.fillRect(0, 0, 1024, 512);
+      const rg = g.createRadialGradient(512, 470, 10, 512, 470, 560); rg.addColorStop(0, `rgba(${ACC.r * 255 | 0},${ACC.g * 255 | 0},${ACC.b * 255 | 0},${dark ? 0.28 : 0.16})`); rg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg; g.fillRect(0, 0, 1024, 512);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
     const cam = new THREE.PerspectiveCamera(28, W / H, 0.05, 40);
     const M = materialSet('studio');
     const FONT = (() => { try { return getComputedStyle(document.body).fontFamily || 'sans-serif'; } catch (e) { return 'sans-serif'; } })();
@@ -152,7 +158,7 @@ function studio(theme, accent, force) {
       const g = new THREE.Group();
       for (let i = 0; i < n; i++) {
         const x = from.x - 0.3 + i * 0.15, pts = [new THREE.Vector3(x, from.y, from.z), new THREE.Vector3(x + 0.02, from.y - 0.25, from.z + len * 0.4), new THREE.Vector3(x + 0.06, from.y - 0.55, from.z + len)];
-        const m = new THREE.MeshBasicMaterial({ color: cold ? 0x8fdcff : 0xffb074, transparent: true, opacity: 0.32, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+        const m = new THREE.MeshBasicMaterial({ color: cold ? (dark ? 0x8fdcff : 0x4f9ad8) : 0xffb074, transparent: true, opacity: dark ? 0.26 : 0.22, depthWrite: false, blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending, toneMapped: false });
         const t = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.012, 8), m); t.userData.noShadow = true; g.add(t);
       }
       return g;
@@ -170,7 +176,7 @@ function studio(theme, accent, force) {
       'door:repair': g => { const O = outdoor(); O.scale.setScalar(0.62); O.position.set(-0.35, 0.17, -0.05); O.rotation.y = 0.35; g.add(O); const mf = manifold(); mf.position.set(0.42, 0.42, 0.25); mf.rotation.y = -0.4; g.add(mf);
         g.add(glass(0.56, 0.3, (c) => { T(c, 'DIAGNOSIS FIRST', 30, 58, 26, accHex, 700); T(c, I.diag || '', 30, 132, 58, ink, 700); T(c, 'ค่าตรวจ · ซ่อมเมื่อคุณอนุมัติ', 30, 188, 26, ink2, 500); }, { at: [0.5, 0.95, 0.15], ry: -0.3 })); },
       // Rev.43 hero film: the FUJIVA wall unit breathing cool air over the pedestal, the outdoor unit and the tools of the three services
-      hero: g => { const U = unit(); U.root.position.set(-0.15, 0.9, -0.15); g.add(U.root); g.add(airflow(new THREE.Vector3(-0.15, 0.78, -0.02), 7, 1.2));
+      hero: g => { const U = unit(); U.root.position.set(-0.15, 0.78, -0.15); g.add(U.root); g.add(airflow(new THREE.Vector3(-0.15, 0.66, -0.02), 7, 1.0));
         const O = outdoor(); O.scale.setScalar(0.5); O.position.set(0.72, 0.14, -0.2); O.rotation.y = -0.45; g.add(O);
         const mf = manifold(); mf.scale.setScalar(0.8); mf.position.set(-0.85, 0.3, 0.3); mf.rotation.y = 0.5; g.add(mf);
         const gun = tool('gun', 1.5); gun.position.set(0.25, 0.08, 0.45); gun.rotation.set(Math.PI / 2, 0, 0.9); g.add(gun);
@@ -234,6 +240,8 @@ function studio(theme, accent, force) {
 
     function render(k, info, view = 0, size = null) {
       if (size) { r.setSize(size[0], size[1], false); cam.aspect = size[0] / size[1]; } else { r.setSize(W, H, false); cam.aspect = W / H; } cam.updateProjectionMatrix();
+      scene.background = size ? backdrop : null;   // sized renders are film frames: opaque
+      if (backGlow) backGlow.visible = !size;
       seed = 7 + k.length * 131 + k.charCodeAt(k.length - 1);
       Object.keys(I).forEach(x => delete I[x]); Object.assign(I, info || {});
       const g = new THREE.Group(); S[k](g);

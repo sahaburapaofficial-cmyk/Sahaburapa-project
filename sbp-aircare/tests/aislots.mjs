@@ -35,6 +35,12 @@ ok(await p.evaluate(() => { const f = document.querySelector('#kh-types .kh-ai-p
 await p.evaluate(() => document.getElementById('enterprise').scrollIntoView()); await p.waitForTimeout(500);
 await p.locator('#en-tab-hospital').click();
 ok(await wait(() => { const f = document.querySelector('#enterprise .en-ai-pic'); return f && !f.hidden && f.querySelector('img.ai-fill'); }), 'ent:hospital picture in the sector panel');
+// Rev.43: with no AI pictures, the pre-rendered 3D stills and the 3D film of this design fill the pictures at once (no WebGL needed)
+await p.unroute('**/assets/ai/manifest.json'); await p.route('**/assets/ai/manifest.json', r => r.fulfill({ contentType: 'application/json', body: '{}' }));
+await p.goto(`${BASE}/${page}`); await p.waitForTimeout(2500); await p.locator('#doors').scrollIntoViewIfNeeded();
+ok(await wait(() => { const b = document.querySelector('#doors .lx-ai-hero'); return b && !b.hidden && b.querySelector('video.ai-fill') && /3 มิติ/.test(b.querySelector('.ai-fill-tag').textContent); }), `3D film of ${V} in the band (label ภาพจำลอง 3 มิติ)`);
+ok(await wait(() => [...document.querySelectorAll('#doors .pa-door-art')].every(a => a.classList.contains('has-v') && !a.classList.contains('is-ai') && a.querySelector('img.pa-v.in'))), 'all three doors show the pre-rendered stills');
+ok(await wait(() => { const im = document.querySelector('#doors .pa-door-art img.pa-v'); return im && im.src.includes(`/assets/stills/${V}-`); }), `stills are this design's own (${V}-…)`);
 ok(!errs.length, 'no console errors', errs.slice(0, 3).join(' | '));
 ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no sideways scroll');
 await b.close(); console.log(fail ? `${page} ${fail} FAILED` : `${page} ALL PASS`); process.exit(fail ? 1 : 0);

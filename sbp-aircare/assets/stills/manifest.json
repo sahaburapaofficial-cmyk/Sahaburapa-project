@@ -73,6 +73,14 @@
   "D": {
    "file": "D-film.mp4",
    "poster": "D-film.webp"
+  },
+  "E": {
+   "file": "E-film.mp4",
+   "poster": "E-film.webp"
+  },
+  "F": {
+   "file": "F-film.mp4",
+   "poster": "F-film.webp"
   }
  }
 }
