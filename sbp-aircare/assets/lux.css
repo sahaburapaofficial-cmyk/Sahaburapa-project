@@ -717,3 +717,7 @@ img.pa-v.in{opacity:1}img.pa-v.out{opacity:0}
 .pa-view button{min-height:32px;padding:4px 12px;border:0;border-radius:999px;background:transparent;color:var(--s-ink-2);font:inherit;font-size:13px;cursor:pointer}
 .pa-view button[aria-pressed=true]{background:var(--s-accent);color:var(--s-on-accent);font-weight:600}
 @media (pointer:coarse){.pa-view button{min-height:40px}}
+/* Rev.41 AI image slots: a small honest label on every AI-made picture */
+.pa-ai-tag{position:absolute;left:10px;top:10px;z-index:3;padding:3px 9px;border-radius:999px;font:500 11.5px var(--s-mono,monospace);letter-spacing:.04em;color:#fff;background:rgba(8,12,20,.62);backdrop-filter:blur(6px)}
+.pa-tab-ic .pa-ai-tag{display:none}
+img.pa-v.ai{object-fit:cover}

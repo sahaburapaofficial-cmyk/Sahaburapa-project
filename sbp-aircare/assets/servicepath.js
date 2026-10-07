@@ -22,6 +22,7 @@ import { FIT_RULES } from './roomfit.js';
 import { runWhenVisible } from './animicons.js';
 import { whenNear } from './lazy.js';
 import { vignette } from './vignette3d.js';
+import { aiArt } from './aiart.js';
 
 /* ---------------- illustrations (inline SVG, animated by lux.css .pa-*) ---------------- */
 const U = (x, y, w = 70, cls = '') => `<g class="pa-u ${cls}" transform="translate(${x} ${y})"><rect class="pa-body" width="${w}" height="${w * 0.3}" rx="${w * 0.07}"/><rect class="pa-vent" x="${w * 0.08}" y="${w * 0.22}" width="${w * 0.84}" height="${w * 0.035}" rx="1"/><circle class="pa-led" cx="${w * 0.84}" cy="${w * 0.1}" r="${w * 0.022}"/></g>`;
@@ -137,11 +138,15 @@ function figures() {
 let FIG = null;
 const shot = (k, view = 0) => { const L = look(); return vignette(k, { ...L, view, info: FIG || (FIG = figures()) }); };
 /** put the 3D still of `k` into `box` (crossfade over whatever is there); the line art stays as the fallback */
+// Rev.41: an AI image in the slot (assets/ai/manifest.json) takes the place of the 3D still — one view, labelled ภาพประกอบ (AI)
 function still(box, k, view = 0) {
   const want = k + '|' + view; box.dataset.want = want;
-  return shot(k, view).then(async src => {
-    if (!src || box.dataset.want !== want) return;
-    const im = new Image(); im.alt = ''; im.className = 'pa-v'; im.src = src;
+  return aiArt().then(m => m[k] ? { ai: m[k] } : shot(k, view).then(src => src && { src })).then(async got => {
+    if (!got || box.dataset.want !== want) return;
+    const src = got.ai ? got.ai.src : got.src;
+    box.classList.toggle('is-ai', !!got.ai);
+    let tag = box.querySelector('.pa-ai-tag'); if (got.ai && !tag) box.append(tag = h('span', { class: 'pa-ai-tag' }, 'ภาพประกอบ (AI)')); if (!got.ai && tag) tag.remove();
+    const im = new Image(); im.alt = ''; im.className = 'pa-v' + (got.ai ? ' ai' : ''); im.src = src;
     try { await im.decode(); } catch (e) { return; }
     if (box.dataset.want !== want) return;
     box.querySelectorAll('img.pa-v').forEach(o => { o.classList.add('out'); setTimeout(() => o.remove(), 700); });
@@ -223,7 +228,7 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
     if (art.dataset.k !== s.k) {
       art.querySelector('.pa-sv').innerHTML = ST[s.k]; art.dataset.k = s.k;
       // the still of this step (then warm the next one) + a soft glow on the change
-      if (booted) { still(art, s.k, vw).then(() => shot(S.steps[(i + 1) % 6].k, vw)); stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse'); }
+      if (booted) { still(art, s.k, vw).then(() => { views.hidden = !art.classList.contains('has-v') || art.classList.contains('is-ai'); return shot(S.steps[(i + 1) % 6].k, vw); }); stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse'); }
     }
     const act = h('button', { type: 'button', class: 'btn-primary pa-go', onclick: () => { stop(); user = true; if (s.hook && hooks[s.hook]) hooks[s.hook](); if (s.cart) openCart(); else go(s.go[0]); } }, s.go[1]);
     card.innerHTML = '';
@@ -236,6 +241,6 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
   runWhenVisible(art);
   lean(stage);
   draw();
-  whenNear(stage, () => { booted = true; const k = art.dataset.k; still(art, k).then(ok => { if (art.classList.contains('has-v')) views.hidden = false; }).then(() => shot(D[svc].steps[(i + 1) % 6].k)).then(tabArt); });
+  whenNear(stage, () => { booted = true; const k = art.dataset.k; still(art, k).then(() => { views.hidden = !art.classList.contains('has-v') || art.classList.contains('is-ai'); }).then(() => shot(D[svc].steps[(i + 1) % 6].k)).then(tabArt); });
   return { show(k, step = 0) { if (D[k]) { svc = k; i = step; user = false; draw(); tick(); } } };
 }
