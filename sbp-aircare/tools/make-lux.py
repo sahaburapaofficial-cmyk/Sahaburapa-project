@@ -78,22 +78,45 @@ COPY = {
            'F': ('Area', 'แผนที่และค่าเดินทาง', 'เลือกที่อยู่หน้างาน ดูระยะและค่าเดินทางก่อน VAT')},
 }
 
+
+# Rev.46 — D · F rebuilt around the job the customer wants done; the best of A · B · C brought in
+COPY.update({
+  'myac': {'D': ('แอร์ของฉัน', 'แอร์ทุกเครื่องในบ้าน ถึงรอบล้างเมื่อไร', 'ใส่ห้อง ประเภท และวันที่ล้างล่าสุด ระบบบอกฝุ่นสะสม ลมที่ลดลง และเครื่องที่ถึงรอบ แล้วจองล้างได้ในคลิกเดียว'),
+           'F': ('My units', 'แอร์ของฉัน', 'บันทึกแอร์ในบ้าน ดูเครื่องที่ถึงรอบล้าง แล้วจองพร้อมจำนวนเครื่อง')},
+  'pclean': {'D': ('ล้างแอร์ · 6 ขั้น', 'จองจนห้องกลับมาเย็น', 'ราคา วันนัด สิ่งที่ช่างทำ และสิ่งที่คุณได้รับ ทีละขั้น'),
+             'F': ('Clean · 6 steps', 'ล้างแอร์ ทีละขั้น', 'ราคา วันนัด งานของช่าง และรายงานหลังงาน')},
+  'pinstall': {'D': ('ซื้อ · ติดตั้ง · 6 ขั้น', 'จากเลือกรุ่น จนส่งมอบ', 'เลือกขนาด ลองวาง รู้ราคารวม นัดวัน และรับประกัน'),
+               'F': ('Install · 6 steps', 'ซื้อและติดตั้ง ทีละขั้น', 'เลือกรุ่น ลองวาง ราคารวม วันติดตั้ง ส่งมอบ')},
+  'prepair': {'D': ('ซ่อม · 6 ขั้น', 'หาสาเหตุก่อน ซ่อมหลังคุณอนุมัติ', 'บอกอาการ ตรวจเองอย่างปลอดภัย จองช่าง วินิจฉัย แจ้งราคา แล้วซ่อม'),
+              'F': ('Repair · 6 steps', 'ซ่อมแอร์ ทีละขั้น', 'อาการ → ตรวจเอง → ช่างวินิจฉัย → อนุมัติ → ซ่อม → ทดสอบ')},
+  'wallfit': {'D': ('ลองบนผนังบ้านคุณ', 'ถ่ายรูปผนัง แล้ววางแอร์ขนาดจริง', 'กะความกว้างผนังในภาพ เลือกประเภทและขนาด ดูระยะห่างรอบเครื่องที่แนะนำ รูปอยู่ในเครื่องคุณ ไม่ส่งออก'),
+              'F': ('Wall fit', 'ลองวางบนผนังของคุณ', 'ใช้รูปผนังจริง วางเครื่องตามขนาดสเปก ลากย้ายได้')},
+  'story': {'D': ('ช่างในบ้านจำลอง', 'ล้าง ติดตั้ง และตรวจซ่อม ทีละขั้น', 'ฉาก 3 มิติในบ้าน ช่างทำอะไร ทำไม และคุณได้อะไร ตามแบบฟอร์มของบริษัท'),
+            'F': ('Crew house', 'ช่างทำงานในบ้าน 3 มิติ', 'ล้างปกติ ล้างใหญ่ ติดตั้ง ตรวจซ่อม ตามแบบฟอร์มบริษัท')},
+  'boq': {'D': ('BOQ ฝ่ายจัดซื้อ', 'ใบเสนอราคาเป็นตาราง วางลง Excel ได้', 'รหัส Pricebook รายการ หน่วย จำนวน ราคาต่อหน่วย และยอดก่อน VAT · VAT · รวม จากใบเสนอราคาของคุณ'),
+          'F': ('BOQ', 'ตาราง BOQ สำหรับจัดซื้อ', 'คัดลอกเป็นตาราง วางใน Excel หรือ Google Sheets แยกคอลัมน์เอง')},
+  'system': {'D': ('ระบบแอร์ 9 ขั้น', 'ไฟ ลม น้ำยา น้ำทิ้ง ไหลอย่างไร', 'ภาพ 3 มิติแนวท่อในราง ระบบไฟ และน้ำทิ้ง พร้อมภาพตัดวิศวกรรม สำหรับฝ่ายอาคาร'),
+             'F': ('System', 'ระบบแอร์แบบวิศวกรรม', 'เส้นทางไฟ ลม น้ำยา และน้ำทิ้ง 9 ขั้น พร้อมภาพตัด')},
+})
+
 V = {
   'D': dict(name='Holo Cinema', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ D)', theme='#04060B', theme3d='dark', jobType='wall', studio='condobed', throw='remote', fit='bedroom',
-            order=['home', 'service', 'shop', 'business', 'knowledge', 'contact'],
-            views=dict(home=['film', 'intro', 'doors', 'book', 'start', 'coverage'], service=['paths', 'cleanflow', 'howto', 'standards', 'symptoms', 'prices', 'quality'], shop=['catalog', 'tradein', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
-            labels=dict(film='ภาพยนตร์สั้น', intro='บริการของเรา', inside='ข้างในแอร์', doors='เลือกบริการ', paths='ขั้นตอนบริการ'),
-            nav=[('#film', 'ภาพยนตร์'), ('#book', 'จองล้าง'), ('#cleanflow', 'ทีมช่าง'), ('#catalog', 'แอร์ทุกรุ่น'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร'), ('#area', 'พื้นที่')]),
+            order=['home', 'clean', 'install', 'repair', 'business', 'help'],
+            views=dict(home=['film', 'intro', 'doors', 'myac', 'start', 'coverage'], clean=['pclean', 'book', 'cleanflow', 'standards'], install=['pinstall', 'catalog', 'studio', 'fit', 'wallfit', 'quality', 'tradein'], repair=['prepair', 'symptoms', 'story', 'howto'], business=['enterprise', 'b2b', 'boq', 'system'], help=['prices', 'learn', 'inside', 'about', 'area', 'faq', 'quote']),
+            viewDefs=dict(clean={'th': 'ล้างแอร์', 'lead': 'ราคามาตรฐาน วันนัด ทีมช่างทำอะไรบ้าง และมาตรฐานงานล้าง'}, install={'th': 'ซื้อ · ติดตั้ง', 'lead': 'หาขนาดที่พอดีห้อง เลือกรุ่นพร้อมราคาติดตั้ง ลองวางในห้องและบนผนังจริง วัสดุที่ใช้ และเทิร์นแอร์เก่า'}, repair={'th': 'ซ่อม', 'lead': 'เช็กอาการ ตรวจเองอย่างปลอดภัย แล้วจองช่างตรวจ ไม่ซ่อมก่อนคุณอนุมัติราคา'}, help={'th': 'ราคา · ความรู้ · ติดต่อ', 'lead': 'ค่าบริการทุกรายการ ความรู้ก่อนตัดสินใจ ข้างในแอร์ ข้อมูลบริษัท พื้นที่ และส่งคำขอ'}),
+            labels=dict(film='ภาพยนตร์สั้น', intro='บริการของเรา', inside='ข้างในแอร์', pclean='ขั้นตอนล้าง', pinstall='ขั้นตอนซื้อ · ติดตั้ง', prepair='ขั้นตอนซ่อม', myac='แอร์ของฉัน', wallfit='ลองบนผนังบ้าน', story='ช่างในบ้านจำลอง', boq='BOQ จัดซื้อ', system='ระบบแอร์ 9 ขั้น', doors='เลือกบริการ'),
+            nav=[('#book', 'จองล้าง'), ('#catalog', 'แอร์ทุกรุ่น'), ('#symptoms', 'เช็กอาการ'), ('#myac', 'แอร์ของฉัน'), ('#enterprise', 'องค์กร'), ('#prices', 'ค่าบริการ'), ('#area', 'พื้นที่')]),
   'E': dict(name='Atelier 2050', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ E)', theme='#F3F6F9', theme3d='light', jobType='ceiling', studio='living', throw='panel', fit='living',
             order=['home', 'service', 'shop', 'business', 'knowledge', 'contact'],
             views=dict(home=['concierge', 'doors', 'book', 'start', 'coverage'], service=['paths', 'cleanflow', 'standards', 'howto', 'symptoms', 'prices', 'quality'], shop=['tradein', 'catalog', 'studio', 'fit'], business=['enterprise', 'b2b'], knowledge=['learn', 'inside'], contact=['about', 'area', 'faq', 'quote']),
             labels=dict(concierge='ปรึกษาบริการ', inside='แอร์ทำงานอย่างไร', doors='เลือกบริการ', paths='ขั้นตอนบริการ'),
             nav=[('#concierge', 'ปรึกษา'), ('#book', 'จองล้าง'), ('#cleanflow', 'งานช่าง'), ('#tradein', 'รีโนเวท'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร'), ('#about', 'เกี่ยวกับเรา')]),
   'F': dict(name='Holodeck', title='ล้างแอร์ ติดตั้ง ซ่อม กรุงเทพฯ · SBP AirCare (แบบ F)', theme='#03050C', theme3d='dark', jobType='cassette', studio='openoffice', throw='glass', fit='living',
-            order=['home', 'knowledge', 'service', 'shop', 'business', 'contact'],
-            views=dict(home=['dome', 'doors', 'book', 'start', 'coverage'], knowledge=['inside', 'studio', 'learn'], service=['paths', 'cleanflow', 'howto', 'standards', 'symptoms', 'prices', 'quality'], shop=['catalog', 'fit', 'tradein'], business=['enterprise', 'b2b'], contact=['about', 'area', 'faq', 'quote']),
-            labels=dict(dome='ห้องทดลองความเย็น', inside='ข้างในแอร์', studio='ห้องจำลอง 48 ห้อง', doors='เลือกบริการ', paths='ขั้นตอนบริการ'),
-            nav=[('#dome', 'ห้องทดลอง'), ('#book', 'จองล้าง'), ('#inside', 'ข้างในแอร์'), ('#cleanflow', 'ทีมช่าง'), ('#catalog', 'แอร์ทุกรุ่น'), ('#prices', 'ค่าบริการ'), ('#enterprise', 'องค์กร')]),
+            order=['home', 'clean', 'install', 'repair', 'business', 'help'],
+            views=dict(home=['dome', 'doors', 'myac', 'start', 'coverage'], clean=['pclean', 'book', 'cleanflow', 'standards'], install=['pinstall', 'catalog', 'studio', 'fit', 'wallfit', 'quality', 'tradein'], repair=['prepair', 'symptoms', 'story', 'howto'], business=['enterprise', 'b2b', 'boq', 'system'], help=['prices', 'learn', 'inside', 'about', 'area', 'faq', 'quote']),
+            viewDefs=dict(clean={'th': 'ล้างแอร์', 'lead': 'ราคามาตรฐาน วันนัด ทีมช่างทำอะไรบ้าง และมาตรฐานงานล้าง'}, install={'th': 'ซื้อ · ติดตั้ง', 'lead': 'หาขนาดที่พอดีห้อง เลือกรุ่นพร้อมราคาติดตั้ง ลองวางในห้องและบนผนังจริง วัสดุที่ใช้ และเทิร์นแอร์เก่า'}, repair={'th': 'ซ่อม', 'lead': 'เช็กอาการ ตรวจเองอย่างปลอดภัย แล้วจองช่างตรวจ ไม่ซ่อมก่อนคุณอนุมัติราคา'}, help={'th': 'ราคา · ความรู้ · ติดต่อ', 'lead': 'ค่าบริการทุกรายการ ความรู้ก่อนตัดสินใจ ข้างในแอร์ ข้อมูลบริษัท พื้นที่ และส่งคำขอ'}),
+            labels=dict(dome='ห้องทดลองความเย็น', studio='ห้องจำลอง 48 ห้อง', inside='ข้างในแอร์', pclean='ขั้นตอนล้าง', pinstall='ขั้นตอนซื้อ · ติดตั้ง', prepair='ขั้นตอนซ่อม', myac='แอร์ของฉัน', wallfit='ลองบนผนังบ้าน', story='ช่างในบ้านจำลอง', boq='BOQ จัดซื้อ', system='ระบบแอร์ 9 ขั้น', doors='เลือกบริการ'),
+            nav=[('#dome', 'ห้องทดลอง'), ('#book', 'จองล้าง'), ('#catalog', 'แอร์ทุกรุ่น'), ('#symptoms', 'เช็กอาการ'), ('#myac', 'แอร์ของฉัน'), ('#enterprise', 'องค์กร'), ('#prices', 'ค่าบริการ')]),
 }
 
 HERO = {
@@ -154,6 +177,8 @@ BODY = {
   'prices': '<div id="allSvc"></div><div class="panel" id="priceCenter"></div>', 'quality': '<div class="panel" id="qualityRoot"></div>',
   'enterprise': '<div class="panel" id="entRoot"></div>', 'b2b': '<div id="b2bRoot"></div>', 'learn': '<div class="panel" id="learnRoot"></div>',
   'inside': '<div class="panel" id="howRoot"></div>', 'about': '<div id="aboutRoot"></div>', 'area': '<div id="areaRoot"></div>',
+  'myac': '<div id="myacRoot"></div>', 'pclean': '<div id="pathsClean"></div>', 'pinstall': '<div id="pathsInstall"></div>', 'prepair': '<div id="pathsRepair"></div>',
+  'wallfit': '<div class="panel" id="wallRoot"></div>', 'story': '<div class="panel" id="storyRoot"></div>', 'boq': '<div id="boqRoot"></div>', 'system': '<div class="panel" id="edRoot"></div>',
 }
 EXTRA_CSS = {
   'D': '''.d-intro{max-width:880px}.d-intro h1{font:300 clamp(38px,5.6vw,80px)/1.06 var(--display);letter-spacing:.005em}.d-intro h1 em{font-style:normal;background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -177,6 +202,7 @@ def page(v):
     views_js = json.dumps(c['views'], ensure_ascii=False)
     order_js = json.dumps(c['order'])
     labels_js = json.dumps(c['labels'], ensure_ascii=False)
+    vdefs_js = json.dumps(c.get('viewDefs') or None, ensure_ascii=False)
     return f'''<!doctype html>
 <html lang="th" data-lux="{v}">
 <head>
@@ -231,6 +257,7 @@ await mountLux({{
   views: {views_js},
   order: {order_js},
   labels: {labels_js},
+  viewDefs: {vdefs_js},
   {HERO_JS[v]}
 }});
 </script>

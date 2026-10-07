@@ -29,6 +29,10 @@ import { soundButton } from './luxsound.js';
 import { mountDock } from './luxdock.js';
 import { mountDoors, mountPaths } from './servicepath.js';
 import { aiFill, fillMedia } from './aiart.js';
+// Rev.46 the best of A · B · C inside D · F (mounted when the design has the section)
+import { mountMyAc } from './myac.js';
+import { mountBoq } from './boq.js';
+import { mountWallFit } from './wallfit.js';
 import { filmFor } from './stills.js';
 
 const fill = (sel, ...kids) => { const el = $(sel); if (el) el.append(...kids.flat().filter(Boolean)); return el; };
@@ -173,15 +177,23 @@ export async function mountLux(cfg) {
     import('./atelier.js').then(m => m.mountConcierge(box.lastChild, { go, openCart: CART.open, prefill: QC && QC.prefill }));
   }
   SITE = mountSite({
-    variant, openCart: CART.open, openProduct, views, order, labels,
+    variant, openCart: CART.open, openProduct, views, order, labels, viewDefs: cfg.viewDefs,
     hooks: {
       clean: () => JOB && JOB.setJob('clean'), install: () => JOB && JOB.setJob('install'),
       repair: () => SVX && SVX.set('repair'),
     },
   });
   // ★Rev.38 the three services as customer journeys: doors on the home page → the six-step path at the top of the services page
-  const PATHS = mountPaths($('#pathsRoot'), { go, openCart: CART.open, hooks: { clean: () => JOB && JOB.setJob('clean'), install: () => JOB && JOB.setJob('install') } });
-  mountDoors($('#doorsRoot'), { onPick: k => { PATHS && PATHS.show(k); go('paths'); } });
+  const PH = { clean: () => JOB && JOB.setJob('clean'), install: () => JOB && JOB.setJob('install') };
+  const PATHS = mountPaths($('#pathsRoot'), { go, openCart: CART.open, hooks: PH });
+  // Rev.46 D · F: one path per service view (#pathsClean · #pathsInstall · #pathsRepair); the doors open that service's view
+  ['clean', 'install', 'repair'].forEach(k => { const r = $('#paths' + k[0].toUpperCase() + k.slice(1)); r && mountPaths(r, { go, openCart: CART.open, hooks: PH, only: k }); });
+  mountDoors($('#doorsRoot'), { onPick: k => { if (cfg.viewDefs && cfg.viewDefs[k]) return go(k); PATHS && PATHS.show(k); go('paths'); } });
+  if ($('#myacRoot')) mountMyAc($('#myacRoot'), { prefill: QC && QC.prefill, go });
+  if ($('#boqRoot')) mountBoq($('#boqRoot'), { openCart: () => CART.open() });
+  if ($('#wallRoot')) mountWallFit($('#wallRoot'), { onSize: (t, b) => { cat.setType(t); cat.setBtu(b); go('catalog'); } });
+  if ($('#edRoot')) import('./system3d.js').then(m => m.mountSystem3D($('#edRoot'), { theme: T }));
+  if ($('#storyRoot')) import('./techstory.js').then(m => m.mountTechStory($('#storyRoot'), { theme: T === 'dark' ? 'dark' : 'light' }));
   // Rev.42/43: a full-width film band above the service doors — an AI film/image from slot hero:<variant> (aiart.js), otherwise the
   // pre-rendered 3D film of this design (stills.js, tools/render-film.mjs); hidden when neither exists
   { const d = $('#doorsRoot'); if (d) { const band = h('div', { class: 'lx-ai-hero', hidden: true }); d.before(band); aiFill(band, 'hero:' + variant).then(ok => ok || filmFor(String(variant).toUpperCase()).then(f => fillMedia(band, f, 'ภาพจำลอง 3 มิติ'))).then(ok => { band.hidden = !ok; }); } }

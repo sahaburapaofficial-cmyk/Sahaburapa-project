@@ -74,6 +74,8 @@ const svgI = d => h('span', { class: 'sx-ico', 'aria-hidden': 'true', html: `<sv
  */
 export function mountSite(cfg) {
   const { variant = 'A', views, order = ['home', 'shop', 'service', 'business', 'knowledge', 'contact'], hooks = {}, openCart = () => {}, navFmt = (i, th) => th, labels = {} } = cfg;
+  // Rev.46: a design may bring its own views (D · F are arranged by the job the customer wants done: clean · install · repair …)
+  if (cfg.viewDefs) Object.assign(VIEWS, cfg.viewDefs);
   document.documentElement.dataset.sxVariant = variant;   // ★Rev.33 the quotation / ticket names the design it came from (single-file builds have no a.html in the path)
   document.documentElement.classList.add('sx-on');
   const L = id => labels[id] || SEC_TH[id] || id;

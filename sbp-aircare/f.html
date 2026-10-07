@@ -29,7 +29,7 @@
 <aside class="proto" aria-label="แบบเว็บไซต์">แบบ F · ราคาจาก Pricebook 2569 ของบริษัท · <a href="./">เทียบแบบ D · E · F</a></aside>
 <header class="hdr"><div class="wrap">
   <a class="logo" href="#home"><img class="logo-mk" data-logo="sbp" alt="" width="40" height="30"><span>SBP AirCare<small>Holodeck</small></span></a>
-  <nav class="nav" aria-label="เมนูหลัก"><a href="#dome">ห้องทดลอง</a><a href="#book">จองล้าง</a><a href="#inside">ข้างในแอร์</a><a href="#cleanflow">ทีมช่าง</a><a href="#catalog">แอร์ทุกรุ่น</a><a href="#prices">ค่าบริการ</a><a href="#enterprise">องค์กร</a></nav>
+  <nav class="nav" aria-label="เมนูหลัก"><a href="#dome">ห้องทดลอง</a><a href="#book">จองล้าง</a><a href="#catalog">แอร์ทุกรุ่น</a><a href="#symptoms">เช็กอาการ</a><a href="#myac">แอร์ของฉัน</a><a href="#enterprise">องค์กร</a><a href="#prices">ค่าบริการ</a></nav>
   <div class="vsw" aria-label="เลือกแบบเว็บไซต์"><a href="./d.html">D</a><a href="./e.html">E</a><a href="./f.html" aria-current="page">F</a></div>
   <button type="button" class="btn-primary" data-cart-btn>ใบเสนอราคา <span data-cart-n>0</span></button>
 </div></header>
@@ -47,9 +47,9 @@
     <div class="sec-h"><p class="eyebrow">Start</p><h2>เลือกบริการ แล้วดูทุกขั้น</h2><p>ล้าง ติดตั้ง ซ่อม — ความหมาย เวลา ราคาเริ่มต้น และขั้นตอนตั้งแต่จองจนเสร็จงาน</p></div>
     <div id="doorsRoot"></div>
   </section>
-  <section class="sec" id="book">
-    <div class="sec-h"><p class="eyebrow">Book · 3 steps</p><h2>จองล้างแอร์ เห็นยอดก่อนส่ง</h2><p>ราคามาตรฐาน ค่าเดินทาง ยอดขั้นต่ำ และคิวด่วน คำนวณให้ครบในหน้าเดียว</p></div>
-    <div id="bookRoot"></div>
+  <section class="sec" id="myac">
+    <div class="sec-h"><p class="eyebrow">My units</p><h2>แอร์ของฉัน</h2><p>บันทึกแอร์ในบ้าน ดูเครื่องที่ถึงรอบล้าง แล้วจองพร้อมจำนวนเครื่อง</p></div>
+    <div id="myacRoot"></div>
   </section>
   <section class="sec" id="start">
     <div class="sec-h"><p class="eyebrow">Journeys</p><h2>เส้นทางของคุณ</h2><p>เลือกเรื่องที่ต้องการ ระบบพาไปทีละขั้นจนส่งคำขอ</p></div>
@@ -59,57 +59,65 @@
     <div class="sec-h"><p class="eyebrow">Coverage</p><h2>พื้นที่ให้บริการแบบ 3 มิติ</h2><p>ทีมวิ่งจากพระราม 2 ตามนาฬิกาทำงาน เลือกที่อยู่แล้วเห็นระยะและค่าเดินทาง</p></div>
     <div id="covRoot"></div>
   </section>
-  <section class="sec" id="inside">
-    <div class="sec-h"><p class="eyebrow">Inside</p><h2>ข้างในแอร์ 3 ประเภท</h2><p>ภาพตัด 3 มิติและจำลองระยะลม</p></div>
-    <div class="panel" id="howRoot"></div>
+  <section class="sec" id="pclean">
+    <div class="sec-h"><p class="eyebrow">Clean · 6 steps</p><h2>ล้างแอร์ ทีละขั้น</h2><p>ราคา วันนัด งานของช่าง และรายงานหลังงาน</p></div>
+    <div id="pathsClean"></div>
   </section>
-  <section class="sec" id="studio">
-    <div class="sec-h"><p class="eyebrow">Room lab</p><h2>ห้องจำลอง 48 ห้อง</h2><p>BTU ทิศทางลม ฝุ่นสะสม และค่าไฟ ในห้องที่ใกล้เคียงกับของคุณ</p></div>
-    <div id="studioRoot"></div>
-  </section>
-  <section class="sec" id="learn">
-    <div class="sec-h"><p class="eyebrow">Learn</p><h2>คู่มือ 12 หัวข้อ</h2><p>อ่านสั้น ๆ แล้วลองในห้องทดลองได้ทันที</p></div>
-    <div class="panel" id="learnRoot"></div>
-  </section>
-  <section class="sec" id="paths">
-    <div class="sec-h"><p class="eyebrow">Service path</p><h2>หกขั้น จองจนเสร็จงาน</h2><p>เลือกบริการ ดูภาพเคลื่อนไหวและคำอธิบายของแต่ละขั้น แล้วกดไปทำขั้นนั้นได้ทันที</p></div>
-    <div id="pathsRoot"></div>
+  <section class="sec" id="book">
+    <div class="sec-h"><p class="eyebrow">Book · 3 steps</p><h2>จองล้างแอร์ เห็นยอดก่อนส่ง</h2><p>ราคามาตรฐาน ค่าเดินทาง ยอดขั้นต่ำ และคิวด่วน คำนวณให้ครบในหน้าเดียว</p></div>
+    <div id="bookRoot"></div>
   </section>
   <section class="sec" id="cleanflow">
     <div class="sec-h"><p class="eyebrow">Crew</p><h2>ทีมช่างทำงานจริงทีละขั้น</h2><p>ล้าง C1 · C2 · ติดตั้ง 4 ประเภทเครื่อง ในฉาก 3 มิติ</p></div>
     <div class="panel" id="cleanRoot"></div>
   </section>
-  <section class="sec" id="howto">
-    <div class="sec-h"><p class="eyebrow">Service steps</p><h2>ทุกขั้นตอนบริการ</h2><p>ล้าง ติดตั้ง ซ่อม ต่อประเภทเครื่อง</p></div>
-    <div class="panel" id="servicesRoot"></div>
-  </section>
   <section class="sec" id="standards">
     <div class="sec-h"><p class="eyebrow">Standards</p><h2>มาตรฐานงาน</h2><p>ล้าง · น้ำยา · ติดตั้ง · ซ่อม · สิ่งที่ได้รับทุกงาน</p></div>
     <div class="panel" id="stdRoot"></div>
   </section>
-  <section class="sec" id="symptoms">
-    <div class="sec-h"><p class="eyebrow">Diagnose</p><h2>เช็กอาการแอร์</h2><p>14 อาการ ชี้จุดที่น่าจะเสีย ประเภทงาน และราคามาตรฐาน</p></div>
-    <div class="panel" id="symRoot"></div>
-  </section>
-  <section class="sec" id="prices">
-    <div class="sec-h"><p class="eyebrow">Prices</p><h2>ราคาทุกบริการ</h2><p>ค้นหาได้ ทุกแถวเพิ่มลงใบเสนอราคา ราคาก่อน VAT · VRV / VRF ติดต่อทีมโครงการแยก</p></div>
-    <div id="allSvc"></div><div class="panel" id="priceCenter"></div>
-  </section>
-  <section class="sec" id="quality">
-    <div class="sec-h"><p class="eyebrow">Materials</p><h2>วัสดุแบบเห็นข้างใน</h2><p>โชว์รูม 3 มิติและภาพตัดเคลื่อนไหวของวัสดุแต่ละชิ้น</p></div>
-    <div class="panel" id="qualityRoot"></div>
+  <section class="sec" id="pinstall">
+    <div class="sec-h"><p class="eyebrow">Install · 6 steps</p><h2>ซื้อและติดตั้ง ทีละขั้น</h2><p>เลือกรุ่น ลองวาง ราคารวม วันติดตั้ง ส่งมอบ</p></div>
+    <div id="pathsInstall"></div>
   </section>
   <section class="sec" id="catalog">
     <div class="sec-h"><p class="eyebrow">Catalogue</p><h2>แอร์ทุกรุ่น ทุกขนาด</h2><p>กรอง เทียบ แล้ววางลงในห้องของคุณได้ทันที</p></div>
     <div id="catalogRoot"></div>
   </section>
+  <section class="sec" id="studio">
+    <div class="sec-h"><p class="eyebrow">Room lab</p><h2>ห้องจำลอง 48 ห้อง</h2><p>BTU ทิศทางลม ฝุ่นสะสม และค่าไฟ ในห้องที่ใกล้เคียงกับของคุณ</p></div>
+    <div id="studioRoot"></div>
+  </section>
   <section class="sec" id="fit">
     <div class="sec-h"><p class="eyebrow">Fit</p><h2>วางแอร์ในห้องของคุณ</h2><p>ขนาดจริงตามสเปก ลากเฟอร์นิเจอร์ได้ ดูลมไหลรอบของในห้อง</p></div>
     <div class="panel" id="fitRoot"></div>
   </section>
+  <section class="sec" id="wallfit">
+    <div class="sec-h"><p class="eyebrow">Wall fit</p><h2>ลองวางบนผนังของคุณ</h2><p>ใช้รูปผนังจริง วางเครื่องตามขนาดสเปก ลากย้ายได้</p></div>
+    <div class="panel" id="wallRoot"></div>
+  </section>
+  <section class="sec" id="quality">
+    <div class="sec-h"><p class="eyebrow">Materials</p><h2>วัสดุแบบเห็นข้างใน</h2><p>โชว์รูม 3 มิติและภาพตัดเคลื่อนไหวของวัสดุแต่ละชิ้น</p></div>
+    <div class="panel" id="qualityRoot"></div>
+  </section>
   <section class="sec" id="tradein">
     <div class="sec-h"><p class="eyebrow">Trade-in</p><h2>ซ่อมหรือเปลี่ยน ดูตัวเลขก่อน</h2><p>ค่าซ่อม เครื่องใหม่ ค่าไฟต่อปี และมูลค่าเทิร์นเป็นช่วงบาทต่อเครื่อง</p></div>
     <div class="panel" id="tiRoot"></div>
+  </section>
+  <section class="sec" id="prepair">
+    <div class="sec-h"><p class="eyebrow">Repair · 6 steps</p><h2>ซ่อมแอร์ ทีละขั้น</h2><p>อาการ → ตรวจเอง → ช่างวินิจฉัย → อนุมัติ → ซ่อม → ทดสอบ</p></div>
+    <div id="pathsRepair"></div>
+  </section>
+  <section class="sec" id="symptoms">
+    <div class="sec-h"><p class="eyebrow">Diagnose</p><h2>เช็กอาการแอร์</h2><p>14 อาการ ชี้จุดที่น่าจะเสีย ประเภทงาน และราคามาตรฐาน</p></div>
+    <div class="panel" id="symRoot"></div>
+  </section>
+  <section class="sec" id="story">
+    <div class="sec-h"><p class="eyebrow">Crew house</p><h2>ช่างทำงานในบ้าน 3 มิติ</h2><p>ล้างปกติ ล้างใหญ่ ติดตั้ง ตรวจซ่อม ตามแบบฟอร์มบริษัท</p></div>
+    <div class="panel" id="storyRoot"></div>
+  </section>
+  <section class="sec" id="howto">
+    <div class="sec-h"><p class="eyebrow">Service steps</p><h2>ทุกขั้นตอนบริการ</h2><p>ล้าง ติดตั้ง ซ่อม ต่อประเภทเครื่อง</p></div>
+    <div class="panel" id="servicesRoot"></div>
   </section>
   <section class="sec" id="enterprise">
     <div class="sec-h"><p class="eyebrow">Enterprise</p><h2>สัญญารายปีตามประเภทองค์กร</h2><p>7 ประเภทองค์กร สัญญาตัวอย่างคำนวณสด</p></div>
@@ -118,6 +126,26 @@
   <section class="sec" id="b2b">
     <div class="sec-h"><p class="eyebrow">Annual plan</p><h2>งบและแผนล้างทั้งปี</h2><p>จำนวนเครื่อง × รอบ × แพ็กเกจ → งบต่อปีและปฏิทิน 12 เดือน</p></div>
     <div id="b2bRoot"></div>
+  </section>
+  <section class="sec" id="boq">
+    <div class="sec-h"><p class="eyebrow">BOQ</p><h2>ตาราง BOQ สำหรับจัดซื้อ</h2><p>คัดลอกเป็นตาราง วางใน Excel หรือ Google Sheets แยกคอลัมน์เอง</p></div>
+    <div id="boqRoot"></div>
+  </section>
+  <section class="sec" id="system">
+    <div class="sec-h"><p class="eyebrow">System</p><h2>ระบบแอร์แบบวิศวกรรม</h2><p>เส้นทางไฟ ลม น้ำยา และน้ำทิ้ง 9 ขั้น พร้อมภาพตัด</p></div>
+    <div class="panel" id="edRoot"></div>
+  </section>
+  <section class="sec" id="prices">
+    <div class="sec-h"><p class="eyebrow">Prices</p><h2>ราคาทุกบริการ</h2><p>ค้นหาได้ ทุกแถวเพิ่มลงใบเสนอราคา ราคาก่อน VAT · VRV / VRF ติดต่อทีมโครงการแยก</p></div>
+    <div id="allSvc"></div><div class="panel" id="priceCenter"></div>
+  </section>
+  <section class="sec" id="learn">
+    <div class="sec-h"><p class="eyebrow">Learn</p><h2>คู่มือ 12 หัวข้อ</h2><p>อ่านสั้น ๆ แล้วลองในห้องทดลองได้ทันที</p></div>
+    <div class="panel" id="learnRoot"></div>
+  </section>
+  <section class="sec" id="inside">
+    <div class="sec-h"><p class="eyebrow">Inside</p><h2>ข้างในแอร์ 3 ประเภท</h2><p>ภาพตัด 3 มิติและจำลองระยะลม</p></div>
+    <div class="panel" id="howRoot"></div>
   </section>
   <section class="sec" id="about">
     <div class="sec-h"><p class="eyebrow">About</p><h2>เกี่ยวกับเรา</h2><p>ข้อมูลบริษัทและช่องทางติดต่อ</p></div>
@@ -140,9 +168,10 @@
 import { mountLux } from './assets/lux-site.js';
 await mountLux({
   variant: 'F', theme: 'dark', jobType: 'cassette', studioStart: 'openoffice', throwStyle: 'glass', fitPreset: 'living',
-  views: {"home": ["dome", "doors", "book", "start", "coverage"], "knowledge": ["inside", "studio", "learn"], "service": ["paths", "cleanflow", "howto", "standards", "symptoms", "prices", "quality"], "shop": ["catalog", "fit", "tradein"], "business": ["enterprise", "b2b"], "contact": ["about", "area", "faq", "quote"]},
-  order: ["home", "knowledge", "service", "shop", "business", "contact"],
-  labels: {"dome": "ห้องทดลองความเย็น", "inside": "ข้างในแอร์", "studio": "ห้องจำลอง 48 ห้อง", "doors": "เลือกบริการ", "paths": "ขั้นตอนบริการ"},
+  views: {"home": ["dome", "doors", "myac", "start", "coverage"], "clean": ["pclean", "book", "cleanflow", "standards"], "install": ["pinstall", "catalog", "studio", "fit", "wallfit", "quality", "tradein"], "repair": ["prepair", "symptoms", "story", "howto"], "business": ["enterprise", "b2b", "boq", "system"], "help": ["prices", "learn", "inside", "about", "area", "faq", "quote"]},
+  order: ["home", "clean", "install", "repair", "business", "help"],
+  labels: {"dome": "ห้องทดลองความเย็น", "studio": "ห้องจำลอง 48 ห้อง", "inside": "ข้างในแอร์", "pclean": "ขั้นตอนล้าง", "pinstall": "ขั้นตอนซื้อ · ติดตั้ง", "prepair": "ขั้นตอนซ่อม", "myac": "แอร์ของฉัน", "wallfit": "ลองบนผนังบ้าน", "story": "ช่างในบ้านจำลอง", "boq": "BOQ จัดซื้อ", "system": "ระบบแอร์ 9 ขั้น", "doors": "เลือกบริการ"},
+  viewDefs: {"clean": {"th": "ล้างแอร์", "lead": "ราคามาตรฐาน วันนัด ทีมช่างทำอะไรบ้าง และมาตรฐานงานล้าง"}, "install": {"th": "ซื้อ · ติดตั้ง", "lead": "หาขนาดที่พอดีห้อง เลือกรุ่นพร้อมราคาติดตั้ง ลองวางในห้องและบนผนังจริง วัสดุที่ใช้ และเทิร์นแอร์เก่า"}, "repair": {"th": "ซ่อม", "lead": "เช็กอาการ ตรวจเองอย่างปลอดภัย แล้วจองช่างตรวจ ไม่ซ่อมก่อนคุณอนุมัติราคา"}, "help": {"th": "ราคา · ความรู้ · ติดต่อ", "lead": "ค่าบริการทุกรายการ ความรู้ก่อนตัดสินใจ ข้างในแอร์ ข้อมูลบริษัท พื้นที่ และส่งคำขอ"}},
   hero: async ({ go }) => { const m = await import('./assets/spatial3d.js'); m.mountSpatial(document.getElementById('spRoot'), { go }); },
 });
 </script>

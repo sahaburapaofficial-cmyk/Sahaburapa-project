@@ -192,10 +192,11 @@ export function mountDoors(root, { onPick = () => {} } = {}) {
 }
 
 /** the journey of one service, six animated steps */
-export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {} } = {}) {
+export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {}, only = null } = {}) {
   if (!root) return null;
   const D = data();
-  let svc = 'clean', i = 0, user = false, timer = 0, visible = false;
+  // Rev.46 only: one service per page (D · F service views) — no service tabs, the path of that service only
+  let svc = only || 'clean', i = 0, user = false, timer = 0, visible = false;
   const tabs = h('div', { class: 'pa-tabs', role: 'tablist', 'aria-label': 'บริการ' });
   const head = h('div', { class: 'pa-head' });
   const list = h('ol', { class: 'pa-list' });
@@ -219,8 +220,8 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
   function draw(full = true) {
     const S = D[svc], s = S.steps[i];
     if (full) {
-      tabs.innerHTML = '';
-      ORDER.forEach(k => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': String(k === svc), class: 'pa-tab', 'data-svc': k, onclick: () => { svc = k; i = 0; user = true; stop(); draw(); } }, h('span', { class: 'pa-tab-ic', html: D[k].door }), D[k].th)));
+      tabs.innerHTML = ''; tabs.hidden = !!only;
+      (only ? [] : ORDER).forEach(k => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': String(k === svc), class: 'pa-tab', 'data-svc': k, onclick: () => { svc = k; i = 0; user = true; stop(); draw(); } }, h('span', { class: 'pa-tab-ic', html: D[k].door }), D[k].th)));
       if (booted) tabArt();
       head.innerHTML = '';
       head.append(h('div', {}, h('small', {}, `${S.en} · คืออะไร`), h('p', {}, S.means)), h('div', {}, h('small', {}, 'เหมาะเมื่อ'), h('p', {}, S.when)), h('div', {}, h('small', {}, 'เวลาโดยประมาณ'), h('p', {}, S.time)), h('div', { class: 'pa-price' }, h('small', {}, 'ราคา'), h('p', {}, S.price)));
