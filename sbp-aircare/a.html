@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th">
+<html lang="th" data-art="A">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="assets/shared.css">
 <link rel="stylesheet" href="assets/studio.css">
 <link rel="stylesheet" href="assets/services.css">
+<link rel="stylesheet" href="assets/servicepath.css">
 <style>
 /* Layout concept A — "Bento Clean": calm neutral ground, white tiles on a 4-col named grid, one dark feature tile, brand orange only on primary CTAs. */
 :root{
@@ -468,6 +469,12 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
     <div id="myacRoot"></div>
   </section>
 
+  <!-- Rev.47 service doors (servicepath.js — from D/F) -->
+  <section class="sec" id="doors">
+    <div class="sec-h"><div><p class="eyebrow">เลือกบริการ</p><h2>ล้าง · ติดตั้ง · ซ่อม — เริ่มจากสิ่งที่คุณต้องการ</h2><p>แต่ละบริการบอกความหมาย เหมาะเมื่อไร ใช้เวลาประมาณเท่าไร และราคาเริ่มต้นก่อน VAT กดแล้วดูขั้นตอนทีละขั้นได้ทันที</p></div></div>
+    <div id="doorsRoot"></div>
+  </section>
+
   <section class="sec" id="start">
     <div class="sec-h"><div><p class="eyebrow">เริ่มต้นที่นี่</p><h2>วันนี้ต้องการอะไร</h2><p>เลือกสิ่งที่ตรงกับคุณ ระบบพาไปทีละขั้นจนส่งคำขอ ทำต่อจากเดิมได้เมื่อกลับมา</p></div></div>
     <div id="startRoot"></div>
@@ -491,6 +498,12 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
   </section>
 
   <!-- CREW AT WORK: CLEANING C1 / C2 + INSTALLATION (Rev.09 r3 → r4) -->
+  <!-- Rev.47 step-by-step service journeys -->
+  <section class="sec" id="paths">
+    <div class="sec-h"><div><p class="eyebrow">ขั้นตอนบริการ</p><h2>ใช้บริการอย่างไร ทีละขั้น</h2><p>ภาพ 3 มิติทุกขั้น พร้อมข้อมูลสำคัญเป็นช่อง ๆ: เกิดอะไรขึ้น · ทำไม · คุณได้อะไร และปุ่มไปทำขั้นนั้นบนเว็บ</p></div></div>
+    <div id="pathsRoot"></div>
+  </section>
+
   <section class="sec" id="cleanflow">
     <div class="sec-h"><div><p class="eyebrow">ทีมช่างทำงานอย่างไร · ตามแบบฟอร์มงานล้างและงานติดตั้งของบริษัท</p><h2>ดูทีมช่างล้างและติดตั้งแอร์ทีละขั้น ทั้งติดผนัง แขวน สี่ทิศทาง และตู้ตั้ง</h2><p>เลือกงานล้างหรืองานติดตั้ง และประเภทแอร์ แล้วกดเล่นทีละขั้น เห็นช่าง 2 คนทำงานเป็นทีม ถอดชิ้นไหนส่งต่อกันอย่างไร ล้างปกติกับล้างใหญ่ต่างกันตรงไหน ติดตั้งมาตรฐานกับพรีเมียมทดสอบอะไรเพิ่ม พร้อมราคามาตรฐานจาก Pricebook</p></div></div>
     <div class="tile" id="cleanRoot"></div>
@@ -729,6 +742,7 @@ import { mountRoomFit } from './assets/roomfit.js';
 import { mountKnowledge } from './assets/knowledge.js';
 import { mountJobGuide } from './assets/jobguide.js';
 import { mountSite } from './assets/site.js';
+import { mountDoors, mountPaths } from './assets/servicepath.js';
 import { mountQuickClean, cleanFrom } from './assets/quickclean.js';
 import { mountMyAc } from './assets/myac.js';
 await loadData(); await loadMedia();
@@ -818,7 +832,7 @@ if (story) { story.view('exploded'); story.setAirflow(false); scrollExplode($('#
 mountViewer($('#insideBox'), { style: 'studio', autoRotate: false, dirt: 0.7, onCleaned: () => toast('ล้างเสร็จ · ลมกลับมาแรงขึ้น (แบบจำลอง)') });
 
 // btu, zone, process, faq
-mountStudio($('#studioRoot'), { theme: 'light', sceneStart: 'bedroom', onOpen: (m, i) => openProduct(m, i) });
+mountStudio($('#studioRoot'), { theme: 'light', sceneStart: 'bedroom', onOpen: (m, i) => openProduct(m, i), sheet: true });
 const FIT = mountRoomFit($('#fitRoot'), { theme: 'light', preset: 'bedroom', onOpenModel: (m, i) => openProduct(m, i) });
 const JOB = mountJobGuide($('#cleanRoot'), { theme: 'light', start: 'C1', type: 'wall' });
 mountKnowledge($('#learnRoot'), { ids: { cleanflow: 'cleanflow', fit: 'fit', studio: 'studio', howto: 'howto', catalog: 'catalog', inside: 'inside', prices: 'prices', quality: 'quality', b2b: 'b2b', area: 'area', quote: 'quote' } });
@@ -850,9 +864,12 @@ reveal();
 mountTradeIn($('#tiRoot'), { catalog: cat, openCart: CART.open });   // Rev.24 trade-in old AC: repair vs replace + trade-in assessment
 const SITE = mountSite({
   variant: 'A', openCart: CART.open, openProduct,
-  views: { home: ['hero', 'book', 'myac', 'start', 'flow', 'services'], shop: ['catalog', 'tradein', 'studio', 'fit'], service: ['cleanflow', 'symptoms', 'standards', 'prices', 'quality', 'story', 'inside'], business: ['enterprise', 'b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['hero', 'book', 'myac', 'doors', 'start', 'flow', 'services'], shop: ['catalog', 'tradein', 'studio', 'fit'], service: ['paths', 'cleanflow', 'symptoms', 'standards', 'prices', 'quality', 'story', 'inside'], business: ['enterprise', 'b2b'], knowledge: ['learn', 'howto'], contact: ['about', 'area', 'faq', 'quote'] },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });
+// Rev.47 (owner 7 ต.ค. 2569: "พัฒนาแค่ A B C พอ"): the three service doors and the step-by-step journeys from D/F, 3D stills in this design's colours
+const PATHS = mountPaths($('#pathsRoot'), { go: id => SITE.go(id), openCart: CART.open, hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install') } });
+mountDoors($('#doorsRoot'), { onPick: k => { PATHS && PATHS.show(k); SITE.go('paths'); } });
 // Rev.30: "not sure what you need?" — the four-question consultation (atelier.js, same rules as design E) under the intent picker;
 // its plan links to the right section and can open the cleaning form already holding the number of units
 { const box = h('details', { class: 's-con' }, h('summary', {}, h('b', {}, 'ยังไม่แน่ใจว่าต้องการบริการไหน'), h('span', {}, 'ตอบ 4 ข้อ ให้เราจัดลำดับบริการที่เหมาะกับคุณ')), h('div'));

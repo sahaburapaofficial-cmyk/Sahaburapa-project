@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th">
+<html lang="th" data-art="B">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="assets/shared.css">
 <link rel="stylesheet" href="assets/studio.css">
 <link rel="stylesheet" href="assets/services.css">
+<link rel="stylesheet" href="assets/servicepath.css">
 <style>
 /* Layout concept B — "Engineering sheet": a drawing set. Visible column grid, title blocks, leader lines, schedules and mono labels. Built for facility managers and procurement. */
 :root{
@@ -409,6 +410,14 @@ footer .sx-foot{padding-block:24px 8px}
     </div>
   </section>
 
+  <!-- Rev.47 service doors (servicepath.js — from D/F) -->
+  <section class="s" id="doors">
+    <div class="sheet">
+      <div class="sheet-h"><div><p class="lbl">Sheet 00 · เลือกบริการ</p><h2>ล้าง · ติดตั้ง · ซ่อม — เริ่มจากสิ่งที่คุณต้องการ</h2><p>แต่ละบริการบอกความหมาย เหมาะเมื่อไร ใช้เวลาประมาณเท่าไร และราคาเริ่มต้นก่อน VAT กดแล้วดูขั้นตอนทีละขั้นได้ทันที</p></div><span class="sheet-no">S-00</span></div>
+      <div id="doorsRoot" style="padding:14px 20px 18px"></div>
+    </div>
+  </section>
+
   <section class="s" id="start">
     <div class="sheet">
       <div class="sheet-h"><div><p class="lbl">Sheet S · เริ่มต้น</p><h2>วันนี้ต้องการอะไร</h2><p>เลือกงานที่ตรงกับคุณ ระบบพาไปทีละขั้นจนส่งคำขอ ทำต่อจากเดิมได้เมื่อกลับมา</p></div><span class="sheet-no">S-00</span></div>
@@ -503,6 +512,14 @@ footer .sx-foot{padding-block:24px 8px}
   </section>
 
   <!-- CREW SOP: CLEANING C1 / C2 + INSTALLATION (Rev.09 r3 → r4) -->
+  <!-- Rev.47 step-by-step service journeys -->
+  <section class="s" id="paths">
+    <div class="sheet">
+      <div class="sheet-h"><div><p class="lbl">Sheet 01 · ขั้นตอนบริการ</p><h2>ใช้บริการอย่างไร ทีละขั้น</h2><p>ภาพ 3 มิติทุกขั้น พร้อมข้อมูลสำคัญเป็นช่อง ๆ: เกิดอะไรขึ้น · ทำไม · คุณได้อะไร และปุ่มไปทำขั้นนั้นบนเว็บ</p></div><span class="sheet-no">S-01</span></div>
+      <div id="pathsRoot" style="padding:14px 20px 18px"></div>
+    </div>
+  </section>
+
   <section class="s" id="cleanflow">
     <div class="sheet">
       <div class="sheet-h"><div><p class="lbl">Sheet 01C · SOP งานล้าง / งานติดตั้ง</p><h2>ขั้นตอนตามแบบฟอร์ม SBP-SR-ACCL-UNI-001 Rev.07 (ล้าง C1 / C2) และ SBP-SR-ACIN-UNI-001 Rev.04 (ติดตั้ง)</h2><p>เลือกงาน ประเภทแอร์ (ติดผนัง · แขวน · สี่ทิศทาง · ตู้ตั้ง) และระดับงาน แล้วกดเล่นทีละขั้น เห็นการแบ่งงานของช่างหัวหน้ากับช่างผู้ช่วย ชิ้นส่วนที่ถอด การทดสอบ และราคามาตรฐานต่อเครื่องจาก Pricebook · ทุกขั้นมีจุดบันทึกในรายงานรายเครื่อง ตรวจสอบย้อนหลังได้</p></div><span class="sheet-no">M-01C</span></div>
@@ -686,6 +703,7 @@ import { mountRoomFit } from './assets/roomfit.js';
 import { mountKnowledge } from './assets/knowledge.js';
 import { mountJobGuide } from './assets/jobguide.js';
 import { mountSite } from './assets/site.js';
+import { mountDoors, mountPaths } from './assets/servicepath.js';
 import { mountBoq } from './assets/boq.js';
 import { mountQuickClean, cleanFrom } from './assets/quickclean.js';
 await loadData(); await loadMedia();
@@ -759,7 +777,7 @@ if (ins) {
   const action = { front: 'ถอด เช็ด', filter: 'ถอดล้างน้ำ ผึ่งแห้ง', coil: 'ฉีดปั๊มแรงดัน + น้ำยา', blower: 'ฉีดไล่คราบดำ', pan: 'ล้างเมือก เคลียร์ท่อ', louver: 'เช็ด ถอดล้าง', motor: 'ตรวจเสียง ห้ามน้ำ', pcb: 'คลุมกันน้ำ ตรวจ', chassis: 'ตรวจยึด ท่อหลัง' };
   PARTS.indoor.forEach((p, i) => { const tr = h('tr', { 'data-part': p.id, tabindex: '0' }, h('td', { class: 'm' }, String(i + 1).padStart(2, '0')), h('td', {}, p.th), h('td', {}, action[p.id])); tr.addEventListener('click', () => ins.select(p.id)); tr.addEventListener('keydown', e => e.key === 'Enter' && ins.select(p.id)); $('#ptab').append(tr); });
 }
-mountStudio($('#studioRoot'), { theme: 'blueprint', sceneStart: 'openoffice', onOpen: (m, i) => openProduct(m, i) });
+mountStudio($('#studioRoot'), { theme: 'blueprint', sceneStart: 'openoffice', onOpen: (m, i) => openProduct(m, i), sheet: true });
 const FIT = mountRoomFit($('#fitRoot'), { theme: 'light', preset: 'office', onOpenModel: (m, i) => openProduct(m, i) });
 const JOB = mountJobGuide($('#cleanRoot'), { theme: 'light', start: 'C1', type: 'ceiling' });
 mountKnowledge($('#learnRoot'), { ids: { cleanflow: 'cleanflow', fit: 'fit', studio: 'studio', howto: 'howto', catalog: 'catalog', inside: 'inside', prices: 'prices', quality: 'quality', b2b: 'b2b', area: 'area', quote: 'quote' } });
@@ -796,10 +814,13 @@ const SITE = mountSite({
   variant: 'B', openCart: CART.open, openProduct,
   order: ['home', 'business', 'service', 'shop', 'knowledge', 'contact'],
   navFmt: (i, th) => `${String(i).padStart(2, '0')} ${th}`,
-  views: { home: ['hero', 'book', 'start', 'coverage', 'flow'], business: ['enterprise', 'b2b', 'boq'], service: ['cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop: ['catalog', 'tradein', 'fit', 'studio'], knowledge: ['learn', 'inside'], contact: ['about', 'area', 'faq', 'quote'] },
+  views: { home: ['hero', 'book', 'doors', 'start', 'coverage', 'flow'], business: ['enterprise', 'b2b', 'boq'], service: ['paths', 'cleanflow', 'symptoms', 'howto', 'standards', 'prices', 'quality'], shop: ['catalog', 'tradein', 'fit', 'studio'], knowledge: ['learn', 'inside'], contact: ['about', 'area', 'faq', 'quote'] },
   labels: { howto: 'SOP · ลำดับการทำงานของระบบ', cleanflow: 'ทีมช่าง · SOP ล้าง / ติดตั้ง', inside: 'ข้างในแอร์ · ล้างเสมือนจริง' },
   hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install'), repair: () => SVX && SVX.set('repair') },
 });
+// Rev.47 (owner 7 ต.ค. 2569: "พัฒนาแค่ A B C พอ"): the three service doors and the step-by-step journeys from D/F, 3D stills in this design's colours
+const PATHS = mountPaths($('#pathsRoot'), { go: id => SITE.go(id), openCart: CART.open, hooks: { clean: () => JOB.setJob('clean'), install: () => JOB.setJob('install') } });
+mountDoors($('#doorsRoot'), { onPick: k => { PATHS && PATHS.show(k); SITE.go('paths'); } });
 // Rev.30: "not sure what you need?" — the four-question consultation (atelier.js, same rules as design E) under the intent picker;
 // its plan links to the right section and can open the cleaning form already holding the number of units
 { const box = h('details', { class: 's-con' }, h('summary', {}, h('b', {}, 'ยังไม่แน่ใจว่าต้องการบริการไหน'), h('span', {}, 'ตอบ 4 ข้อ ให้เราจัดลำดับบริการที่เหมาะกับคุณ')), h('div'));

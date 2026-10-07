@@ -10,10 +10,12 @@ const load = () => P || (P = EMBED ? Promise.resolve(EMBED)
   : fetch(new URL('assets/stills/manifest.json', document.baseURI)).then(r => r.ok ? r.json() : null).then(m => {
     if (!m) return null;
     const base = new URL('assets/stills/', document.baseURI).href, out = { fig: m.fig };
-    for (const V of 'DEF') if (m[V]) { out[V] = {}; for (const k in m[V]) out[V][k] = base + m[V][k]; }
+    for (const V of 'ABCDEF') if (m[V]) { out[V] = {}; for (const k in m[V]) out[V][k] = base + m[V][k]; }
     if (m.film) { out.film = {}; for (const V in m.film) out.film[V] = { kind: 'video', src: base + m.film[V].file, poster: base + m.film[V].poster }; }
     return out;
   }).catch(() => null));
+// which design this page is: D · E · F carry data-lux, A · B · C data-art (after Rev.46 — owner: "พัฒนาแค่ A B C พอ")
+export const artV = () => { const d = document.documentElement.dataset; return (d.lux || d.art || '').toUpperCase(); };
 // fig = null for pictures that print no figures (symptoms, topics, types, materials, buildings): no price check needed
 export const stillFor = (V, key, fig) => load().then(m => (m && (fig == null || m.fig === fig) && m[V] && m[V][key]) || null);
 /** the 3D hero film of a design (tools/render-film.mjs) → { kind: 'video', src, poster } | null */

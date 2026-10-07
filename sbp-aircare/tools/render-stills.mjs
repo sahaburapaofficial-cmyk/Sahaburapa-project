@@ -6,7 +6,9 @@
 import { launch, BASE } from '../tests/_lib.mjs';
 import fs from 'node:fs';
 const OUT = new URL('../assets/stills/', import.meta.url);
-const LOOK = { D: ['dark', '#63E6FF'], E: ['light', '#2F47F5'], F: ['dark', '#9A8CFF'] };
+const LOOK = { D: ['dark', '#63E6FF'], E: ['light', '#2F47F5'], F: ['dark', '#9A8CFF'],
+  // after Rev.46 (owner: "พัฒนาแค่ A B C พอ"): A · B · C in their own light colours
+  A: ['light', '#0B74B5'], B: ['light', '#003C99'], C: ['light', '#1F9BD6'] };
 const vs = (process.argv[2] || 'DF').split(''), only = process.argv[3] ? process.argv[3].split(',') : null;
 const KEYS = only || ['door:clean', 'door:install', 'door:repair', ...['c', 'i', 'r'].flatMap(s => [1, 2, 3, 4, 5, 6].map(i => s + i)),
   // Rev.45: D · F show every picture in 3D — symptoms, knowledge topics, unit types, materials, building types

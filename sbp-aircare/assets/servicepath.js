@@ -23,7 +23,7 @@ import { runWhenVisible } from './animicons.js';
 import { whenNear } from './lazy.js';
 import { vignette, liveOK } from './vignette3d.js';
 import { aiArt } from './aiart.js';
-import { stillFor } from './stills.js';
+import { stillFor, artV } from './stills.js';
 
 /* ---------------- illustrations (inline SVG, animated by lux.css .pa-*) ---------------- */
 const U = (x, y, w = 70, cls = '') => `<g class="pa-u ${cls}" transform="translate(${x} ${y})"><rect class="pa-body" width="${w}" height="${w * 0.3}" rx="${w * 0.07}"/><rect class="pa-vent" x="${w * 0.08}" y="${w * 0.22}" width="${w * 0.84}" height="${w * 0.035}" rx="1"/><circle class="pa-led" cx="${w * 0.84}" cy="${w * 0.1}" r="${w * 0.022}"/></g>`;
@@ -120,9 +120,11 @@ const ORDER = ['clean', 'install', 'repair'];
 /* ---------------- 3D stills (Rev.39) ---------------- */
 // the look of this page: E is a light editorial site, D and F are dark; the accent is the page's own --acc
 function look() {
-  const L = document.documentElement.dataset.lux || 'D';
+  const L = artV() || 'D';
   let a = ''; try { a = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(); } catch (e) { /* default */ }
-  return { theme: L === 'E' ? 'light' : 'dark', accent: /^#[0-9a-f]{6}$/i.test(a) ? a : '#63E6FF' };
+  // A · B · C (light pages) use the colours their pre-rendered stills were made with (tools/render-stills.mjs LOOK)
+  const ABC = { A: '#0B74B5', B: '#003C99', C: '#1F9BD6' };
+  return { theme: L === 'D' || L === 'F' ? 'dark' : 'light', accent: ABC[L] || (/^#[0-9a-f]{6}$/i.test(a) ? a : '#63E6FF') };
 }
 // figures printed on the glass panels inside the stills — the same constants as the text
 export function figures() {
@@ -142,7 +144,7 @@ const shot = (k, view = 0) => { const L = look(); return vignette(k, { ...L, vie
 function still(box, k, view = 0) {
   const want = k + '|' + view; box.dataset.want = want;
   // order: AI picture (slot) → pre-rendered still (front view, same figures) → live render (other angles, or after a price change)
-  const L = (document.documentElement.dataset.lux || 'D').toUpperCase(), fig = JSON.stringify(FIG || (FIG = figures()));
+  const L = artV() || 'D', fig = JSON.stringify(FIG || (FIG = figures()));
   return aiArt().then(m => m[k] ? { ai: m[k] } : (view === 0 ? stillFor(L, k, fig) : Promise.resolve(null)).then(pre => pre ? { src: pre } : shot(k, view).then(src => src && { src }))).then(async got => {
     if (!got || box.dataset.want !== want) return;
     const src = got.ai ? got.ai.src : got.src;

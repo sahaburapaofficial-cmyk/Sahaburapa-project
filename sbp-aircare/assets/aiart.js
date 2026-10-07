@@ -8,7 +8,7 @@
 //     unit, no fake "our team" photos: every AI image is labelled ภาพประกอบ (AI) on the page (rules 14, 15, 20)
 //   · dev reads the manifest + files; build.py writes the images into ai/embed.js as data URIs for the one-file pages
 import EMBED from './ai/embed.js';
-import { stillFor } from './stills.js';
+import { stillFor, artV } from './stills.js';
 let P = null;
 export function aiArt() {
   if (P) return P;
@@ -28,7 +28,7 @@ const RM = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').m
 export function aiFill(host, key, { label = 'ภาพประกอบ (AI)' } = {}) {
   if (!host) return Promise.resolve(false);
   // Rev.45 (owner: "D และ F … ใช้รูปที่เป็นมิติเท่านั้น"): no AI picture → this design's pre-rendered 3D still, if it has one
-  const V = (document.documentElement.dataset.lux || '').toUpperCase();
+  const V = artV();   // A · B · C too, after Rev.46
   return aiArt().then(m => m[key] ? fillMedia(host, m[key], label) : V ? stillFor(V, key, null).then(src => src ? fillMedia(host, { src }, '') : false) : false);
 }
 /** put one picture or film { src, kind, poster } into `host` (used by AI slots and by the pre-rendered 3D film) */
