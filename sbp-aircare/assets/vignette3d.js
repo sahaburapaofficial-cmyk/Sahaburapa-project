@@ -30,7 +30,7 @@ function studio(theme, accent, force) {
     const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
     let soft = false; try { const g = r.getContext(), d = g.getExtension('WEBGL_debug_renderer_info'); soft = /swiftshader|llvmpipe|software|basic render/i.test(d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : ''); } catch (e) { /* unknown */ }
     if (soft && !force) { r.dispose(); r.forceContextLoss(); return { soft, has: () => true, render: async () => null, dispose() {} }; }   // stop before the costly setup
-    const W = soft ? 720 : 1280, H = soft ? 450 : 800;
+    const W = 1280, H = 800;   // (software GL reaches here only when forced — the offline pre-render tool — so full size too)
     r.setPixelRatio(1); r.setSize(W, H, false); r.debug.checkShaderErrors = false;
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = theme === 'light' ? 1.05 : 1.12;
     r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -39,7 +39,7 @@ function studio(theme, accent, force) {
     const ACC = new THREE.Color(accent || '#63E6FF'), dark = theme !== 'light';
     // lighting: soft warm key with a long soft shadow, cool fill, an accent-coloured rim from behind that outlines every object
     scene.add(new THREE.HemisphereLight(dark ? 0x9fb4d8 : 0xffffff, dark ? 0x0b0f18 : 0xd9dfe8, dark ? 0.35 : 0.55));
-    const key = new THREE.DirectionalLight(0xfff3e6, dark ? 2.2 : 1.6); key.castShadow = true; key.shadow.mapSize.set(soft ? 1024 : 2048, soft ? 1024 : 2048); key.shadow.radius = 8; key.shadow.bias = -0.0004;
+    const key = new THREE.DirectionalLight(0xfff3e6, dark ? 2.2 : 1.6); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 8; key.shadow.bias = -0.0004;
     const fill = new THREE.DirectionalLight(0xdfe9ff, dark ? 0.5 : 0.45), rim = new THREE.DirectionalLight(ACC, dark ? 3.2 : 1.6), rim2 = new THREE.DirectionalLight(0xffffff, dark ? 0.9 : 0.6);
     scene.add(key, key.target, fill, fill.target, rim, rim.target, rim2, rim2.target);
     // the pedestal: lacquered disc, a thin light ring, a soft floor glow
@@ -169,6 +169,12 @@ function studio(theme, accent, force) {
         g.add(glass(0.6, 0.3, (c2) => { T(c2, 'INSTALLATION', 30, 58, 26, accHex, 700); T(c2, I.installFrom || '', 30, 132, 58, ink, 700); T(c2, 'ค่าติดตั้งมาตรฐาน ก่อน VAT', 30, 188, 26, ink2, 500); }, { at: [0.62, 0.62, 0.3], ry: -0.4 })); },
       'door:repair': g => { const O = outdoor(); O.scale.setScalar(0.62); O.position.set(-0.35, 0.17, -0.05); O.rotation.y = 0.35; g.add(O); const mf = manifold(); mf.position.set(0.42, 0.42, 0.25); mf.rotation.y = -0.4; g.add(mf);
         g.add(glass(0.56, 0.3, (c) => { T(c, 'DIAGNOSIS FIRST', 30, 58, 26, accHex, 700); T(c, I.diag || '', 30, 132, 58, ink, 700); T(c, 'ค่าตรวจ · ซ่อมเมื่อคุณอนุมัติ', 30, 188, 26, ink2, 500); }, { at: [0.5, 0.95, 0.15], ry: -0.3 })); },
+      // Rev.43 hero film: the FUJIVA wall unit breathing cool air over the pedestal, the outdoor unit and the tools of the three services
+      hero: g => { const U = unit(); U.root.position.set(-0.15, 0.9, -0.15); g.add(U.root); g.add(airflow(new THREE.Vector3(-0.15, 0.78, -0.02), 7, 1.2));
+        const O = outdoor(); O.scale.setScalar(0.5); O.position.set(0.72, 0.14, -0.2); O.rotation.y = -0.45; g.add(O);
+        const mf = manifold(); mf.scale.setScalar(0.8); mf.position.set(-0.85, 0.3, 0.3); mf.rotation.y = 0.5; g.add(mf);
+        const gun = tool('gun', 1.5); gun.position.set(0.25, 0.08, 0.45); gun.rotation.set(Math.PI / 2, 0, 0.9); g.add(gun);
+        const c = coil(2.2, 0.16, 0.012); c.position.set(-0.35, 0, 0.45); g.add(c); },
       c1: g => { ['wall', 'ceiling', 'cassette'].forEach((t, i) => { const U = unit(t); U.root.scale.setScalar(t === 'wall' ? 0.62 : 0.5); U.root.position.set(-0.62 + i * 0.62, t === 'cassette' ? 0.3 : 0.32, 0); if (t === 'cassette') U.root.rotation.x = -0.9; g.add(U.root); });
         g.add(glass(0.36, 0.22, (c, w, h) => { T(c, '× 3', w / 2, h * 0.62, 120, accHex, 700, 'center'); }, { at: [0.62, 0.62, 0.25], ry: -0.3 })); },
       c2: g => { g.add(glass(0.86, 1.0, (c, w, h) => { T(c, 'ใบเสนอราคา', 40, 70, 40, accHex, 700); T(c, 'ราคามาตรฐาน · ก่อน VAT', 40, 112, 26, ink2, 500);
@@ -226,7 +232,8 @@ function studio(theme, accent, force) {
         g.add(glass(0.5, 0.6, (c, w, h) => { T(c, 'ลมออก', 34, 62, 28, ink2, 500); T(c, '12.4°C', 34, 150, 72, accHex, 700); T(c, 'กระแสไฟ', 34, 230, 28, ink2, 500); T(c, '5.1 A', 34, 300, 56, ink, 700); T(c, 'ตัวอย่างการบันทึก', 34, h - 30, 22, ink2, 500); }, { at: [0.6, 0.6, 0.15], ry: -0.35 })); },
     };
 
-    function render(k, info, view = 0) {
+    function render(k, info, view = 0, size = null) {
+      if (size) { r.setSize(size[0], size[1], false); cam.aspect = size[0] / size[1]; } else { r.setSize(W, H, false); cam.aspect = W / H; } cam.updateProjectionMatrix();
       seed = 7 + k.length * 131 + k.charCodeAt(k.length - 1);
       Object.keys(I).forEach(x => delete I[x]); Object.assign(I, info || {});
       const g = new THREE.Group(); S[k](g);
@@ -254,9 +261,15 @@ function studio(theme, accent, force) {
 }
 
 /** one rendered vignette (queued, one at a time; the studio is released 6 s after the last one) */
-let slow = false;   // a still took too long on this device: keep the line art from now on (the page must stay responsive)
-export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {}, view = 0, force = false } = {}) {
-  const id = `${theme}|${accent}|${key}|${view}`;
+let slow = false, soft = null;
+/** can this device render other angles live? (a GPU, and no still has been slow) — checked once with a throw-away context */
+export function liveOK() {
+  if (slow) return false;
+  if (soft === null) { try { const g = document.createElement('canvas').getContext('webgl'), d = g && g.getExtension('WEBGL_debug_renderer_info'); soft = !g || /swiftshader|llvmpipe|software|basic render/i.test(d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : ''); g && g.getExtension('WEBGL_lose_context')?.loseContext(); } catch (e) { soft = true; } }
+  return !soft;
+}   // a still took too long on this device: keep the line art from now on (the page must stay responsive)
+export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {}, view = 0, force = false, size = null, keep = true } = {}) {
+  const id = `${theme}|${accent}|${key}|${view}|${size ? size.join('x') : ''}`;
   if (SHOTS[id]) return Promise.resolve(SHOTS[id]);
   if (typeof WebGLRenderingContext === 'undefined') return Promise.resolve(null);
   const job = queue.then(async () => {
@@ -268,7 +281,8 @@ export function vignette(key, { theme = 'dark', accent = '#63E6FF', info = {}, v
     if (st.soft && !force) { slow = true; return null; }
     await quiet();   // between scrolls, when the browser is idle
     const t0 = performance.now();
-    try { SHOTS[id] = await st.render(key, info, view); } catch (e) { SHOTS[id] = null; }
+    try { SHOTS[id] = await st.render(key, info, view, size); } catch (e) { SHOTS[id] = null; }
+    if (!keep) { const v = SHOTS[id]; delete SHOTS[id]; return v; }
     if (performance.now() - t0 > 2500 && !force) slow = true;
     idle = setTimeout(() => { const p = studioP; studioP = null; p && p.then(s => s && s.dispose()); }, 6000);
     return SHOTS[id];

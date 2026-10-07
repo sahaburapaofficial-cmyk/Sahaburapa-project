@@ -21,8 +21,9 @@ import { diagLine } from './acdiag.js';
 import { FIT_RULES } from './roomfit.js';
 import { runWhenVisible } from './animicons.js';
 import { whenNear } from './lazy.js';
-import { vignette } from './vignette3d.js';
+import { vignette, liveOK } from './vignette3d.js';
 import { aiArt } from './aiart.js';
+import { stillFor } from './stills.js';
 
 /* ---------------- illustrations (inline SVG, animated by lux.css .pa-*) ---------------- */
 const U = (x, y, w = 70, cls = '') => `<g class="pa-u ${cls}" transform="translate(${x} ${y})"><rect class="pa-body" width="${w}" height="${w * 0.3}" rx="${w * 0.07}"/><rect class="pa-vent" x="${w * 0.08}" y="${w * 0.22}" width="${w * 0.84}" height="${w * 0.035}" rx="1"/><circle class="pa-led" cx="${w * 0.84}" cy="${w * 0.1}" r="${w * 0.022}"/></g>`;
@@ -124,15 +125,14 @@ function look() {
   return { theme: L === 'E' ? 'light' : 'dark', accent: /^#[0-9a-f]{6}$/i.test(a) ? a : '#63E6FF' };
 }
 // figures printed on the glass panels inside the stills — the same constants as the text
-function figures() {
+export function figures() {
   const from = cleanFrom(), ins = DATA.instByCode && DATA.instByCode['INS-W-9000-12000-STANDARD'], dWall = diagLine('wall');
   const r = t => { const x = cleanRate('Basic Clean', 'C1', t, 0); return x && x.rate && x.rate.s; }, w = r('wall'), c = r('ceiling');
   const cr = cleanRate('Basic Clean', 'C1', 'wall', 0);
-  let month = ''; try { month = new Date().toLocaleDateString('th-TH', { month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }); } catch (e) { /* none */ }
   return {
     cleanFrom: from != null ? baht(from) : '', installFrom: ins && ins.ex != null ? baht(ins.ex) : '', diag: dWall && dWall.rate.s != null ? baht(dWall.rate.s) : '',
     lines: [w != null && ['ล้างติดผนัง × 2', baht(w * 2)], c != null && ['ล้างแขวน × 1', baht(c)]].filter(Boolean),
-    min: baht(DATA.minBill), trip: baht(TRAVEL.baseFee), lead: QUEUE_RULES.leadDays, pipe: FIT_RULES.pipeIncluded, cleanWarranty: (cr && cr.warranty) || '', month,
+    min: baht(DATA.minBill), trip: baht(TRAVEL.baseFee), lead: QUEUE_RULES.leadDays, pipe: FIT_RULES.pipeIncluded, cleanWarranty: (cr && cr.warranty) || '',   // (no month on the calendar: the pre-rendered still must not date itself)
   };
 }
 let FIG = null;
@@ -141,7 +141,9 @@ const shot = (k, view = 0) => { const L = look(); return vignette(k, { ...L, vie
 // Rev.41: an AI image in the slot (assets/ai/manifest.json) takes the place of the 3D still — one view, labelled ภาพประกอบ (AI)
 function still(box, k, view = 0) {
   const want = k + '|' + view; box.dataset.want = want;
-  return aiArt().then(m => m[k] ? { ai: m[k] } : shot(k, view).then(src => src && { src })).then(async got => {
+  // order: AI picture (slot) → pre-rendered still (front view, same figures) → live render (other angles, or after a price change)
+  const L = (document.documentElement.dataset.lux || 'D').toUpperCase(), fig = JSON.stringify(FIG || (FIG = figures()));
+  return aiArt().then(m => m[k] ? { ai: m[k] } : (view === 0 ? stillFor(L, k, fig) : Promise.resolve(null)).then(pre => pre ? { src: pre } : shot(k, view).then(src => src && { src }))).then(async got => {
     if (!got || box.dataset.want !== want) return;
     const src = got.ai ? got.ai.src : got.src;
     box.classList.toggle('is-ai', !!got.ai);
@@ -228,7 +230,7 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
     if (art.dataset.k !== s.k) {
       art.querySelector('.pa-sv').innerHTML = ST[s.k]; art.dataset.k = s.k;
       // the still of this step (then warm the next one) + a soft glow on the change
-      if (booted) { still(art, s.k, vw).then(() => { views.hidden = !art.classList.contains('has-v') || art.classList.contains('is-ai'); return shot(S.steps[(i + 1) % 6].k, vw); }); stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse'); }
+      if (booted) { still(art, s.k, vw).then(() => { views.hidden = !art.classList.contains('has-v') || art.classList.contains('is-ai') || !liveOK(); return shot(S.steps[(i + 1) % 6].k, vw); }); stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse'); }
     }
     const act = h('button', { type: 'button', class: 'btn-primary pa-go', onclick: () => { stop(); user = true; if (s.hook && hooks[s.hook]) hooks[s.hook](); if (s.cart) openCart(); else go(s.go[0]); } }, s.go[1]);
     card.innerHTML = '';
@@ -241,6 +243,6 @@ export function mountPaths(root, { go = () => {}, openCart = () => {}, hooks = {
   runWhenVisible(art);
   lean(stage);
   draw();
-  whenNear(stage, () => { booted = true; const k = art.dataset.k; still(art, k).then(() => { views.hidden = !art.classList.contains('has-v') || art.classList.contains('is-ai'); }).then(() => shot(D[svc].steps[(i + 1) % 6].k)).then(tabArt); });
+  whenNear(stage, () => { booted = true; const k = art.dataset.k; still(art, k).then(() => { views.hidden = !art.classList.contains('has-v') || art.classList.contains('is-ai') || !liveOK(); }).then(() => shot(D[svc].steps[(i + 1) % 6].k)).then(tabArt); });
   return { show(k, step = 0) { if (D[k]) { svc = k; i = step; user = false; draw(); tick(); } } };
 }

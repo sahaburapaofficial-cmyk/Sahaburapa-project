@@ -28,7 +28,8 @@ import { mountQuickClean, cleanFrom } from './quickclean.js';
 import { soundButton } from './luxsound.js';
 import { mountDock } from './luxdock.js';
 import { mountDoors, mountPaths } from './servicepath.js';
-import { aiFill } from './aiart.js';
+import { aiFill, fillMedia } from './aiart.js';
+import { filmFor } from './stills.js';
 
 const fill = (sel, ...kids) => { const el = $(sel); if (el) el.append(...kids.flat().filter(Boolean)); return el; };
 
@@ -181,8 +182,9 @@ export async function mountLux(cfg) {
   // ★Rev.38 the three services as customer journeys: doors on the home page → the six-step path at the top of the services page
   const PATHS = mountPaths($('#pathsRoot'), { go, openCart: CART.open, hooks: { clean: () => JOB && JOB.setJob('clean'), install: () => JOB && JOB.setJob('install') } });
   mountDoors($('#doorsRoot'), { onPick: k => { PATHS && PATHS.show(k); go('paths'); } });
-  // Rev.42: a full-width AI film / image band above the service doors when slot hero:<variant> is set (aiart.js) — hidden otherwise
-  { const d = $('#doors'); if (d) { const band = h('div', { class: 'lx-ai-hero', hidden: true }); d.prepend(band); aiFill(band, 'hero:' + variant).then(ok => { band.hidden = !ok; }); } }
+  // Rev.42/43: a full-width film band above the service doors — an AI film/image from slot hero:<variant> (aiart.js), otherwise the
+  // pre-rendered 3D film of this design (stills.js, tools/render-film.mjs); hidden when neither exists
+  { const d = $('#doors'); if (d) { const band = h('div', { class: 'lx-ai-hero', hidden: true }); d.prepend(band); aiFill(band, 'hero:' + variant).then(ok => ok || filmFor(String(variant).toUpperCase()).then(f => fillMedia(band, f, 'ภาพจำลอง 3 มิติ'))).then(ok => { band.hidden = !ok; }); } }
   mountDock();   // Rev.35: "ในหน้านี้" rail on wide screens
   return { ...ctx, SITE, JOB, FIT, HWX, cat };
 }

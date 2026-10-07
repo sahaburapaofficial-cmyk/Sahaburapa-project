@@ -12,9 +12,10 @@ let P = null;
 export function aiArt() {
   if (P) return P;
   if (EMBED) return (P = Promise.resolve(EMBED));
-  P = fetch(new URL('./ai/manifest.json', import.meta.url)).then(r => r.ok ? r.json() : {}).then(m => {
+  // page-relative (assets/ai/…) so the multi-file site build works too (its code lives in js/, the files are copied to assets/ai/)
+  P = fetch(new URL('assets/ai/manifest.json', document.baseURI)).then(r => r.ok ? r.json() : {}).then(m => {
     const out = {};
-    const u = f => new URL('./ai/' + f, import.meta.url).href;
+    const u = f => new URL('assets/ai/' + f, document.baseURI).href;
     for (const k in m) if (m[k] && m[k].file) out[k] = { ...m[k], src: u(m[k].file), poster: m[k].poster ? u(m[k].poster) : '' };
     return out;
   }).catch(() => ({}));
@@ -25,8 +26,13 @@ const RM = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').m
 /** Rev.42: put the AI image / video of `key` into `host` (cover, fades in, labelled). Resolves true when the slot is filled. */
 export function aiFill(host, key, { label = 'ภาพประกอบ (AI)' } = {}) {
   if (!host) return Promise.resolve(false);
-  return aiArt().then(m => {
-    const a = m[key]; if (!a || host.querySelector(':scope > .ai-fill')) return !!a;
+  return aiArt().then(m => m[key] ? fillMedia(host, m[key], label) : false);
+}
+/** put one picture or film { src, kind, poster } into `host` (used by AI slots and by the pre-rendered 3D film) */
+export function fillMedia(host, a, label) {
+  if (!host || !a) return false;
+  if (host.querySelector(':scope > .ai-fill')) return true;
+  {
     let el;
     if (a.kind === 'video') {
       el = document.createElement('video'); el.muted = true; el.loop = true; el.playsInline = true; el.setAttribute('playsinline', ''); el.preload = 'metadata';
@@ -37,6 +43,7 @@ export function aiFill(host, key, { label = 'ภาพประกอบ (AI)' }
     const tag = document.createElement('span'); tag.className = 'ai-fill-tag'; tag.textContent = label;
     host.classList.add('ai-has'); host.append(el, tag);
     const on = () => el.classList.add('in'); a.kind === 'video' ? el.addEventListener('loadeddata', on, { once: true }) : (el.decode ? el.decode().then(on, on) : on());
+    if (a.kind === 'video' && a.poster) { host.style.backgroundImage = `url("${a.poster}")`; host.style.backgroundSize = 'cover'; host.style.backgroundPosition = 'center'; }
     return true;
-  });
+  }
 }
