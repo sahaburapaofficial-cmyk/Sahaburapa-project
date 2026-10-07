@@ -45,7 +45,8 @@
     "servicepath": "node tests/servicepath.mjs d.html && node tests/servicepath.mjs e.html && node tests/servicepath.mjs f.html && node tests/servicepath.mjs d.html mobile && node tests/servicepath.mjs e.html mobile && node tests/servicepath.mjs f.html mobile",
     "rev35:ui": "node tests/rev35-ui.mjs a.html && node tests/rev35-ui.mjs b.html && node tests/rev35-ui.mjs c.html && node tests/rev35-ui.mjs d.html && node tests/rev35-ui.mjs e.html && node tests/rev35-ui.mjs f.html",
     "backpanel": "node tests/backpanel.mjs a.html && node tests/backpanel.mjs b.html && node tests/backpanel.mjs c.html && node tests/backpanel.mjs d.html && node tests/backpanel.mjs e.html && node tests/backpanel.mjs f.html",
-    "aislots": "for v in d e f; do node tests/aislots.mjs $v.html || exit 1; done"
+    "aislots": "for v in d e f; do node tests/aislots.mjs $v.html || exit 1; done",
+    "verify:abc": "node tools/verify-abc.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.0",
