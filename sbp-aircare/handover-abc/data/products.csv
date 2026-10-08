@@ -1,0 +1,706 @@
+﻿ประเภท,แบรนด์,ซีรีส์,รุ่น,BTU,Inverter,ราคาเครื่อง ก่อน VAT,ราคาติดตั้งมาตรฐาน ก่อน VAT (Pricebook),ระบบ,น้ำยา,ท่อเล็ก,ท่อใหญ่,ขนาดคอยล์เย็น,นน.คอยล์เย็น,ขนาดคอยล์ร้อน,นน.คอยล์ร้อน,ไฟ,คอมเพรสเซอร์,รับประกันผู้ผลิต,ระยะส่งของ,รุ่นคอยล์ร้อน
+wall,AUX,ME-Series · Inverter,ASW-09/DIM-1S,9500,ใช่,7800,3800,Inverter,R32,1/4,3/8,298 x 766 x 202,7.5,536 x 709 x 280,20,220-240V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,AUX,ME-Series · Inverter,ASW-13/DIM-1S,12400,ใช่,9600,4500,Inverter,R32,1/4,3/8,298 x 834 x 202,8.5,536 x 709 x 280,20,220-240V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,AUX,ME-Series · Inverter,ASW-18/DIM-1S,18700,ใช่,12400,5200,Inverter,R32,1/4,1/2,318 x 1002 x 223,11,536 x 709 x 280,23,220-240V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,AUX,ME-Series · Inverter,ASW-24/DIM-1S,24600,ใช่,16400,6000,Inverter,R32,1/4,1/2,331 x 1145 x 230,13,655 x 830 x 315,30,220-240V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-12/4DR3FA-T/AL-12/4DR3A-T,12480,ใช่,16700,6500,Inverter,R32,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-12/4DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-18/4DR3FA-T/AL-18/4DR3A-T,18600,ใช่,20300,7000,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-18/4DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-24/4DR3FA-T/AL-24/4DR3A-T,25260,ใช่,21400,7500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-24/4DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-30/4DR3FA-T/AL-30/4DR3A-T,31000,ใช่,27500,8500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-30/4DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-36/4DR3FA-T/AL-36/4DR3A-T,38000,ใช่,29600,10000,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-36/4DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-36/5DR3FA-T/AL-36/5DR3A-T,38000,ใช่,29800,10000,Inverter,,,,,,,,380V / 3Ph,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-36/5DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-42/5DR3FA-T/AL-42/5DR3A-T,44000,ใช่,37100,10000,Inverter,,,,,,,,380V / 3Ph,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-42/5DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-48/5DR3FA-T/AL-48/5DR3A-T,50000,ใช่,39100,12000,Inverter,,,,,,,,380V / 3Ph,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-48/5DR3A-T
+ceiling,AUX,ALCF Ceiling · Inverter,ALCF-60/5DR3FA-T/AL-60/5DR3A-T,60000,ใช่,43800,12000,Inverter,,,,,,,,380V / 3Ph,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-60/5DR3A-T
+cassette,AUX,ALCA Cassette · Inverter,ALCA-18/4DR3YAA-T/AL-18/4DR3A-T,18660,ใช่,21100,8500,Inverter,R32,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-18/4DR3A-T
+cassette,AUX,ALCA Cassette · Inverter,ALCA-24/4DR3YAA-T/AL-24/4DR3A-T,25800,ใช่,24400,9500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-24/4DR3A-T
+cassette,AUX,ALCA Cassette · Inverter,ALCA-30/4DR3YAA-T/AL-30/4DR3A-T,31000,ใช่,28000,10500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-30/4DR3A-T
+cassette,AUX,ALCA Cassette · Inverter,ALCA-36/4DR3YAA-T/AL-36/4DR3A-T,38000,ใช่,30500,12500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-36/4DR3A-T
+cassette,AUX,ALCA Cassette · Inverter,ALCA-42/5DR3YAA-T/AL-42/5DR3A-T,44000,ใช่,36100,12500,Inverter,,,,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-42/5DR3A-T
+cassette,AUX,ALCA Cassette · Inverter,ALCA-48/5DR3YAA-T/AL-48/5DR3A-T,50000,ใช่,37100,14500,Inverter,,,,,,,,380V / 3Ph,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-48/5DR3A-T
+cassette,AUX,ALCA Cassette · Inverter,ALCA-60/5DR3YAA-T/AL-60/5DR3A-T,60000,ใช่,39800,14500,Inverter,,,,,,,,380V / 3Ph,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,AL-60/5DR3A-T
+wall,Carrier,Copper 7 / TSAA · Fixed Speed,42TSAA010,9000,,11000,3800,Fixed Speed,,1/4,3/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TSAA010
+wall,Carrier,Copper 7 / TSAA · Fixed Speed,42TSAA013,12000,,12100,3800,Fixed Speed,,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TSAA013
+wall,Carrier,Copper 7 / TSAA · Fixed Speed,42TSAA018A,18000,,18400,4500,Fixed Speed,,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TSAA018
+wall,Carrier,Copper 7 / TSAA · Fixed Speed,42TSAA025,24000,,24400,5200,Fixed Speed,,1/4,5/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TSAA025
+wall,Carrier,Copper Ion · Inverter,42TVEB010 / 38TVEB010,9000,ใช่,11100,3800,Inverter,R32,1/4,3/8,288 x 770 x 225,9,530 x 598 x 200,17,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVEB010
+wall,Carrier,Copper Ion · Inverter,42TVEB013 / 38TVEB013,12000,ใช่,12200,3800,Inverter,R32,1/4,3/8,288 x 770 x 225,9,530 x 660 x 240,20,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVEB013
+wall,Carrier,Copper Ion · Inverter,42TVEB016 / 38TVEB016,15000,ใช่,16200,4500,Inverter,R32,1/4,1/2,293 x 798 x 230,9,550 x 780 x 290,24,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVEB016
+wall,Carrier,Copper Ion · Inverter,42TVEB018 / 38TVEB018,18000,ใช่,17400,4500,Inverter,R32,1/4,1/2,293 x 798 x 230,9,550 x 780 x 290,29,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVEB018
+wall,Carrier,Copper Ion · Inverter,42TVEB022 / 38TVEB022,22000,ใช่,22500,5200,Inverter,R32,1/4,1/2,"320 x 1,050 x 250",13,630 x 800 x 300,29,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVEB022
+wall,Carrier,Copper Ion · Inverter,42TVEB026 / 38TVEB026,25000,ใช่,27200,6000,Inverter,R32,1/4,1/2,"320 x 1,050 x 250",13,630 x 800 x 300,33,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVEB026
+wall,Carrier,Copper Seal · Inverter,42TVDB010 / 38TVDB010,9000,ใช่,10400,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVDB010
+wall,Carrier,Copper Seal · Inverter,42TVDB013 / 38TVDB013,12000,ใช่,11500,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVDB013
+wall,Carrier,Copper Seal · Inverter,42TVDB016 / 38TVDB016,15000,ใช่,15300,4500,Inverter,,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVDB016
+wall,Carrier,Copper Seal · Inverter,42TVDB018 / 38TVDB018,18000,ใช่,16400,4500,Inverter,,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVDB018
+wall,Carrier,Copper Seal · Inverter,42TVDB022 / 38TVDB022,22000,ใช่,21500,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVDB022
+wall,Carrier,Copper Seal · Inverter,42TVDB026 / 38TVDB026,25000,ใช่,26500,6000,Inverter,,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38TVDB026
+wall,Carrier,Tech-S · Fixed Speed,42NSAA010 / 38NSAA010,9000,,9900,3800,Fixed Speed,R32,1/4,3/8,300 x 865 x 200,10,495 x 732 x 305,23,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NSAA010
+wall,Carrier,Tech-S · Fixed Speed,42NSAA013 / 38NSAA013,12000,,10600,3800,Fixed Speed,R32,1/4,1/2,300 x 865 x 200,10,495 x 732 x 305,28,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NSAA013
+wall,Carrier,Tech-S · Fixed Speed,42NSAA018 / 38NSAA018,18000,,15900,4500,Fixed Speed,R32,1/4,1/2,320 x 972 x 225,11,521 x 787 x 280,36,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NSAA018
+wall,Carrier,Tech-S · Fixed Speed,42NSAA024 / 38NSAA024,24000,,21200,5200,Fixed Speed,R32,3/8,5/8,335 x 1080 x 226,14,702 x 841 x 382,49,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NSAA024
+wall,Carrier,Tech-V · Inverter,42NVAA010 / 38NVAA010,9000,ใช่,9900,3800,Inverter,R32,1/4,3/8,300 x 715 x 200,8,495 x 732 x 305,20,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NVAA010
+wall,Carrier,Tech-V · Inverter,42NVAA013 / 38NVAA013,12000,ใช่,10900,3800,Inverter,R32,1/4,3/8,300 x 865 x 200,9,495 x 732 x 305,22,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NVAA013
+wall,Carrier,Tech-V · Inverter,42NVAA018 / 38NVAA018,18000,ใช่,14300,4500,Inverter,R32,1/4,1/2,320 x 972 x 225,13,521 x 787 x 280,29,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NVAA018
+wall,Carrier,Tech-V · Inverter,42NVAA024 / 38NVAA024,24000,ใช่,19400,5200,Inverter,R32,3/8,5/8,335 x 1080 x 226,14,702 x 841 x 382,43,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,38NVAA024
+wall,Carrier,X-Inverter Plus TVAB-I,TVAB010-I,9000,ใช่,17300,3800,Inverter,,1/4,3/8,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Carrier,X-Inverter Plus TVAB-I,TVAB030B-I,30000,ใช่,38500,6000,Inverter,,3/8,5/8,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Carrier,X-Inverter Plus TVAB-I,TVAB033B-I,33000,ใช่,40500,6500,Inverter,,3/8,5/8,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Carrier,X-Inverter Plus TVAB-I,TVAB036B-I,36000,ใช่,42400,6500,Inverter,,3/8,5/8,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Carrier,X-Inverter Plus,38TVAB010/42TVAB010-W/B,9200,ใช่,18400,3800,Inverter,R32,1/4,3/8,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB010
+wall,Carrier,X-Inverter Plus,38TVAB013/42TVAB013-W/B,12200,ใช่,20700,4500,Inverter,,1/4,3/8,,,,,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB013
+wall,Carrier,X-Inverter Plus,38TVAB016/42TVAB016,16000,ใช่,24900,4500,Inverter,,1/4,1/2,,,,,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB016
+wall,Carrier,X-Inverter Plus,38TVAB018/42TVAB018-W/B,18000,ใช่,26900,4500,Inverter,,1/4,1/2,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB018
+wall,Carrier,X-Inverter Plus,38TVAB024/42TVAB024-W/B,20400,ใช่,31400,5200,Inverter,,1/4,1/2,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB024
+wall,Carrier,X-Inverter Plus,38TVAB028/42TVAB028-W/B,25200,ใช่,35800,6000,Inverter,,1/4,1/2,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB028
+wall,Carrier,X-Inverter Plus,38TVAB030/42TVAB030-W/B,27200,ใช่,41000,6000,Inverter,,3/8,5/8,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB030
+wall,Carrier,X-Inverter Plus,38TVAB033/42TVAB033-W/B,30000,ใช่,43300,6000,Inverter,,3/8,5/8,,,,,,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TVAB033
+wall,Carrier,Copper SEAL TVDB · Inverter,42TVDB024,24000,ใช่,26400,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE012-R1/42FGE004-R1,12800,,21900,6500,Fixed Speed,R32,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE012-R1
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE018-R1/42FGE006-R1,18000,,26600,7000,Fixed Speed,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE018-R1
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE025-R1/42FGE008-R1,25800,,31300,7500,Fixed Speed,,1/4,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE025-R1
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE030-R1/42FDGE0010-R1,30500,,38700,8500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE030-R1
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE036-R3/42FGE012-R3,36200,,44600,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE036-R3
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE036-R1/42FGE012-R1,37000,,43300,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE036-R1
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE040-R3/42FGE014-R3,40000,,50000,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE040-R3
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE044-R3/42FGE015-R3,40000,,50200,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE044-R3
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE048-R3/42FGE006-R3,48000,,48700,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE048-R3
+ceiling,Carrier,FGE Floor/Ceiling · Fixed Speed,38FGE060-S3/42FGE020-S3,60000,,54700,12000,Fixed Speed,,1/2,3/4,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38FGE060-S3
+ceiling,Carrier,TGV · Inverter,42TGV013,13000,ใช่,27800,6500,Inverter,R32,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,TGV · Inverter,42TGV018,18000,ใช่,32600,7000,Inverter,R32,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,TGV · Inverter,42TGV024,24000,ใช่,36900,7000,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,TGV · Inverter,42TGV030,30000,ใช่,42400,7500,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,TGV · Inverter,42TGV036,36000,ใช่,47000,8500,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,TGV · Inverter,42TGV040,40000,ใช่,54800,10000,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,TGV · Inverter,42TGV048,48000,ใช่,55200,10000,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Carrier,TGF Fixed Speed,38TGF0131A1/42TGF0131CP,13300,,23000,6500,Fixed Speed,R32,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0131A1
+ceiling,Carrier,TGF Fixed Speed,38TGF0181A1/42TGF0181CP,18100,,25000,7000,Fixed Speed,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0181A1
+ceiling,Carrier,TGF Fixed Speed,38TGF0241A1/42TGF0241CP,24200,,27500,7500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0241A1
+ceiling,Carrier,TGF Fixed Speed,38TGF0301A1/42TGF0301CP,30000,,35700,7500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0301A1
+ceiling,Carrier,TGF Fixed Speed,38TGF0361A1/42TGF0361CP,36100,,39200,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0361A1
+ceiling,Carrier,TGF Fixed Speed,38TGF0361A3/42TGF0361CP,36100,,39900,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0361A3
+ceiling,Carrier,TGF Fixed Speed,38TGF0401A1/42TGF0401CP,40200,,45600,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0401A1
+ceiling,Carrier,TGF Fixed Speed,38TGF0401A3/42TGF0401CP,40200,,46500,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0401A3
+ceiling,Carrier,TGF Fixed Speed,38TGF0481A3/42TGF0481CP,51500,,47500,12000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0481A3
+ceiling,Carrier,TGF Fixed Speed,38TGF0601A3/42TGF0601CP,60000,,54500,12000,Fixed Speed,,3/8,3/4,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0601A3
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0131A1/42TGV0131CP,13300,ใช่,27400,6500,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0131A1
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0181A1/42TGV0181CP,18100,ใช่,29600,7000,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0181A1
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0241A1/42TGV0241CP,24200,ใช่,33800,7500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0241A1
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0251A1/42TGV0251CP,25000,ใช่,41800,7500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0251A1
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0301A1/42TGV0301CP,30000,ใช่,46400,7500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0301A1
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0361A1/42TGV0361CP,36000,ใช่,47800,8500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0361A1
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0361A3/42TGV0361CP,36000,ใช่,47800,8500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0361A3
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0391A3/42TGV0391CP,38500,ใช่,52200,10000,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0391A3
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0401A1/42TGV0401CP,40200,ใช่,52800,10000,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0401A1
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0401A3/42TGV0401CP,40200,ใช่,52800,10000,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0401A3
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0481A3/42TGV0481CP,48000,ใช่,56400,10000,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0481A3
+ceiling,Carrier,TGV X-Power · Inverter,38TGV0601A3/42TGV0601CP,60700,ใช่,64200,12500,Inverter,,3/8,3/4,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0601A3
+ceiling,Carrier,TGEV Inverter,38TGEV0181A1/42TGEV0181CP,18100,ใช่,25600,7000,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0181A1
+ceiling,Carrier,TGEV Inverter,38TGEV0241A1/42TGEV0241CP,24200,ใช่,31100,7500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0241A1
+ceiling,Carrier,TGEV Inverter,38TGEV0301A1/42TGEV0301CP,30000,ใช่,38100,7500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0301A1
+ceiling,Carrier,TGEV Inverter,38TGEV0361A1/42TGEV0361CP,36100,ใช่,46000,10000,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0361A1
+ceiling,Carrier,TGEV Inverter,38TGEV0361A3/42TGEV0361CP,36100,ใช่,44200,10000,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0361A3
+ceiling,Carrier,TGEV Inverter,38TGEV0401A1/42TGEV0401CP,40200,ใช่,48000,10000,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0401A1
+ceiling,Carrier,TGEV Inverter,38TGEV0401A3/42TGEV0401CP,40200,ใช่,48000,10000,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0401A3
+ceiling,Carrier,TGEV Inverter,38TGEV0481A3/42TGEV0401CP,48000,ใช่,52200,10000,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0481A3
+ceiling,Carrier,TGEV Inverter,38TGEV0551A3/42TGEV0551CP,55000,ใช่,59500,12000,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0551A3
+cassette,Carrier,TGF Fixed Speed,38TGF0131A1/40TGF0131UP,13300,,24200,7500,Fixed Speed,R32,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0131A1
+cassette,Carrier,TGF Fixed Speed,38TGF0181A1/40TGF0181UP,18700,,26000,8500,Fixed Speed,R32,1/4,1/2,256 x 840 x 840,20,550 x 780 x 290,37,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0181A1
+cassette,Carrier,TGF Fixed Speed,38TGF0241A1/40TGF0241UP,24200,,28400,9500,Fixed Speed,R32,3/8,5/8,256 x 840 x 840,20,630 x 800 x 300,40,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0241A1
+cassette,Carrier,TGF Fixed Speed,38TGF0301A1/40TGF0301UP,30000,,35800,9500,Fixed Speed,R32,3/8,5/8,256 x 840 x 840,20,890 x 900 x 320,56,220V / 1Ph / 50Hz,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0301A1
+cassette,Carrier,TGF Fixed Speed,38TGF0361A1/40TGF0361UP,36100,,39600,12500,Fixed Speed,R32,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0361A1
+cassette,Carrier,TGF Fixed Speed,38TGF0361A3/40TGF0361UP,36100,,40300,12500,Fixed Speed,R32,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0361A3
+cassette,Carrier,TGF Fixed Speed,38TGF0401A1/40TGF0401UP,40200,,46900,12500,Fixed Speed,R32,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0401A1
+cassette,Carrier,TGF Fixed Speed,38TGF0401A3/40TGF0401UP,40200,,47600,12500,Fixed Speed,R32,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0401A3
+cassette,Carrier,TGF Fixed Speed,38TGF0481A3/40TGF0481UP,53200,,49000,14500,Fixed Speed,R32,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0481A3
+cassette,Carrier,TGF Fixed Speed,38TGF0601A3/40TGF0601UP,60000,,56000,14500,Fixed Speed,R32,3/8,3/4,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGF0601A3
+cassette,Carrier,TGV X-Power · Inverter,38TGV0131A1/40TGV0131UP,13300,ใช่,35200,7500,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0131A1
+cassette,Carrier,TGV X-Power · Inverter,38TGV0181A1/40TGV0181UP,18100,ใช่,37600,8500,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0181A1
+cassette,Carrier,TGV X-Power · Inverter,38TGV0241A1/40TGV0241UP,24200,ใช่,43100,9500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0241A1
+cassette,Carrier,TGV X-Power · Inverter,38TGV0251A1/40TGV0251UP,25200,ใช่,48700,9500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0251A1
+cassette,Carrier,TGV X-Power · Inverter,38TGV0302A1/40TGV0301UP,30000,ใช่,53100,9500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0302A1
+cassette,Carrier,TGV X-Power · Inverter,38TGV0361A1/40TGV0361UP,36100,ใช่,56800,12500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0361A1
+cassette,Carrier,TGV X-Power · Inverter,38TGV0361A3/40TGV0361UP,36100,ใช่,56800,12500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0361A3
+cassette,Carrier,TGV X-Power · Inverter,38TGV0391A3/40TGV0391UP,38500,ใช่,61200,12500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0391A3
+cassette,Carrier,TGV X-Power · Inverter,38TGV0401A1/40TGV0401UP,40200,ใช่,61800,12500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0401A1
+cassette,Carrier,TGV X-Power · Inverter,38TGV0401A3/40TGV0401UP,40200,ใช่,61800,12500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0401A3
+cassette,Carrier,TGV X-Power · Inverter,38TGV0481A3/40TGV0481UP,48000,ใช่,66800,12500,Inverter,R32,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0481A3
+cassette,Carrier,TGV X-Power · Inverter,38TGV0601A3/40TGV0601UP,60700,ใช่,75000,15000,Inverter,R32,3/8,3/4,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGV0601A3
+cassette,Carrier,TGV Cassette · Inverter,40TGV018,18000,ใช่,42600,8500,Inverter,R32,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Carrier,TGV Cassette · Inverter,40TGV024,24000,ใช่,53900,8500,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Carrier,TGV Cassette · Inverter,40TGV030,30000,ใช่,57400,9500,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Carrier,TGV Cassette · Inverter,40TGV036,36000,ใช่,66800,10500,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Carrier,TGV Cassette · Inverter,40TGV040,40000,ใช่,74500,12500,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Carrier,TGV Cassette · Inverter,40TGV048,48000,ใช่,76000,12500,Inverter,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Carrier,TGEV Inverter,38TGEV0181A1/40TGEV0181UP,18100,ใช่,28400,8500,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0181A1
+cassette,Carrier,TGEV Inverter,38TGEV0241A1/40TGEV0241UP,24200,ใช่,34900,9500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0241A1
+cassette,Carrier,TGEV Inverter,38TGEV0301A1/40TGEV0301UP,30000,ใช่,42500,9500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0301A1
+cassette,Carrier,TGEV Inverter,38TGEV0361A1/40TGEV0361UP,36100,ใช่,46000,12500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0361A1
+cassette,Carrier,TGEV Inverter,38TGEV0361A3/40TGEV0361UP,36100,ใช่,46000,12500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0361A3
+cassette,Carrier,TGEV Inverter,38TGEV0401A1/40TGEV0401UP,40200,ใช่,50100,12500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0401A1
+cassette,Carrier,TGEV Inverter,38TGEV0401A3/40TGEV0401UP,40200,ใช่,50100,12500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0401A3
+cassette,Carrier,TGEV Inverter,38TGEV0481A3/40TGEV0481UP,48000,ใช่,55200,12500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0481A3
+cassette,Carrier,TGEV Inverter,38TGEV0551A3/40TGEV0551UP,55000,ใช่,64200,14500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 7 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,38TGEV0551A3
+cassette,Carrier,TGF Cassette · Fixed Speed,40TGF036,36000,,66800,10500,Fixed Speed,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Carrier,TGF Cassette · Fixed Speed,40TGF040,40000,,74500,12500,Fixed Speed,R32,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Carrier,QBJ/QBU Series · Fixed Speed,40QBJ018X110FWR0/38RLJ018R120,19107,,45800,7000,Fixed Speed,,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,38RLJ018R120
+floor,Carrier,QBJ/QBU Series · Fixed Speed,40QBJ024X110FWR0/38RLJ024R120,25249,,47600,7500,Fixed Speed,,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,38RLJ024R120
+floor,Carrier,QBJ/QBU Series · Fixed Speed,40QBJ030X110FWR0/38RLJ030R100,30026,,61500,8500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,38RLJ030R100
+floor,Carrier,QBJ/QBU Series · Fixed Speed,40QBJ036X110FWR0/38RLJ036R100,36167,,85000,11000,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,38RLJ036R100
+floor,Carrier,QBJ/QBU Series · Fixed Speed,40QBU060X-10FW/38LHU060S301,60000,,103900,13000,Fixed Speed,,3/8,7/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,38LHU060S301
+wall,Casper,Verde · Inverter,GC-09IS32-IT,9000,ใช่,10200,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Casper,Verde · Inverter,GC-12IS32-IT,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Casper,Verde · Inverter,GC-18IS32-IT,18000,ใช่,15300,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Casper,Verde · Inverter,GC-24IS32-IT,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Casper,Verde · Fixed Speed,SC-09FS32-IT,9000,,10500,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Casper,Verde · Fixed Speed,SC-12FS32-IT,12000,,10500,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Casper,Verde · Fixed Speed,SC-18FS32-IT,18000,,15600,4500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Casper,Verde · Fixed Speed,SC-24FS32-IT,24000,,20300,5200,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Central Air,CFW-2JSFE · Fixed Speed,CFW-2JSFE09 / CCS-2JSFE09,9000,,10000,3800,Fixed Speed,R32,1/4,3/8,292 x 792 x 201,8,545 x 730 x 285,25,220V / 1Ph / 50Hz,Rotary,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-2JSFE09
+wall,Central Air,CFW-2JSFE · Fixed Speed,CFW-2JSFE13 / CCS-2JSFE13,12000,,11000,3800,Fixed Speed,R32,1/4,1/2,294 x 881 x 194,9.5,545 x 730 x 285,28,220V / 1Ph / 50Hz,Rotary,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-2JSFE13
+wall,Central Air,CFW-2JSFE · Fixed Speed,CFW-2JSFE18 / CCS-2JSFE18,18000,,15300,4500,Fixed Speed,R32,1/4,1/2,330 x 1132 x 232,14.5,545 x 800 x 315,34,220V / 1Ph / 50Hz,Rotary,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-2JSFE18
+wall,Central Air,CFW-2JSFE · Fixed Speed,CFW-2JSFE25 / CCS-2JSFE25,24000,,19500,5200,Fixed Speed,R32,1/4,5/8,330 x 1132 x 232,14,700 x 900 x 350,50,220V / 1Ph / 50Hz,Rotary,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-2JSFE25
+wall,Central Air,CFW-IVJS · Inverter,CFW-IVJS09-1 / CCS-IVJS09-1,9000,ใช่,9900,3800,Inverter,R32,1/4,3/8,292 x 792 x 201,8,456 x 650 x 233,17,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVJS09-1
+wall,Central Air,CFW-IVJS · Inverter,CFW-IVJS13-1 / CCS-IVJS13-1,12000,ใช่,10900,3800,Inverter,R32,1/4,3/8,294 x 881 x 194,10,530 x 705 x 279,21,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVJS13-1
+wall,Central Air,CFW-IVJS · Inverter,CFW-IVJS18-1 / CCS-IVJS18-1,18000,ใช่,15000,4500,Inverter,R32,1/4,1/2,316 x 940 x 224,11,530 x 705 x 279,23,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVJS18-1
+wall,Central Air,CFW-IVJS · Inverter,CFW-IVJS25-1 / CCS-IVJS25-1,24000,ใช่,19200,5200,Inverter,R32,1/4,5/8,330 x 1132 x 232,14,700 x 900 x 350,40,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVJS25-1
+wall,Central Air,CFW-IVM · Inverter,CFW-IVM09 / CCS-IVM09,9300,ใช่,8500,3800,Inverter,R32,1/4,3/8,295 x 835 x 208,8.5,495 x 720 x 270,20.4,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVM09
+wall,Central Air,CFW-IVM · Inverter,CFW-IVM13 / CCS-IVM13,12100,ใช่,9700,4500,Inverter,R32,1/4,3/8,295 x 835 x 208,8.6,495 x 720 x 270,20.5,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVM13
+wall,Central Air,CFW-IVM · Inverter,CFW-IVM18 / CCS-IVM18,18400,ใช่,13800,5200,Inverter,R32,1/4,1/2,320 x 969 x 241,10.9,555 x 765 x 303,25.7,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVM18
+wall,Central Air,CFW-IVM · Inverter,CFW-IVM25 / CCS-IVM25,25000,ใช่,18200,6000,Inverter,R32,3/8,5/8,336 x 1083 x 244,13.4,673 x 890 x 342,39.1,220V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVM25
+wall,Central Air,CFW-IVM · Inverter,CFW-IVM28,28000,ใช่,23900,6000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Central Air,CFW-MFE · Fixed Speed,CFW-MFE09 / CCS-MFE09,9300,,8600,3800,Fixed Speed,R32,1/4,3/8,295 x 835 x 208,9.3,555 x 765 x 303,26,220V / 1Ph / 50Hz,Rotary,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CCS-MFE09
+wall,Central Air,CFW-MFE · Fixed Speed,CFW-MFE13 / CCS-MFE13,12300,,9900,4500,Fixed Speed,R32,1/4,1/2,295 x 835 x 208,9.4,554 x 805 x 330,31.5,220V / 1Ph / 50Hz,Rotary,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CCS-MFE13
+wall,Central Air,CFW-MFE · Fixed Speed,CFW-MFE18 / CCS-MFE18,18250,,14000,5200,Fixed Speed,R32,1/4,1/2,320 x 969 x 241,12.3,554 x 805 x 330,39.9,220V / 1Ph / 50Hz,Rotary,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CCS-MFE18
+wall,Central Air,CFW-MFE · Fixed Speed,CFW-MFE25 / CCS-MFE25,25000,,17800,6000,Fixed Speed,R32,3/8,5/8,336 x 1083 x 244,14.1,673 x 890 x 342,50.7,220V / 1Ph / 50Hz,Rotary,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CCS-MFE25
+wall,Central Air,IVGE Large Wall · Inverter,CFW-IVGE30 / CCS-IVGE30,30000,ใช่,31900,6000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVGE30
+wall,Central Air,IVGE Large Wall · Inverter,CFW-IVGE36 / CCS-IVGE36,36000,ใช่,33900,6500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CCS-IVGE36
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA12 / CCS-32IVSA12-H,12200,ใช่,37600,6500,Inverter,R32,1/4,1/2,690 x 1000 x 235,26,536 x 709 x 280,21,220V / 1Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA12-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA18 / CCS-32IVSA18-H,18500,ใช่,41600,7000,Inverter,R32,1/4,1/2,690 x 1000 x 235,27,536 x 709 x 280,23,220V / 1Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA18-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA24 / CCS-32IVSA24-H,25200,ใช่,46100,7500,Inverter,R32,3/8,5/8,690 x 1280 x 235,33,655 x 825 x 310,35.5,220V / 1Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA24-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA30 / CCS-32IVSA30-H,30700,ใช่,46100,8500,Inverter,R32,3/8,5/8,690 x 1280 x 235,33,700 x 900 x 360,40,220V / 1Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA30-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA36 / CCS-32IVSA36-H,36800,ใช่,50400,10000,Inverter,R32,3/8,5/8,690 x 1600 x 235,40,700 x 900 x 360,45,220V / 1Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA36-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA36(A) / CCS-32IVSA36(A)-H,36800,ใช่,54400,10000,Inverter,R32,3/8,5/8,690 x 1600 x 235,40,805 x 970 x 395,53,380V / 3Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA36(A)-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA42 / CCS-32IVSA42(A)-H,42500,ใช่,64000,10000,Inverter,R32,3/8,5/8,690 x 1600 x 235,40,805 x 970 x 395,55,380V / 3Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA42(A)-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA48 / CCS-32IVSA48(A)-H,48000,ใช่,33500,10000,Inverter,R32,3/8,5/8,690 x 1600 x 235,41.5,805 x 970 x 395,62.5,380V / 3Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA48(A)-H
+ceiling,Central Air,IVSA Series R32 · Inverter,CFH-32IVSA60 / CCS-32IVSA60(A)-H,61000,ใช่,39800,12500,Inverter,R32,3/8,3/4,690 x 1600 x 235,42.5,1325 x 940 x 370,75.5,380V / 3Ph / 50Hz,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CCS-32IVSA60(A)-H
+cassette,Central Air,CFC-32IVSA · Inverter,CFC-32IVSA18/CCS-32IVSA18-C,18800,ใช่,23900,8500,Inverter,R32,1/4,1/2,,,709 x 536 x 280,23,,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,CCS-32IVSA18-C
+cassette,Central Air,CFC-32IVSA · Fixed Speed,CFC-32IVSA24/CCS-32IVSA24-C,25200,,28000,9500,Fixed Speed,R32,3/8,5/8,,,825 x 655 x 310,35.5,,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,CCS-32IVSA24-C
+cassette,Central Air,CFC-32IVSA · Fixed Speed,CFC-32IVSA30/CCS-32IVSA30-C,31000,,33500,10500,Fixed Speed,R32,3/8,5/8,,,900 x 700 x 360,40,,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,CCS-32IVSA30-C
+cassette,Central Air,CFC-32IVSA · Fixed Speed,CFC-32IVSA36/CCS-32IVSA36-C,38200,,36200,12500,Fixed Speed,R32,3/8,5/8,,,900 x 700 x 360,45,,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,CCS-32IVSA36-C
+cassette,Central Air,CFC-32IVSA · Fixed Speed,CFC-32IVSA42/CCS-32IVSA42-C,42000,,42400,12500,Fixed Speed,R32,3/8,5/8,,,970 x 805 x 395,55,380V / 3Ph,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,CCS-32IVSA42-C
+cassette,Central Air,CFC-32IVSA · Fixed Speed,CFC-32IVSA48/CCS-32IVSA48-C,49000,,45000,14500,Fixed Speed,R32,3/8,5/8,,,970 x 805 x 395,62.5,380V / 3Ph,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,CCS-32IVSA48-C
+cassette,Central Air,CFC-32IVSA · Fixed Speed,CFC-32IVSA60/CCS-32IVSA60-C,61000,,54000,15000,Fixed Speed,R32,3/8,5/8,,,,,380V / 3Ph,Rotary,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,CCS-32IVSA60-C
+wall,Daikin,FTKB / Max Inverter,FTKB09ZV2S / RKB09ZV2S,9200,ใช่,8900,3800,Inverter,R32,1/4,3/8,285 x 770 x 226,8,418 x 695 x 244,20,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKB09ZV2S
+wall,Daikin,FTKB / Max Inverter,FTKB12ZV2S / RKB12ZV2S,12300,ใช่,11500,4500,Inverter,R32,1/4,3/8,285 x 770 x 226,8,550 x 675 x 284,24,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKB12ZV2S
+wall,Daikin,FTKB / Max Inverter,FTKB24ZV2S / RKB24ZV2S,24200,ใช่,22100,6000,Inverter,R32,1/4,1/2,285 x 770 x 226,9,595 x 845 x 300,36,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKB24ZV2S
+wall,Daikin,FTKB / Max Inverter Sabai,FTKB09AV2S / RKB09AV2S,9200,ใช่,10700,3800,Inverter,R32,1/4,3/8,285 x 770 x 226,8,461 x 650 x 244,17,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKB09AV2S
+wall,Daikin,FTKC / Max Inverter Star KC,FTKC09YV2S,9200,ใช่,17700,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Daikin,FTKF / Max Inverter Star KF,FTKF09YV2S / RKF09YV2S,9200,ใช่,15900,3800,Inverter,R32,1/4,3/8,286 x 770 x 244,9,418 x 695 x 244,21,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKF09YV2S
+wall,Daikin,FTKF / Sabai Inverter,FTKF09WV2S,9200,ใช่,16800,3800,Inverter,R32,1/4,3/8,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKF09WV2S
+wall,Daikin,FTKF / Sabai Inverter,FTKF12WV2S,12300,ใช่,19400,4500,Inverter,R32,1/4,3/8,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKF12WV2S
+wall,Daikin,FTKF / Sabai Inverter,FTKF18WV2S,18100,ใช่,27400,5200,Inverter,R32,1/4,1/2,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKF18WV2S
+wall,Daikin,FTKF / Sabai Inverter,FTKF24WV2S,24200,ใช่,43200,6000,Inverter,R32,1/4,1/2,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKF24WV2S
+wall,Daikin,FTKM / K Series · Inverter,FTKM09WV2S,9200,ใช่,16800,3800,Inverter,R32,1/4,3/8,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKM09WV2S
+wall,Daikin,FTKM / K Series · Inverter,FTKM12WV2S,12300,ใช่,19400,4500,Inverter,R32,1/4,3/8,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKM12WV2S
+wall,Daikin,FTKM / K Series · Inverter,FTKM18WV2S,18100,ใช่,27400,5200,Inverter,R32,1/4,1/2,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKM18WV2S
+wall,Daikin,FTKM / K Series · Inverter,FTKM24WV2S,24200,ใช่,43200,6000,Inverter,R32,1/4,1/2,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKM24WV2S
+wall,Daikin,FTKM / Max Inverter Star KM,FTKM09YV2S / RKM09YV2S,9200,ใช่,21300,3800,Inverter,R32,1/4,3/8,300 x 838 x 240,11,550 x 675 x 284,24,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKM09YV2S
+wall,Daikin,FTKQ / Max Inverter Star KQ,FTKQ09YV2S / RKQ09YV2S,9200,ใช่,12100,3800,Inverter,R32,1/4,3/8,285 x 770 x 226,8,418 x 695 x 244,21,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKQ09YV2S
+wall,Daikin,FTKQ / Max Inverter Star KQ,FTKQ24YV2S / RKQ24YV2S,20500,ใช่,32900,5200,Inverter,R32,1/4,1/2,285 x 770 x 226,9,595 x 845 x 300,40,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKQ24YV2S
+wall,Daikin,FTKQ / Smile Inverter,FTKQ09XV2S,9200,ใช่,16800,3800,Inverter,R32,1/4,3/8,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKQ09XV2S
+wall,Daikin,FTKQ / Smile Inverter,FTKQ12XV2S,12300,ใช่,19400,4500,Inverter,R32,1/4,3/8,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKQ12XV2S
+wall,Daikin,FTKQ / Smile Inverter,FTKQ18XV2S,18100,ใช่,27400,5200,Inverter,R32,1/4,1/2,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKQ18XV2S
+wall,Daikin,FTKQ / Smile Inverter,FTKQ24XV2S,24200,ใช่,43200,6000,Inverter,R32,1/4,1/2,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKQ24XV2S
+wall,Daikin,FTKZ / Max Inverter Star KZ,FTKZ09YV2S5 / RKZ09YV2S5,9200,ใช่,28200,3800,Inverter,R32,1/4,1/2,299 x 920 x 275,13,595 x 845 x 300,34,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKZ09YV2S5
+wall,Daikin,FTKZ / Max Inverter Star KZ,FTKZ24YV2S5 / RKZ24YV2S5,24200,ใช่,54900,6000,Inverter,R32,1/4,1/2,299 x 1100 x 275,15,695 x 930 x 350,46,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKZ24YV2S5
+wall,Daikin,FTKZ / Premium · Inverter,FTKZ09VV2S / RKZ09VV2S,9200,ใช่,16800,3800,Inverter,R32,1/4,3/8,300 x 920 x 240,13,550 x 675 x 284,27,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKZ09VV2S
+wall,Daikin,FTKZ / Premium · Inverter,FTKZ12VV2S / RKZ12VV2S,12300,ใช่,19400,4500,Inverter,R32,1/4,3/8,300 x 920 x 240,13,550 x 675 x 284,27,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKZ12VV2S
+wall,Daikin,FTKZ / Premium · Inverter,FTKZ18VV2S / RKZ18VV2S,18100,ใช่,27400,5200,Inverter,R32,1/4,1/2,300 x 1100 x 240,15,595 x 845 x 300,34,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKZ18VV2S
+wall,Daikin,FTKZ / Premium · Inverter,FTKZ24VV2S / RKZ24VV2S,24200,ใช่,43200,6000,Inverter,R32,1/4,1/2,300 x 1100 x 240,15,595 x 845 x 300,36,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKZ24VV2S
+wall,Daikin,FTM / Super Cool (Fixed),FTM09PV2S,9200,,11900,3800,Fixed Speed,R32,1/4,3/8,,,,,220V / 1Ph / 50Hz,Hermetically Sealed Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RM09PV2S
+wall,Daikin,FTM / Super Cool (Fixed),FTM24PV2S,24200,,29200,6000,Fixed Speed,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RM24PV2S
+wall,Daikin,FTKB · Inverter,FTKB12AV2S RKB12AV2S,12300,ใช่,11900,4500,Inverter,R32,1/4,3/8,,,,,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKB12AV2S
+wall,Daikin,FTKB · Inverter,FTKB15ZV2S RKB15ZV2S,15000,ใช่,16500,4500,Inverter,R32,1/4,1/2,285 x 770 x 226,9,550 x 675 x 284,26,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKB15ZV2S
+wall,Daikin,FTKB · Inverter,FTKB18ZV2S RKB18ZV2S,18100,ใช่,17200,5200,Inverter,R32,1/4,1/2,285 x 770 x 226,9,550 x 675 x 284,28,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKB18ZV2S
+wall,Daikin,FTKF · Inverter,FTKF12YV2S RKF12YV2S,12300,ใช่,20100,4500,Inverter,R32,1/4,3/8,286 x 770 x 244,9,550 x 675 x 284,24,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKF12YV2S
+wall,Daikin,FTKF · Inverter,FTKF15YV2S RKF15YV2S,15000,ใช่,25000,4500,Inverter,R32,1/4,1/2,286 x 770 x 244,9,595 x 845 x 300,34,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKF15YV2S
+wall,Daikin,FTKF · Inverter,FTKF18YV2S RKF18YV2S,18100,ใช่,28800,5200,Inverter,R32,1/4,1/2,286 x 770 x 244,9,595 x 845 x 300,34,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKF18YV2S
+wall,Daikin,FTKF · Inverter,FTKF24YV2S RKF24YV2S,24200,ใช่,41700,6000,Inverter,R32,1/4,1/2,295 x 993 x 281,14,595 x 845 x 300,36,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKF24YV2S
+wall,Daikin,FTKM · Inverter,FTKM12YV2S RKM12YV2S,12300,ใช่,26700,4500,Inverter,R32,1/4,3/8,300 x 838 x 240,11,550 x 675 x 284,24,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKM12YV2S
+wall,Daikin,FTKM · Inverter,FTKM15YV2S RKM15YV2S,15000,ใช่,31100,4500,Inverter,R32,1/4,1/2,300 x 920 x 240,13,595 x 845 x 300,34,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKM15YV2S
+wall,Daikin,FTKM · Inverter,FTKM18YV2S RKM18YV2S,18100,ใช่,35300,5200,Inverter,R32,1/4,1/2,300 x 1100 x 240,15,595 x 845 x 300,34,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKM18YV2S
+wall,Daikin,FTKM · Inverter,FTKM24YV2S RKM24YV2S,24200,ใช่,50300,6000,Inverter,R32,1/4,1/2,300 x 1100 x 240,15,595 x 845 x 300,36,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKM24YV2S
+wall,Daikin,FTKQ · Inverter,FTKQ12YV2S RKQ12YV2S,12300,ใช่,15600,4500,Inverter,R32,1/4,3/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKQ12YV2S
+wall,Daikin,FTKQ · Inverter,FTKQ15YV2S RKQ15YV2S,15000,ใช่,19500,4500,Inverter,R32,1/4,1/2,285 x 770 x 226,9,550 x 675 x 284,28,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKQ15YV2S
+wall,Daikin,FTKQ · Inverter,FTKQ18YV2S RKQ18YV2S,18100,ใช่,24200,5200,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKQ18YV2S
+wall,Daikin,FTKZ · Inverter,FTKZ12YV2S RKZ12YV2S,12300,ใช่,34700,4500,Inverter,R32,1/4,1/2,"299 x 1,100 x 275",15,595 x 845 x 300,34,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKZ12YV2S
+wall,Daikin,FTKZ · Inverter,FTKZ15YV2S RKZ15YV2S,15000,ใช่,40500,4500,Inverter,R32,1/4,1/2,"299 x 1,100 x 275",15,595 x 845 x 300,34,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKZ15YV2S
+wall,Daikin,FTKZ · Inverter,FTKZ18YV2S RKZ18YV2S,18100,ใช่,44800,5200,Inverter,R32,1/4,1/2,"299 x 1,100 x 275",15,695 x 930 x 350,46,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKZ18YV2S
+wall,Daikin,FTKZ · Inverter,FTKZ24YV2S RKZ24YV2S,24200,ใช่,59100,6000,Inverter,R32,1/4,1/2,"299 x 1,100 x 275",15,695 x 930 x 350,46,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKZ24YV2S
+wall,Daikin,FTM · Fixed Speed,FTM13PV2S RM13PV2S,13000,,15400,4500,Fixed Speed,R32,1/4,1/2,,,,,220V / 1Ph,Hermetically Sealed Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RM13PV2S
+wall,Daikin,FTM · Fixed Speed,FTM15PV2S RM15PV2S,14400,,19100,4500,Fixed Speed,R32,1/4,1/2,,,,,220V / 1Ph,Hermetically Sealed Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RM15PV2S
+wall,Daikin,FTM · Fixed Speed,FTM18PV2S RM18PV2S,18090,,23800,5200,Fixed Speed,R32,1/4,5/8,,,,,220V / 1Ph,Hermetically Sealed Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RM18PV2S
+wall,Daikin,FAVF · Inverter,FAVF30XV2S RKV30XV2S,30000,ใช่,44600,6000,Inverter,R32,1/4,5/8,329 x 1240 x 278,19,695 x 930 x 350,44,220V / 1Ph,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RKV30XV2S
+wall,Daikin,FAVF (Large Wall) · Inverter,FAVF36XV2S / RKV36XV2S,36200,ใช่,60600,7800,Inverter,R32,1/4,5/8,329 x 1240 x 278,19,990 x 940 x 320,77,220V / 1Ph / 50Hz,Hermetically Sealed Swing Type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,RKV36XV2S
+ceiling,Daikin,FHA · Inverter,FHA13DV2S / RZF13DV2S,13000,ใช่,31100,6500,Inverter,R32,3/8,5/8,235 x 960 x 690,25,595 x 845 x 300,41,220V / 1Ph / 50Hz,Hermetically sealed swing type,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZF13DV2S
+ceiling,Daikin,FHA · Inverter,FHA13BV2S/RZF13CV2S,13600,ใช่,30300,6500,Inverter,R410A,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZF13CV2S
+ceiling,Daikin,FHA · Inverter,FHA18BV2S/RZF18CV2S,18000,ใช่,34400,7000,Inverter,R410A,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZF18CV2S
+ceiling,Daikin,FHA · Inverter,FHA18DV2S,18000,ใช่,33000,7000,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA24BV2S/RZF24CV2S,24000,ใช่,41400,7000,Inverter,R410A,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZF24CV2S
+ceiling,Daikin,FHA · Inverter,FHA24DV2S,24000,ใช่,40200,7000,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA30BV2S,30000,ใช่,45800,7500,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA30DV2S,30000,ใช่,45800,7500,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA36BV2S,36000,ใช่,51400,8500,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA36DV2S,36000,ใช่,51400,8500,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHAS38DV2S,38000,ใช่,54500,10000,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA42BV2S/RZF42CV2SY2S,42000,ใช่,57800,10000,Inverter,,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZF42CV2SY2S
+ceiling,Daikin,FHA · Inverter,FHA42DV2S,42000,ใช่,55100,10000,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA48BV2S,48000,ใช่,61300,10000,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA48BV2SRZF48CV2SY2S,48000,ใช่,64800,10000,Inverter,,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Daikin,FHA · Inverter,FHA48DV2S,48000,ใช่,61300,10000,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHNQ5 · Fixed Speed,FHNQ13MV2S5,13000,,15000,6500,Fixed Speed,,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHNQ5 · Fixed Speed,FHNQ18MV2S5,18000,,20800,7000,Fixed Speed,,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHNQ5 · Fixed Speed,FHNQ24MV2S5,24000,,27700,7000,Fixed Speed,,1/4,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHNQ5 · Fixed Speed,FHNQ30MV2S5,30000,,34600,7500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHNQ5 · Fixed Speed,FHNQ36MV2S5,36000,,41600,8500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHFC · Inverter,FHFC13EV3S/RZFC13EV2S,13600,ใช่,28300,6500,Inverter,R32,1/4,1/2,195 x 960 x 680,25,595 x 845 x 300,34,220V / 1Ph,Hermetically sealed swing type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC13EV2S
+ceiling,Daikin,FHFC · Inverter,FHFC18EV2S/RZFC18EV2S,18000,ใช่,31700,7000,Inverter,R32,1/4,1/2,"195 x 1,160 x 680",27,595 x 845 x 300,34,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC18EV2S
+ceiling,Daikin,FHFC · Inverter,FHFC24EV2S/RZFC24EV2S,24000,ใช่,37900,7000,Inverter,R32,3/8,5/8,"195 x 1,400 x 680",32,595 x 845 x 300,37,220V / 1Ph / 380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC24EV2S
+ceiling,Daikin,FHFC · Inverter,FHFC30EV2S,30000,ใช่,42500,7500,Inverter,R32,3/8,5/8,"195 x 1,590 x 680",35,695 x 930 x 350,46,,Hermetically Sealed Swing,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHFC · Inverter,FHFC30EV2SRZFC30EV2S,30000,ใช่,44700,7500,Inverter,R32,3/8,5/8,"195 x 1,590 x 680",35,695 x 930 x 350,46,220V / 1Ph / 380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Daikin,FHFC · Inverter,FHFC36EV2S/RZFC36EV2S,36000,ใช่,50300,8500,Inverter,R32,3/8,5/8,"235 x 1,590 x 690",38,695 x 930 x 350,46,220V / 1Ph / 380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC36EV2S
+ceiling,Daikin,FHFC · Inverter,FHFC42EV2S/RZFC42EV2S,42000,ใช่,53700,10000,Inverter,R32,3/8,5/8,"235 x 1,590 x 690",38,,,380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC42EV2S
+ceiling,Daikin,FHFC · Inverter,FHFC48EV2S,48000,ใช่,54700,10000,Inverter,R32,3/8,5/8,"235 x 1,590 x 690",38,990 x 940 x 320,62,380V / 3Ph / 50Hz,Hermetically Sealed Swing,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHFC · Inverter,FHFC48EV2SRZFC48EV2S,48000,ใช่,58200,10000,Inverter,R32,3/8,5/8,"235 x 1,590 x 690",38,,,380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ13NV2S/RNQ13NV2S2,14175,,19900,6500,Fixed Speed,R410A,1/4,1/2,195 x 1160 x 680,26,595 x 845 x 300,40,220V / 1Ph,Hermetically sealed rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ13NV2S2
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ18NV2S/RNQ18NV2S2,18000,,24000,7000,Fixed Speed,R410A,1/4,1/2,195 x 1400 x 680,32,735 x 825 x 300,48,220V / 1Ph,Hermetically sealed rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ18NV2S2
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ24MV2S/RNQ24MV2S,24000,,29500,7000,Fixed Speed,R410A,1/4,5/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ24MV2S
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ24NV2SRNQ24NV2S2,24200,,32300,7500,ตรวจสอบระบบ,R410A,1/4,5/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ30MAV2S,30000,,36500,7500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ30MV2S/RNQ30MV2S-Y2S,30000,,36400,7500,Fixed Speed,R410A,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ30MV2S-Y2S
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ30NV2S/RNQ30NV2S2,30500,,38600,8500,ตรวจสอบระบบ,R410A,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ30NV2S2
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ36MV2S/RNQ36MV2S1-Y2S1,34100,,40700,8500,Fixed Speed,R410A,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ36MV2S1-Y2S1
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ36MAV2S,36000,,40700,8500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ36NV2S/RNQ36NV2S2,37500,,43400,10000,ตรวจสอบระบบ,R410A,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ36NV2S2
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ42MV2S/RNQ42MY2S,42000,,46900,10000,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ42MY2S
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ48MV2S/RNQ48MY2S,48000,,51800,10000,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RNQ48MY2S
+ceiling,Daikin,FHNQ · Fixed Speed,FHNQ55MV2S,55000,,63100,12000,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Daikin,FCFC · Inverter,FCFC13DV2S/RZFC13EV2S,13000,ใช่,32000,7500,Inverter,,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZFC13EV2S
+cassette,Daikin,FCFC · Inverter,FCFC13EV2S,13600,ใช่,33300,7500,Inverter,R32,1/4,1/2,256 x 840 x 840,19,595 x 845 x 300,34,220V / 1Ph / 50Hz,Hermetically sealed swing type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCFC · Inverter,FCFC18DV2S/RZFC18EV2S,18000,ใช่,35600,8500,Inverter,,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZFC18EV2S
+cassette,Daikin,FCFC · Inverter,FCFC18EV2S,18000,ใช่,37300,8500,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCFC · Inverter,FCFC24DV2S/RZFC24EV2S,24000,ใช่,45400,8500,Inverter,,1/4,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZFC24EV2S
+cassette,Daikin,FCFC · Inverter,FCFC24EV2S,24000,ใช่,47000,8500,Inverter,R32,1/4,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCFC · Inverter,FCFC30DV2S/RZFC30EV2S/Y2S,30000,ใช่,51000,9500,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZFC30EV2S/Y2S
+cassette,Daikin,FCFC · Inverter,FCFC30EV2S/RZFC30EV2S/Y2S,30000,ใช่,52900,9500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC30EV2S/Y2S
+cassette,Daikin,FCFC · Inverter,FCFC36DV2S/RZFC36EV2S/Y2S,36000,ใช่,56500,10500,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZFC36EV2S/Y2S
+cassette,Daikin,FCFC · Inverter,FCFC36EV2S,36000,ใช่,59100,10500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCFC · Inverter,FCFC42DV2S/RZFC42EY2S,42000,ใช่,60300,12500,Inverter,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZFC42EY2S
+cassette,Daikin,FCFC · Inverter,FCFC42EV2S/RZFC42EY2S,42000,ใช่,63400,12500,Inverter,R32,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC42EY2S
+cassette,Daikin,FCFC · Inverter,FCFC48EV2S/RZFC48EY2S,48000,ใช่,68600,12500,Inverter,R32,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZFC48EY2S
+cassette,Daikin,FCF · Inverter,FCF13DV2S,13880,ใช่,39100,7500,Inverter,R32,3/8,5/8,256 x 840 x 840,22,595 x 845 x 300,41,220V / 1Ph,Hermetically sealed swing type,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCF · Inverter,FCF18DV2S,18090,ใช่,48800,8500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCF · Inverter,FCF24DV2S,24230,ใช่,61400,9500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCF · Inverter,FCF30DV2S/RZF30DV2S/Y2S,30090,ใช่,64300,10500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZF30DV2S/Y2S
+cassette,Daikin,FCF · Inverter,FCF36DV2S,36230,ใช่,76200,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Daikin,FCF · Inverter,FCF42DV2S/RZF42DV2S/Y2S,42000,ใช่,82900,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZF42DV2S/Y2S
+cassette,Daikin,FCF · Inverter,FCF48DV2S/RZF48DV2S/Y2S,48000,ใช่,85100,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,Hermetically Sealed Swing,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RZF48DV2S/Y2S
+cassette,Daikin,FCNQ · Fixed Speed,FCNQ18MV2S,18000,,40400,8500,Fixed Speed,,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Daikin,FCNQ · Fixed Speed,FCNQ24MV2S,24000,,51500,8500,Fixed Speed,,1/4,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Daikin,FCNQ · Fixed Speed,FCNQ30MV2S,30000,,55600,9500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Daikin,FCNQ · Fixed Speed,FCNQ36MV2S,36000,,63600,10500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Daikin,FCNQ · Fixed Speed,FCNQ42MV2S,42000,,68400,12500,Fixed Speed,,3/8,5/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Daikin,FCC · Fixed Speed,"FCC, STANDARDPANEL นำเข้าจากมาเลเซีย, R32, 5+1 NEW FCC18AV1S/RC18AV1S",18500,,29200,8500,Fixed Speed,R32,1/4,1/2,246 x 840 x 840,22,615 x 845 x 300,42,220V / 1Ph,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RC18AV1S
+cassette,Daikin,FCC · Fixed Speed,FCC24AV1S/RC18AV1S,24000,,34300,8500,Fixed Speed,R32,1/4,5/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RC18AV1S
+cassette,Daikin,FCC · Fixed Speed,FCC30AV1S/RC30AV1S,29000,,41000,9500,Fixed Speed,R32,3/8,5/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RC30AV1S
+cassette,Daikin,FCC · Fixed Speed,FCC36AV1S/RC18AV1S,33400,,46500,10500,Fixed Speed,R32,3/8,5/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RC18AV1S
+cassette,Daikin,FCC · Fixed Speed,FCC42AV1S/RC42AY1S,41000,,52800,12500,Fixed Speed,R32,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RC42AY1S
+cassette,Daikin,FCC · Fixed Speed,FCC46AV1S/RC18AY1S,44500,,58700,12500,Fixed Speed,R32,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,RC18AY1S
+floor,Daikin,FVGR/FVPR Series · Fixed Speed,FVGR08RNV2S/RUR08RNY2S,80000,,107700,19000,Fixed Speed,,3/8,3/4,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RUR08RNY2S
+floor,Daikin,FVGR/FVPR Series · Fixed Speed,FVGR10RNV2S/RUR10RNY2S,100000,,129100,25000,Fixed Speed,,3/8,7/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RUR10RNY2S
+floor,Daikin,FVGR/FVPR Series · Fixed Speed,FVPR10RNY2S/RUR10RNY2S,100000,,153600,25000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RUR10RNY2S
+floor,Daikin,FVGR/FVPR Series · Fixed Speed,FVPR12RNY2S/RUR12RNY2S,120000,,176900,31000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RUR12RNY2S
+floor,Daikin,FVGR/FVPR Series · Fixed Speed,FVPR16RNY2S/RUR16RNY2S,150000,,192700,40000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RUR16RNY2S
+floor,Daikin,FVGR/FVPR Series · Fixed Speed,FVPR18RNY2S/RUR18RNY2S,180000,,137500,49000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RUR18RNY2S
+floor,Daikin,FVGR/FVPR Series · Fixed Speed,FVPR20RNY2S/RUR20RNY2S,200000,,140300,55000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RUR20RNY2S
+floor,Daikin,FVGR/FVPR Series · Inverter,FVGR10PV2S/RZUR10PY2S,96000,ใช่,41000,24000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZUR10PY2S
+floor,Daikin,FVGR/FVPR Series · Inverter,FVGR10QV2S/RZUR10QY2S,99000,ใช่,41900,25000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RZUR10QY2S
+wall,Eminent,Excel GM · Inverter,WVM09F1,9000,ใช่,9800,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Eminent,Excel GM · Inverter,WVM12F1,12000,ใช่,10800,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Eminent,Excel GM · Inverter,WVM18F1,18000,ใช่,15500,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Eminent,Excel GM · Inverter,WVM24F1,24000,ใช่,19400,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Fujitsu,Excellence · Inverter,ASMA09B,9200,ใช่,14600,3800,Inverter,R32,1/4,3/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AOMA09B
+wall,Fujitsu,Excellence · Inverter,ASMA12B,12000,ใช่,10900,3800,Inverter,R32,1/4,3/8,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AOMA12B
+wall,Fujitsu,Excellence · Inverter,ASMA18F,18000,ใช่,15300,4500,Inverter,R410A,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AOMA18F
+wall,Fujitsu,Excellence · Inverter,ASMA24F,24000,ใช่,19300,5200,Inverter,R410A,1/4,1/2,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AOMA24F
+wall,Fujitsu,Excellence · Inverter,ASMA30F,30000,ใช่,35200,6000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AOMA30F
+wall,Fujitsu,iSave · Inverter,ASMG09J,9200,ใช่,14600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AOMG09J
+wall,Fujitsu,iSave · Inverter,ASMG12J,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AOMG12J
+wall,Gree,Savi · Inverter,GWC09GB2-K6DNA1G,9000,ใช่,10200,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Gree,Savi · Inverter,GWC12GB2-K6DNA1G,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Gree,Savi · Inverter,GWC15GB2-K6DNA1G,15000,ใช่,18400,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Gree,Savi · Inverter,GWC18GB2-K6DNA1G,18000,ใช่,15300,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Gree,Savi · Inverter,GWC24GB2-K6DNA1G,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,CQRC · Fixed Speed,HSU-10CQRC03T,9200,,9000,3800,Fixed Speed,R32,1/4,3/8,292 x 805 x 200,9.5,463 x 660 x 245,23.2,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,CQRC · Fixed Speed,HSU-13CQRC03T,12000,,9500,3800,Fixed Speed,R32,1/4,3/8,292 x 805 x 200,9.5,544 x 700 x 245,26,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,CQRC · Fixed Speed,HSU-18CQRC03T,18000,,14100,4500,Fixed Speed,R32,1/4,1/2,318 x 975 x 220,11.5,553 x 800 x 280,34,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,CQRC · Fixed Speed,HSU-24CQRC03T,24000,,19100,5200,Fixed Speed,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VQAC · Inverter,HSU-09VQAC03T,9200,ใช่,9000,3800,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VQAC · Inverter,HSU-12VQAC03T,12000,ใช่,10000,3800,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VQAC · Inverter,HSU-15VQAC03T,15000,ใช่,13200,4500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VQAC · Inverter,HSU-18VQAC03T,18000,ใช่,14400,4500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VQAC · Inverter,HSU-24VQAC03T,24000,ใช่,19400,5200,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VQAC · Inverter,HSU-30VQAC03T,30000,ใช่,31700,6000,Inverter,R32,1/4,5/8,365 x 1316 x 275,21.5,815 x 950 x 370,51,220V / 1Ph / 50Hz,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VQAC · Inverter,HSU-36VQAC03T,36000,ใช่,36100,6500,Inverter,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VRRA · Inverter,HSU-10VRRA03T,9200,ใช่,9000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VRRA · Inverter,HSU-13VRRA03T,12000,ใช่,10000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VRRA · Inverter,HSU-18VRRA03T,18000,ใช่,14400,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Haier,VRRA · Inverter,HSU-24VRRA03T,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Hisense,KC · Inverter,AS-10TRKC2T,9500,ใช่,8700,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-10TRKC2T
+wall,Hisense,KC · Inverter,AS-13TRKC2T,12000,ใช่,11000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-13TRKC2T
+wall,Hisense,KC · Inverter,AS-18TRKC2T,18000,ใช่,16500,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-18TRKC2T
+wall,Hisense,KC · Inverter,AS-24TRKC2T,24000,ใช่,22000,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-24TRKC2T
+wall,Hisense,LB · Inverter,AS-10TRLB2T,9500,ใช่,8700,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-10TRLB2T
+wall,Hisense,LB · Inverter,AS-13TRLB2T,12000,ใช่,11000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-13TRLB2T
+wall,Hisense,LB · Inverter,AS-18TRLB2T,18000,ใช่,16500,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-18TRLB2T
+wall,Hisense,LB · Inverter,AS-24TRLB2T,24000,ใช่,22000,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-24TRLB2T
+wall,Hitachi,airHome 100 · Fixed Speed,RAK-BJ10PCAST,9200,,10500,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-BJ10PCAST
+wall,Hitachi,airHome 100 · Fixed Speed,RAK-BJ13PCAST,12000,,10500,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-BJ13PCAST
+wall,Hitachi,airHome 100 · Fixed Speed,RAK-BJ18PCAST,18000,,15600,4500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-BJ18PCAST
+wall,Hitachi,airHome 100 · Fixed Speed,RAK-BJ24PCAST,24000,,20300,5200,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-BJ24PCAST
+wall,Hitachi,airHome 300 · Inverter,RAK-CJ10PCAST,9200,ใช่,14600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-CJ10PCAST
+wall,Hitachi,airHome 300 · Inverter,RAK-CJ13PCAST,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-CJ13PCAST
+wall,Hitachi,airHome 300 · Inverter,RAK-CJ18PCAST,18000,ใช่,15300,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-CJ18PCAST
+wall,Hitachi,airHome 300 · Inverter,RAK-CJ24PCAST,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,RAC-CJ24PCAST
+wall,LG,IBY · Inverter,IBY11AN,9000,ใช่,10000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,IBY · Inverter,IBY13AN,12000,ใช่,10600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,IBY · Inverter,IBY18AN,18000,ใช่,15100,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,IBY · Inverter,IBY24AN,24000,ใช่,18000,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,IQ Inverter,IG10R,9200,ใช่,10000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,IQ Inverter,IG13R,12000,ใช่,10600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,IQ Inverter,IG18R,18000,ใช่,15100,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,IQ Inverter,IG24R,24000,ใช่,18000,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Modern Inverter,ISR10E1,9200,ใช่,10000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Modern Inverter,ISR13E1,12000,ใช่,10600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Modern Inverter,IFR18E1,18000,ใช่,15100,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Modern Inverter,ISR24E1,24000,ใช่,18000,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Smart Inverter,IK10R.SR2,9200,ใช่,10000,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Smart Inverter,IK13R.SR2,12000,ใช่,10600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Smart Inverter,IK15R.SR2,15000,ใช่,12800,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Smart Inverter,IK18R.SR2,18000,ใช่,15100,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,LG,Smart Inverter,IK24R.SR2,24000,ใช่,18000,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,LG,AVNQ · Inverter,AVNQ18,18000,ใช่,32600,7000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,LG,AVNQ · Inverter,AVNQ24,24000,ใช่,36900,7000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,LG,AVNQ · Inverter,AVNQ30,30000,ใช่,42400,7500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,LG,AVNQ · Inverter,AVNQ36,36000,ใช่,47000,8500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,LG,AVNQ · Inverter,AVNQ40,40000,ใช่,54800,10000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,LG,AVNQ · Inverter,AVNQ48,48000,ใช่,55200,10000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,LG,AVNQ · Inverter,AVNQ54,54000,ใช่,62500,12000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,LG,ATNQ · Inverter,ATNQ18,18000,ใช่,42600,8500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,LG,ATNQ · Inverter,ATNQ24,24000,ใช่,53900,8500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,LG,ATNQ · Inverter,ATNQ30,30000,ใช่,57400,9500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,LG,ATNQ · Inverter,ATNQ36,36000,ใช่,66800,10500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,LG,ATNQ · Inverter,ATNQ42,42000,ใช่,76400,12500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,LG,ATNQ · Inverter,ATNQ48,48000,ใช่,76000,12500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Mavell,Inverter WiFi New,MWF-09WINV,9000,ใช่,10200,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Midea,MSAG · Fixed Speed,MSAG-09CRN8-IDU,9000,,7400,3800,Fixed Speed,R32,1/4,3/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 7 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSAG-09CRN8-ODU
+wall,Midea,MSAG · Fixed Speed,MSAG-12CRN8-IDU,12000,,8700,3800,Fixed Speed,R32,1/4,3/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 7 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSAG-12CRN8-ODU
+wall,Midea,MSAG · Fixed Speed,MSAG-18CRN8-IDU,18000,,13900,4500,Fixed Speed,R32,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 7 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSAG-18CRN8-ODU
+wall,Midea,MSAG · Fixed Speed,MSAG-24CRN8-IDU,24000,,17400,5200,Fixed Speed,R32,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 7 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSAG-24CRN8-ODU
+wall,Midea,Celest · Inverter,MSCE-10CRFN8-ID,9500,ใช่,7400,3800,Inverter,R32,1/4,3/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSCE-10CRFN8-OD
+wall,Midea,Celest · Inverter,MSCE-13CRFN8-ID,12000,ใช่,8600,3800,Inverter,R32,1/4,3/8,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSCE-13CRFN8-OD
+wall,Midea,Celest · Inverter,MSCE-19CRFN8-ID,18000,ใช่,12300,4500,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSCE-19CRFN8-OD
+wall,Midea,Celest · Inverter,MSCE-25CRFN8-ID,24000,ใช่,14600,5200,Inverter,R32,1/4,1/2,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 10 ปี | ค่าแรง 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MSCE-25CRFN8-OD
+wall,Mitsubishi Electric,Happy Inverter KA,MSY-KA09VF / MUY-KA09VF,9000,ใช่,12300,3800,Inverter,R32,1/4,3/8,290 x 799 x 233,7.9,454 x 660 x 235,17.8,220V / 1Ph / 50Hz,Inverter,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-KA09VF
+wall,Mitsubishi Electric,Happy Inverter KA,MSY-KA13VF / MUY-KA13VF,12283,ใช่,13200,4500,Inverter,R32,1/4,3/8,290 x 799 x 233,8.3,454 x 660 x 235,18,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-KA13VF
+wall,Mitsubishi Electric,Happy Inverter KA,MSY-KA15VF / MUY-KA15VF,14330,ใช่,18300,4500,Inverter,R32,1/4,3/8,290 x 799 x 233,8.3,538 x 699 x 249,21.5,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-KA15VF
+wall,Mitsubishi Electric,Happy Inverter KA,MSY-KA18VF / MUY-KA18VF,18084,ใช่,21300,5200,Inverter,R32,1/4,1/2,290 x 799 x 233,8.4,545 x 780 x 294,26.5,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-KA18VF
+wall,Mitsubishi Electric,Happy Inverter KA,MSY-KA24VF / MUY-KA24VF,24000,ใช่,29400,5200,Inverter,R32,1/4,1/2,290 x 999 x 233,10.9,545 x 780 x 294,27,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-KA24VF
+wall,Mitsubishi Electric,Kiwami AW · Inverter,MSY-AW09VF,9000,ใช่,15200,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-AW09VF
+wall,Mitsubishi Electric,Kiwami AW · Inverter,MSY-AW13VF,12283,ใช่,17500,4500,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-AW13VF
+wall,Mitsubishi Electric,Kiwami AW · Inverter,MSY-AW18VF,18084,ใช่,25400,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-AW18VF
+wall,Mitsubishi Electric,MZ Inverter,MSY-MZ09VF,9000,ใช่,15200,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-MZ09VF
+wall,Mitsubishi Electric,MZ Inverter,MSY-MZ13VF,12283,ใช่,17500,4500,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-MZ13VF
+wall,Mitsubishi Electric,MZ Inverter,MSY-MZ18VF,18084,ใช่,25400,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-MZ18VF
+wall,Mitsubishi Electric,Move Eye GZ · Inverter,MSY-GZ09VF,9000,ใช่,18100,3800,Inverter,,1/4,3/8,280 x 838 x 239,9.9,454 x 660 x 235,20,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-GZ09VF
+wall,Mitsubishi Electric,Move Eye GZ · Inverter,MSY-GZ13VF,12283,ใช่,21900,4500,Inverter,,1/4,3/8,280 x 838 x 239,9.9,545 x 780 x 294,27.5,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-GZ13VF
+wall,Mitsubishi Electric,Move Eye GZ · Inverter,MSY-GZ15VF,14330,ใช่,26200,4500,Inverter,,1/4,3/8,280 x 838 x 239,9.9,714 x 800 x 285,35.5,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-GZ15VF
+wall,Mitsubishi Electric,Move Eye GZ · Inverter,MSY-GZ18VF,18084,ใช่,29600,5200,Inverter,,1/4,1/2,"325 x 1,100 x 266",16.5,545 x 780 x 294,29.5,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-GZ18VF
+wall,Mitsubishi Electric,Move Eye GZ · Inverter,MSY-GZ24VF,24000,ใช่,46000,5200,Inverter,,1/4,1/2,"325 x 1,100 x 266",16.5,880 x 840 x 330,46,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-GZ24VF
+wall,Mitsubishi Electric,Move Eye GZ · Inverter,MSY-GZ30VF,30000,ใช่,57500,6000,Inverter,,1/4,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-GZ30VF
+wall,Mitsubishi Electric,Standard Inverter JY,MSY-JY09VF,9000,ใช่,14100,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JY09VF
+wall,Mitsubishi Electric,Standard Inverter JY,MSY-JY13VF,12283,ใช่,19200,4500,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JY13VF
+wall,Mitsubishi Electric,Standard Inverter JY,MSY-JY15VF,14330,ใช่,22400,4500,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JY15VF
+wall,Mitsubishi Electric,Standard Inverter JY,MSY-JY18VF,18084,ใช่,28300,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JY18VF
+wall,Mitsubishi Electric,Standard Inverter JY,MSY-JY24VF,24000,ใช่,37500,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JY24VF
+wall,Mitsubishi Electric,Standard Inverter JY,MSY-JY36VF,36000,ใช่,56300,6500,Inverter,,1/4,5/8,,,,,,Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JY36VF
+wall,Mitsubishi Electric,Standard Inverter JZ,MSY-JZ09VF,9000,ใช่,15200,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JZ09VF
+wall,Mitsubishi Electric,Standard Inverter JZ,MSY-JZ13VF,12283,ใช่,17500,4500,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JZ13VF
+wall,Mitsubishi Electric,Standard Inverter JZ,MSY-JZ18VF,18084,ใช่,25400,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JZ18VF
+wall,Mitsubishi Electric,Standard Inverter JZ,MSY-JZ24VF,24000,ใช่,37700,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-JZ24VF
+wall,Mitsubishi Electric,XZ Inverter,MSY-XZ09VF,9000,ใช่,15200,3800,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-XZ09VF
+wall,Mitsubishi Electric,XZ Inverter,MSY-XZ13VF,12283,ใช่,17500,4500,Inverter,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-XZ13VF
+wall,Mitsubishi Electric,XZ Inverter,MSY-XZ18VF,18084,ใช่,25400,5200,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MUY-XZ18VF
+wall,Mitsubishi Electric,Econo · Fixed Speed,MS-GY09VF,9212,,13800,3800,Fixed Speed,R32,1/4,3/8,290 x 825 x 237,8.8,525 x 718 x 255,27,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MU-GY09VF
+wall,Mitsubishi Electric,Econo · Fixed Speed,MS-GY12VF,11601,,16400,3800,Fixed Speed,R32,1/4,3/8,290 x 825 x 237,9.5,525 x 718 x 255,30.5,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MU-GY12VF
+wall,Mitsubishi Electric,Econo · Fixed Speed,MS-GY13VF,12966,,18300,4500,Fixed Speed,,1/4,3/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MU-GY13VF
+wall,Mitsubishi Electric,Econo · Fixed Speed,MS-GY18VF,18366,,25900,5200,Fixed Speed,R32,1/4,1/2,325 x 1126 x 237,15.5,880 x 840 x 330,51.4,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,MU-GY18VF
+ceiling,Mitsubishi Electric,PCY-M · Inverter,PCYM13KAL2,13000,ใช่,25200,6500,Inverter,R32,1/4,1/2,230 x 960 x 680,25,550 x 800 x 285,31,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-M · Inverter,PCYM18KAL2,18000,ใช่,28900,7000,Inverter,R32,1/4,1/2,230 x 960 x 680,25,550 x 800 x 285,31,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-M · Inverter,PCYM24KAL2,24000,ใช่,33200,7000,Inverter,R32,3/8,5/8,"230 x 1,280 x 680",32,714 x 800 x 285,35,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-M · Inverter,PCYM30KAL2,30000,ใช่,36500,7500,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",37,880 x 840 x 330,44,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-M · Inverter,PCYM36KAL2,36000,ใช่,43200,8500,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",37,880 x 840 x 330,44,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-M · Inverter,PCYM42KAL2,42000,ใช่,49900,10000,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",37,"981 x 1,050 x 330",61,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-M · Inverter,PCYM48KAL2,48000,ใช่,55200,10000,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",40,"981 x 1,050 x 330",61,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-SM · Inverter,PCY-SM13KAL4,13000,ใช่,29100,6500,Inverter,R32,1/4,1/2,"230 x 1,280 x 680",32,714 x 800 x 285,35,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-SM · Inverter,PCY-SM18KAL4,18000,ใช่,33400,7000,Inverter,R32,1/4,1/2,"230 x 1,280 x 680",32,880 x 840 x 330,44,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-SM · Inverter,PCY-SM24KAL4,24000,ใช่,38600,7000,Inverter,R32,3/8,5/8,,37,880 x 840 x 330,46,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-SM · Inverter,PCY-SM30KAL4,30000,ใช่,42500,7500,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",40,880 x 840 x 330,43,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-SM · Inverter,PCY-SM36KAL4,36000,ใช่,50200,8500,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",40,"981 x 1,050 x 330",62,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-SM · Inverter,PCY-SM42KAL4,42000,ใช่,58100,10000,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",40,"981 x 1,050 x 330",62,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PCY-SM · Inverter,PCY-SM48KAL4,48000,ใช่,64400,10000,Inverter,R32,3/8,5/8,"230 x 1,600 x 680",40,"981 x 1,050 x 330",64,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PC Fixed,PC-M18KAKL,18000,,28300,7000,Fixed Speed,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PC Fixed,PC-M24KAKL,24000,,32300,7000,Fixed Speed,R32,1/4,5/8,"230 x 1,280 x 680",32,880 x 840 x 330,51,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PC Fixed,PC-M30KAKL,30000,,35800,7500,Fixed Speed,R32,3/8,5/8,"230 x 1,600 x 680",37,880 x 840 x 330,63,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PC Fixed,PC-M36KAKL,36000,,39800,8500,Fixed Speed,R32,3/8,5/8,"230 x 1,600 x 680",40,"981 x 1,050 x 330",81,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PC Fixed,PC-M42KAKL,42000,,45900,10000,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Mitsubishi Electric,PC Fixed,PC-M48KAKL,48000,,50700,10000,Fixed Speed,R32,3/8,5/8,"230 x 1,600 x 680",40,"981 x 1,050 x 330",86,380V / 3Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM13EA4,13000,ใช่,40700,7500,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM13EA/TH-SUY-SM13VA-TH,13989,ใช่,42500,7500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-SM13VA-TH
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM18EA4,18000,ใช่,46600,8500,Inverter,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM18EA/TH-SUY-SM18VA-TH,18084,ใช่,49000,8500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-SM18VA-TH
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM24EA4,24000,ใช่,58600,8500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM24EA/TH-SUY-SM24VA-TH,25249,ใช่,61200,9500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-SM24VA-TH
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM30EA4,30000,ใช่,63700,9500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM30EA/TH-SUY-SM30VA-TH,30026,ใช่,66900,10500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-SM30VA-TH
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM36EA4,36000,ใช่,73200,10500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM36EA/TH-SUY-SM36VA-TH,36167,ใช่,77300,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-SM36VA-TH
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM42EA/TH-SUY-SM42VA-TH,42000,ใช่,84700,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-SM42VA-TH
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM42EA4,42000,ใช่,79900,12500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM48EA/TH-SUY-SM48VA-TH,48000,ใช่,87200,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-SM48VA-TH
+cassette,Mitsubishi Electric,PLY-SM · Inverter,PLY-SM48EA4,48000,ใช่,16900,12500,Inverter,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-(M) · Inverter,PLY-(M)13EA2,13989,ใช่,35000,7500,Inverter,R32,1/4,1/2,,,,,,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-(M) · Inverter,PLY-(M)18EA2,18084,ใช่,40000,8500,Inverter,R32,1/4,1/2,,,,,,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-(M) · Inverter,PLY-(M)24EA2,24000,ใช่,50300,8500,Inverter,R32,3/8,5/8,,,,,,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-(M) · Inverter,PLY-(M)30EA2,30000,ใช่,54600,9500,Inverter,R32,3/8,5/8,,,,,,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-(M) · Inverter,PLY-(M)36EA2,36000,ใช่,62900,10500,Inverter,R32,3/8,5/8,,,,,,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-(M) · Inverter,PLY-(M)42EA2,42000,ใช่,68500,12500,Inverter,R32,3/8,5/8,,,,,,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-(M) · Inverter,PLY-(M)48EA2,48000,ใช่,70100,12500,Inverter,R32,3/8,5/8,,,,,,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PLY-M · Inverter,PLY-M13EA/TH-SUY-M13VA-TH,13989,ใช่,36400,7500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-M13VA-TH
+cassette,Mitsubishi Electric,PLY-M · Inverter,PLY-M18EA/TH-SUY-M18VA-TH,18084,ใช่,41800,8500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-M18VA-TH
+cassette,Mitsubishi Electric,PLY-M · Inverter,PLY-M24EA/TH-SUY-M24VA-TH,25249,ใช่,52100,9500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-M24VA-TH
+cassette,Mitsubishi Electric,PLY-M · Inverter,PLY-M30EA/TH-SUY-M30VA-TH,30026,ใช่,56800,10500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-M30VA-TH
+cassette,Mitsubishi Electric,PLY-M · Inverter,PLY-M36EA/TH-SUY-M36VA-TH,36167,ใช่,65900,12500,Inverter,R32,3/8,5/8,298 x 840 x 840,26,"981 x 1,050 x 330",81,220V / 1Ph / 380V / 3Ph,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-M36VA-TH
+cassette,Mitsubishi Electric,PLY-M · Inverter,PLY-M42EA/TH-SUY-M42VA-TH,42000,ใช่,72200,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-M42VA-TH
+cassette,Mitsubishi Electric,PLY-M · Inverter,PLY-M48EA/TH-SUY-M48VA-TH,48000,ใช่,74000,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,Inverter Rotary,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,TH-SUY-M48VA-TH
+cassette,Mitsubishi Electric,PL Fixed,PL-18,18000,,43300,8500,Fixed Speed,,1/4,1/2,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL Fixed,PL-24,24000,,54400,8500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL Fixed,PL-30,30000,,59100,9500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL Fixed,PL-36,36000,,68000,10500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL Fixed,PL-42,42000,,79900,12500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 5 ปี | คอยล์ 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL-M · Fixed Speed,PL-M30EAKLM,30026,,54400,10500,Fixed Speed,,3/8,5/8,,,,,,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL-M · Fixed Speed,PL-M36EAKLM,36167,,59400,12500,Fixed Speed,,3/8,5/8,,,,,220V / 1Ph / 380V / 3Ph,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL-M · Fixed Speed,PL-M42EAKLM,42821,,66000,12500,Fixed Speed,,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Electric,PL-M · Fixed Speed,PL-M48EAKLM,48109,,67800,14500,Fixed Speed,,3/8,5/8,,,,,380V / 3Ph,,อะไหล่ 2 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 10 YYMW1,8683,ใช่,15100,3800,Inverter,R32,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 10 YYP-W1,8727,ใช่,13700,3800,Inverter,R32,1/4,3/8,267 x 783 x 210,8,540 x 645(+57) x 275,22,220V / 1Ph,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 25 ZSXS-W1,8769,ใช่,27500,3800,Inverter,R32,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 10 YYS-W1,9633,ใช่,16200,3800,Inverter,R32,1/4,3/8,290 x 870 x 230,10,540 x 645(+57) x 275,23.5,220V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 13 YYMW1,11098,ใช่,17500,3800,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 35 ZSXS-W1,12102,ใช่,30600,4500,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 13 YYS-W1,12406,ใช่,18900,4500,Inverter,R32,1/4,3/8,290 x 870 x 230,10,540 x 780(+62) x 290,31.5,220V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 13 YYP-W1,12500,ใช่,15700,4500,Inverter,R32,1/4,3/8,267 x 783 x 210,8,540 x 645(+57) x 275,23.5,220-240V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 15 YYMW1,15479,ใช่,20900,4500,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 15 YYS-W1,15640,ใช่,24100,4500,Inverter,R32,1/4,1/2,290 x 870 x 230,10,640 x 800(+71) x 290,37,220V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 15 YYP-W1,16000,ใช่,19500,4500,Inverter,R32,1/4,1/2,267 x 783 x 210,8,540 x 780(+62) x 290,30.5,220-240V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 50 ZSXS-W1,17105,ใช่,42500,4500,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 18 YYMW1,17275,ใช่,25400,4500,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 18 YYS-W1,18244,ใช่,27900,5200,Inverter,R32,1/4,1/2,290 x 870 x 230,10,640 x 800(+71) x 290,37,220V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 18 YYP218600BTUมี1ดาว,18600,ใช่,23500,5200,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 60 ZSXS-W1,20977,ใช่,48400,5200,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 24 YYM-W1,23020,ใช่,34400,5200,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 24 YYS-W1,24215,ใช่,37700,6000,Inverter,R32,1/4,1/2,"339 x 1,197 x 262",16.5,750 x 880(+88) x 340,50.5,220V / 1Ph / 50Hz,Twin Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 90YA-W1,26748,ใช่,46300,6000,Inverter,R32,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Inverter,SRK 100YA-W1,32070,ใช่,49200,6500,Inverter,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Fixed Speed,SRK 10 CYV-W1,9200,,12400,3800,Fixed Speed,R32,1/4,3/8,262 x 769 x 230,7,540 x 780(+62) x 290,29,220-240V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Fixed Speed,SRK 13 CYV-W1,12350,,14300,4500,Fixed Speed,R32,1/4,3/8,262 x 769 x 230,8,540 x 780(+62) x 290,29,220-240V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Fixed Speed,SRK 15 CYV-W1,14580,,16800,4500,Fixed Speed,R32,1/4,1/2,290 x 870 x 230,10,595 x 780(+62) x 290,32,220-240V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Fixed Speed,SRK 18 CYV-W1,18600,,21800,5200,Fixed Speed,R32,1/4,5/8,"339 x 1,197 x 262",16,640 x 800(+71) x 290,44.5,220-240V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,SRK · Fixed Speed,SRK 24 CYV-W1,25300,,30100,6000,Fixed Speed,R32,1/4,5/8,"339 x 1,197 x 262",16,750 x 880(+88) x 340,57.5,220-240V / 1Ph / 50Hz,Rotary,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,Kaze · Fixed Speed,SRK10CXV,9500,,12300,3800,Fixed Speed,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,Kaze · Fixed Speed,SRK13CXV,12500,,14600,4500,Fixed Speed,,,,,,,,,,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Mitsubishi Heavy Duty,Hoshi · Inverter,SRK/C18YYP-W1,18000,ใช่,22000,4500,Inverter,R32,1/4,1/2,290 x 870 x 230,10,540 x 780(+62) x 290,32,220-240V / 1Ph / 50Hz,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,SRC18YYP-W1
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Inverter,FDE 40 YA-W1,14720,ใช่,29700,6500,Inverter,R32,1/4,1/2,"210 x 1,070 x 690",28,595 x 780(+62) x 290,32,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Inverter,FDE 50 YA-W1,18093,ใช่,30200,7000,Inverter,R32,1/4,1/2,"210 x 1,070 x 690",28,595 x 780(+62) x 290,32.5,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Inverter,FDE 60 YA-W1,20823,ใช่,31300,7000,Inverter,R32,1/4,1/2,"210 x 1,070 x 690",28,595 x 780(+62) x 290,34.5,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Inverter,FDE 71 YA-W1,25087,ใช่,36200,7500,Inverter,R32,1/4,1/2,"210 x 1,070 x 690",33,640 x 800(+71) x 290,37,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Inverter,FDE 100 YA-W1,36621,ใช่,46500,10000,Inverter,R32,3/8,5/8,"250 x 1,620 x 690",43,750 x 880(+88) x 340,51,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Inverter,FDE 125 YA-W1,40915,ใช่,53100,10000,Inverter,R32,3/8,5/8,"250 x 1,620 x 690",43,845 x 970 x 370,67.5,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Inverter,FDE 140 YA-W1,47353,ใช่,59100,10000,Inverter,R32,3/8,5/8,"250 x 1,620 x 690",43,845 x 970 x 370,68,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Fixed Speed,FDE 50 CNVX-S1,18252,,27300,7000,Fixed Speed,R410A,1/4,5/8,,,,,220V / 1Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Fixed Speed,FDE 71 CNVX-S1,23871,,31400,7000,Fixed Speed,R410A,1/4,5/8,,,,,220V / 1Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Fixed Speed,FDE 100 CNV-S1,36195,,41900,10000,Fixed Speed,R410A,3/8,5/8,,,,,220V / 1Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Fixed Speed,FDE 100 CSV-S1,36301,,41900,10000,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Fixed Speed,FDE 125 CSV-S1,42650,,46100,10000,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Mitsubishi Heavy Duty,FDE Ceiling · Fixed Speed,FDE 140 CSV-S1,49474,,52400,12000,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Inverter,FDT 40 YA-W1,14786,ใช่,35900,7500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Inverter,FDT 50 YA-W1,18119,ใช่,39100,8500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Inverter,FDT 60 YA-W1,20864,ใช่,40600,8500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Inverter,FDT 71 YA-W1,24570,ใช่,48000,9500,Inverter,R32,1/4,1/2,,,,,220V / 1Ph,Single Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Inverter,FDT 100 YA-W1,36251,ใช่,57400,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Inverter,FDT 125 YA-W1,42032,ใช่,63100,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Inverter,FDT 140 YA-W1,46953,ใช่,72400,12500,Inverter,R32,3/8,5/8,,,,,220V / 1Ph,Twin Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Fixed Speed,FDT 50 CNVX-S1,18857,,37600,8500,Fixed Speed,R410A,1/4,5/8,,,,,220V / 1Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Fixed Speed,FDT 71 CNVX-S1,24693,,45500,9500,Fixed Speed,R410A,1/4,5/8,,,,,220V / 1Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Fixed Speed,FDT 100 CNV-S1,35703,,55900,10500,Fixed Speed,R410A,3/8,5/8,,,,,220V / 1Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Fixed Speed,FDT 100 CSV-S1,36557,,55900,12500,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Fixed Speed,FDT 125 CSV-S1,44356,,59000,12500,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+cassette,Mitsubishi Heavy Duty,FDT Cassette · Fixed Speed,FDT 140 CSV-S1,49474,,67200,14500,Fixed Speed,R410A,3/8,5/8,,,,,380V / 3Ph,Rotary,อะไหล่ 5 ปี | คอมเพรสเซอร์ 5 ปี (ตรวจบัตรรับประกัน),ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+wall,Panasonic,XU Deluxe · Inverter,CS-XU9AKT / CU-XU9AKT,9000,ใช่,17700,3800,Inverter,R32,1/4,3/8,295 x 870 x 229,10,542 x 780 x 289,27,220V / 1Ph / 50Hz,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี | ค่าแรง 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-XU9AKT
+wall,Panasonic,XU Deluxe · Inverter,CS-XU9YKT,9200,ใช่,17600,3800,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-XU9YKT
+wall,Panasonic,XU Deluxe · Inverter,CS-XU13YKT,12300,ใช่,21800,4500,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-XU13YKT
+wall,Panasonic,XU Deluxe · Inverter,CS-XU18YKT,18100,ใช่,29000,5200,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-XU18YKT
+wall,Panasonic,XU Deluxe · Inverter,CS-XU24AKT / CU-XU24AKT,24000,ใช่,36400,5200,Inverter,R32,1/4,1/2,295 x 1040 x 244,14,695 x 875 x 320,42,220V / 1Ph / 50Hz,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี | ค่าแรง 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-XU24AKT
+wall,Panasonic,XU Deluxe · Inverter,CS-XU24YKT,24200,ใช่,36400,6000,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 10 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-XU24YKT
+wall,Panasonic,YU Standard Inverter,YU9ZKT,9000,ใช่,10000,3800,Inverter,R32,1/4,3/8,295 x 835 x 208,8.5,495 x 720 x 270,20.4,220V / 1Ph / 50Hz,Inverter,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU9ZKT
+wall,Panasonic,YU Standard Inverter,YU13ZKT,12000,ใช่,11200,3800,Inverter,R32,1/4,3/8,295 x 835 x 208,8.6,495 x 720 x 270,20.5,220V / 1Ph / 50Hz,Inverter,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU13ZKT
+wall,Panasonic,YU Standard Inverter,YU18ZKT,18000,ใช่,16200,4500,Inverter,R32,1/4,1/2,320 x 969 x 241,10.9,555 x 765 x 303,25.7,220V / 1Ph / 50Hz,Inverter,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU18ZKT
+wall,Panasonic,YU Standard Inverter,YU24ZKT,24000,ใช่,19400,5200,Inverter,R32,3/8,5/8,336 x 1083 x 244,13.4,673 x 890 x 342,39.1,220V / 1Ph / 50Hz,Inverter,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU24ZKT
+wall,Panasonic,YU Standard Inverter,YU28ZKT,28000,ใช่,28700,6000,Inverter,R32,3/8,5/8,336 x 1083 x 244,13.4,673 x 890 x 342,39.1,220V / 1Ph / 50Hz,Inverter,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU28ZKT
+wall,Panasonic,YU Standard Inverter,YU36ZKT,36000,ใช่,40300,6500,Inverter,R32,3/8,5/8,362 x 1259 x 283,17.5,673 x 890 x 342,40.1,220V / 1Ph / 50Hz,Inverter,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU36ZKT
+wall,Panasonic,PU Inverter,CS-PU9XKT / CU-PU9XKT,9200,ใช่,13800,3800,Inverter,R32,1/4,3/8,290 x 779 x 209,8,511 x 650 x 230,17,220V / 1Ph / 50Hz,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 10 ปี | ค่าแรง 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-PU9XKT
+wall,Panasonic,Sky VU · Inverter,CS-VU9YKT,9200,ใช่,13800,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CU-VU9YKT
+wall,Panasonic,Sky VU · Inverter,CS-VU12YKT,12300,ใช่,11100,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CU-VU12YKT
+wall,Panasonic,Sky VU · Inverter,CS-VU18YKT,18100,ใช่,16200,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,CU-VU18YKT
+wall,Panasonic,YU Inverter,CS-YU9YKT,9200,ใช่,13800,3800,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU9YKT
+wall,Panasonic,YU Inverter,CS-YU13YKT,12300,ใช่,11100,4500,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU13YKT
+wall,Panasonic,YU Inverter,CS-YU18YKT,18100,ใช่,16200,5200,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU18YKT
+wall,Panasonic,YU Inverter,CS-YU24YKT,24200,ใช่,27900,6000,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU24YKT
+wall,Panasonic,YU Inverter,CS-YU28YKT,28000,ใช่,28700,6000,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU28YKT
+wall,Panasonic,YU Inverter,CS-YU36YKT,36000,ใช่,40300,6500,Inverter,,,,,,,,,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YU36YKT
+wall,Panasonic,ECO / YN · Fixed Speed,CS-YN9YKT / CU-YN9YKT,9300,,10000,3800,Fixed Speed,R32,1/4,3/8,295 x 835 x 208,9.3,555 x 765 x 303,26,220V / 1Ph / 50Hz,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YN9YKT
+wall,Panasonic,ECO / YN · Fixed Speed,CS-YN12YKT / CU-YN12YKT,12100,,10600,4500,Fixed Speed,R32,1/4,1/2,295 x 835 x 208,9.4,554 x 805 x 330,31.5,220V / 1Ph / 50Hz,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YN12YKT
+wall,Panasonic,ECO / YN · Fixed Speed,CS-YN18YKT / CU-YN18YKT,18100,,17000,5200,Fixed Speed,R32,1/4,1/2,320 x 969 x 241,11.3,554 x 805 x 330,36.5,220V / 1Ph / 50Hz,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YN18YKT
+wall,Panasonic,ECO / YN · Fixed Speed,CS-YN24YKT / CU-YN24YKT,24200,,22200,6000,Fixed Speed,R32,3/8,5/8,336 x 1083 x 244,14.1,673 x 890 x 342,50.7,220V / 1Ph / 50Hz,,อะไหล่ 3 ปี | คอมเพรสเซอร์ 5 ปี | ค่าแรง 3 ปี,ตรวจสอบสต็อกก่อนยืนยัน,CU-YN24YKT
+ceiling,Panasonic,ETT · Fixed Speed,CS-C12ETT,12000,,27700,6500,Fixed Speed,,,,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Panasonic,ETT · Fixed Speed,CS-C18ETT,18000,,42700,7000,Fixed Speed,,,,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Panasonic,ETT · Fixed Speed,CS-C24ETT,24000,,53900,7000,Fixed Speed,,,,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Panasonic,HyperWave · Fixed Speed,CST19,19000,,67200,8500,Fixed Speed,,,,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Panasonic,HyperWave · Fixed Speed,CST24,24000,,76400,8500,Fixed Speed,,,,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Panasonic,HyperWave · Fixed Speed,CST34,34000,,42600,10500,Fixed Speed,,,,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,Panasonic,HyperWave · Fixed Speed,CST43,43000,,58000,12500,Fixed Speed,,,,,,,,,,อะไหล่ 1 ปี | คอมเพรสเซอร์ 1 ปี,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Grand Hybrid Inverter,GRAND HYBRID INVERTER-09,8993,ใช่,10200,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Grand Hybrid Inverter,GRAND HYBRID INVERTER-12,12357,ใช่,12500,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Grand Hybrid Inverter,GRAND HYBRID INVERTER-18,18105,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Grand Hybrid Inverter,GRAND HYBRID INVERTER-25,24299,ใช่,27600,6000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Grand Hybrid Inverter,GRAND HYBRID INVERTER-30,30120,ใช่,35200,6500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Grand Hybrid Inverter,GRAND HYBRID INVERTER-36,36450,ใช่,40300,7800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Premium Inverter,PREMIUM INVERTER-09,9016,ใช่,10200,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Premium Inverter,PREMIUM INVERTER-12,12294,ใช่,12500,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Premium Inverter,PREMIUM INVERTER-18,18192,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Premium Inverter,PREMIUM INVERTER-25,24721,ใช่,24300,6000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Super Turbo A.P.S · Fixed Speed,TURBO A.P.S-09,9071,,10500,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Super Turbo A.P.S · Fixed Speed,TURBO A.P.S-12,12572,,12200,4500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Super Turbo A.P.S · Fixed Speed,TURBO A.P.S-18,18258,,16400,5200,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Super Turbo A.P.S · Fixed Speed,TURBO A.P.S-25,25259,,17800,6000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Super Turbo A.P.S · Fixed Speed,TURBO A.P.S-30,30441,,26200,6500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Super Turbo A.P.S · Fixed Speed,TURBO A.P.S-36,36221,,31300,7800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Super Turbo A.P.S · Fixed Speed,TURBO A.P.S-40,40200,,34700,7800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Smart Cool SWG · Fixed Speed,SWG-09,9410,,10700,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Smart Cool SWG · Fixed Speed,SWG-12,12582,,12200,4500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Smart Cool SWG · Fixed Speed,SWG-18,18258,,16400,5200,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Saijo Denki,Smart Cool SWG · Fixed Speed,SWG-25,25259,,17800,6000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE12,12000,,17900,6500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE18,18000,,20300,7000,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE25,25000,,24800,7500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE30,30000,,31300,7500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE30T,30000,,34700,7500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE33,33000,,34900,8500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE33T,33000,,38000,8500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE36,36000,,35000,8500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE36T,36000,,38400,8500,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE40T,40000,,43700,10000,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE40แขวน/ธรรมดา,40000,,40400,10000,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,ธรรมดา
+ceiling,Saijo Denki,SUE Fixed Speed,SUE44T,44000,,44300,10000,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE52T,52000,,51500,12000,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+ceiling,Saijo Denki,SUE Fixed Speed,SUE60T,60000,,54400,12000,Fixed Speed,,,,,,,,,,ตรวจสอบบัตรรับประกันตามรุ่นก่อนเสนอ,ตรวจสอบสต็อกและ Lead Time ก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-30X,30722,,48700,8500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-30TX,31421,,48700,8500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-36X,36503,,54600,11000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-36TX,36513,,53400,11000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-40TX,40001,,69300,11000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-40X,40944,,58700,11000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-44X,44000,,80000,11000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-52X,52000,,69300,13000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+floor,Saijo Denki,TURBO SF R32 · Fixed Speed,TURBO SF R32-60X,60000,,80000,13000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,New Inverter,AR-10MYFTAURN,9200,ใช่,14600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,New Inverter,AR-13MYFTAURN,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,New Inverter,AR-15MYFTAURN,15000,ใช่,18400,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,New Inverter,AR-18MYFTAURN,18000,ใช่,15300,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,New Inverter,AR-24MYFTAURN,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,S-Inverter,AR10TYHZC,9200,ใช่,14600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,S-Inverter,AR13TYHZC,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,S-Inverter,AR18TYHZC,18000,ใช่,15300,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Samsung,S-Inverter,AR24TYHZC,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,Sharp,J-Tech Inverter,AH-XP10WMB,9200,ใช่,14600,3800,Inverter,R32,1/4,3/8,292 x 877 x 222,9,495 x 598 x 265,17,220V / 1Ph / 50Hz,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-XP10WMB
+wall,Sharp,J-Tech Inverter,AH-XP13WMB,12000,ใช่,10900,3800,Inverter,R32,1/4,3/8,292 x 877 x 222,9,495 x 598 x 265,17,220V / 1Ph / 50Hz,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-XP13WMB
+wall,Sharp,J-Tech Inverter,AH-XP18WMB,18000,ใช่,15300,4500,Inverter,R32,1/4,1/2,"316 x 1,006 x 248",13,540 x 780 x 260,28,220V / 1Ph / 50Hz,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-XP18WMB
+wall,Sharp,J-Tech Inverter,AH-XP24WMB,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,AU-XP24WMB
+wall,TCL,BreezeIN Premium · Inverter,TAC-PRO09,9000,ใช่,9800,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN Premium · Inverter,TAC-PRO12,12000,ใช่,11200,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN Premium · Inverter,TAC-PRO18,18000,ใช่,16000,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN Premium · Inverter,TAC-PRO24,24000,ใช่,19200,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,T-VOXIN · Inverter,TAC-TVOX09,9000,ใช่,11300,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,T-VOXIN · Inverter,T-VOXIN10,10000,ใช่,13600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,T-VOXIN · Inverter,TAC-TVOX13,12000,ใช่,14900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,T-VOXIN · Inverter,TAC-TVOX19,18000,ใช่,18800,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,T-VOXIN · Inverter,T-VOXIN19,19000,ใช่,19500,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,T-VOXIN · Inverter,TAC-TVOX25,24000,ใช่,21000,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,T-VOXIN · Inverter,T-VOXIN25,25000,ใช่,21300,6000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN WiFi · Inverter,TAC-BR10CSV/TB-ID,9500,ใช่,9500,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,TAC-BR10CSV/TB-OD
+wall,TCL,BreezeIN WiFi · Inverter,TAC-BR13CSV/TB-ID,12000,ใช่,10700,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,TAC-BR13CSV/TB-OD
+wall,TCL,BreezeIN WiFi · Inverter,TAC-BR19CSV/TB-ID,18000,ใช่,15500,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,TAC-BR19CSV/TB-OD
+wall,TCL,BreezeIN WiFi · Inverter,TAC-BR25CSV/TB-ID,24000,ใช่,19400,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,TAC-BR25CSV/TB-OD
+wall,TCL,New Miracle · Fixed Speed,TAC-MFS10,9500,,9000,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,New Miracle · Fixed Speed,TAC-MFS13,12000,,9800,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,New Miracle · Fixed Speed,TAC-MFS19,18000,,14600,4500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,New Miracle · Fixed Speed,TAC-MFS25 / TAC-MFS26,24000,,18100,5200,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN Premium 2026 · Inverter,TAC-PRO09PE,9895,ใช่,10700,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN Premium 2026 · Inverter,TAC-PRO12PE,12283,ใช่,11800,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN Premium 2026 · Inverter,TAC-PRO18PE,18425,ใช่,16400,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,BreezeIN Premium 2026 · Inverter,TAC-PRO24PE,23884,ใช่,19100,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,TCL,Large Wall SA · Inverter,TAC-SA30CSV/ZB,30000,ใช่,25700,6000,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Ionic YJJF · Inverter,YJJF09BXAMR,9200,ใช่,14600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Ionic YJJF · Inverter,YJJF12BXAMR,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Ionic YJJF · Inverter,YJJF18BXAMR,18000,ใช่,15300,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Ionic YJJF · Inverter,YJJF24BXAMR,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Standard YHJF · Inverter,YHJF09BXAMR,9200,ใช่,14600,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Standard YHJF · Inverter,YHJF12BXAMR,12000,ใช่,10900,3800,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Standard YHJF · Inverter,YHJF18BXAMR,18000,ใช่,15300,4500,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,Standard YHJF · Inverter,YHJF24BXAMR,24000,ใช่,19300,5200,Inverter,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,ECO PLUS · Fixed Speed,YHFF09XETAHH,9212,,10500,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,ECO PLUS · Fixed Speed,YHFF12XETAHH,12000,,10500,3800,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,ECO PLUS · Fixed Speed,YHFF18XETAHH,18000,,15600,4500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+wall,York,ECO PLUS · Fixed Speed,YHFF24XETAHH,24000,,20300,5200,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,FLCH · Fixed Speed,FLCH12,12000,,29200,6500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,FLCH · Fixed Speed,FLCH18,18000,,36100,7000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,FLCH · Fixed Speed,FLCH25,25000,,40200,7500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,FLCH · Fixed Speed,FLCH30,30000,,44000,7500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,FLCH · Fixed Speed,FLCH36,36000,,16900,8500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,FLCH · Fixed Speed,FLCH40,40000,,25600,10000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,YIFFY · Fixed Speed,YIFFY12,12000,,29200,6500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,YIFFY · Fixed Speed,YIFFY18,18000,,36100,7000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,YIFFY · Fixed Speed,YIFFY25,25000,,40200,7500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,YIFFY · Fixed Speed,YIFFY30,30000,,44000,7500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,YIFFY · Fixed Speed,YIFFY36,36000,,28000,8500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+ceiling,York,YIFFY · Fixed Speed,YIFFY40,40000,,32600,10000,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCSH · Fixed Speed,FCSH18,18000,,57400,8500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCSH · Fixed Speed,FCSH25,25000,,66800,9500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCSH · Fixed Speed,FCSH30,30000,,42600,9500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCSH · Fixed Speed,FCSH36,36000,,58000,10500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCST · Fixed Speed,FCST18,18000,,57400,8500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCST · Fixed Speed,FCST25,25000,,66800,9500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCST · Fixed Speed,FCST30,30000,,70700,9500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCST · Fixed Speed,FCST36,36000,,16900,10500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,
+cassette,York,FCST · Fixed Speed,FCST45,45000,,25600,12500,Fixed Speed,,,,,,,,,,ยังไม่พบระยะรับประกันตรงรุ่นที่ยืนยันได้,ตรวจสอบสต็อกก่อนยืนยัน,

@@ -25,7 +25,7 @@ with tempfile.TemporaryDirectory() as t:
 DEF_ONLY = {'d.html', 'e.html', 'f.html', 'showcase.html', 'index.html', 'hub.tpl.html', 'hub.tpl2.html', 'hub-local.html',
             'assets/lux.css', 'tools/make-lux.py', 'tools/render-film.mjs', 'tests/lux.mjs', 'tests/sound.mjs', 'tests/aislots.mjs', 'tests/film-shots.mjs'}
 def keep(f):
-    if f in DEF_ONLY or f.startswith(('internal/', 'assets/showcase/', '.github/')): return False
+    if f in DEF_ONLY or f.startswith(('internal/', 'assets/showcase/', '.github/', 'handover-abc/')): return False
     if f.startswith('assets/') and f.endswith('.js') and f.count('/') == 1: return f in need
     if f.startswith('assets/stills/'):
         b = os.path.basename(f)
@@ -81,4 +81,10 @@ with tempfile.TemporaryDirectory() as T:
         for dp, _, fs in os.walk(P):
             for f in sorted(fs): Z.write(os.path.join(dp, f), os.path.relpath(os.path.join(dp, f), T))
     n = sum(len(fs) for _, _, fs in os.walk(P))
+    # handover-abc/ (committed, so the owner can forward one GitHub link): the zip, the data, the checklist page, the results
+    H = os.path.join(ROOT, 'handover-abc'); os.makedirs(H, exist_ok=True)
+    shutil.copy2(z, os.path.join(H, NAME + '.zip'))
+    shutil.rmtree(os.path.join(H, 'data'), ignore_errors=True); shutil.copytree(os.path.join(P, 'data'), os.path.join(H, 'data'))
+    shutil.copy2(os.path.join(D, 'dev-check.html'), os.path.join(H, 'dev-check.html'))
+    if os.path.exists(s): shutil.copy2(s, os.path.join(H, 'verify-abc-summary.md'))
 print(json.dumps({'zip': os.path.relpath(z, ROOT), 'files': n, 'source_files': len(files), 'js_modules': len([x for x in need if x.endswith('.js')]), 'mb': round(os.path.getsize(z) / 1e6, 1)}))

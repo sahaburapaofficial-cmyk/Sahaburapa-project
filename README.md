@@ -8,6 +8,8 @@ repair and sales, with standard prices from the company Pricebook and interactiv
 
 - **Live site (GitHub Pages):** https://sahaburapaofficial-cmyk.github.io/Sahaburapa-project/ · works on computer, tablet and phone
   (`a.html` · `b.html` · `c.html` for each design). Built by `.github/workflows/sbp-aircare-pages.yml` on every push to `main`.
+- **ส่งมอบ Dev (แบบ A · B · C):** [`sbp-aircare/handover-abc/`](sbp-aircare/handover-abc/) — เริ่มที่ README ในโฟลเดอร์นั้น
+  (ไฟล์ zip ครบชุด · ข้อมูลเป็น CSV · รายการตรวจรับ · ผลตรวจอัตโนมัติ)
 - **Start here:** `sbp-aircare/HANDOFF.md` (status, rules, todo) → `sbp-aircare/CLAUDE.md` (technical spec).
 - **Requests from the site** (quote, contact, feedback) go to a Google Sheet + e-mail once the Apps Script in
   `sbp-aircare/backend/` is deployed (see its README).
