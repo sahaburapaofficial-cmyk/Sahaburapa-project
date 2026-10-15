@@ -4,6 +4,7 @@ import { whenQuiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DEMO, BRAND_BY_ID, TYPE_BY_ID, DATA, TRAVEL, CLEAN_PKGS, VAT, incVat, baht, btuFmt, h, $, $$, installOptions, cleanRate } from './sbp-core.js';
 import { cart } from './commerce.js';
 import { toast } from './proto-ui.js';
+import { manufacturerRatedBtu } from './model-evidence.js';
 import { SCENE_GROUPS, SCENES, SCENE_BY_ID, TYPE_RULES, STD_SIZES, needBtu, btuBreakdown, recommendUnits, dirtFrom, effects, cleanInterval, dirtTh, thermal, stepT, timeToSet, steadyT, T_START, T_SET, ORIENT, GLASS, defaultOrient, dustRate, RISK, energy, RATE, EFF, LOAD_F, SET_REF, SET_RANGE, SET_PER_DEG, PETS, LOCS, PM_STD_24H, envF, clogRisk } from './studio-model.js';
 
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -243,7 +244,7 @@ export async function mountStudio(root, cfg = {}) {
     const type = state.type, per = state.per, n = state.n;
     // models of this type with this size (or the next one up)
     const cands = [];
-    DEMO.models.filter(m => m.type === type).forEach(m => { const i = m.skus.findIndex(k => k.btu >= per && k.btu <= per * 1.25); if (i >= 0) cands.push({ m, i, k: m.skus[i] }); });
+    DEMO.models.filter(m => m.type === type).forEach(m => { const i = m.skus.findIndex(k => { const capacity = manufacturerRatedBtu(k) ?? k.btu; return capacity >= per && capacity <= per * 1.25; }); if (i >= 0) cands.push({ m, i, k: m.skus[i] }); });
     cands.sort((a, b) => a.k.px - b.k.px);
     const col1 = h('div', { class: 'st-rc' }, h('h3', {}, `รุ่นที่เข้ากับห้องนี้ · ${TYPE_RULES[type].th} ${btuFmt(per)} × ${n}`));
     if (!cands.length) {
@@ -252,13 +253,14 @@ export async function mountStudio(root, cfg = {}) {
     } else {
       const list = h('ul', { class: 'st-models' });
       cands.slice(0, 4).forEach(({ m, i, k }) => {
+        const ratedBtu = manufacturerRatedBtu(k), capacity = ratedBtu ?? k.btu;
         const ins = installOptions(m.type, k.btu).find(o => o.key === 'STANDARD');
         const oneEx = k.px + (ins ? ins.item.ex : 0);
         list.append(h('li', {},
-          h('div', { class: 'st-m-t' }, h('small', {}, `${BRAND_BY_ID[m.brand].name} · ${m.series}`), h('b', {}, k.sku), h('span', { class: 's-note' }, `${btuFmt(k.btu)}${k.d.approved ? '' : ' · ราคาอ้างอิง'}`)),
+          h('div', { class: 'st-m-t' }, h('small', {}, `${BRAND_BY_ID[m.brand].name} · ${m.series}`), h('b', {}, k.sku), h('span', { class: 's-note' }, `${btuFmt(capacity)}/h${ratedBtu ? ' ตามผู้ผลิต' : ' · ข้อมูลรายการบริษัท'}${ratedBtu && ratedBtu !== k.btu ? ` · Pricebook ${btuFmt(k.btu)}` : ''}${k.d.approved ? '' : ' · ราคาอ้างอิง'}`)),
           h('div', { class: 'st-m-p' }, h('b', {}, baht(oneEx * n)), h('small', {}, `${n} เครื่อง พร้อมติดตั้งมาตรฐาน · เครื่องละ ${baht(oneEx)}`)),
           h('div', { class: 'st-m-a' },
-            h('button', { type: 'button', class: 's-btn primary', onclick: () => { cart.add({ kind: 'product', group: 'product', key: `P-${k.sku}`, name: `${BRAND_BY_ID[m.brand].name} ${k.sku}`, detail: `${TYPE_BY_ID[m.type].th} ${btuFmt(k.btu)} · จากห้องจำลอง ${state.scene.th}`, unitEx: k.px, qty: n }); if (ins) cart.add({ kind: 'service', group: 'install', key: `I-${ins.item.code}`, name: ins.item.name, detail: `สำหรับ ${k.sku}`, unitEx: ins.item.ex, qty: n }); toast(`ใส่ ${n} เครื่อง + ติดตั้งมาตรฐาน ในใบเสนอราคาแล้ว`); } }, 'ใส่ใบเสนอราคา'),
+            h('button', { type: 'button', class: 's-btn primary', onclick: () => { cart.add({ kind: 'product', group: 'product', key: `P-${k.sku}`, name: `${BRAND_BY_ID[m.brand].name} ${k.sku}`, detail: `${TYPE_BY_ID[m.type].th} ${btuFmt(capacity)}/h${ratedBtu ? ' ผู้ผลิต' : ''}${ratedBtu && ratedBtu !== k.btu ? ` · Pricebook ${btuFmt(k.btu)}` : ''} · จากห้องจำลอง ${state.scene.th}`, unitEx: k.px, qty: n }); if (ins) cart.add({ kind: 'service', group: 'install', key: `I-${ins.item.code}`, name: ins.item.name, detail: `สำหรับ ${k.sku}`, unitEx: ins.item.ex, qty: n }); toast(`ใส่ ${n} เครื่อง + ติดตั้งมาตรฐาน ในใบเสนอราคาแล้ว`); } }, 'ใส่ใบเสนอราคา'),
             cfg.onOpen ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => cfg.onOpen(m, i) }, 'รายละเอียด') : null)));
       });
       col1.append(list, h('p', { class: 's-note' }, `เรียงจากราคาต่ำ · ${cands.length} รุ่นที่เข้าเงื่อนไข · ราคาก่อน VAT ตาม Pricebook 2569 ติดตั้งมาตรฐานรวมท่อและวัสดุ 4 เมตรแรก`));

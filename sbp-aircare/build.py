@@ -36,15 +36,25 @@ def bundle(js, name):
     entry = os.path.join(ROOT, f'_entry_{name}.mjs')
     open(entry, 'w', encoding='utf-8').write(js)
     try:
-        out = subprocess.run(['npx', '--yes', 'esbuild@0.28.2', entry, '--bundle', '--format=esm', '--minify',
-                              '--target=es2022', '--legal-comments=none', '--log-level=warning'],
-                             cwd=ROOT, capture_output=True, text=True, check=True).stdout
+        command = ['npx', '--yes', 'esbuild@0.28.2', entry, '--bundle', '--format=esm', '--minify',
+                   '--target=es2022', '--legal-comments=none', '--log-level=warning']
+        # Windows exposes npx as a .cmd shim, which CreateProcess cannot launch directly.
+        # Route the fixed build command through cmd.exe; keep POSIX builds unchanged.
+        if os.name == 'nt':
+            command = ['cmd.exe', '/d', '/s', '/c', subprocess.list2cmdline(['npx.cmd', *command[1:]])]
+        out = subprocess.run(command,
+                             cwd=ROOT, capture_output=True, text=True, encoding='utf-8', errors='replace', check=True).stdout
     finally:
         os.remove(entry)
     return re.sub(r'</script', r'<\\/script', out, flags=re.I)
 
 DATA = read(os.path.join(A, 'sbp-data.json'))
 DATA_TAG = '<script>globalThis.__SBP_DATA=' + DATA.replace('</', '<\\/') + '</script>'
+# Exact-model manufacturer evidence is kept separate from the Pricebook and inlined for offline builds.
+EVIDENCE_PATH = os.path.join(A, 'model-evidence.json')
+if os.path.exists(EVIDENCE_PATH):
+    EVIDENCE = json.dumps(json.load(open(EVIDENCE_PATH, encoding='utf-8')), ensure_ascii=False, separators=(',', ':'))
+    DATA_TAG += '<script>globalThis.__SBP_EVIDENCE=' + EVIDENCE.replace('</', '<\\/') + '</script>'
 THGEO = read(os.path.join(A, 'thai-provinces.json'))
 DATA_TAG += '<script>globalThis.__SBP_TH=' + THGEO.replace('</', '<\\/') + '</script>'
 # Rev.20 address book for the area picker + travel rule (assets/th-address.json, tools/build-address.py)
@@ -189,9 +199,12 @@ for v in 'abc':
     open(os.path.join(ROOT, f'_entry_site_{v}.mjs'), 'w', encoding='utf-8').write(m.group(1))
 meta_path = os.path.join(ROOT, '_entry_site_meta.json')
 try:
-    subprocess.run(['npx', '--yes', 'esbuild@0.28.2', *[f'_entry_site_{v}.mjs' for v in 'abc'], '--bundle', '--splitting', '--format=esm', '--minify',
-                    '--target=es2022', '--legal-comments=none', '--log-level=warning', '--outdir=' + os.path.join(SITE_DIR, 'js'),
-                    '--entry-names=[name]-[hash]', '--chunk-names=c-[hash]', '--metafile=' + meta_path], cwd=ROOT, check=True)
+    command = ['npx', '--yes', 'esbuild@0.28.2', *[f'_entry_site_{v}.mjs' for v in 'abc'], '--bundle', '--splitting', '--format=esm', '--minify',
+               '--target=es2022', '--legal-comments=none', '--log-level=warning', '--outdir=' + os.path.join(SITE_DIR, 'js'),
+               '--entry-names=[name]-[hash]', '--chunk-names=c-[hash]', '--metafile=' + meta_path]
+    if os.name == 'nt':
+        command = ['cmd.exe', '/d', '/s', '/c', subprocess.list2cmdline(['npx.cmd', *command[1:]])]
+    subprocess.run(command, cwd=ROOT, check=True, encoding='utf-8', errors='replace')
     meta = json.load(open(meta_path))
 finally:
     for v in 'abc':

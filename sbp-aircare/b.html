@@ -654,7 +654,7 @@ footer .sx-foot{padding-block:24px 8px}
 
 <script type="module">
 import { mountCatalog, mountBuilder, mountZone, mountFaq, mountBtu, mountViewer, toast, wireDrawers, openDrawer, closeDrawer,
-  productDrawerContent, compareTable, typeArt, h, $, $$, baht, BRAND_BY_ID, TYPE_BY_ID, PARTS, incVat } from './assets/proto-ui.js';
+  productDrawerContent, compareTable, typeArt, h, $, $$, baht, btuFmt, manufacturerRatedBtu, BRAND_BY_ID, TYPE_BY_ID, PARTS, incVat } from './assets/proto-ui.js';
 import { PROCESS, FAQ, PRESETS, TYPES, PRICING } from './assets/sbp-core.js';
 import { loadData, DEMO as CATA, BRANDS as BRS, DATA as PBK } from './assets/sbp-core.js';
 import { mountCart, productDetail, mountPriceCenter, cart, mountMaterials } from './assets/commerce.js';
@@ -708,7 +708,7 @@ function openProduct(m, i = 0) {
   b.append(productDetail(m, i, { onPick: j => openProduct(m, j), on3D: () => { closeDrawer(drawer); $('#inside').scrollIntoView({ behavior: 'smooth' }); }, onFit: (mm, k) => { closeDrawer(drawer); FIT.setModel(mm, k); } }));
   if (drawer.hidden) openDrawer(drawer);
 }
-const thead = h('div', { class: 'thead' }, ...['รหัสรุ่น', 'แบรนด์', 'ซีรีส์', 'ประเภท', 'BTU', 'เครื่อง', '+ติดตั้ง', ''].map(x => h('span', {}, x)));
+const thead = h('div', { class: 'thead' }, ...['รหัสรุ่น', 'แบรนด์', 'ซีรีส์', 'ประเภท', 'ความเย็น', 'เครื่อง', '+ติดตั้ง', ''].map(x => h('span', {}, x)));
 const cat = mountCatalog($('[data-catalog]'), {
   pageSize: 16, view: 'table', toast,
   skeleton: () => h('div', { class: 'skel' }, h('i', { style: 'height:120px' }), h('i', { style: 'height:12px;width:60%' }), h('i', { style: 'height:12px' })),
@@ -718,14 +718,15 @@ const cat = mountCatalog($('[data-catalog]'), {
       h('div', { class: 'ph' }, productVisual(m, s), h('span', { class: 'code' }, s.sku)),
       h('p', { class: 'br' }, b.name, b.own ? h('b', { class: 'own-tag' }, 'OWN') : null),
       h('h3', {}, m.series),
-      h('div', { class: 'btu-chips', role: 'radiogroup', 'aria-label': 'BTU' }, skus.map((k, i) => h('button', { type: 'button', role: 'radio', class: 'bchip', 'aria-checked': i === si, onclick: () => act.pick(i) }, (k.btu / 1000) + 'k'))),
-      h('div', { class: 'pr' }, h('b', {}, baht(s.price)), h('small', {}, 'INC VAT')),
+      h('div', { class: 'btu-chips', role: 'radiogroup', 'aria-label': 'ขนาด BTU/h' }, skus.map((k, i) => { const rated = manufacturerRatedBtu(k) ?? k.btu; return h('button', { type: 'button', role: 'radio', class: 'bchip', 'aria-checked': i === si, title: `${btuFmt(rated)}/h${manufacturerRatedBtu(k) ? ' ตามผู้ผลิต' : ' ตามข้อมูลรายการบริษัท'}`, onclick: () => act.pick(i) }, `${(rated / 1000).toFixed(1)}k`); })),
+      manufacturerRatedBtu(s) && manufacturerRatedBtu(s) !== s.btu ? h('small', { class: 's-note s-card-btu-note' }, `ผู้ผลิต ${btuFmt(manufacturerRatedBtu(s))}/h · ราคา/ติดตั้งตาม Pricebook ${btuFmt(s.btu)}`) : null,
+      h('div', { class: 'pr' }, h('b', {}, baht(s.price)), h('small', {}, 'ก่อน VAT')),
       h('p', { class: 'lbl' }, s.installStdEx ? `+ติดตั้ง ${baht(s.px + s.installStdEx)}` : 'ติดตั้ง: ประเมิน'),
       h('div', { class: 'acts' }, h('button', { type: 'button', class: 'open', onclick: () => openProduct(m, m.skus.indexOf(s)) }, 'OPEN'), h('button', { type: 'button', 'aria-pressed': act.inCompare, onclick: act.compare }, act.inCompare ? '✓ CMP' : '+ CMP')));
   },
   rowTpl: (m, skus) => h('table', { class: 'rows' }, h('tbody', {}, skus.map(s => h('tr', {},
     h('td', {}, s.sku), h('td', {}, BRAND_BY_ID[m.brand].name, BRAND_BY_ID[m.brand].own ? h('b', { class: 'own-tag' }, 'OWN') : null), h('td', {}, m.series), h('td', {}, TYPE_BY_ID[m.type].th),
-    h('td', {}, s.btu.toLocaleString()), h('td', {}, baht(s.price)), h('td', {}, s.installStdEx ? baht(s.px + s.installStdEx) : '—'),
+    h('td', { title: manufacturerRatedBtu(s) ? 'ค่าความเย็น BTU/h ตามผู้ผลิต' : 'ความจุ BTU/h ในข้อมูลรายการบริษัท' }, `${btuFmt(manufacturerRatedBtu(s) ?? s.btu)}/h`), h('td', {}, baht(s.price)), h('td', {}, s.installStdEx ? baht(s.px + s.installStdEx) : '—'),
     h('td', {}, h('button', { type: 'button', class: 'chip', onclick: () => openProduct(m, m.skus.indexOf(s)) }, 'OPEN')))))),
   onOpen: (m, s) => openProduct(m, m.skus.indexOf(s)),
   onCompare: items => { const b = $('#drawerBody'); b.innerHTML = ''; b.append(h('h3', { style: 'font-size:22px;margin-bottom:10px' }, 'ตารางเทียบรุ่น'), compareTable(items)); openDrawer(drawer); },

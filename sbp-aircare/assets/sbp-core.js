@@ -5,6 +5,7 @@
 // All source prices are before VAT. The site shows VAT-inclusive prices first, with the pre-VAT figure beside it.
 
 import { DECIDED, MOVE, MOVE_TH, MOVE_REPLACES, SMALL_VISIT } from './rates.js';   // ★Rev.27 decided standard rates (no imports there)
+import { attachManufacturerEvidence, manufacturerRatedBtu } from './model-evidence.js';
 export const VAT = 0.07;
 export const incVat = n => Math.round(n * (1 + VAT));
 // ★Rev.16 owner decision (2 ต.ค. 2569: "ราคาก่อนแวททั้งหมด ทุกราคา งานบริการให้เป็นตัวเลข round up hundred digit และระบุราคาก่อน VAT เสมอ"):
@@ -34,7 +35,17 @@ const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, 
 export async function loadData(url) {
   if (DATA.loaded) return DATA;
   // single-file builds inline the data as globalThis.__SBP_DATA; the multi-file prototype fetches it
-  const j = globalThis.__SBP_DATA || await (await fetch(url || new URL('./sbp-data.json', import.meta.url))).json();
+  const dataPromise = globalThis.__SBP_DATA
+    ? Promise.resolve(globalThis.__SBP_DATA)
+    : fetch(url || new URL('./sbp-data.json', import.meta.url)).then(response => response.json());
+  const evidencePromise = globalThis.__SBP_EVIDENCE
+    ? Promise.resolve(globalThis.__SBP_EVIDENCE)
+    : typeof window === 'undefined' ? Promise.resolve({ models: [] })
+    : fetch(new URL('./model-evidence.json', import.meta.url)).then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }).catch(error => { console.warn('manufacturer evidence unavailable', error); return { models: [] }; });
+  const [j, manufacturerEvidence] = await Promise.all([dataPromise, evidencePromise]);
   const S = i => (i == null || i < 0 ? null : j.pool[i]);
   DATA.version = j.v; DATA.minBill = j.minBill;
   await loadAddr();   // Rev.20 address book for the area picker + travel rule
@@ -54,6 +65,7 @@ export async function loadData(url) {
     skuCount++;
   }
   DEMO.models = [...groups.values()].map(m => (m.skus.sort((a, b) => a.btu - b.btu), m.code = m.skus[0].sku, m));
+  attachManufacturerEvidence(DEMO.models, manufacturerEvidence);
   DEMO.skuCount = skuCount;
   BRANDS.sort((a, b) => b.n - a.n);
   const fj = { id: 'fujiva', name: 'FUJIVA', own: true, n: 0 }; BRANDS.unshift(fj); BRAND_BY_ID.fujiva = fj;
@@ -154,9 +166,12 @@ export const BTU_BANDS = [
   { id: 'b4', th: '30,001–48,000', min: 30001, max: 48000 },
   { id: 'b5', th: '> 48,000', min: 48001, max: Infinity },
 ];
+// Customer-facing capacity prefers an exact manufacturer rating. sku.btu remains the company Pricebook band for prices and installation.
+export const catalogBtu = sku => manufacturerRatedBtu(sku) ?? sku.btu;
 export function emptyFilter() { return { q: '', type: new Set(), brand: new Set(), btu: new Set(), price: new Set(), inverter: '', sort: 'rec' }; }
 function skuMatches(sku, f) {
-  if (f.btu.size && ![...f.btu].some(id => { const b = BTU_BANDS.find(x => x.id === id); return sku.btu >= b.min && sku.btu <= b.max; })) return false;
+  const capacity = catalogBtu(sku);
+  if (f.btu.size && ![...f.btu].some(id => { const b = BTU_BANDS.find(x => x.id === id); return capacity >= b.min && capacity <= b.max; })) return false;
   if (f.price.size && ![...f.price].some(id => { const b = PRICE_BANDS.find(x => x.id === id); return sku.price >= b.min && sku.price < b.max; })) return false;
   return true;
 }
@@ -166,7 +181,7 @@ function modelMatches(m, f, skip) {
   if (skip !== 'inverter' && f.inverter && (f.inverter === 'inv') !== m.inverter) return false;
   if (f.q) {
     const q = f.q.toLowerCase().replace(/[,\s\-\/]/g, '');
-    const hay = (m.series + BRAND_BY_ID[m.brand].name + TYPE_BY_ID[m.type].th + m.skus.map(s => s.sku + s.btu).join('')).toLowerCase().replace(/[,\s\-\/]/g, '');
+    const hay = (m.series + BRAND_BY_ID[m.brand].name + TYPE_BY_ID[m.type].th + m.skus.map(s => s.sku + catalogBtu(s) + s.btu).join('')).toLowerCase().replace(/[,\s\-\/]/g, '');
     if (!hay.includes(q)) return false;
   }
   const g = { ...f };
@@ -179,8 +194,8 @@ export function queryCatalog(f) {
   const minP = m => Math.min(...m.skus.filter(s => skuMatches(s, f)).map(s => s.price));
   if (f.sort === 'price-asc') list.sort((a, b) => minP(a) - minP(b));
   else if (f.sort === 'price-desc') list.sort((a, b) => minP(b) - minP(a));
-  else if (f.sort === 'btu') list.sort((a, b) => a.skus[0].btu - b.skus[0].btu);
-  else list.sort((a, b) => TYPES.findIndex(t => t.id === a.type) - TYPES.findIndex(t => t.id === b.type) || BRAND_BY_ID[b.brand].n - BRAND_BY_ID[a.brand].n || a.skus[0].btu - b.skus[0].btu);
+  else if (f.sort === 'btu') list.sort((a, b) => catalogBtu(a.skus[0]) - catalogBtu(b.skus[0]));
+  else list.sort((a, b) => TYPES.findIndex(t => t.id === a.type) - TYPES.findIndex(t => t.id === b.type) || BRAND_BY_ID[b.brand].n - BRAND_BY_ID[a.brand].n || catalogBtu(a.skus[0]) - catalogBtu(b.skus[0]));
   const skuTotal = list.reduce((n, m) => n + m.skus.filter(s => skuMatches(s, f)).length, 0);
   return { list, skuTotal, visibleSkus: m => m.skus.filter(s => skuMatches(s, f)) };
 }
@@ -189,7 +204,7 @@ export function facetCounts(f) {
   const base = key => DEMO.models.filter(m => modelMatches(m, f, key));
   const bt = base('type'); TYPES.forEach(t => out.type[t.id] = bt.filter(m => m.type === t.id).length);
   const bb = base('brand'); BRANDS.forEach(b => out.brand[b.id] = bb.filter(m => m.brand === b.id).length);
-  const bu = base('btu'); BTU_BANDS.forEach(b => out.btu[b.id] = bu.filter(m => m.skus.some(s => s.btu >= b.min && s.btu <= b.max && skuMatches(s, { ...f, btu: new Set() }))).length);
+  const bu = base('btu'); BTU_BANDS.forEach(b => out.btu[b.id] = bu.filter(m => m.skus.some(s => catalogBtu(s) >= b.min && catalogBtu(s) <= b.max && skuMatches(s, { ...f, btu: new Set() }))).length);
   const bp = base('price'); PRICE_BANDS.forEach(b => out.price[b.id] = bp.filter(m => m.skus.some(s => s.price >= b.min && s.price < b.max && skuMatches(s, { ...f, price: new Set() }))).length);
   const bi = base('inverter'); out.inverter.inv = bi.filter(m => m.inverter).length; out.inverter.fix = bi.filter(m => !m.inverter).length;
   return out;

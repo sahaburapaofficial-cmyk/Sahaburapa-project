@@ -6,6 +6,7 @@
 import { QUEUE_URL } from './queue.js';
 import { cart } from './commerce.js';
 import { h, $, DEMO, BRAND_BY_ID, TYPE_BY_ID, btuFmt, baht, FAQ, COMPANY, cleanRate, incVat, DATA } from './sbp-core.js';
+import { manufacturerRatedBtu } from './model-evidence.js';
 
 const norm = s => String(s || '').toLowerCase().replace(/[\s·\-\/,().]/g, '');
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -44,8 +45,12 @@ export function mountPalette(cfg) {
   DEMO.models.forEach(m => {
     const b = BRAND_BY_ID[m.brand], t = TYPE_BY_ID[m.type], lo = m.skus[0], hi = m.skus[m.skus.length - 1];
     const price = m.skus.map(s => s.price).filter(p => p > 0);
-    add('รุ่นแอร์', `${b ? b.name : m.brand} ${m.series}`, `${t ? t.th : ''} · ${lo.btu === hi.btu ? btuFmt(lo.btu) : btuFmt(lo.btu) + '–' + btuFmt(hi.btu)}${price.length ? ' · เริ่ม ' + baht(Math.min(...price)) : ''}`,
-      () => openProduct && openProduct(m, lastBtu ? m.skus.reduce((bi, s2, i2) => Math.abs(s2.btu - lastBtu) < Math.abs(m.skus[bi].btu - lastBtu) ? i2 : bi, 0) : 0), m.skus.map(s => s.sku).join(' ') + (m.inverter ? ' inverter' : ''), m.skus.map(s => s.btu));
+    const capacities = m.skus.map(s => manufacturerRatedBtu(s) ?? s.btu);
+    const minCapacity = Math.min(...capacities), maxCapacity = Math.max(...capacities);
+    const range = minCapacity === maxCapacity ? btuFmt(capacities[0]) : `${btuFmt(minCapacity)}–${btuFmt(maxCapacity)}`;
+    const evidenceNote = m.skus.some(s => manufacturerRatedBtu(s)) ? ' · BTU/h ผู้ผลิตเมื่อมีข้อมูลตรงรุ่น' : ' · BTU/h ข้อมูลรายการบริษัท';
+    add('รุ่นแอร์', `${b ? b.name : m.brand} ${m.series}`, `${t ? t.th : ''} · ${range}${evidenceNote}${price.length ? ' · เริ่ม ' + baht(Math.min(...price)) : ''}`,
+      () => openProduct && openProduct(m, lastBtu ? m.skus.reduce((bi, s2, i2) => Math.abs((manufacturerRatedBtu(s2) ?? s2.btu) - lastBtu) < Math.abs((manufacturerRatedBtu(m.skus[bi]) ?? m.skus[bi].btu) - lastBtu) ? i2 : bi, 0) : 0), m.skus.map(s => s.sku).join(' ') + (m.inverter ? ' inverter' : ''), capacities);
   });
   FAQ.forEach(f => add('คำถามที่พบบ่อย', f.q, f.a.slice(0, 80) + (f.a.length > 80 ? '…' : ''), () => go('faq'), f.a));
   const GROUPS = ['ทำทันที', 'บริการ', 'หน้า', 'หัวข้อ', 'รุ่นแอร์', 'คำถามที่พบบ่อย'];
