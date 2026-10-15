@@ -20,8 +20,8 @@ const exactPair = (sku, product) => {
 };
 
 assert.equal(evidence.schema, 'sbp-model-evidence-v1');
-assert.equal(evidence.models.length, 119, 'only exact, source-hash-verified, recently checked models with secure source links should be included');
-assert.equal(evidence.models.reduce((count, model) => count + Object.keys(model.fields || {}).length, 0), 1291, 'the published evidence index should preserve the 1,291 reviewed field values');
+assert.equal(evidence.models.length, 140, 'only exact, source-hash-verified, recently checked models with secure source links should be included');
+assert.equal(evidence.models.reduce((count, model) => count + Object.keys(model.fields || {}).length, 0), 1801, 'the published evidence index should preserve the 1,801 reviewed field values');
 assert.equal(new Set(evidence.models.map(model => `${model.brandId}|${model.type}|${normalize(model.sku)}`)).size, evidence.models.length, 'model evidence keys must be unique');
 assert.equal(evidence.provenance.currentSiteCatalogSha256, crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'assets', 'sbp-data.json'))).digest('hex'), 'evidence must declare the catalog snapshot it was matched against');
 
@@ -51,9 +51,75 @@ for (const model of evidence.models) {
     assert.match(source.checkedAt || '', /^2026-10-/, `${model.sku}.${key} must have a recent check date`);
   }
 }
-assert.equal(ratedCapacityCount, 108, 'only reviewed manufacturer BTU values are used');
-assert.equal(dimensionCompleteCount, 34, 'only complete, source-backed indoor W/H/D triplets may drive room simulation');
-assert.equal(pricebookBandDifferences, 48, 'known manufacturer-vs-Pricebook BTU differences must remain separate and visible');
+assert.equal(ratedCapacityCount, 120, 'only reviewed manufacturer BTU values are used');
+assert.equal(dimensionCompleteCount, 55, 'only complete, source-backed indoor W/H/D triplets may drive room simulation');
+assert.equal(pricebookBandDifferences, 54, 'known manufacturer-vs-Pricebook BTU differences must remain separate and visible');
+
+const carrierWall = evidence.models.filter(model => model.brandId === 'carrier' && /^42TV[ED]B/.test(model.indoorModel || ''));
+assert.equal(carrierWall.length, 12, 'the 2026 Carrier ION and Seal source tables should cover all six exact capacities in each series');
+assert.equal(evidence.sources[50]?.sha256, '0a710cadc277d5983b5befe0a98d486b07cd455415893a81a23fed8f6285bb3f');
+assert.equal(evidence.sources[51]?.sha256, 'ceeaf2702d43fa7ed51a5df078f2e2ade52912d1e61ee6a3117d1e8ebdb85cb0');
+for (const series of ['TVEB', 'TVDB']) {
+  for (const [suffix, btu, current, indoorW, indoorH, indoorD, gasPipe] of [
+    ['010', 9200, 4.11, 770, 288, 225, 9.52],
+    ['013', 12000, 5.35, 770, 288, 225, 9.52],
+    ['016', 15000, 6.80, 798, 293, 230, 12.70],
+    ['018', 18000, 8.36, 798, 293, 230, 12.70],
+    ['022', 21000, 9.40, 1050, 320, 250, 12.70],
+    ['026', 24000, 10.80, 1050, 320, 250, 12.70],
+  ]) {
+    const model = carrierWall.find(candidate => candidate.indoorModel === `42${series}${suffix}`);
+    assert.ok(model, `exact Carrier indoor model 42${series}${suffix} should be covered`);
+    const row = siteRows.find(candidate => candidate.type === 'wall' && normalize(candidate.brand) === 'CARRIER' && normalize(candidate.sku) === normalize(model.sku));
+    assert.ok(row, `${model.sku} must map to the existing Pricebook row`);
+    assert.equal(model.fields.btu.value, btu);
+    assert.equal(model.fields.ratedCurrentA.value, current);
+    assert.equal(model.fields.power.value, '220V / 1 Ph / 50Hz');
+    assert.equal(model.fields.indoorWidth.value, indoorW);
+    assert.equal(model.fields.indoorHeight.value, indoorH);
+    assert.equal(model.fields.indoorDepth.value, indoorD);
+    assert.equal(model.fields.pipeGas.value, gasPipe);
+    assert.equal(model.fields.inverter.value, true);
+    assert.equal(model.fields.refrigerant.value, 'R32');
+    assert.equal(model.fields.minPipe.value, 2);
+    assert.ok(model.fields.capacityRangeBtu.value.includes('–'));
+  }
+}
+const carrierSeal22 = carrierWall.find(model => model.indoorModel === '42TVDB022');
+const carrierSeal26 = carrierWall.find(model => model.indoorModel === '42TVDB026');
+assert.equal(siteRows.find(row => normalize(row.sku) === normalize(carrierSeal22.sku)).btu, 22000, 'company installation band stays at the existing 22,000 BTU band');
+assert.equal(siteRows.find(row => normalize(row.sku) === normalize(carrierSeal26.sku)).btu, 25000, 'company installation band stays at the existing 25,000 BTU band');
+
+const daikinKqKz = evidence.models.filter(model => model.brandId === 'daikin' && /^FTK[QZ](09|12|15|18|24)YV2S$/.test(model.indoorModel || ''));
+assert.equal(daikinKqKz.length, 9, 'exact Daikin FTKQ-Y and FTKZ-Y manuals should map only the matching site SKUs');
+assert.equal(evidence.sources[52]?.sha256, 'b3fb54980b536dfa42e26ff4a7f3d126987b503df3ef8b405012c2767320e6bd');
+assert.equal(evidence.sources[53]?.sha256, '0d2f606aa08b0366f83abba28745701771af697a617d313493d8c2230adb27e9');
+for (const [modelCode, kw, amps, watts, width, height, depth] of [
+  ['FTKQ09YV2S', 2.7, 4.1, 860, 770, 285, 226],
+  ['FTKQ12YV2S', 3.6, 5.4, 1130, 770, 285, 226],
+  ['FTKQ15YV2S', 4.4, 6.5, 1385, 770, 285, 226],
+  ['FTKQ18YV2S', 5.3, 8.2, 1740, 770, 285, 226],
+  ['FTKQ24YV2S', 6.0, 9.0, 1930, 770, 285, 226],
+  ['FTKZ12YV2S', 3.6, 3.7, 750, 1100, 299, 275],
+  ['FTKZ15YV2S', 4.4, 5.1, 1070, 1100, 299, 275],
+  ['FTKZ18YV2S', 5.3, 6.3, 1320, 1100, 299, 275],
+  ['FTKZ24YV2S', 7.1, 9.6, 2080, 1100, 299, 275],
+]) {
+  const model = daikinKqKz.find(candidate => candidate.indoorModel === modelCode);
+  assert.ok(model, `${modelCode} should match exactly`);
+  assert.equal(model.fields.ratedCapacityKw.value, kw);
+  assert.equal(model.fields.ratedCurrentA.value, amps);
+  assert.equal(model.fields.ratedInputW.value, watts);
+  assert.equal(model.fields.power.value, '220 V / 50 Hz');
+  assert.match(model.fields.powerNote.value, /ไม่ระบุจำนวนเฟสหรือจำนวนสายไฟ/);
+  assert.equal(model.fields.refrigerant.value, 'R32');
+  assert.equal(model.fields.indoorWidth.value, width);
+  assert.equal(model.fields.indoorHeight.value, height);
+  assert.equal(model.fields.indoorDepth.value, depth);
+  assert.equal(model.fields.inverter.value, true);
+  assert.equal(model.fields.inverter.status, 'MANUFACTURER_PAGE_REVIEWED');
+  assert.equal(model.fields.btu, undefined, 'Daikin BTU must not be inferred from kW when the manual does not state it');
+}
 
 assert.equal(evidence.retailerReferences.length, 3, 'exact-model competitor listing examples are retained as references only');
 for (const reference of evidence.retailerReferences) {
