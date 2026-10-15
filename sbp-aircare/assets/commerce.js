@@ -312,7 +312,7 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
 /* =========================================================
    Product detail: specs + install package + add-ons + live total
    ========================================================= */
-const OEM_FIELD_ORDER = ['indoorModel', 'outdoorModel', 'btu', 'series', 'system', 'inverter', 'refrigerant', 'seer', 'power', 'ratedInputW', 'maxInputW', 'pipePair', 'pipeLiquid', 'pipeGas', 'indoorDimReported', 'outdoorDimReported', 'indoorWidth', 'indoorHeight', 'indoorDepth', 'panelWidth', 'panelHeight', 'panelDepth', 'indoorWeight', 'outdoorWeight', 'maxPipe', 'maxLift', 'compressor', 'airflow', 'outdoorNoise', 'refrigerantCharge', 'drainConnection', 'features', 'wifi'];
+const OEM_FIELD_ORDER = ['indoorModel', 'outdoorModel', 'btu', 'capacityRangeBtu', 'series', 'system', 'inverter', 'refrigerant', 'seer', 'power', 'ratedCurrentA', 'ratedInputW', 'maxInputW', 'pipePair', 'pipeLiquid', 'pipeGas', 'minPipe', 'maxPipe', 'maxLift', 'indoorDimReported', 'outdoorDimReported', 'indoorWidth', 'indoorHeight', 'indoorDepth', 'panelWidth', 'panelHeight', 'panelDepth', 'indoorWeight', 'outdoorWeight', 'compressor', 'indoorAirflowCfm', 'airflow', 'indoorNoiseLevels', 'outdoorNoise', 'refrigerantCharge', 'drainConnection', 'features', 'wifi'];
 function manufacturerEvidencePanel(s) {
   const evidence = s.manufacturerEvidence, fields = evidence?.fields || {}, refs = s.retailerReferences || [];
   if (!Object.keys(fields).length && !refs.length) return null;
