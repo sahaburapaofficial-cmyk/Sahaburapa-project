@@ -16,6 +16,7 @@ import { ticketPanel, ticketText, sendTicket, photoLine, jobsIn } from './ticket
 import { canReach, ENDPOINT, BACKEND } from './submit.js';
 import { breakdown, packageParts, pipeBundle, optionNote, pipeItemFor } from './costs.js';
 import { addrPicker } from './addrpick.js';
+import { manufacturerRatedBtu } from './model-evidence.js';
 
 // Rev.16: what the crew will do on the visit, for the queue rules (visit time → slots)
 // ★Rev.21.1 (review BUG-05): every cleaning line says its type and level — quick booking (QC-), price centre (C-) and the
@@ -311,6 +312,58 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
 /* =========================================================
    Product detail: specs + install package + add-ons + live total
    ========================================================= */
+const OEM_FIELD_ORDER = ['indoorModel', 'outdoorModel', 'btu', 'ratedCapacityW', 'capacityRangeBtu', 'ratedCapacityKw', 'capacityRangeKw', 'series', 'color', 'system', 'inverter', 'refrigerant', 'seer', 'tisiEnergyRatio', 'energyLabelStars', 'power', 'ratedCurrentA', 'maxCurrentA', 'ratedInputW', 'maxInputW', 'interconnectCable', 'powerCord', 'powerNote', 'pipePair', 'pipeLiquid', 'pipeGas', 'minPipe', 'maxPipe', 'maxPipeEquivalentLength', 'maxLift', 'indoorDimReported', 'outdoorDimReported', 'indoorWidth', 'indoorHeight', 'indoorDepth', 'panelWidth', 'panelHeight', 'panelDepth', 'indoorWeight', 'outdoorWeight', 'compressor', 'indoorAirflowCfm', 'outdoorAirflowCfm', 'airflow', 'indoorNoiseLevels', 'outdoorNoise', 'refrigerantCharge', 'chargeFreePipeLengthM', 'additionalRefrigerantChargeRate', 'drainConnection', 'suitableArea', 'features', 'wifi'];
+function manufacturerEvidencePanel(s) {
+  const evidence = s.manufacturerEvidence, fields = evidence?.fields || {}, refs = s.retailerReferences || [];
+  if (!Object.keys(fields).length && !refs.length) return null;
+  const sources = s.manufacturerSources || [];
+  const authorities = new Set(Object.values(fields).map(field => sources[field.sourceIndex]?.authorityType || 'MANUFACTURER'));
+  const sourceDescription = authorities.has('THAI_REGULATORY_BODY')
+    ? (authorities.has('MANUFACTURER') ? 'เอกสารผู้ผลิตและทะเบียน มอก.' : 'ทะเบียน มอก.')
+    : 'เอกสารผู้ผลิต';
+  const entries = Object.entries(fields).sort(([a], [b]) => {
+    const ia = OEM_FIELD_ORDER.indexOf(a), ib = OEM_FIELD_ORDER.indexOf(b);
+    return (ia < 0 ? OEM_FIELD_ORDER.length : ia) - (ib < 0 ? OEM_FIELD_ORDER.length : ib);
+  });
+  const details = h('details', { class: 's-det s-oem' });
+  details.append(h('summary', {}, Object.keys(fields).length ? `ข้อมูลจาก${sourceDescription}ที่ตรวจตรงรุ่น · ${Object.keys(fields).length} รายการ` : 'แหล่งอ้างอิงรายการสินค้ารหัสตรงรุ่น'));
+  if (entries.length) {
+    details.append(h('p', { class: 's-note' }, 'แสดงตำแหน่งและแหล่งข้อมูลที่ตรวจได้ด้านล่าง · ราคาเครื่องและอัตราติดตั้งยังยึดข้อมูลบริษัท (Pricebook)'));
+    for (const warning of evidence.dataWarnings || []) {
+      details.append(h('p', { class: 's-oem-notice' }, `${warning.label}: ${warning.text}`));
+    }
+    const value = (key, field) => {
+      if (typeof field.value === 'boolean') return key === 'inverter' ? (field.value ? 'Inverter' : 'Fixed speed') : field.value ? 'มี' : 'ไม่มี';
+      let result = typeof field.value === 'number' ? field.value.toLocaleString('th-TH') : String(field.value);
+      if (key === 'btu') return `${result} BTU/h`;
+      const unit = field.unit;
+      if (unit && !(typeof field.value === 'string' && /มม\.|mm|นิ้ว|กก\.|kg|btu\/h|v|เฟส|hz|%|เมตร|น\.\s*ม\.|pa|w\b|db/i.test(result))) result += ` ${unit}`;
+      return result;
+    };
+    details.append(h('dl', { class: 's-spec s-oem-spec' }, entries.flatMap(([key, field]) => [
+      h('dt', {}, field.label || key), h('dd', {}, value(key, field)),
+    ])));
+    const sourceIndexes = [...new Set(entries.map(([, field]) => field.sourceIndex).filter(Number.isInteger))];
+    sourceIndexes.forEach(index => {
+      const source = s.manufacturerSources?.[index];
+      if (!source) return;
+      const locators = entries.filter(([, field]) => field.sourceIndex === index && field.locator).map(([key, field]) => `${field.label || key}: ${field.locator}`);
+      details.append(h('div', { class: 's-oem-source' },
+        h('a', { href: source.href, target: '_blank', rel: 'noopener noreferrer' }, source.label || 'เปิดเอกสารผู้ผลิต'),
+        h('small', {}, `ตรวจ ${source.checkedAt || 'ไม่ระบุวันที่'}${source.sourceEdition ? ` · ${source.sourceEdition}` : ''}`),
+        locators.length ? h('details', { class: 's-oem-locators' }, h('summary', {}, 'ตำแหน่งข้อมูลที่ตรวจในเอกสาร'), h('ul', {}, locators.map(locator => h('li', {}, locator)))) : null));
+    });
+    const ratedBtu = manufacturerRatedBtu(s);
+    if (ratedBtu && ratedBtu !== s.btu) details.append(h('p', { class: 's-oem-notice' }, `ผู้ผลิตระบุ ${btuFmt(ratedBtu)}/h · การเลือกอัตราติดตั้งของบริษัทใช้ช่วง ${btuFmt(s.btu)} ตาม Pricebook · ไม่เปลี่ยนราคาเครื่องหรืออัตราบริการ`));
+  }
+  if (refs.length) {
+    details.append(h('div', { class: 's-oem-retail' }, h('b', {}, 'หน้าอ้างอิงร้านค้าปลีกที่ตรงรหัส'), refs.map(ref => h('p', {},
+      h('a', { href: ref.href, target: '_blank', rel: 'noopener noreferrer' }, `${ref.retailer} · ${ref.listingTitle}`),
+      h('small', {}, ref.note)))));
+  }
+  return details;
+}
+
 export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}) {
   const b = BRAND_BY_ID[m.brand], t = TYPE_BY_ID[m.type], s = m.skus[skuIndex], d = s.d;
   const opts = installOptions(m.type, s.btu);
@@ -321,11 +374,17 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
     productVisual(m, s, { size: 'detail' }),   // Rev.09: photo slot (assets/product-media.json) or studio render
     h('p', { class: 's-pd-brand' }, b.name, ' · ', t.th, d.system ? ' · ' + d.system : ''),
     h('h3', { class: 's-pd-title' }, s.sku),
-    h('p', { class: 's-pd-meta' }, `${d.series || ''} · ${btuFmt(s.btu)} · น้ำยา ${d.refrigerant || '—'}`),
+    h('p', { class: 's-pd-meta' }, `${d.series || ''} · ${manufacturerRatedBtu(s) ? `${btuFmt(manufacturerRatedBtu(s))}/h ตามผู้ผลิต` : `${btuFmt(s.btu)}/h ในข้อมูลรายการบริษัท`}`),
   );
   const chips = h('div', { class: 'btu-chips s-chips', role: 'radiogroup', 'aria-label': 'เลือกขนาด BTU' });
-  m.skus.forEach((k, i) => chips.append(h('button', { type: 'button', role: 'radio', 'aria-checked': i === skuIndex, class: 'bchip', onclick: () => onPick && onPick(i) }, k.btu.toLocaleString())));
+  m.skus.forEach((k, i) => {
+    const rated = manufacturerRatedBtu(k);
+    const bandNote = rated && rated !== k.btu ? ` · อัตราติดตั้ง ${btuFmt(k.btu)}` : '';
+    chips.append(h('button', { type: 'button', role: 'radio', 'aria-checked': i === skuIndex, class: 'bchip', title: `${btuFmt(rated ?? k.btu)}/h ตาม${rated ? 'ผู้ผลิต' : 'ข้อมูลรายการบริษัท'}${bandNote}`, 'aria-label': `เลือก ${btuFmt(rated ?? k.btu)} ต่อชั่วโมง${bandNote}`, onclick: () => onPick && onPick(i) }, btuFmt(rated ?? k.btu)));
+  });
   root.append(chips);
+  const evidencePanel = manufacturerEvidencePanel(s);
+  if (evidencePanel) root.append(evidencePanel);
   // price block
   root.append(h('div', { class: 's-pd-price' }, h('span', { class: 's-lbl' }, 'ราคาเครื่อง'), priceNode(s.px), h('small', { class: 's-note' }, stockTh(s) + (d.approved ? ' · ราคาอนุมัติ Pricebook 2569' : ' · ราคาอ้างอิงตลาด ต้องยืนยันก่อนเสนอ'))));
   // install package
@@ -382,8 +441,8 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
   const bd = h('div', { class: 's-bd', 'aria-live': 'polite' });
   root.append(h('details', { class: 's-det s-bd-w', open: true }, h('summary', {}, 'ค่าใช้จ่ายแยกรายการ (ก่อน VAT)'), bd));
   // specs
-  const spec = [['รหัสรุ่น', s.sku], ['ซีรีส์', d.series], ['ระบบ', d.system], ['ขนาด', btuFmt(s.btu)], ['น้ำยา', d.refrigerant], ['ท่อน้ำยา', d.pipeLiquid && d.pipeGas ? `${d.pipeLiquid}" / ${d.pipeGas}"` : null], ['คอยล์เย็น (มม.)', d.indoorDim], ['น้ำหนักคอยล์เย็น', d.indoorKg && d.indoorKg + ' กก.'], ['คอยล์ร้อน (มม.)', d.outdoorDim], ['น้ำหนักคอยล์ร้อน', d.outdoorKg && d.outdoorKg + ' กก.'], ['ไฟ', d.power], ['คอมเพรสเซอร์', d.compressor], ['รับประกันเครื่อง', d.warranty]];
-  root.append(h('details', { class: 's-det', open: true }, h('summary', {}, 'สเปกเครื่อง'), h('dl', { class: 's-spec' }, spec.filter(([, v]) => v).map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]))));
+  const spec = [['รหัสรุ่น', s.sku], ['ซีรีส์', d.series], ['ระบบ', d.system], ['BTU ในข้อมูลรายการบริษัท', btuFmt(s.btu)], ['น้ำยา', d.refrigerant], ['ท่อน้ำยา', d.pipeLiquid && d.pipeGas ? `${d.pipeLiquid}" / ${d.pipeGas}"` : null], ['คอยล์เย็น (มม.)', d.indoorDim], ['น้ำหนักคอยล์เย็น', d.indoorKg && d.indoorKg + ' กก.'], ['คอยล์ร้อน (มม.)', d.outdoorDim], ['น้ำหนักคอยล์ร้อน', d.outdoorKg && d.outdoorKg + ' กก.'], ['ไฟ', d.power], ['คอมเพรสเซอร์', d.compressor], ['เงื่อนไขรับประกันในข้อมูลบริษัท', d.warranty]];
+  root.append(h('details', { class: 's-det', open: !s.manufacturerEvidence }, h('summary', {}, s.manufacturerEvidence ? 'ข้อมูลที่บันทึกในแคตตาล็อกบริษัท · แสดงแยกจากผู้ผลิต' : 'ข้อมูลรุ่นในแคตตาล็อก · ยังไม่มีหลักฐานผู้ผลิตแนบตรงรุ่น'), h('p', { class: 's-note' }, 'ข้อมูลนี้เป็นข้อมูลที่บันทึกในรายการบริษัทและยังไม่ได้ยืนยันกับเอกสารผู้ผลิตเฉพาะรุ่นนี้'), h('dl', { class: 's-spec' }, spec.filter(([, v]) => v).map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]))));
   // live total
   const tot = h('div', { class: 's-pd-total', 'aria-live': 'polite' });
   const qtyIn = h('input', { type: 'number', min: '1', max: '99', value: '1', 'aria-label': 'จำนวนเครื่อง', inputmode: 'numeric' });
@@ -394,7 +453,9 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
       onFit ? h('button', { type: 'button', class: 's-btn', onclick: () => onFit(m, m.skus.indexOf(s)) }, 'ลองวางในห้องของคุณ') : null,
       on3D ? h('button', { type: 'button', class: 's-btn ghost', onclick: () => on3D(m, s) }, 'ดูข้างในแบบ 3 มิติ') : null)));
   function lines() {
-    const L = [{ kind: 'product', group: 'product', key: `P-${s.sku}`, name: `${b.name} ${s.sku}`, detail: `${t.th} ${btuFmt(s.btu)}`, unitEx: s.px, qty: state.qty }];
+    const ratedBtu = manufacturerRatedBtu(s), shownBtu = ratedBtu ?? s.btu;
+    const btuNote = `${btuFmt(shownBtu)}/h${ratedBtu ? ' ตามผู้ผลิต' : ' ตามข้อมูลรายการบริษัท'}${ratedBtu && ratedBtu !== s.btu ? ` · อัตราราคา/ติดตั้งยึด Pricebook ${btuFmt(s.btu)}` : ''}`;
+    const L = [{ kind: 'product', group: 'product', key: `P-${s.sku}`, name: `${b.name} ${s.sku}`, detail: `${t.th} · ${btuNote}`, unitEx: s.px, qty: state.qty }];
     const o = opts.find(o => o.key === state.level);
     if (o) L.push({ kind: 'service', group: 'install', key: `I-${o.item.code}`, name: o.item.name, detail: `สำหรับ ${s.sku}`, unitEx: o.item.ex, qty: state.qty });
     Object.values(state.add).filter(Boolean).forEach(a => L.push(a.flag ? { kind: 'survey', group: 'addon', key: `S-${a.item.code}`, name: a.item.name, detail: `สำหรับ ${s.sku}`, unitEx: null, qty: 1 } : { kind: 'addon', group: 'addon', key: `A-${a.item.code}`, name: a.item.name, detail: `${a.qty} ${a.item.unit} × ${state.qty} เครื่อง`, unitEx: a.item.ex * a.qty, qty: state.qty }));
@@ -411,7 +472,8 @@ export function productDetail(m, skuIndex, { onPick, on3D, onAdded, onFit } = {}
   }
   function drawBreakdown() {
     const o = opts.find(o => o.key === state.level), Q = state.qty;
-    const rows = [{ group: 'product', key: `P-${s.sku}`, name: `${b.name} ${s.sku} (${btuFmt(s.btu)})`, unit: 'เครื่อง', unitEx: s.px, qty: Q }];
+    const ratedBtu = manufacturerRatedBtu(s), shownBtu = ratedBtu ?? s.btu;
+    const rows = [{ group: 'product', key: `P-${s.sku}`, name: `${b.name} ${s.sku} (${btuFmt(shownBtu)}/h${ratedBtu ? ' ผู้ผลิต' : ' รายการบริษัท'}${ratedBtu && ratedBtu !== s.btu ? ` · Pricebook ${btuFmt(s.btu)}` : ''})`, unit: 'เครื่อง', unitEx: s.px, qty: Q }];
     if (o) rows.push({ group: 'install', key: `I-${o.item.code}`, name: o.th || o.item.name, unit: 'เครื่อง', unitEx: o.item.ex, qty: Q });
     Object.values(state.add).filter(Boolean).forEach(a => rows.push(a.flag ? { group: 'addon', key: `S-${a.item.code}`, name: a.item.name, unitEx: null, qty: 1 } : { group: 'addon', key: `A-${a.item.code}`, name: a.item.name, unit: a.item.unit, unitEx: a.item.ex, qty: a.qty * Q }));
     const B = breakdown(rows), parts = o ? packageParts(o.item) : [];

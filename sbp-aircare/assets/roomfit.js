@@ -8,6 +8,7 @@
 // around the furniture and the checks add air-path, comfort and window/door clashes (roomplan.js).
 import { quiet } from './lazy.js';   // Rev.26.1 boot between scrolls
 import { DEMO, BRAND_BY_ID, TYPE_BY_ID, baht, btuFmt, incVat, recommendBtu, installOptions, addonsFor, h, $$ } from './sbp-core.js';
+import { manufacturerIndoorDimensions, manufacturerRatedBtu } from './model-evidence.js';
 import { cart } from './commerce.js';
 import { productVisual, photosFor } from './product-media.js';
 import { toast } from './proto-ui.js';
@@ -63,7 +64,7 @@ export function unitDims(type, btu, spec) {
 export function fitCheck(S) {
   const { w: W, l: L, h: H } = S.room, u = S.unit, d = u.dims, t = u.type, R = FIT_RULES[t], sku = S.sel ? S.sel.m.skus[S.sel.si] : null;
   const need = recommendBtu({ w: W, d: L, h: H, sun: S.sun, people: S.people }).btu;
-  const btu = sku ? sku.btu : need;
+  const btu = sku ? (manufacturerRatedBtu(sku) ?? sku.btu) : need;
   const thr = throwFor(t, btu);
   const gaps = {}, checks = [];
   const add = (ok, th, d2) => checks.push({ ok, th, d: d2 });
@@ -269,7 +270,8 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
   const allSkus = () => DEMO.models.flatMap(m => m.skus.map((s, si) => ({ m, s, si })));
   function pickBest() {
     const need = recommendBtu({ w: S.room.w, d: S.room.l, h: S.room.h, sun: S.sun, people: S.people }).btu;
-    const c = allSkus().filter(x => x.m.type === S.unit.type).sort((a, b) => Math.abs(a.s.btu - need * 1.05) - Math.abs(b.s.btu - need * 1.05) || a.s.price - b.s.price)[0];
+    const capacity = s => manufacturerRatedBtu(s) ?? s.btu;
+    const c = allSkus().filter(x => x.m.type === S.unit.type).sort((a, b) => Math.abs(capacity(a.s) - need * 1.05) - Math.abs(capacity(b.s) - need * 1.05) || a.s.price - b.s.price)[0];
     if (c) setModel(c.m, c.si, true);
   }
   function renderPick() {
@@ -278,14 +280,16 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     const need = recommendBtu({ w: S.room.w, d: S.room.l, h: S.room.h, sun: S.sun, people: S.people }).btu;
     let c = allSkus();
     if (qq) c = c.filter(x => (BRAND_BY_ID[x.m.brand].name + x.m.series + x.s.sku + x.s.btu + TYPE_BY_ID[x.m.type].th).toLowerCase().replace(/[\s,\-\/]/g, '').includes(qq));
-    else c = c.filter(x => x.m.type === S.unit.type).sort((a, b) => Math.abs(a.s.btu - need) - Math.abs(b.s.btu - need) || a.s.price - b.s.price);
+    else c = c.filter(x => x.m.type === S.unit.type).sort((a, b) => Math.abs((manufacturerRatedBtu(a.s) ?? a.s.btu) - need) - Math.abs((manufacturerRatedBtu(b.s) ?? b.s.btu) - need) || a.s.price - b.s.price);
     const seen = new Set(); const out = [];
     for (const x of c) { const k = x.m.id + (qq ? x.s.sku : ''); if (seen.has(k)) continue; seen.add(k); out.push(x); if (out.length >= 6) break; }
     if (!out.length) list.append(h('p', { class: 'rf-note' }, 'ไม่พบรุ่นที่ค้นหา'));
     out.forEach(x => {
       const on = S.sel && S.sel.m === x.m && S.sel.si === x.si;
+      const ratedBtu = manufacturerRatedBtu(x.s), capacity = ratedBtu ?? x.s.btu;
+      const bandNote = ratedBtu && ratedBtu !== x.s.btu ? ` · ค่าติดตั้งใช้ช่วง ${btuFmt(x.s.btu)}` : '';
       list.append(h('button', { type: 'button', class: 'rf-item', 'aria-pressed': on, onclick: () => { setModel(x.m, x.si); } },
-        h('b', {}, BRAND_BY_ID[x.m.brand].name, ' ', x.s.sku), h('small', {}, `${TYPE_BY_ID[x.m.type].th} · ${btuFmt(x.s.btu)} · ${baht(x.s.price)}`)));
+        h('b', {}, BRAND_BY_ID[x.m.brand].name, ' ', x.s.sku), h('small', {}, `${TYPE_BY_ID[x.m.type].th} · ${btuFmt(capacity)}/h${bandNote} · ${baht(x.s.price)}`)));
     });
   }
   function renderSel() {
@@ -293,14 +297,19 @@ export function mountRoomFit(root, { theme = 'light', onOpenModel, preset = 'bed
     if (!S.sel) { selBox.append(h('p', { class: 'rf-note' }, 'ยังไม่ได้เลือกรุ่น')); return; }
     const { m, si } = S.sel, s = m.skus[si], d = S.unit.dims;
     selBox.append(productVisual(m, s, { size: 'thumb' }),
-      h('div', {}, h('p', { class: 'rf-br' }, BRAND_BY_ID[m.brand].name, ' · ', TYPE_BY_ID[m.type].th, m.inverter ? ' · Inverter' : ''), h('b', { class: 'rf-sku' }, s.sku), h('p', { class: 'rf-meta' }, `${btuFmt(s.btu)} · ${s.price == null ? 'ราคากำลังนำเข้า' : baht(s.price) + ' ก่อน VAT'}`),
-        h('p', { class: 'rf-dims' + (d.src === 'est' ? ' est' : '') }, `กว้าง ${Math.round(d.w * 100)} · สูง ${Math.round(d.h * 100)} · ลึก ${Math.round(d.d * 100)} ซม.`, h('small', {}, d.src === 'spec' ? ' ตามสเปกผู้ผลิต' : ' ขนาดโดยประมาณ · รอสเปกรุ่น'))));
+      h('div', {}, h('p', { class: 'rf-br' }, BRAND_BY_ID[m.brand].name, ' · ', TYPE_BY_ID[m.type].th, m.inverter ? ' · Inverter' : ''), h('b', { class: 'rf-sku' }, s.sku), h('p', { class: 'rf-meta' }, `${btuFmt(manufacturerRatedBtu(s) ?? s.btu)}/h${manufacturerRatedBtu(s) ? ' ตามผู้ผลิต' : ' · ข้อมูลรายการ'}${manufacturerRatedBtu(s) && manufacturerRatedBtu(s) !== s.btu ? ` · ค่าติดตั้งใช้ช่วง ${btuFmt(s.btu)}` : ''} · ${s.price == null ? 'ราคากำลังนำเข้า' : baht(s.price) + ' ก่อน VAT'}`),
+        h('p', { class: 'rf-dims' + (d.src === 'est' ? ' est' : '') }, `กว้าง ${Math.round(d.w * 100)} · สูง ${Math.round(d.h * 100)} · ลึก ${Math.round(d.d * 100)} ซม.`, h('small', {}, d.src === 'manufacturer' ? ' ตามเอกสารผู้ผลิตที่ตรวจรหัสรุ่น' : d.src === 'catalog' ? ' ตามข้อมูลรายการบริษัท · ยังไม่ยืนยันกับผู้ผลิต' : ' ขนาดโดยประมาณ · รอสเปกรุ่น'))));
   }
   function setModel(m, si = 0, quiet = false) {
     const s = m.skus[si];
     const prevType = S.unit.type;
     S.sel = { m, si };
-    S.unit = { type: m.type === 'duct' ? 'ceiling' : m.type, dims: unitDims(m.type, s.btu, s.d.indoorDim), photo: (photosFor(m, s)[0] || {}).src || null, logo: m.brand === 'fujiva' };
+    const verifiedDimensions = manufacturerIndoorDimensions(s);
+    const dims = verifiedDimensions
+      ? { w: verifiedDimensions.widthMm / 1000, h: verifiedDimensions.heightMm / 1000, d: verifiedDimensions.depthMm / 1000, src: 'manufacturer' }
+      : unitDims(m.type, manufacturerRatedBtu(s) ?? s.btu, s.d.indoorDim);
+    if (!verifiedDimensions && dims.src === 'spec') dims.src = 'catalog';
+    S.unit = { type: m.type === 'duct' ? 'ceiling' : m.type, dims, photo: (photosFor(m, s)[0] || {}).src || null, logo: m.brand === 'fujiva' };
     if (!S.unit.photo) S.photo = false;
     if (S.unit.type !== prevType) {   // fresh, sensible placement for the new type
       const d = S.unit.dims;

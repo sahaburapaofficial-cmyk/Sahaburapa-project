@@ -703,7 +703,7 @@ html.sx-on .t-queue .d a{color:inherit;text-decoration:none}
 
 <script type="module">
 import { mountCatalog, mountBuilder, mountZone, mountFaq, mountBtu, mountViewer, scrollExplode, toast, reveal, wireDrawers, openDrawer, closeDrawer,
-  productDrawerContent, compareTable, typeArt, h, $, $$, baht, BRAND_BY_ID, TYPE_BY_ID, countUp, PARTS, incVat } from './assets/proto-ui.js';
+  productDrawerContent, compareTable, typeArt, h, $, $$, baht, btuFmt, manufacturerRatedBtu, BRAND_BY_ID, TYPE_BY_ID, countUp, PARTS, incVat } from './assets/proto-ui.js';
 import { SERVICES, PROCESS, FAQ, PRESETS, TYPES, estimateContract } from './assets/sbp-core.js';
 import { loadData, DEMO as CATA, BRANDS as BRS, DATA as PBK } from './assets/sbp-core.js';
 import { mountCart, productDetail, mountPriceCenter, cart, mountMaterials } from './assets/commerce.js';
@@ -780,7 +780,8 @@ const cat = mountCatalog($('[data-catalog]'), {
       h('div', { class: 'ph' }, productVisual(m, s, { tag: t.th })),
       h('p', { class: 'br' }, b.name, b.own ? h('b', { class: 'own-tag' }, 'แบรนด์เรา') : null, m.inverter ? h('span', {}, '· Inverter') : null),
       h('h3', {}, m.series),
-      h('div', { class: 'btu-chips', role: 'radiogroup', 'aria-label': 'ขนาด BTU' }, skus.map((k, i) => h('button', { type: 'button', role: 'radio', class: 'bchip', 'aria-checked': i === si, onclick: () => act.pick(i) }, (k.btu / 1000) + 'k'))),
+      h('div', { class: 'btu-chips', role: 'radiogroup', 'aria-label': 'ขนาด BTU/h' }, skus.map((k, i) => { const rated = manufacturerRatedBtu(k) ?? k.btu; return h('button', { type: 'button', role: 'radio', class: 'bchip', 'aria-checked': i === si, title: `${btuFmt(rated)}/h${manufacturerRatedBtu(k) ? ' ตามผู้ผลิต' : ' ตามข้อมูลรายการบริษัท'}`, onclick: () => act.pick(i) }, `${(rated / 1000).toFixed(1)}k`); })),
+      manufacturerRatedBtu(s) && manufacturerRatedBtu(s) !== s.btu ? h('small', { class: 's-note s-card-btu-note' }, `ผู้ผลิต ${btuFmt(manufacturerRatedBtu(s))}/h · ราคา/ติดตั้งตาม Pricebook ${btuFmt(s.btu)}`) : null,
       h('div', { class: 'pr' }, h('b', {}, baht(s.price)), h('span', { class: 'st o' }, 'ก่อน VAT')),
       h('p', { class: 'inst' }, s.installStdEx ? `พร้อมติดตั้งมาตรฐาน ${baht(s.px + s.installStdEx)}` : 'ติดตั้ง: ประเมินหน้างาน'),
       h('div', { class: 'acts' }, h('button', { type: 'button', class: 'open', onclick: () => openProduct(m, m.skus.indexOf(s)) }, 'รายละเอียด'), h('button', { type: 'button', 'aria-pressed': act.inCompare, onclick: act.compare }, act.inCompare ? '✓ เทียบ' : '+ เทียบ')));
@@ -789,7 +790,7 @@ const cat = mountCatalog($('[data-catalog]'), {
     const tr = document.createDocumentFragment();
     return h('table', { class: 'rows' }, h('tbody', {}, skus.map(s => h('tr', {},
       h('td', { class: 'mono' }, s.sku), h('td', {}, BRAND_BY_ID[m.brand].name), h('td', {}, m.series), h('td', {}, TYPE_BY_ID[m.type].th),
-      h('td', { class: 'r' }, s.btu.toLocaleString()), h('td', { class: 'r' }, baht(s.price)), h('td', { class: 'r' }, s.installStdEx ? baht(s.px + s.installStdEx) : '—'),
+      h('td', { class: 'r', title: manufacturerRatedBtu(s) ? 'ค่าความเย็นตามผู้ผลิต' : 'ข้อมูลรายการบริษัท' }, btuFmt(manufacturerRatedBtu(s) ?? s.btu)), h('td', { class: 'r' }, baht(s.price)), h('td', { class: 'r' }, s.installStdEx ? baht(s.px + s.installStdEx) : '—'),
       h('td', {}, h('button', { type: 'button', class: 'chip', onclick: () => openProduct(m, m.skus.indexOf(s)) }, 'เปิด'))))));
   },
   onOpen: (m, s) => openProduct(m, m.skus.indexOf(s)),

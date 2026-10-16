@@ -8,8 +8,9 @@ import {
 import { attachAddr } from './addrpick.js';
 import { createACViewer, createRoomSim, PARTS } from './ac3d.js';
 import { deferred } from './lazy.js';
+import { manufacturerRatedBtu } from './model-evidence.js';
 
-export { DEMO, TYPES, TYPE_BY_ID, BRANDS, BRAND_BY_ID, baht, btuFmt, h, $, $$, countUp, reduceMotion, PARTS, stockTh, incVat };
+export { DEMO, TYPES, TYPE_BY_ID, BRANDS, BRAND_BY_ID, baht, btuFmt, h, $, $$, countUp, reduceMotion, PARTS, stockTh, incVat, manufacturerRatedBtu };
 
 /* ---------------- Catalog ---------------- */
 export function mountCatalog(root, cfg) {
@@ -26,7 +27,7 @@ export function mountCatalog(root, cfg) {
   };
   const groups = [
     { key: 'type', th: 'ประเภท', opts: TYPES.map(t => ({ id: t.id, th: t.th, dot: t.color })) },
-    { key: 'btu', th: 'ขนาด BTU', opts: BTU_BANDS.map(b => ({ id: b.id, th: b.th })) },
+    { key: 'btu', th: 'ขนาด BTU/h', opts: BTU_BANDS.map(b => ({ id: b.id, th: b.th })) },
     { key: 'brand', th: 'แบรนด์', opts: BRANDS.map(b => ({ id: b.id, th: b.name, own: b.own })), collapsible: 8 },
     { key: 'price', th: 'ราคาเครื่อง (ก่อน VAT)', opts: PRICE_BANDS.map(b => ({ id: b.id, th: b.th })) },
     { key: 'inverter', th: 'ระบบ', opts: [{ id: 'inv', th: 'Inverter' }, { id: 'fix', th: 'Fixed speed' }], single: true },
@@ -52,6 +53,7 @@ export function mountCatalog(root, cfg) {
         list.append(lab);
       });
       box.append(list);
+      if (g.key === 'btu') box.append(h('small', { class: 's-note' }, 'ใช้ค่าผู้ผลิตเมื่อยืนยันตรงรุ่น หากยังไม่มีหลักฐานใช้ข้อมูลรายการบริษัท'));
       if (g.collapsible) {
         const t = h('button', { type: 'button', class: 'facet-more' }, `ดูทั้งหมด ${g.opts.length} แบรนด์`);
         t.addEventListener('click', () => { box.classList.toggle('open'); t.textContent = box.classList.contains('open') ? 'ย่อรายการ' : `ดูทั้งหมด ${g.opts.length} แบรนด์`; });
@@ -107,7 +109,7 @@ export function mountCatalog(root, cfg) {
     if (!els.tray) return;
     els.tray.hidden = compare.size === 0;
     const list = $('[data-compare-list]', els.tray); list.innerHTML = '';
-    compare.forEach(({ m, sku }, id) => list.append(h('li', {}, h('span', {}, `${BRAND_BY_ID[m.brand].name} ${m.series} · ${sku.btu / 1000}k`), h('button', { type: 'button', 'aria-label': 'เอาออก', onclick: () => { compare.delete(id); renderTray(); renderGrid(); } }, '×'))));
+    compare.forEach(({ m, sku }, id) => list.append(h('li', {}, h('span', {}, `${BRAND_BY_ID[m.brand].name} ${m.series} · ${btuFmt(manufacturerRatedBtu(sku) ?? sku.btu)}/h`), h('button', { type: 'button', 'aria-label': 'เอาออก', onclick: () => { compare.delete(id); renderTray(); renderGrid(); } }, '×'))));
     const go = $('[data-compare-go]', els.tray); go.textContent = `เทียบ ${compare.size} รุ่น`;
     go.onclick = () => cfg.onCompare && cfg.onCompare([...compare.values()]);
   }
@@ -480,6 +482,7 @@ export function typeArt(type, cls = 'art') {
 export function productDrawerContent(m, skuIndex, { onPick, on3D, onQuote } = {}) {
   const b = BRAND_BY_ID[m.brand], t = TYPE_BY_ID[m.type];
   const sku = m.skus[skuIndex];
+  const ratedBtu = manufacturerRatedBtu(sku);
   const wrap = h('div', { class: 'pd' });
   wrap.append(
     h('div', { class: 'pd-art', html: typeArt(m.type) }),
@@ -488,11 +491,14 @@ export function productDrawerContent(m, skuIndex, { onPick, on3D, onQuote } = {}
     h('p', { class: 'pd-meta' }, `${t.th} · ${m.inverter ? 'Inverter' : 'Fixed speed'} · ฉลาก ${m.label}`),
   );
   const chips = h('div', { class: 'btu-chips', role: 'radiogroup', 'aria-label': 'เลือกขนาด BTU' });
-  m.skus.forEach((s, i) => chips.append(h('button', { type: 'button', role: 'radio', 'aria-checked': i === skuIndex, class: 'bchip', onclick: () => onPick && onPick(i) }, (s.btu / 1000) + 'k')));
+  m.skus.forEach((s, i) => {
+    const rated = manufacturerRatedBtu(s);
+    chips.append(h('button', { type: 'button', role: 'radio', 'aria-checked': i === skuIndex, class: 'bchip', title: `${btuFmt(rated ?? s.btu)}/h${rated ? ' ตามผู้ผลิต' : ' ตามข้อมูลรายการบริษัท'}`, 'aria-label': `เลือก ${btuFmt(rated ?? s.btu)} ต่อชั่วโมง` }, `${((rated ?? s.btu) / 1000).toFixed(1)}k`));
+  });
   wrap.append(chips,
     h('dl', { class: 'pd-spec' },
       h('dt', {}, 'รหัส SKU'), h('dd', { class: 'mono' }, sku.sku),
-      h('dt', {}, 'ขนาด'), h('dd', {}, btuFmt(sku.btu)),
+      h('dt', {}, ratedBtu ? 'BTU/h ตามผู้ผลิต' : 'BTU/h ในข้อมูลรายการบริษัท'), h('dd', {}, btuFmt(ratedBtu ?? sku.btu), ratedBtu && ratedBtu !== sku.btu ? h('small', {}, ` · อัตราราคา/ติดตั้งยึดช่วง Pricebook ${btuFmt(sku.btu)}`) : null),
       h('dt', {}, 'ราคาเครื่อง'), h('dd', {}, baht(sku.price), h('small', {}, ' ราคาตัวอย่าง')),
       h('dt', {}, 'สถานะ'), h('dd', {}, sku.stock === 'ready' ? 'พร้อมส่ง' : 'สั่งจอง 3–7 วัน'),
     ),
@@ -512,7 +518,7 @@ export function productDrawerContent(m, skuIndex, { onPick, on3D, onQuote } = {}
 export function compareTable(items) {
   const rows = [
     ['แบรนด์', x => BRAND_BY_ID[x.m.brand].name], ['รุ่น', x => x.m.series], ['ประเภท', x => TYPE_BY_ID[x.m.type].th],
-    ['ขนาด', x => btuFmt(x.sku.btu)], ['ระบบ', x => x.m.inverter ? 'Inverter' : 'Fixed speed'], ['น้ำยา', x => x.m.label],
+    ['BTU/h ตามผู้ผลิตเมื่อมีหลักฐานตรงรุ่น', x => btuFmt(manufacturerRatedBtu(x.sku) ?? x.sku.btu)], ['ระบบ', x => x.m.inverter ? 'Inverter' : 'Fixed speed'], ['น้ำยา', x => x.m.label],
     ['ราคาเครื่อง ก่อน VAT', x => baht(x.sku.price)], ['พร้อมติดตั้งมาตรฐาน', x => x.sku.installStdEx ? baht(x.sku.px + x.sku.installStdEx) : '—'], ['รับประกัน', x => x.sku.d?.warranty || '—'],
   ];
   const tbl = h('table', { class: 'cmp' });
