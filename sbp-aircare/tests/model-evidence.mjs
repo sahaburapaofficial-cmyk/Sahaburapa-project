@@ -45,11 +45,11 @@ const exactPair = (sku, product) => {
 };
 
 assert.equal(evidence.schema, 'sbp-model-evidence-v1');
-assert.equal(evidence.sources.length, 159, 'all retained source revisions should remain available in the evidence index');
-assert.equal(evidence.models.length, 339, 'only exact, source-hash-verified, recently checked models with secure source links should be included');
+assert.equal(evidence.sources.length, 166, 'all retained source revisions should remain available in the evidence index');
+assert.equal(evidence.models.length, 356, 'only exact, source-hash-verified, recently checked models with secure source links should be included');
 assert.equal(evidence.provenance.matchedExactModels, evidence.models.length, 'provenance model count must track the evidence index');
 assert.equal(evidence.provenance.verifiedFieldValues, evidence.models.reduce((count, model) => count + Object.keys(model.fields || {}).length, 0), 'provenance field count must track the evidence index');
-assert.equal(evidence.provenance.verifiedFieldValues, 7547, 'verified field count should include exact Saijo, Daikin, and TCL fields');
+assert.equal(evidence.provenance.verifiedFieldValues, 7921, 'verified field count should include exact manufacturer and regulatory fields');
 assert.equal(new Set(evidence.models.map(model => `${model.brandId}|${model.type}|${normalize(model.sku)}`)).size, evidence.models.length, 'model evidence keys must be unique');
 assert.equal(evidence.provenance.currentSiteCatalogSha256, crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'assets', 'sbp-data.json'))).digest('hex'), 'evidence must declare the catalog snapshot it was matched against');
 const tclApiSources = evidence.sources.filter(source => source.captureFile?.startsWith('docs/evidence/tcl-2026-10-16/'));
@@ -59,6 +59,22 @@ for (const source of tclApiSources) {
   assert.equal(crypto.createHash('sha256').update(capture).digest('hex'), source.sha256, `${source.sourceId} raw API snapshot must match its retained SHA-256`);
   assert.equal(JSON.parse(capture.toString('utf8')).code, 200, `${source.sourceId} capture must be a successful official response`);
   assert.match(source.captureHref, /^https:\/\/www\.tcl\.com\//, `${source.sourceId} should retain the exact official JSON endpoint`);
+}
+const centralAirSources = evidence.sources.filter(source => source.captureFile?.startsWith('docs/evidence/centralair-2026-10-16/'));
+assert.equal(centralAirSources.length, 5, 'three Central Air catalogue transcriptions and two TISI license records should be retained');
+for (const source of centralAirSources) {
+  const capture = fs.readFileSync(path.join(root, source.captureFile));
+  assert.equal(crypto.createHash('sha256').update(capture).digest('hex'), source.sha256, `${source.sourceId} transcription must match its retained capture SHA-256`);
+  assert.equal(source.captureHashKind, 'STRUCTURED_TEXT_TRANSCRIPTION_NOT_REMOTE_PDF_BINARY', `${source.sourceId} must distinguish transcription hash from a remote PDF binary hash`);
+}
+const plySmTisiSources = evidence.sources.filter(source => source.captureFile?.startsWith('docs/evidence/mitsubishi-ply-sm-2026-10-16/'));
+assert.equal(plySmTisiSources.length, 2, 'both exact PLY-SM TISI license revisions should be retained');
+for (const source of plySmTisiSources) {
+  const capture = fs.readFileSync(path.join(root, source.captureFile));
+  const captureJson = JSON.parse(capture.toString('utf8'));
+  assert.equal(crypto.createHash('sha256').update(capture).digest('hex'), source.captureSha256, `${source.sourceId} transcription hash should match`);
+  assert.equal(String(captureJson.sourcePdfSha256).toLowerCase(), source.sha256.toLowerCase(), `${source.sourceId} should distinguish transcription hash from original TISI PDF hash`);
+  assert.equal(source.captureHashKind, 'STRUCTURED_TISI_TRANSCRIPTION_SEPARATE_FROM_REMOTE_PDF_BINARY_SHA256');
 }
 
 const siteRows = site.prods.map(row => ({ type: row[0], brand: row[1], sku: row[2], btu: row[3], price: row[4] }));
@@ -95,11 +111,58 @@ for (const model of evidence.models) {
     }
   }
 }
-assert.equal(ratedCapacityCount, 299, 'only reviewed manufacturer BTU values are used');
-assert.equal(dimensionCompleteCount, 234, 'only complete, source-backed indoor W/H/D triplets may drive room simulation');
-assert.equal(pricebookBandDifferences, 133, 'manufacturer capacity and the company Pricebook band remain separate where they differ');
+assert.equal(ratedCapacityCount, 316, 'only reviewed manufacturer BTU values are used');
+assert.equal(dimensionCompleteCount, 251, 'only complete, source-backed indoor W/H/D triplets may drive room simulation');
+assert.equal(pricebookBandDifferences, 143, 'manufacturer capacity and the company Pricebook band remain separate where they differ');
 const evidenceKeys = new Set(evidence.models.map(model => `${normalize(model.brand)}|${model.type}|${normalize(model.sku)}`));
-assert.equal(siteRows.filter(row => !evidenceKeys.has(`${normalize(row.brand)}|${row.type}|${normalize(row.sku)}`)).length, 366, 'unmatched catalog rows should decrease only for exact manufacturer evidence');
+assert.equal(siteRows.filter(row => !evidenceKeys.has(`${normalize(row.brand)}|${row.type}|${normalize(row.sku)}`)).length, 349, 'unmatched catalog rows should decrease only for exact manufacturer evidence');
+
+const plySmPairs = [
+  ['PLY-SM13EA4/SUY-SM13VA4', 'PLY-SM13EA4', 'SUY-SM13VA4', 13989, 13989, 4100, 5.00, 42500],
+  ['PLY-SM18EA4/SUY-SM18VA4', 'PLY-SM18EA4', 'SUY-SM18VA4', 18084, 18084, 5300, 4.86, 49000],
+  ['PLY-SM24EA4/SUY-SM24VA4', 'PLY-SM24EA4', 'SUY-SM24VA4', 25249, 24225, 7100, 3.92, 61200],
+  ['PLY-SM30EA4/SUY-SM30VA4', 'PLY-SM30EA4', 'SUY-SM30VA4', 30026, 30026, 8800, 3.81, 66900],
+  ['PLY-SM36EA4/PUY-SM36VKA4', 'PLY-SM36EA4', 'PUY-SM36VKA4', 36167, 36167, 10600, 3.90, 77300],
+];
+for (const [sku, indoor, outdoor, pricebookBtu, manufacturerBtu, capacityW, tisiRatio, price] of plySmPairs) {
+  const row = siteRows.find(item => item.type === 'cassette' && item.brand === 'Mitsubishi Electric' && item.sku === sku);
+  const model = evidence.models.find(item => item.type === 'cassette' && item.brandId === 'mitsubishi-electric' && item.sku === sku);
+  assert.ok(row && model, `${sku} should match one exact public catalog row and evidence record`);
+  assert.equal(row.btu, pricebookBtu, `${sku} company BTU band should be preserved`);
+  assert.equal(row.price, price, `${sku} product price should be preserved`);
+  assert.equal(model.indoorModel, indoor);
+  assert.equal(model.outdoorModel, outdoor);
+  assert.equal(model.fields.btu.value, manufacturerBtu);
+  assert.equal(model.fields.outdoorModel.value, outdoor);
+  assert.equal(model.fields.outdoorModel.status, 'REGULATORY_RECORD_REVIEWED');
+  assert.equal(model.fields.ratedCapacityW.value, capacityW);
+  assert.equal(model.fields.tisiEnergyRatio.value, tisiRatio);
+  assert.match(model.fields.outdoorModel.locator, /T 7120|T 7931/);
+  assert.equal(model.fields.power.value, '220 V / 1 Phase / 50 Hz');
+}
+assert.ok(!siteRows.some(row => row.sku === 'PLY-SM36EA/TH-SUY-SM36VA-TH'), 'the unverified 36k SUY pairing should be corrected');
+assert.ok(siteRows.some(row => row.sku === 'PLY-SM36EA4/PUY-SM36VKA4'), 'the TISI-listed 36k one-phase PUY partner should be used');
+
+const centralAirModels = evidence.models.filter(model => model.brandId === 'central-air' && model.type === 'wall');
+assert.equal(centralAirModels.length, 12, 'only the 12 exact Central Air wall model pairs covered by the reviewed 2024 tables should be included');
+const centralByIndoor = new Map(centralAirModels.map(model => [model.indoorModel, model]));
+const centralMfe09 = centralByIndoor.get('CFW-MFE09');
+assert.equal(centralMfe09.sku.replace(/\s/g, ''), 'CFW-MFE09/CCS-MFE09');
+assert.equal(centralMfe09.fields.btu.value, 9300);
+assert.equal(centralMfe09.fields.ratedCapacityW.value, 2700);
+assert.equal(centralMfe09.fields.pipeGas.value, 9.52);
+assert.equal(evidence.sources[centralMfe09.fields.ratedCapacityW.sourceIndex].authorityType, 'THAI_REGULATORY_BODY');
+const centralMfe18 = centralByIndoor.get('CFW-MFE18');
+assert.equal(centralMfe18.fields.btu.value, 18200);
+const centralIvjs25 = centralByIndoor.get('CFW-IVJS25-1');
+assert.equal(centralIvjs25.fields.btu.value, 26000);
+assert.equal(centralIvjs25.fields.ratedInputW.value, 2200);
+assert.equal(centralIvjs25.fields.power.value, '220–240 V / 1Ph / 50 Hz');
+assert.equal(centralIvjs25.fields.power.status, 'REGULATORY_RECORD_REVIEWED');
+const centralJsfe09 = centralByIndoor.get('CFW-2JSFE09');
+assert.equal(centralJsfe09.fields.btu.value, 9600);
+assert.equal(centralJsfe09.fields.power.status, 'MANUFACTURER_DOCUMENT_REVIEWED', 'the unlisted JSFE09 TISI entry must not be inferred from adjacent model sizes');
+assert.equal(centralByIndoor.get('CFW-2JSFE25').fields.outdoorDepth.value, 350);
 
 const saijoModels = [
   ['TURBO A.P.S-09', 'TURBO APS R32-09', 'FS09TURBO32SW1', 'CE09TURBO32SW1', 9563, 9071, 10500, 3800, 654, 15.52, 350, 800, '1/4', '3/8', 2.5, 10, 28],
@@ -485,7 +548,7 @@ for (const [indoor, outdoor, housingHeight, outdoorDims, outdoorWeight, chargeKg
   }
 }
 assert.ok(!site.prods.some(row => row[0] === 'cassette' && row[1] === 'Carrier' && row[2] === '38TGV0302A1/40TGV0301UP'), 'the model code typo must not remain in the public catalog');
-assert.equal(site.prods.filter(row => !evidence.models.some(model => model.type === row[0] && normalize(model.brand) === normalize(row[1]) && normalize(model.sku) === normalize(row[2]))).length, 366, '366 company catalog rows should remain clearly unmatched to exact manufacturer/regulatory evidence');
+assert.equal(site.prods.filter(row => !evidence.models.some(model => model.type === row[0] && normalize(model.brand) === normalize(row[1]) && normalize(model.sku) === normalize(row[2]))).length, 349, '349 company catalog rows should remain clearly unmatched to exact manufacturer/regulatory evidence');
 
 const mhiProductList = evidence.sources.find(source => source.sourceId === 'MHI_TH_RESIDENTIAL_PRODUCT_LIST_2026');
 const mhiHaruCatalog = evidence.sources.find(source => source.sourceId === 'MHI_HARU_SERIES_CATALOG_2026');
@@ -1029,7 +1092,7 @@ const plyMManual = evidence.sources.find(source => source.sourceId === 'MITSUBIS
 assert.ok(plySmManual && plyMManual, 'both PLY series installation manuals must be retained as primary sources');
 assert.equal(plySmManual.sha256, '07f598f0c99df95bdc4ac58cb2f1b6d53466b71f4d659970f8b92c695352f428');
 assert.equal(plyMManual.sha256, 'cab337a547399f90d8e49f4a14fa22a8717dbae229c04d40aec1729f1f126109');
-const plyModels = evidence.models.filter(model => model.brandId === 'mitsubishi-electric' && model.type === 'cassette' && /^PLY-(?:SM|M)(?:13|18|24|30)EA[24]$/.test(model.indoorModel || ''));
+const plyModels = evidence.models.filter(model => model.brandId === 'mitsubishi-electric' && model.type === 'cassette' && /^PLY-(?:SM|\(M\))(?:13|18|24|30)EA[24]$/.test(model.sku || ''));
 assert.equal(plyModels.length, 8, 'the exact Mitsubishi Electric PLY 13k–30k catalogue models should be covered');
 for (const [sku, indoor, btu, seer, power, indoorDims, pipeLiquid, pipeGas] of [
   ['PLY-SM13EA4', 'PLY-SM13EA4', 13989, 26.37, '220 V / 1 Phase / 50 Hz', [258,840,840], '6.35 mm (1/4 in)', '12.70 mm (1/2 in)'],
@@ -1098,7 +1161,7 @@ for (const [indoor, outdoor, capacity, ratio, inputW] of [
 }
 assert.match(daikinWvModels.find(model => model.indoorModel === 'FTKF24WV2S').dataWarnings[0].text, /6,000 W.*24,200 BTU\/h/);
 
-const plySmLarge = evidence.models.filter(model => model.brandId === 'mitsubishi-electric' && model.type === 'cassette' && /^PLY-SM(?:36|42|48)EA4$/.test(model.indoorModel || ''));
+const plySmLarge = evidence.models.filter(model => model.brandId === 'mitsubishi-electric' && model.type === 'cassette' && model.sku === model.indoorModel && /^PLY-SM(?:36|42|48)EA4$/.test(model.indoorModel || ''));
 assert.equal(plySmLarge.length, 3, 'three exact PLY-SM 36k–48k model codes have common official-page evidence');
 for (const [sku, btu, seer, rated, capacityRange, hasInterconnect] of [
   ['PLY-SM36EA4', 36167, 22.28, 10.6, '4.0–10.6', true],

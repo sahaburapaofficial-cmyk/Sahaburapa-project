@@ -2,22 +2,22 @@
   "schema": "sbp-model-evidence-v1",
   "generatedAt": "2026-10-16",
   "provenance": {
-    "sourceName": "SBP C14/C15 exact-model evidence plus official Carrier, Daikin, Midea Thailand, Mitsubishi Electric, Panasonic, and TCL sources plus the official Daikin live product comparison page; official Carrier XPower TGV cassette catalogue (2023); verified physical, piping, refrigerant-charge, airflow and sound fields for 12 exact Carrier XPower TGV cassette pairs; exact Mitsubishi Electric PLY-M13/18/24/30/36 bundled cassette pairs cross-checked against TISI licenses and Mitsubishi installation/dimension documents; Daikin FTKF-WV2S exact model pairs and rated electrical/capacity records verified against TISI licenses; official Mitsubishi Heavy Duty Thailand residential product list and 2026 Haru Series catalogue; Panasonic Thailand YU-ZKT exact pages/2025 catalogue and XU-AKT product pages; TISI N35556-69/1529 exact supply/input records; TISI license T6961-1/1529 exact Daikin FHA13/18/24 BV2S records; official Saijo Denki residential catalogue M9/2021 with current official product-list cross-check; official TCL Thailand product_spec APIs for BreezeIN WiFi/Premium, SaveIN F1, and New Miracle exact models checked 2026-10-16",
+    "sourceName": "SBP C14/C15 exact-model evidence plus official Carrier, Daikin, Midea Thailand, Mitsubishi Electric, Panasonic, and TCL sources plus the official Daikin live product comparison page; official Carrier XPower TGV cassette catalogue (2023); verified physical, piping, refrigerant-charge, airflow and sound fields for 12 exact Carrier XPower TGV cassette pairs; exact Mitsubishi Electric PLY-M13/18/24/30/36 bundled cassette pairs cross-checked against TISI licenses and Mitsubishi installation/dimension documents; Daikin FTKF-WV2S exact model pairs and rated electrical/capacity records verified against TISI licenses; official Mitsubishi Heavy Duty Thailand residential product list and 2026 Haru Series catalogue; Panasonic Thailand YU-ZKT exact pages/2025 catalogue and XU-AKT product pages; TISI N35556-69/1529 exact supply/input records; TISI license T6961-1/1529 exact Daikin FHA13/18/24 BV2S records; official Saijo Denki residential catalogue M9/2021 with current official product-list cross-check; official TCL Thailand product_spec APIs for BreezeIN WiFi/Premium, SaveIN F1, and New Miracle exact models checked 2026-10-16; Central Air 2024 MFE/IVJS/2JSFE catalogue transcriptions cross-checked with exact TISI license pairs where listed",
     "sourceSha256": "a114708b5331fbaa89f8c92ede4d9ddcdd8fe5f10c9116db38702adf18f18266",
     "sourceCatalogModels": 1159,
     "sourceMasterCheckedAt": "2026-10-12",
-    "currentSiteCatalogSha256": "0b0f66a3b9c27c7ab14cf8afa8fa6f67954aecce7c1934ce29d7cd0e64f41477",
+    "currentSiteCatalogSha256": "ea8be20e1ea9ade99842dd7f62b513f4843e184e755bf758082e7f2354631b23",
     "currentSiteModels": 705,
-    "matchedExactModels": 339,
-    "verifiedFieldValues": 7547,
+    "matchedExactModels": 356,
+    "verifiedFieldValues": 7921,
     "manufacturerSourceCheckedAtRange": [
       "2026-10-08",
       "2026-10-16"
     ],
-    "matchingRule": "Exact brand and type plus exact indoor code, or exact indoor/outdoor pair in either order. Field requires manufacturer-reviewed status, exactModel=true, a SHA-256 retained for the primary source, an HTTPS manufacturer source, and an October 2026 check date. For the five Mitsubishi PLY-M bundles, the exact site indoor/outdoor pair is compared after removing only the repeated terminal TISI country suffix TH from each licensed model code; the original TISI codes remain stored. The four Daikin FTKF-WV2S records match the site catalog by exact indoor model; the exact TISI condenser partner is retained as a separate regulatory field. Panasonic YU-ZKT site rows that omit the CS-/CU- prefixes are linked only where the official indoor and outdoor codes share the exact full suffix in the catalog SKU; the explicit pair and exact manufacturer page must both agree. Saijo Denki Turbo A.P.S and Smart Cool site rows are matched by exact official family plus capacity suffix, and both published indoor/outdoor codes are retained from the corresponding exact manufacturer catalogue column; Turbo A.P.S 30/36/40 are only the single-phase non-T columns. Daikin FHFC-EV2S rows are matched only through the official exact indoor/outdoor pair in the Product Compare table; the two incorrect catalog code segments were corrected without changing company BTU bands, prices, or installation rates. TCL rows are matched only where the official customerModel selector and exact-model product_spec API agree; four company -ID suffixes were removed because TCL lists those TAC-BR model codes without the suffix.",
-    "excluded": "Retailer prices, company prices, stock, installation hints, warranty terms and HTTP-only source links were not imported. Carrier kW and refrigerant-charge unit conversions are identified in field locators. Daikin manual capacity remains in source kW and kcal/h; no kW-to-BTU conversion was inferred. Manufacturer BTU values were recorded only where the official product page states them. The FTKB grouped ZV2S/AV2S manufacturer page was split only where exact ordered model-code pairs were explicit; FTKM-W phase and pipe sizes were left unstated when not shown by the checked source. Carrier TGEV cassette 4-way product IDs and exact FCU/CDU pairs were matched against the published cassette SKU. The 2025 Carrier TGEV catalogue and exact indoor-unit installation manuals were checked; interconnection wiring is 4 × 1.5 mm² or larger (H07RN-F or 60245 IEC 66), maximum 70 m, and the indoor unit receives power from the outdoor unit. The indoor manuals refer mains supply and breaker sizing to the separate outdoor-unit manual, so those remain unstated. The pictured product was not copied into the product-photo manifest because per-model image authorization is absent. Daikin FCFC-EV2S exact product-page variants were matched only when the published indoor or full paired model uniquely identified one manufacturer variant; ambiguous 30k/36k catalog codes remain unmatched. Manufacturer electrical values identify the product power-supply phase and rated input W; no rated-current, breaker, mains-cable, or interconnection-cable data was inferred from this page. Daikin FCF-DV2S catalog rows were matched only for unique exact manufacturer pairs; higher-capacity FCF indoor codes with multiple 1-phase/3-phase outdoor variants remain unmatched where the website row omits the outdoor code. Mitsubishi Electric PLY-SM36/42/48 website rows do not distinguish single-phase and three-phase variants sharing the same base model code; only identical common specification fields were imported, power phase and variant-dependent outdoor dimensions/weights were withheld. Mitsubishi Electric PLY-M36/42/48 website rows normalize to exact PLY-M codes but do not distinguish single-phase and three-phase variants; only identical common specification fields were imported, phase and variant-dependent outdoor dimensions/weights were withheld. Panasonic YN-series values were taken from the official 2025 catalogue. It states 220 V and 50 Hz but not phase or conductor count; phase, mains/interconnect cable, and breaker values were not inferred. Carrier XPower TGV was matched by exact indoor/outdoor column pairs; phase and current are published only as the catalogue states, while wire count, cable size, and breaker remain unspecified. Carrier TGF June 2023 entries were matched only by exact catalog indoor/outdoor pairs; no inverter/fixed-speed claim, wiring, breaker, price, or warranty term was inferred. Daikin FTM-PV2S capacities remain in the exact source kW unit; no kW-to-BTU conversion was inferred. TCL BreezeIN Premium ranges remain separate from rated BTU, and no model wiring or breaker claims were inferred. The Daikin product comparison snapshot showed two FCF36DV2S outdoor variants at different voltage and phase; the site row omits the outdoor code, so only shared indoor and common specification fields are recorded and variant-dependent electrical/outdoor values are withheld. The Carrier XPower TGV 4-Way Cassette April 2023 catalogue was matched by exact indoor/outdoor columns; phase, rated BTU, SEER, current and input are captured per variant, while conductor count, cable sizes and breaker remain unspecified. One public-site outdoor model digit was corrected only after the exact manufacturer table confirmed 38TGV0301A1 paired with 40TGV0301UP; the company price and service rates were retained. TISI entries are identified as regulatory records, never as manufacturer pages. M24 displays an evidence warning because the site BTU listing does not agree with the exact-pair TISI watt rating; no BTU conversion or catalog-price/capacity overwrite was performed. PLY-M42/48 single-phase site bundles lack an exact TISI pair in the inspected license records and remain unverified. The TISI-listed 6,000 W cooling capacity for FTKF24WV2S is not converted to BTU/h; its different 24,200 BTU/h Pricebook value remains visible as a review warning and the Pricebook value still controls price bands. Mitsubishi Heavy Duty image files were not copied into the product-photo manifest because image reuse permission is not established. Manufacturer room-size guidance conflicts between the current residential product cards and the Haru brochure for some YYM sizes, so no model-specific room-area claim was imported. Panasonic YU-ZKT manufacturer BTU and model identity are separate from TISI watt capacity; TISI supply/input fields were added only for exact paired rows. Panasonic XU-AKT pages confirmed only the exact 09/24 model rows present in the site catalog; no dimensions, phase, input, or wiring values were inferred from family features. Saijo Denki M9/2021 brochure claims about warranty, energy-label stars and marketing features were excluded from public model fields; the source edition is explicitly retained because the specification catalogue is dated. The H×W×D triplets were normalized to width=second, height=first and depth=third only after preserving the original reported order. Cable conductor counts and breaker values were not inferred. TCL official product_spec API captures are retained with raw SHA-256 and exact selector cross-check; Power Cord and Connecting Wiring are separate fields, not treated as field-installed mains cable; no breaker, warranty, or unmatched alias was inferred.",
+    "matchingRule": "Exact brand and type plus exact indoor code, or exact indoor/outdoor pair in either order. Field requires manufacturer-reviewed status, exactModel=true, a SHA-256 retained for the primary source, an HTTPS manufacturer source, and an October 2026 check date. For the five Mitsubishi PLY-M bundles, the exact site indoor/outdoor pair is compared after removing only the repeated terminal TISI country suffix TH from each licensed model code; the original TISI codes remain stored. The four Daikin FTKF-WV2S records match the site catalog by exact indoor model; the exact TISI condenser partner is retained as a separate regulatory field. Panasonic YU-ZKT site rows that omit the CS-/CU- prefixes are linked only where the official indoor and outdoor codes share the exact full suffix in the catalog SKU; the explicit pair and exact manufacturer page must both agree. Saijo Denki Turbo A.P.S and Smart Cool site rows are matched by exact official family plus capacity suffix, and both published indoor/outdoor codes are retained from the corresponding exact manufacturer catalogue column; Turbo A.P.S 30/36/40 are only the single-phase non-T columns. Daikin FHFC-EV2S rows are matched only through the official exact indoor/outdoor pair in the Product Compare table; the two incorrect catalog code segments were corrected without changing company BTU bands, prices, or installation rates. TCL rows are matched only where the official customerModel selector and exact-model product_spec API agree; four company -ID suffixes were removed because TCL lists those TAC-BR model codes without the suffix. Mitsubishi PLY-SM13/18/24/30/36 catalog pair SKUs were corrected to the manufacturer/TISI indoor/outdoor codes; the TISI country suffix TH.TH is retained in the exact field locator and transcription, while the product page displays the base model codes.",
+    "excluded": "Retailer prices, company prices, stock, installation hints, warranty terms and HTTP-only source links were not imported. Carrier kW and refrigerant-charge unit conversions are identified in field locators. Daikin manual capacity remains in source kW and kcal/h; no kW-to-BTU conversion was inferred. Manufacturer BTU values were recorded only where the official product page states them. The FTKB grouped ZV2S/AV2S manufacturer page was split only where exact ordered model-code pairs were explicit; FTKM-W phase and pipe sizes were left unstated when not shown by the checked source. Carrier TGEV cassette 4-way product IDs and exact FCU/CDU pairs were matched against the published cassette SKU. The 2025 Carrier TGEV catalogue and exact indoor-unit installation manuals were checked; interconnection wiring is 4 × 1.5 mm² or larger (H07RN-F or 60245 IEC 66), maximum 70 m, and the indoor unit receives power from the outdoor unit. The indoor manuals refer mains supply and breaker sizing to the separate outdoor-unit manual, so those remain unstated. The pictured product was not copied into the product-photo manifest because per-model image authorization is absent. Daikin FCFC-EV2S exact product-page variants were matched only when the published indoor or full paired model uniquely identified one manufacturer variant; ambiguous 30k/36k catalog codes remain unmatched. Manufacturer electrical values identify the product power-supply phase and rated input W; no rated-current, breaker, mains-cable, or interconnection-cable data was inferred from this page. Daikin FCF-DV2S catalog rows were matched only for unique exact manufacturer pairs; higher-capacity FCF indoor codes with multiple 1-phase/3-phase outdoor variants remain unmatched where the website row omits the outdoor code. Mitsubishi Electric PLY-SM36/42/48 website rows do not distinguish single-phase and three-phase variants sharing the same base model code; only identical common specification fields were imported, power phase and variant-dependent outdoor dimensions/weights were withheld. Mitsubishi Electric PLY-M36/42/48 website rows normalize to exact PLY-M codes but do not distinguish single-phase and three-phase variants; only identical common specification fields were imported, phase and variant-dependent outdoor dimensions/weights were withheld. Panasonic YN-series values were taken from the official 2025 catalogue. It states 220 V and 50 Hz but not phase or conductor count; phase, mains/interconnect cable, and breaker values were not inferred. Carrier XPower TGV was matched by exact indoor/outdoor column pairs; phase and current are published only as the catalogue states, while wire count, cable size, and breaker remain unspecified. Carrier TGF June 2023 entries were matched only by exact catalog indoor/outdoor pairs; no inverter/fixed-speed claim, wiring, breaker, price, or warranty term was inferred. Daikin FTM-PV2S capacities remain in the exact source kW unit; no kW-to-BTU conversion was inferred. TCL BreezeIN Premium ranges remain separate from rated BTU, and no model wiring or breaker claims were inferred. The Daikin product comparison snapshot showed two FCF36DV2S outdoor variants at different voltage and phase; the site row omits the outdoor code, so only shared indoor and common specification fields are recorded and variant-dependent electrical/outdoor values are withheld. The Carrier XPower TGV 4-Way Cassette April 2023 catalogue was matched by exact indoor/outdoor columns; phase, rated BTU, SEER, current and input are captured per variant, while conductor count, cable sizes and breaker remain unspecified. One public-site outdoor model digit was corrected only after the exact manufacturer table confirmed 38TGV0301A1 paired with 40TGV0301UP; the company price and service rates were retained. TISI entries are identified as regulatory records, never as manufacturer pages. M24 displays an evidence warning because the site BTU listing does not agree with the exact-pair TISI watt rating; no BTU conversion or catalog-price/capacity overwrite was performed. PLY-M42/48 single-phase site bundles lack an exact TISI pair in the inspected license records and remain unverified. The TISI-listed 6,000 W cooling capacity for FTKF24WV2S is not converted to BTU/h; its different 24,200 BTU/h Pricebook value remains visible as a review warning and the Pricebook value still controls price bands. Mitsubishi Heavy Duty image files were not copied into the product-photo manifest because image reuse permission is not established. Manufacturer room-size guidance conflicts between the current residential product cards and the Haru brochure for some YYM sizes, so no model-specific room-area claim was imported. Panasonic YU-ZKT manufacturer BTU and model identity are separate from TISI watt capacity; TISI supply/input fields were added only for exact paired rows. Panasonic XU-AKT pages confirmed only the exact 09/24 model rows present in the site catalog; no dimensions, phase, input, or wiring values were inferred from family features. Saijo Denki M9/2021 brochure claims about warranty, energy-label stars and marketing features were excluded from public model fields; the source edition is explicitly retained because the specification catalogue is dated. The H×W×D triplets were normalized to width=second, height=first and depth=third only after preserving the original reported order. Cable conductor counts and breaker values were not inferred. TCL official product_spec API captures are retained with raw SHA-256 and exact selector cross-check; Power Cord and Connecting Wiring are separate fields, not treated as field-installed mains cable; no breaker, warranty, or unmatched alias was inferred. Exact TISI-backed Mitsubishi PLY-SM13/18/24/30/36 pairs were added and their company catalog pair codes corrected without changing price or Pricebook capacity. PLY-SM42/48 bundle rows remain unmatched because the exact condenser partner was not established in the checked TISI licenses.",
     "currentSiteCatalogModels": 705,
-    "regulatoryReviewedFieldValues": 76
+    "regulatoryReviewedFieldValues": 120
   },
   "fieldLabels": {
     "outdoorModel": {
@@ -1749,6 +1749,92 @@
       "sourceEdition": "Official product_spec JSON response for exact model TAC-MFS19; exact customerModel also cross-checked against the official family page; raw capture SHA-256 1b6664bb9d74d51780f4307cb6e04647ba9fa31322fa2d95de5a696049589213.",
       "verificationMethod": "TCL_OFFICIAL_PRODUCT_SPEC_JSON_RESPONSE_SHA256_AND_EXACT_CUSTOMER_MODEL_SELECTOR_CROSSCHECK",
       "authorityType": "MANUFACTURER",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "sourceId": "CENTRAL_AIR_MFE_2024_CATALOG_COPY",
+      "label": "Central Air MFE Series · 2024 OEM brochure copy (hosted by GoldenAir)",
+      "href": "https://goldenair.co.th/wp-content/uploads/2025/03/CentralAir-MFE-Series-Brochure.pdf",
+      "captureFile": "docs/evidence/centralair-2026-10-16/centralair-mfe-2024.json",
+      "sourceEdition": "2024 catalogue; structured text transcription checked 2026-10-16",
+      "verificationMethod": "OEM_BRANDED_CATALOGUE_TEXT_TRANSCRIPTION_WITH_TISI_EXACT_PAIR_CROSSCHECK",
+      "authorityType": "MANUFACTURER",
+      "sha256": "a837674f1da1bfb68be5c447d80b7263c3723dfd7f4397723c3e835fdd9d4ac3",
+      "checkedAt": "2026-10-16",
+      "captureHashKind": "STRUCTURED_TEXT_TRANSCRIPTION_NOT_REMOTE_PDF_BINARY"
+    },
+    {
+      "sourceId": "CENTRAL_AIR_IVJS_2024_CATALOG_COPY",
+      "label": "Central Air IVJS Series · 2024 OEM catalogue copy (hosted by GoldenAir)",
+      "href": "https://www.goldenair.co.th/wp-content/uploads/2024/04/2024-Catalog_CFW-IVJS-1.pdf",
+      "captureFile": "docs/evidence/centralair-2026-10-16/centralair-ivjs-2024.json",
+      "sourceEdition": "2024 catalogue; structured text transcription checked 2026-10-16",
+      "verificationMethod": "OEM_BRANDED_CATALOGUE_TEXT_TRANSCRIPTION_WITH_TISI_EXACT_PAIR_CROSSCHECK",
+      "authorityType": "MANUFACTURER",
+      "sha256": "18c2c8f763aaa5ec13e3007c0c3b6b8ffb968e6b4a9a7d7cbc873005d58bc0ba",
+      "checkedAt": "2026-10-16",
+      "captureHashKind": "STRUCTURED_TEXT_TRANSCRIPTION_NOT_REMOTE_PDF_BINARY"
+    },
+    {
+      "sourceId": "CENTRAL_AIR_2JSFE_2024_CATALOG_COPY",
+      "label": "Central Air 2JSFE Series · 2024 OEM catalogue copy (hosted by MeedeeAir)",
+      "href": "https://meedeeair.com/wp-content/uploads/2024/04/2024-Catalog_CFW-2JSFE.pdf",
+      "captureFile": "docs/evidence/centralair-2026-10-16/centralair-2jsfe-2024.json",
+      "sourceEdition": "2024 catalogue; structured text transcription checked 2026-10-16",
+      "verificationMethod": "OEM_BRANDED_CATALOGUE_TEXT_TRANSCRIPTION_WITH_TISI_EXACT_PAIR_CROSSCHECK_WHERE_LISTED",
+      "authorityType": "MANUFACTURER",
+      "sha256": "4da6d46d78f9c6dc3be4c7112052a892c0ef06cbcc0a24c57c50f5561c99393a",
+      "checkedAt": "2026-10-16",
+      "captureHashKind": "STRUCTURED_TEXT_TRANSCRIPTION_NOT_REMOTE_PDF_BINARY"
+    },
+    {
+      "sourceId": "TISI_CENTRAL_AIR_MFE_LICENSE_7486_2117_2134",
+      "label": "TISI · Central Air MFE model-pair licence T 7486-2117/2134",
+      "href": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977486_2117_2134.pdf",
+      "captureFile": "docs/evidence/centralair-2026-10-16/tisi-centralair-licenses.json",
+      "sourceEdition": "T 7486-2117/2134; structured page/entry transcription checked 2026-10-16",
+      "verificationMethod": "OFFICIAL_TISI_LICENSE_TEXT_TRANSCRIPTION_HASHED_AND_EXACT_INDOOR_OUTDOOR_PAIR_REVIEWED",
+      "authorityType": "THAI_REGULATORY_BODY",
+      "sha256": "1207b4294a73a571aa9688c3764e093c3d24bd14a28f55014c6ca7628a98ec28",
+      "checkedAt": "2026-10-16",
+      "captureHashKind": "STRUCTURED_TEXT_TRANSCRIPTION_NOT_REMOTE_PDF_BINARY"
+    },
+    {
+      "sourceId": "TISI_CENTRAL_AIR_WALL_LICENSE_7020_4_1529",
+      "label": "TISI · Central Air IVJS / 2JSFE model-pair licence T 7020-4/1529",
+      "href": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977020_4_1529.pdf",
+      "captureFile": "docs/evidence/centralair-2026-10-16/tisi-centralair-licenses.json",
+      "sourceEdition": "T 7020-4/1529; structured page/entry transcription checked 2026-10-16",
+      "verificationMethod": "OFFICIAL_TISI_LICENSE_TEXT_TRANSCRIPTION_HASHED_AND_EXACT_INDOOR_OUTDOOR_PAIR_REVIEWED",
+      "authorityType": "THAI_REGULATORY_BODY",
+      "sha256": "1207b4294a73a571aa9688c3764e093c3d24bd14a28f55014c6ca7628a98ec28",
+      "checkedAt": "2026-10-16",
+      "captureHashKind": "STRUCTURED_TEXT_TRANSCRIPTION_NOT_REMOTE_PDF_BINARY"
+    },
+    {
+      "sourceId": "TISI_PLY_SM_PAIRS_T7120_2108_2134",
+      "label": "TISI · T 7120-2108/2134 · exact PLY-SM13/18/24/30 indoor/outdoor pairs",
+      "href": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977120_2108_2134.pdf",
+      "sha256": "62f7e22ca63b17bbbceb12943fb69fefd68b8e3fc209bf58bbb0e920000ca0e5",
+      "captureFile": "docs/evidence/mitsubishi-ply-sm-2026-10-16/tisi-7120-ply-sm-pairs.json",
+      "captureSha256": "6a0091d48f7428184ea9eba8b127c2ae3b59647960620af7742bd29897efa874",
+      "captureHashKind": "STRUCTURED_TISI_TRANSCRIPTION_SEPARATE_FROM_REMOTE_PDF_BINARY_SHA256",
+      "sourceEdition": "T 7120-2108/2134; revised 2024-09-02; exact PLY-SM13/18/24/30 model pairs and rating entries reviewed at PDF pages 59–61",
+      "verificationMethod": "DIRECT_OFFICIAL_TISI_PDF_SHA256_AND_EXACT_MODEL_PAIR_REVIEW",
+      "authorityType": "THAI_REGULATORY_BODY",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "sourceId": "TISI_PLY_SM36_PAIR_T7931_2119_2134",
+      "label": "TISI · T 7931-2119/2134 · exact PLY-SM36EA4/PUY-SM36VKA4 pair",
+      "href": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977931_2119_2134.pdf",
+      "sha256": "81414bc8667724f07531c98e1ea9546cac83e5115c3b04438c0a25730ed6b440",
+      "captureFile": "docs/evidence/mitsubishi-ply-sm-2026-10-16/tisi-7931-ply-sm36-pair.json",
+      "captureSha256": "7444311c1de0e31b3cd9c7c68ef76854f3038fbccaaa0797ce61f71e8a3be8da",
+      "captureHashKind": "STRUCTURED_TISI_TRANSCRIPTION_SEPARATE_FROM_REMOTE_PDF_BINARY_SHA256",
+      "sourceEdition": "T 7931-2119/2134; revised 2024-09-10; exact single-phase PLY-SM36EA4/PUY-SM36VKA4 pair reviewed at PDF page 80, entry 364",
+      "verificationMethod": "DIRECT_OFFICIAL_TISI_PDF_SHA256_AND_EXACT_MODEL_PAIR_REVIEW",
+      "authorityType": "THAI_REGULATORY_BODY",
       "checkedAt": "2026-10-16"
     }
   ],
@@ -73403,6 +73489,3563 @@
           "exactModel": true,
           "sourceIndex": 158,
           "locator": "TCL Thailand New Miracle Series · exact TAC-MFS19 · product_spec API · SEER (ค่าประสิทธิภาพ)=13.48"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-MFE09",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-MFE09 / CCS-MFE09",
+      "indoorModel": "CFW-MFE09",
+      "outdoorModel": "CCS-MFE09",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-MFE09",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-MFE09",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 9300,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 2700,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF pages 2–3, entries 3 and 5; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 720,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Power Consumption, Watts"
+        },
+        "seer": {
+          "value": 13.77,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 3.3,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Running Current, Amps"
+        },
+        "power": {
+          "value": "220 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Power Supply, V/Ph/Hz"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 835,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 295,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 208,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 765,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 555,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 303,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 9.3,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 26,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 9.52,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE09/CCS-MFE09; Suction Size, mm (inch also shown in capture)"
+        },
+        "tisiEnergyRatio": {
+          "value": 3.8,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตาม มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF pages 2–3, entries 3 and 5; energy efficiency ratio"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-MFE13",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-MFE13 / CCS-MFE13",
+      "indoorModel": "CFW-MFE13",
+      "outdoorModel": "CCS-MFE13",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-MFE13",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-MFE13",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 12300,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 3600,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF page 3, entry 7; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 950,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Power Consumption, Watts"
+        },
+        "seer": {
+          "value": 13.77,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 4.4,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Running Current, Amps"
+        },
+        "power": {
+          "value": "220 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Power Supply, V/Ph/Hz"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 835,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 295,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 208,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 887,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 610,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 337,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 9.4,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 31.5,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 12.7,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE13/CCS-MFE13; Suction Size, mm (inch also shown in capture)"
+        },
+        "tisiEnergyRatio": {
+          "value": 3.8,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตาม มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF page 3, entry 7; energy efficiency ratio"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-MFE18",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-MFE18 / CCS-MFE18",
+      "indoorModel": "CFW-MFE18",
+      "outdoorModel": "CCS-MFE18",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-MFE18",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-MFE18",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 18200,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 5300,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF page 3, entry 9; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 1405,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Power Consumption, Watts"
+        },
+        "seer": {
+          "value": 13.77,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 6.4,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Running Current, Amps"
+        },
+        "power": {
+          "value": "220 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Power Supply, V/Ph/Hz"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 969,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 320,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 241,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 805,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 554,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 330,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 12.3,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 39.9,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 12.7,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE18/CCS-MFE18; Suction Size, mm (inch also shown in capture)"
+        },
+        "tisiEnergyRatio": {
+          "value": 3.8,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตาม มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF page 3, entry 9; energy efficiency ratio"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-MFE25",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-MFE25 / CCS-MFE25",
+      "indoorModel": "CFW-MFE25",
+      "outdoorModel": "CCS-MFE25",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-MFE25",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-MFE25",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 25000,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 7300,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF page 4, entry 11; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 1980,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Power Consumption, Watts"
+        },
+        "seer": {
+          "value": 13.41,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 9,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Running Current, Amps"
+        },
+        "power": {
+          "value": "220 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Power Supply, V/Ph/Hz"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 1083,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 336,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 244,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 890,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 673,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 342,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 14.1,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 50.7,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 9.52,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 15.88,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 159,
+          "locator": "PDF page 2; exact printed column CFW-MFE25/CCS-MFE25; Suction Size, mm (inch also shown in capture)"
+        },
+        "tisiEnergyRatio": {
+          "value": 3.7,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตาม มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 162,
+          "locator": "T 7486-2117/2134; PDF page 4, entry 11; energy efficiency ratio"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-IVJS09-1",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-IVJS09-1 / CCS-IVJS09-1",
+      "indoorModel": "CFW-IVJS09-1",
+      "outdoorModel": "CCS-IVJS09-1",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-IVJS09-1",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-IVJS09-1",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 9500,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 2700,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "T 7020-4/1529; PDF page 33, entry 129; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 820,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 129; rated electrical input"
+        },
+        "seer": {
+          "value": 17.16,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 3.89,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Running Current, Amps"
+        },
+        "power": {
+          "value": "220–240 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 129; rated voltage, phase and frequency"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 792,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 292,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 201,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 650,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 456,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 233,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 8,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 17,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 9.52,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS09-1/CCS-IVJS09-1; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-IVJS13-1",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-IVJS13-1 / CCS-IVJS13-1",
+      "indoorModel": "CFW-IVJS13-1",
+      "outdoorModel": "CCS-IVJS13-1",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-IVJS13-1",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-IVJS13-1",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 13000,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 3500,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "T 7020-4/1529; PDF page 33, entry 130; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 1150,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 130; rated electrical input"
+        },
+        "seer": {
+          "value": 17.81,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 5.1,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Running Current, Amps"
+        },
+        "power": {
+          "value": "220–240 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 130; rated voltage, phase and frequency"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 881,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 294,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 194,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 705,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 530,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 279,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 10,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 21,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 9.52,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS13-1/CCS-IVJS13-1; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-IVJS18-1",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-IVJS18-1 / CCS-IVJS18-1",
+      "indoorModel": "CFW-IVJS18-1",
+      "outdoorModel": "CCS-IVJS18-1",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-IVJS18-1",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-IVJS18-1",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 18500,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 5300,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "T 7020-4/1529; PDF page 33, entry 131; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 1700,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 131; rated electrical input"
+        },
+        "seer": {
+          "value": 17.33,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 7.8,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Running Current, Amps"
+        },
+        "power": {
+          "value": "220–240 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 131; rated voltage, phase and frequency"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 940,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 316,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 224,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 705,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 530,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 279,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 11,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 23,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 12.7,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS18-1/CCS-IVJS18-1; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-IVJS25-1",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-IVJS25-1 / CCS-IVJS25-1",
+      "indoorModel": "CFW-IVJS25-1",
+      "outdoorModel": "CCS-IVJS25-1",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-IVJS25-1",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-IVJS25-1",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 26000,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 7000,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "T 7020-4/1529; PDF page 33, entry 132; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 2200,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 132; rated electrical input"
+        },
+        "seer": {
+          "value": 17.66,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 10.3,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Running Current, Amps"
+        },
+        "power": {
+          "value": "220–240 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 33, entry 132; rated voltage, phase and frequency"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 1132,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 330,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 232,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 900,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 700,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 350,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 14,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 40,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 15.88,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 160,
+          "locator": "PDF page 2; exact printed column CFW-IVJS25-1/CCS-IVJS25-1; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-2JSFE09",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-2JSFE09 / CCS-2JSFE09",
+      "indoorModel": "CFW-2JSFE09",
+      "outdoorModel": "CCS-2JSFE09",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-2JSFE09",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-2JSFE09",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 9600,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 2600,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Cooling Capacity, Watts"
+        },
+        "ratedInputW": {
+          "value": 720,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Power Consumption, Watts"
+        },
+        "seer": {
+          "value": 13.44,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 3.4,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Running Current, Amps"
+        },
+        "power": {
+          "value": "220 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Power Supply, V/Ph/Hz"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 792,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 292,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 201,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 730,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 545,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 285,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 8,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 25,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 9.52,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE09/CCS-2JSFE09; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-2JSFE13",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-2JSFE13 / CCS-2JSFE13",
+      "indoorModel": "CFW-2JSFE13",
+      "outdoorModel": "CCS-2JSFE13",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-2JSFE13",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-2JSFE13",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 12300,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 3500,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "T 7020-4/1529; PDF page 47, entry 178; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 1600,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 47, entry 178; rated electrical input"
+        },
+        "seer": {
+          "value": 13.82,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 4.4,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Running Current, Amps"
+        },
+        "power": {
+          "value": "220–240 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 47, entry 178; rated voltage, phase and frequency"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 881,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 294,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 194,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 730,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 545,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 285,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 9.5,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 28,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 12.7,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE13/CCS-2JSFE13; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-2JSFE18",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-2JSFE18 / CCS-2JSFE18",
+      "indoorModel": "CFW-2JSFE18",
+      "outdoorModel": "CCS-2JSFE18",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-2JSFE18",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-2JSFE18",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 18300,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 5200,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "T 7020-4/1529; PDF page 47, entry 179; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 2100,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 47, entry 179; rated electrical input"
+        },
+        "seer": {
+          "value": 13.51,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 6.8,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Running Current, Amps"
+        },
+        "power": {
+          "value": "220–240 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 47, entry 179; rated voltage, phase and frequency"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 1132,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 330,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 232,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 800,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 545,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 315,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 14.5,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 34,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 12.7,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE18/CCS-2JSFE18; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": "CENTRAL-AIR-WALL-CFW-2JSFE25",
+      "brand": "Central Air",
+      "brandId": "central-air",
+      "type": "wall",
+      "sku": "CFW-2JSFE25 / CCS-2JSFE25",
+      "indoorModel": "CFW-2JSFE25",
+      "outdoorModel": "CCS-2JSFE25",
+      "fields": {
+        "indoorModel": {
+          "value": "CFW-2JSFE25",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; indoor-unit model row"
+        },
+        "outdoorModel": {
+          "value": "CCS-2JSFE25",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; outdoor-unit model row"
+        },
+        "btu": {
+          "value": 25100,
+          "label": "ความจุความเย็นตามเอกสารผู้ผลิต",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Cooling Capacity, Btu/hr"
+        },
+        "ratedCapacityW": {
+          "value": 7000,
+          "label": "ความจุความเย็นพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "T 7020-4/1529; PDF page 47, entry 180; net cooling capacity"
+        },
+        "ratedInputW": {
+          "value": 2700,
+          "label": "กำลังไฟฟ้าขาเข้าพิกัด",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 47, entry 180; rated electrical input"
+        },
+        "seer": {
+          "value": 13.55,
+          "label": "ค่า SEER",
+          "unit": "BTU/h/W",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; SEER row"
+        },
+        "ratedCurrentA": {
+          "value": 9,
+          "label": "กระแสไฟฟ้าพิกัด",
+          "unit": "A",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Running Current, Amps"
+        },
+        "power": {
+          "value": "220–240 V / 1Ph / 50 Hz",
+          "label": "แหล่งจ่ายไฟ",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 163,
+          "locator": "PDF page 47, entry 180; rated voltage, phase and frequency"
+        },
+        "inverter": {
+          "value": false,
+          "label": "ระบบ Inverter",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; series title"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Refrigerant Type"
+        },
+        "indoorWidth": {
+          "value": 1132,
+          "label": "ความกว้างคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Dimension (W/H/D), indoor unit width, mm"
+        },
+        "indoorHeight": {
+          "value": 330,
+          "label": "ความสูงคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Dimension (W/H/D), indoor unit height, mm"
+        },
+        "indoorDepth": {
+          "value": 232,
+          "label": "ความลึกคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Dimension (W/H/D), indoor unit depth, mm"
+        },
+        "outdoorWidth": {
+          "value": 900,
+          "label": "ความกว้างคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Dimension (W/H/D), outdoor unit width, mm"
+        },
+        "outdoorHeight": {
+          "value": 700,
+          "label": "ความสูงคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Dimension (W/H/D), outdoor unit height, mm"
+        },
+        "outdoorDepth": {
+          "value": 350,
+          "label": "ความลึกคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Dimension (W/H/D), outdoor unit depth, mm"
+        },
+        "indoorWeight": {
+          "value": 14,
+          "label": "น้ำหนักสุทธิคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; indoor net weight, kg"
+        },
+        "outdoorWeight": {
+          "value": 50,
+          "label": "น้ำหนักสุทธิคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; outdoor net weight, kg"
+        },
+        "pipeLiquid": {
+          "value": 6.35,
+          "label": "ขนาดท่อ Liquid",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Liquid Size, mm (inch also shown in capture)"
+        },
+        "pipeGas": {
+          "value": 15.88,
+          "label": "ขนาดท่อ Gas / Suction",
+          "unit": "mm",
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 161,
+          "locator": "PDF page 2; exact printed column CFW-2JSFE25/CCS-2JSFE25; Suction Size, mm (inch also shown in capture)"
+        }
+      }
+    },
+    {
+      "productId": null,
+      "brand": "Mitsubishi Electric",
+      "brandId": "mitsubishi-electric",
+      "type": "cassette",
+      "sku": "PLY-SM13EA4/SUY-SM13VA4",
+      "indoorModel": "PLY-SM13EA4",
+      "outdoorModel": "SUY-SM13VA4",
+      "fields": {
+        "indoorModel": {
+          "value": "PLY-SM13EA4",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; MODEL field"
+        },
+        "btu": {
+          "value": 13989,
+          "label": "ความจุความเย็น",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Cooling capacity (BTU/h) field"
+        },
+        "seer": {
+          "value": 26.37,
+          "label": "SEER",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; SEER (Btu/h/W) field"
+        },
+        "ratedCapacityKw": {
+          "value": 4.1,
+          "label": "ความสามารถทำความเย็นตามพิกัด",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Cooling : Capacity Rated (kW), manufacturer rated value"
+        },
+        "capacityRangeKw": {
+          "value": "2.8–4.1",
+          "label": "ช่วงความสามารถทำความเย็นตามกำลัง",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Cooling : Capacity Rated (kW), manufacturer minimum-to-maximum range"
+        },
+        "power": {
+          "value": "220 V / 1 Phase / 50 Hz",
+          "label": "แหล่งจ่ายไฟตามเอกสารผู้ผลิต",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Power Supply field: 1ph, 220V, 50Hz"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ประเภทระบบ",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Official PLY product description identifies Inverter Series"
+        },
+        "series": {
+          "value": "PLY-SERIES",
+          "label": "ซีรีส์",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Official product family heading"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Refrigerant field"
+        },
+        "indoorDimReported": {
+          "value": "258 × 840 × 840 mm (H × W × D)",
+          "label": "ขนาดคอยล์เย็นตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Indoor (H x W x D) field; original order retained"
+        },
+        "indoorHeight": {
+          "value": 258,
+          "label": "ความสูงตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Indoor (H x W x D), first value: height"
+        },
+        "indoorWidth": {
+          "value": 840,
+          "label": "ความกว้างตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Indoor (H x W x D), second value: width"
+        },
+        "indoorDepth": {
+          "value": 840,
+          "label": "ความลึกตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Indoor (H x W x D), third value: depth"
+        },
+        "indoorWeight": {
+          "value": 21,
+          "label": "น้ำหนักคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Weight Indoor field"
+        },
+        "outdoorDimReported": {
+          "value": "714 × 800 × 285 mm (H × W × D)",
+          "label": "ขนาดคอยล์ร้อนตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Outdoor (H x W x D) field; original order retained"
+        },
+        "outdoorHeight": {
+          "value": 714,
+          "label": "ความสูงตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Outdoor (H x W x D), first value: height"
+        },
+        "outdoorWidth": {
+          "value": 800,
+          "label": "ความกว้างตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Outdoor (H x W x D), second value: width"
+        },
+        "outdoorDepth": {
+          "value": 285,
+          "label": "ความลึกตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Dimensions Outdoor (H x W x D), third value: depth"
+        },
+        "outdoorWeight": {
+          "value": 35,
+          "label": "น้ำหนักคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Weight Outdoor field"
+        },
+        "pipeLiquid": {
+          "value": "6.35 mm (1/4 in)",
+          "label": "ขนาดท่อ Liquid",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Piping Size : Liquid (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "pipeGas": {
+          "value": "12.70 mm (1/2 in)",
+          "label": "ขนาดท่อ Gas",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Piping Size : Gas (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "maxPipe": {
+          "value": 20,
+          "label": "ความยาวท่อสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Piping Size : Max.Length / Max.Height (m), first value: maximum length"
+        },
+        "maxLift": {
+          "value": 12,
+          "label": "ระดับต่างสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 84,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM13EA4; Piping Size : Max.Length / Max.Height (m), second value: maximum height difference"
+        },
+        "interconnectCable": {
+          "value": "สายระหว่างคอยล์เย็น–คอยล์ร้อน 3 เส้น × 1.5 mm² (มีขั้ว S1/S2/S3) และสายดินแยก 1 เส้น × ไม่น้อยกว่า 1.5 mm²; ความยาวสูงสุด 45 m (ถ้าใช้ 2.5 mm² สูงสุด 50 m; หากใช้ 2.5 mm² และแยก S3 สูงสุด 80 m)",
+          "label": "สายเชื่อมระหว่างคอยล์เย็นและคอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 92,
+          "locator": "Official Mitsubishi Electric PLY-SM installation manual, printed p. 9; “Indoor unit model PLY” wiring table and footnote *1. This is the indoor/outdoor interconnection and earth conductor; the manual says outdoor-unit supply patterns vary, so no mains-wire or breaker claim is inferred."
+        },
+        "outdoorModel": {
+          "value": "SUY-SM13VA4",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 59, entry 278; licensed exact pair PLY-SM13EA4-TH.TH/SUY-SM13VA4-TH.TH; condenser-unit model code and exact indoor/outdoor pairing"
+        },
+        "ratedCapacityW": {
+          "value": 4100,
+          "label": "ความสามารถทำความเย็นพิกัดตามทะเบียน มอก.",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 59, entry 278; licensed exact pair PLY-SM13EA4-TH.TH/SUY-SM13VA4-TH.TH; net rated cooling capacity in the license record"
+        },
+        "tisiEnergyRatio": {
+          "value": 5,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตามทะเบียน มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 59, entry 278; licensed exact pair PLY-SM13EA4-TH.TH/SUY-SM13VA4-TH.TH; energy efficiency ratio in the license record"
+        }
+      }
+    },
+    {
+      "productId": null,
+      "brand": "Mitsubishi Electric",
+      "brandId": "mitsubishi-electric",
+      "type": "cassette",
+      "sku": "PLY-SM18EA4/SUY-SM18VA4",
+      "indoorModel": "PLY-SM18EA4",
+      "outdoorModel": "SUY-SM18VA4",
+      "fields": {
+        "indoorModel": {
+          "value": "PLY-SM18EA4",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; MODEL field"
+        },
+        "btu": {
+          "value": 18084,
+          "label": "ความจุความเย็น",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Cooling capacity (BTU/h) field"
+        },
+        "seer": {
+          "value": 26.17,
+          "label": "SEER",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; SEER (Btu/h/W) field"
+        },
+        "ratedCapacityKw": {
+          "value": 5.3,
+          "label": "ความสามารถทำความเย็นตามพิกัด",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Cooling : Capacity Rated (kW), manufacturer rated value"
+        },
+        "capacityRangeKw": {
+          "value": "2.8–5.3",
+          "label": "ช่วงความสามารถทำความเย็นตามกำลัง",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Cooling : Capacity Rated (kW), manufacturer minimum-to-maximum range"
+        },
+        "power": {
+          "value": "220 V / 1 Phase / 50 Hz",
+          "label": "แหล่งจ่ายไฟตามเอกสารผู้ผลิต",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Power Supply field: 1ph, 220V, 50Hz"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ประเภทระบบ",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Official PLY product description identifies Inverter Series"
+        },
+        "series": {
+          "value": "PLY-SERIES",
+          "label": "ซีรีส์",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Official product family heading"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Refrigerant field"
+        },
+        "indoorDimReported": {
+          "value": "258 × 840 × 840 mm (H × W × D)",
+          "label": "ขนาดคอยล์เย็นตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Indoor (H x W x D) field; original order retained"
+        },
+        "indoorHeight": {
+          "value": 258,
+          "label": "ความสูงตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Indoor (H x W x D), first value: height"
+        },
+        "indoorWidth": {
+          "value": 840,
+          "label": "ความกว้างตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Indoor (H x W x D), second value: width"
+        },
+        "indoorDepth": {
+          "value": 840,
+          "label": "ความลึกตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Indoor (H x W x D), third value: depth"
+        },
+        "indoorWeight": {
+          "value": 21,
+          "label": "น้ำหนักคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Weight Indoor field"
+        },
+        "outdoorDimReported": {
+          "value": "550 × 800 × 285 mm (H × W × D)",
+          "label": "ขนาดคอยล์ร้อนตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Outdoor (H x W x D) field; original order retained"
+        },
+        "outdoorHeight": {
+          "value": 550,
+          "label": "ความสูงตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Outdoor (H x W x D), first value: height"
+        },
+        "outdoorWidth": {
+          "value": 800,
+          "label": "ความกว้างตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Outdoor (H x W x D), second value: width"
+        },
+        "outdoorDepth": {
+          "value": 285,
+          "label": "ความลึกตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Dimensions Outdoor (H x W x D), third value: depth"
+        },
+        "outdoorWeight": {
+          "value": 44,
+          "label": "น้ำหนักคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Weight Outdoor field"
+        },
+        "pipeLiquid": {
+          "value": "6.35 mm (1/4 in)",
+          "label": "ขนาดท่อ Liquid",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Piping Size : Liquid (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "pipeGas": {
+          "value": "12.70 mm (1/2 in)",
+          "label": "ขนาดท่อ Gas",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Piping Size : Gas (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "maxPipe": {
+          "value": 20,
+          "label": "ความยาวท่อสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Piping Size : Max.Length / Max.Height (m), first value: maximum length"
+        },
+        "maxLift": {
+          "value": 12,
+          "label": "ระดับต่างสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 85,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM18EA4; Piping Size : Max.Length / Max.Height (m), second value: maximum height difference"
+        },
+        "interconnectCable": {
+          "value": "สายระหว่างคอยล์เย็น–คอยล์ร้อน 3 เส้น × 1.5 mm² (มีขั้ว S1/S2/S3) และสายดินแยก 1 เส้น × ไม่น้อยกว่า 1.5 mm²; ความยาวสูงสุด 45 m (ถ้าใช้ 2.5 mm² สูงสุด 50 m; หากใช้ 2.5 mm² และแยก S3 สูงสุด 80 m)",
+          "label": "สายเชื่อมระหว่างคอยล์เย็นและคอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 92,
+          "locator": "Official Mitsubishi Electric PLY-SM installation manual, printed p. 9; “Indoor unit model PLY” wiring table and footnote *1. This is the indoor/outdoor interconnection and earth conductor; the manual says outdoor-unit supply patterns vary, so no mains-wire or breaker claim is inferred."
+        },
+        "outdoorModel": {
+          "value": "SUY-SM18VA4",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 59, entry 282; licensed exact pair PLY-SM18EA4-TH.TH/SUY-SM18VA4-TH.TH; condenser-unit model code and exact indoor/outdoor pairing"
+        },
+        "ratedCapacityW": {
+          "value": 5300,
+          "label": "ความสามารถทำความเย็นพิกัดตามทะเบียน มอก.",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 59, entry 282; licensed exact pair PLY-SM18EA4-TH.TH/SUY-SM18VA4-TH.TH; net rated cooling capacity in the license record"
+        },
+        "tisiEnergyRatio": {
+          "value": 4.86,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตามทะเบียน มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 59, entry 282; licensed exact pair PLY-SM18EA4-TH.TH/SUY-SM18VA4-TH.TH; energy efficiency ratio in the license record"
+        }
+      }
+    },
+    {
+      "productId": null,
+      "brand": "Mitsubishi Electric",
+      "brandId": "mitsubishi-electric",
+      "type": "cassette",
+      "sku": "PLY-SM24EA4/SUY-SM24VA4",
+      "indoorModel": "PLY-SM24EA4",
+      "outdoorModel": "SUY-SM24VA4",
+      "fields": {
+        "indoorModel": {
+          "value": "PLY-SM24EA4",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; MODEL field"
+        },
+        "btu": {
+          "value": 24225,
+          "label": "ความจุความเย็น",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Cooling capacity (BTU/h) field"
+        },
+        "seer": {
+          "value": 24.48,
+          "label": "SEER",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; SEER (Btu/h/W) field"
+        },
+        "ratedCapacityKw": {
+          "value": 7.1,
+          "label": "ความสามารถทำความเย็นตามพิกัด",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Cooling : Capacity Rated (kW), manufacturer rated value"
+        },
+        "capacityRangeKw": {
+          "value": "2.9–7.1",
+          "label": "ช่วงความสามารถทำความเย็นตามกำลัง",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Cooling : Capacity Rated (kW), manufacturer minimum-to-maximum range"
+        },
+        "power": {
+          "value": "220 V / 1 Phase / 50 Hz",
+          "label": "แหล่งจ่ายไฟตามเอกสารผู้ผลิต",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Power Supply field: 1ph, 220V, 50Hz"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ประเภทระบบ",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Official PLY product description identifies Inverter Series"
+        },
+        "series": {
+          "value": "PLY-SERIES",
+          "label": "ซีรีส์",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Official product family heading"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Refrigerant field"
+        },
+        "indoorDimReported": {
+          "value": "258 × 840 × 840 mm (H × W × D)",
+          "label": "ขนาดคอยล์เย็นตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Indoor (H x W x D) field; original order retained"
+        },
+        "indoorHeight": {
+          "value": 258,
+          "label": "ความสูงตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Indoor (H x W x D), first value: height"
+        },
+        "indoorWidth": {
+          "value": 840,
+          "label": "ความกว้างตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Indoor (H x W x D), second value: width"
+        },
+        "indoorDepth": {
+          "value": 840,
+          "label": "ความลึกตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Indoor (H x W x D), third value: depth"
+        },
+        "indoorWeight": {
+          "value": 21,
+          "label": "น้ำหนักคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Weight Indoor field"
+        },
+        "outdoorDimReported": {
+          "value": "880 × 840 × 330 mm (H × W × D)",
+          "label": "ขนาดคอยล์ร้อนตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Outdoor (H x W x D) field; original order retained"
+        },
+        "outdoorHeight": {
+          "value": 880,
+          "label": "ความสูงตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Outdoor (H x W x D), first value: height"
+        },
+        "outdoorWidth": {
+          "value": 840,
+          "label": "ความกว้างตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Outdoor (H x W x D), second value: width"
+        },
+        "outdoorDepth": {
+          "value": 330,
+          "label": "ความลึกตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Dimensions Outdoor (H x W x D), third value: depth"
+        },
+        "outdoorWeight": {
+          "value": 46,
+          "label": "น้ำหนักคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Weight Outdoor field"
+        },
+        "pipeLiquid": {
+          "value": "9.52 mm (3/8 in)",
+          "label": "ขนาดท่อ Liquid",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Piping Size : Liquid (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "pipeGas": {
+          "value": "15.88 mm (5/8 in)",
+          "label": "ขนาดท่อ Gas",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Piping Size : Gas (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "maxPipe": {
+          "value": 30,
+          "label": "ความยาวท่อสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Piping Size : Max.Length / Max.Height (m), first value: maximum length"
+        },
+        "maxLift": {
+          "value": 15,
+          "label": "ระดับต่างสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 86,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM24EA4; Piping Size : Max.Length / Max.Height (m), second value: maximum height difference"
+        },
+        "interconnectCable": {
+          "value": "สายระหว่างคอยล์เย็น–คอยล์ร้อน 3 เส้น × 1.5 mm² (มีขั้ว S1/S2/S3) และสายดินแยก 1 เส้น × ไม่น้อยกว่า 1.5 mm²; ความยาวสูงสุด 45 m (ถ้าใช้ 2.5 mm² สูงสุด 50 m; หากใช้ 2.5 mm² และแยก S3 สูงสุด 80 m)",
+          "label": "สายเชื่อมระหว่างคอยล์เย็นและคอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 92,
+          "locator": "Official Mitsubishi Electric PLY-SM installation manual, printed p. 9; “Indoor unit model PLY” wiring table and footnote *1. This is the indoor/outdoor interconnection and earth conductor; the manual says outdoor-unit supply patterns vary, so no mains-wire or breaker claim is inferred."
+        },
+        "outdoorModel": {
+          "value": "SUY-SM24VA4",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 60, entry 286; licensed exact pair PLY-SM24EA4-TH.TH/SUY-SM24VA4-TH.TH; condenser-unit model code and exact indoor/outdoor pairing"
+        },
+        "ratedCapacityW": {
+          "value": 7100,
+          "label": "ความสามารถทำความเย็นพิกัดตามทะเบียน มอก.",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 60, entry 286; licensed exact pair PLY-SM24EA4-TH.TH/SUY-SM24VA4-TH.TH; net rated cooling capacity in the license record"
+        },
+        "tisiEnergyRatio": {
+          "value": 3.92,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตามทะเบียน มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 60, entry 286; licensed exact pair PLY-SM24EA4-TH.TH/SUY-SM24VA4-TH.TH; energy efficiency ratio in the license record"
+        }
+      }
+    },
+    {
+      "productId": null,
+      "brand": "Mitsubishi Electric",
+      "brandId": "mitsubishi-electric",
+      "type": "cassette",
+      "sku": "PLY-SM30EA4/SUY-SM30VA4",
+      "indoorModel": "PLY-SM30EA4",
+      "outdoorModel": "SUY-SM30VA4",
+      "fields": {
+        "indoorModel": {
+          "value": "PLY-SM30EA4",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; MODEL field"
+        },
+        "btu": {
+          "value": 30026,
+          "label": "ความจุความเย็น",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Cooling capacity (BTU/h) field"
+        },
+        "seer": {
+          "value": 22.28,
+          "label": "SEER",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; SEER (Btu/h/W) field"
+        },
+        "ratedCapacityKw": {
+          "value": 8.8,
+          "label": "ความสามารถทำความเย็นตามพิกัด",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Cooling : Capacity Rated (kW), manufacturer rated value"
+        },
+        "capacityRangeKw": {
+          "value": "3.8–8.8",
+          "label": "ช่วงความสามารถทำความเย็นตามกำลัง",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Cooling : Capacity Rated (kW), manufacturer minimum-to-maximum range"
+        },
+        "power": {
+          "value": "220 V / 1 Phase / 50 Hz",
+          "label": "แหล่งจ่ายไฟตามเอกสารผู้ผลิต",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Power Supply field: 1ph, 220V, 50Hz"
+        },
+        "inverter": {
+          "value": true,
+          "label": "ประเภทระบบ",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Official PLY product description identifies Inverter Series"
+        },
+        "series": {
+          "value": "PLY-SERIES",
+          "label": "ซีรีส์",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Official product family heading"
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Refrigerant field"
+        },
+        "indoorDimReported": {
+          "value": "298 × 840 × 840 mm (H × W × D)",
+          "label": "ขนาดคอยล์เย็นตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Indoor (H x W x D) field; original order retained"
+        },
+        "indoorHeight": {
+          "value": 298,
+          "label": "ความสูงตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Indoor (H x W x D), first value: height"
+        },
+        "indoorWidth": {
+          "value": 840,
+          "label": "ความกว้างตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Indoor (H x W x D), second value: width"
+        },
+        "indoorDepth": {
+          "value": 840,
+          "label": "ความลึกตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Indoor (H x W x D), third value: depth"
+        },
+        "indoorWeight": {
+          "value": 27,
+          "label": "น้ำหนักคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Weight Indoor field"
+        },
+        "outdoorDimReported": {
+          "value": "880 × 840 × 330 mm (H × W × D)",
+          "label": "ขนาดคอยล์ร้อนตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Outdoor (H x W x D) field; original order retained"
+        },
+        "outdoorHeight": {
+          "value": 880,
+          "label": "ความสูงตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Outdoor (H x W x D), first value: height"
+        },
+        "outdoorWidth": {
+          "value": 840,
+          "label": "ความกว้างตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Outdoor (H x W x D), second value: width"
+        },
+        "outdoorDepth": {
+          "value": 330,
+          "label": "ความลึกตัวเครื่องคอยล์ร้อน",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Dimensions Outdoor (H x W x D), third value: depth"
+        },
+        "outdoorWeight": {
+          "value": 43,
+          "label": "น้ำหนักคอยล์ร้อน",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Weight Outdoor field"
+        },
+        "pipeLiquid": {
+          "value": "9.52 mm (3/8 in)",
+          "label": "ขนาดท่อ Liquid",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Piping Size : Liquid (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "pipeGas": {
+          "value": "15.88 mm (5/8 in)",
+          "label": "ขนาดท่อ Gas",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Piping Size : Gas (mm.in) field; both manufacturer metric and inch values retained"
+        },
+        "maxPipe": {
+          "value": 30,
+          "label": "ความยาวท่อสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Piping Size : Max.Length / Max.Height (m), first value: maximum length"
+        },
+        "maxLift": {
+          "value": 15,
+          "label": "ระดับต่างสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 87,
+          "locator": "Mitsubishi Electric Thailand official PLY Series product specification page for exact PLY-SM30EA4; Piping Size : Max.Length / Max.Height (m), second value: maximum height difference"
+        },
+        "interconnectCable": {
+          "value": "สายระหว่างคอยล์เย็น–คอยล์ร้อน 3 เส้น × 1.5 mm² (มีขั้ว S1/S2/S3) และสายดินแยก 1 เส้น × ไม่น้อยกว่า 1.5 mm²; ความยาวสูงสุด 45 m (ถ้าใช้ 2.5 mm² สูงสุด 50 m; หากใช้ 2.5 mm² และแยก S3 สูงสุด 80 m)",
+          "label": "สายเชื่อมระหว่างคอยล์เย็นและคอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 92,
+          "locator": "Official Mitsubishi Electric PLY-SM installation manual, printed p. 9; “Indoor unit model PLY” wiring table and footnote *1. This is the indoor/outdoor interconnection and earth conductor; the manual says outdoor-unit supply patterns vary, so no mains-wire or breaker claim is inferred."
+        },
+        "outdoorModel": {
+          "value": "SUY-SM30VA4",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 61, entry 290; licensed exact pair PLY-SM30EA4-TH.TH/SUY-SM30VA4-TH.TH; condenser-unit model code and exact indoor/outdoor pairing"
+        },
+        "ratedCapacityW": {
+          "value": 8800,
+          "label": "ความสามารถทำความเย็นพิกัดตามทะเบียน มอก.",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 61, entry 290; licensed exact pair PLY-SM30EA4-TH.TH/SUY-SM30VA4-TH.TH; net rated cooling capacity in the license record"
+        },
+        "tisiEnergyRatio": {
+          "value": 3.81,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตามทะเบียน มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 164,
+          "locator": "T 7120-2108/2134; PDF page 61, entry 290; licensed exact pair PLY-SM30EA4-TH.TH/SUY-SM30VA4-TH.TH; energy efficiency ratio in the license record"
+        }
+      }
+    },
+    {
+      "productId": null,
+      "brand": "Mitsubishi Electric",
+      "brandId": "mitsubishi-electric",
+      "type": "cassette",
+      "sku": "PLY-SM36EA4/PUY-SM36VKA4",
+      "indoorModel": "PLY-SM36EA4",
+      "outdoorModel": "PUY-SM36VKA4",
+      "variantSourceIndexes": [
+        98,
+        99
+      ],
+      "fields": {
+        "indoorModel": {
+          "value": "PLY-SM36EA4",
+          "label": "Model คอยล์เย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. MODEL field."
+        },
+        "btu": {
+          "value": 36167,
+          "label": "ความจุความเย็น",
+          "unit": "BTU/h",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Cooling capacity (BTU/h) field."
+        },
+        "seer": {
+          "value": 22.28,
+          "label": "SEER",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. SEER (Btu/h/W) field."
+        },
+        "ratedCapacityKw": {
+          "value": 10.6,
+          "label": "ความสามารถทำความเย็นตามพิกัด",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Cooling : Capacity Rated (kW), rated value."
+        },
+        "capacityRangeKw": {
+          "value": "4.0–10.6",
+          "label": "ช่วงความสามารถทำความเย็นตามกำลัง",
+          "unit": "kW",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Cooling : Capacity Rated (kW), minimum-to-maximum range."
+        },
+        "inverter": {
+          "value": true,
+          "label": "ประเภทระบบ",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. PLY product classification identifies Inverter Series."
+        },
+        "series": {
+          "value": "PLY-SERIES",
+          "label": "ซีรีส์",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Product-family heading."
+        },
+        "refrigerant": {
+          "value": "R32",
+          "label": "สารทำความเย็น",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Refrigerant field."
+        },
+        "indoorDimReported": {
+          "value": "298 × 840 × 840 mm (H × W × D)",
+          "label": "ขนาดคอยล์เย็นตามต้นฉบับ (ตรวจลำดับแกน)",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Dimensions Indoor (H x W x D) field; original order retained."
+        },
+        "indoorHeight": {
+          "value": 298,
+          "label": "ความสูงตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Dimensions Indoor (H x W x D), first value: height."
+        },
+        "indoorWidth": {
+          "value": 840,
+          "label": "ความกว้างตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Dimensions Indoor (H x W x D), second value: width."
+        },
+        "indoorDepth": {
+          "value": 840,
+          "label": "ความลึกตัวเครื่องคอยล์เย็น",
+          "unit": "mm",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Dimensions Indoor (H x W x D), third value: depth."
+        },
+        "indoorWeight": {
+          "value": 27,
+          "label": "น้ำหนักคอยล์เย็น",
+          "unit": "kg",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Weight Indoor field."
+        },
+        "pipeLiquid": {
+          "value": "9.52 mm (3/8 in)",
+          "label": "ขนาดท่อ Liquid",
+          "unit": "นิ้ว",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Piping Size : Liquid (mm.in) field; metric and inch values retained."
+        },
+        "pipeGas": {
+          "value": "15.88 mm (5/8 in)",
+          "label": "ขนาดท่อ Gas",
+          "unit": "นิ้ว",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Piping Size : Gas (mm.in) field; metric and inch values retained."
+        },
+        "maxPipe": {
+          "value": 50,
+          "label": "ความยาวท่อสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Piping Size : Max.Length / Max.Height (m), first value: maximum length."
+        },
+        "maxLift": {
+          "value": 30,
+          "label": "ระดับต่างสูงสุด",
+          "unit": "m",
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SERIES product specification pages for exact PLY-SM36EA4; values cross-checked against both 1-phase and 3-phase variant pages. The website SKU omits the phase variant, so phase-dependent values are withheld. Piping Size : Max.Length / Max.Height (m), second value: maximum height difference."
+        },
+        "interconnectCable": {
+          "value": "สายระหว่างคอยล์เย็น–คอยล์ร้อน 3 เส้น × 1.5 mm² (มีขั้ว S1/S2/S3) และสายดินแยก 1 เส้น × ไม่น้อยกว่า 1.5 mm²; ความยาวสูงสุด 45 m (ถ้าใช้ 2.5 mm² สูงสุด 50 m; หากใช้ 2.5 mm² และแยก S3 สูงสุด 80 m)",
+          "label": "สายเชื่อมระหว่างคอยล์เย็นและคอยล์ร้อน",
+          "unit": null,
+          "status": "MANUFACTURER_DOCUMENT_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 92,
+          "locator": "Official Mitsubishi Electric PLY-SM installation manual, printed p. 9; its model-scope list includes PLY-SM36EA. The indoor/outdoor interconnection table specifies three 1.5 mm² conductors with polarity plus a separate earth conductor; outdoor mains wiring varies by outdoor-unit model and remains unstated."
+        },
+        "outdoorModel": {
+          "value": "PUY-SM36VKA4",
+          "label": "Model คอยล์ร้อน",
+          "unit": null,
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 165,
+          "locator": "T 7931-2119/2134; PDF page 80, entry 364; licensed exact pair PLY-SM36EA4-TH.TH/PUY-SM36VKA4-TH.TH; condenser-unit model code and exact indoor/outdoor pairing"
+        },
+        "ratedCapacityW": {
+          "value": 10600,
+          "label": "ความสามารถทำความเย็นพิกัดตามทะเบียน มอก.",
+          "unit": "W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 165,
+          "locator": "T 7931-2119/2134; PDF page 80, entry 364; licensed exact pair PLY-SM36EA4-TH.TH/PUY-SM36VKA4-TH.TH; net rated cooling capacity in the license record"
+        },
+        "tisiEnergyRatio": {
+          "value": 3.9,
+          "label": "อัตราส่วนประสิทธิภาพพลังงานตามทะเบียน มอก.",
+          "unit": "W/W",
+          "status": "REGULATORY_RECORD_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 165,
+          "locator": "T 7931-2119/2134; PDF page 80, entry 364; licensed exact pair PLY-SM36EA4-TH.TH/PUY-SM36VKA4-TH.TH; energy efficiency ratio in the license record"
+        },
+        "power": {
+          "value": "220 V / 1 Phase / 50 Hz",
+          "label": "แหล่งจ่ายไฟตามเอกสารผู้ผลิต",
+          "unit": null,
+          "status": "MANUFACTURER_PAGE_REVIEWED",
+          "exactModel": true,
+          "sourceIndex": 98,
+          "locator": "Mitsubishi Electric Thailand official PLY-SM36EA4 1-phase product page; paired outdoor model independently verified by T 7931-2119/2134; PDF page 80, entry 364; licensed exact pair PLY-SM36EA4-TH.TH/PUY-SM36VKA4-TH.TH; Power Supply field: 1ph, 220V, 50Hz"
         }
       }
     }

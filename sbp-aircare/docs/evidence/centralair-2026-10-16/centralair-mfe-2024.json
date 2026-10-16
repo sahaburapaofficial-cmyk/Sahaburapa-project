@@ -1,0 +1,14 @@
+{
+  "captureType": "WEB_RENDERED_PDF_TEXT_TRANSCRIPTION",
+  "capturedAt": "2026-10-16",
+  "documentTitle": "Central Air MFE Series · Wall Type Fixed Speed · 2024 brochure",
+  "sourceUrl": "https://goldenair.co.th/wp-content/uploads/2025/03/CentralAir-MFE-Series-Brochure.pdf",
+  "hostNote": "OEM-branded Central Air brochure copy hosted by GoldenAir; the source PDF binary is not retained. SHA-256 in the evidence index covers this structured transcription, not the remote PDF bytes.",
+  "locator": "PDF page 2, exact indoor/outdoor model columns CFW-MFE09/CCS-MFE09 through CFW-MFE25/CCS-MFE25; specification rows for Cooling Capacity, Power Consumption, SEER, current, supply, refrigerant, dimensions, net/gross weight and pipe sizes.",
+  "models": [
+    {"indoorModel":"CFW-MFE09","outdoorModel":"CCS-MFE09","btu":9300,"ratedCapacityW":2700,"ratedInputW":720,"seer":13.77,"ratedCurrentA":3.3,"power":"220 V / 1Ph / 50 Hz","refrigerant":"R32","indoorDimWHdMm":[835,295,208],"indoorWeightNetKg":9.3,"outdoorDimWHdMm":[765,555,303],"outdoorWeightNetKg":26,"pipeLiquidMm":6.35,"pipeGasMm":9.52},
+    {"indoorModel":"CFW-MFE13","outdoorModel":"CCS-MFE13","btu":12300,"ratedCapacityW":3600,"ratedInputW":950,"seer":13.77,"ratedCurrentA":4.4,"power":"220 V / 1Ph / 50 Hz","refrigerant":"R32","indoorDimWHdMm":[835,295,208],"indoorWeightNetKg":9.4,"outdoorDimWHdMm":[887,610,337],"outdoorWeightNetKg":31.5,"pipeLiquidMm":6.35,"pipeGasMm":12.7},
+    {"indoorModel":"CFW-MFE18","outdoorModel":"CCS-MFE18","btu":18200,"ratedCapacityW":5300,"ratedInputW":1405,"seer":13.77,"ratedCurrentA":6.4,"power":"220 V / 1Ph / 50 Hz","refrigerant":"R32","indoorDimWHdMm":[969,320,241],"indoorWeightNetKg":12.3,"outdoorDimWHdMm":[805,554,330],"outdoorWeightNetKg":39.9,"pipeLiquidMm":6.35,"pipeGasMm":12.7},
+    {"indoorModel":"CFW-MFE25","outdoorModel":"CCS-MFE25","btu":25000,"ratedCapacityW":7300,"ratedInputW":1980,"seer":13.41,"ratedCurrentA":9,"power":"220 V / 1Ph / 50 Hz","refrigerant":"R32","indoorDimWHdMm":[1083,336,244],"indoorWeightNetKg":14.1,"outdoorDimWHdMm":[890,673,342],"outdoorWeightNetKg":50.7,"pipeLiquidMm":9.52,"pipeGasMm":15.88}
+  ]
+}

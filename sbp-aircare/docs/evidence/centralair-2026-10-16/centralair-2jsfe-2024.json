@@ -1,0 +1,14 @@
+{
+  "captureType": "WEB_RENDERED_PDF_TEXT_TRANSCRIPTION",
+  "capturedAt": "2026-10-16",
+  "documentTitle": "Central Air 2JSFE Series · Wall Type Fixed Speed · 2024 catalogue",
+  "sourceUrl": "https://meedeeair.com/wp-content/uploads/2024/04/2024-Catalog_CFW-2JSFE.pdf",
+  "hostNote": "OEM-branded Central Air catalogue copy hosted by MeedeeAir; the source PDF binary is not retained. SHA-256 in the evidence index covers this structured transcription, not the remote PDF bytes.",
+  "locator": "PDF page 2, exact indoor/outdoor model columns CFW-2JSFE09/CCS-2JSFE09 through CFW-2JSFE25/CCS-2JSFE25; specification rows for capacity, input, SEER, current, supply, refrigerant, dimensions, weights and pipe sizes.",
+  "models": [
+    {"indoorModel":"CFW-2JSFE09","outdoorModel":"CCS-2JSFE09","btu":9600,"ratedCapacityW":2600,"ratedInputW":720,"seer":13.44,"ratedCurrentA":3.4,"power":"220 V / 1Ph / 50 Hz","inverter":false,"refrigerant":"R32","indoorDimWHdMm":[792,292,201],"indoorWeightNetKg":8,"outdoorDimWHdMm":[730,545,285],"outdoorWeightNetKg":25,"pipeLiquidMm":6.35,"pipeGasMm":9.52},
+    {"indoorModel":"CFW-2JSFE13","outdoorModel":"CCS-2JSFE13","btu":12300,"ratedCapacityW":3500,"ratedInputW":940,"seer":13.82,"ratedCurrentA":4.4,"power":"220 V / 1Ph / 50 Hz","inverter":false,"refrigerant":"R32","indoorDimWHdMm":[881,294,194],"indoorWeightNetKg":9.5,"outdoorDimWHdMm":[730,545,285],"outdoorWeightNetKg":28,"pipeLiquidMm":6.35,"pipeGasMm":12.7},
+    {"indoorModel":"CFW-2JSFE18","outdoorModel":"CCS-2JSFE18","btu":18300,"ratedCapacityW":5200,"ratedInputW":1410,"seer":13.51,"ratedCurrentA":6.8,"power":"220 V / 1Ph / 50 Hz","inverter":false,"refrigerant":"R32","indoorDimWHdMm":[1132,330,232],"indoorWeightNetKg":14.5,"outdoorDimWHdMm":[800,545,315],"outdoorWeightNetKg":34,"pipeLiquidMm":6.35,"pipeGasMm":12.7},
+    {"indoorModel":"CFW-2JSFE25","outdoorModel":"CCS-2JSFE25","btu":25100,"ratedCapacityW":7000,"ratedInputW":1890,"seer":13.55,"ratedCurrentA":9,"power":"220 V / 1Ph / 50 Hz","inverter":false,"refrigerant":"R32","indoorDimWHdMm":[1132,330,232],"indoorWeightNetKg":14,"outdoorDimWHdMm":[900,700,350],"outdoorWeightNetKg":50,"pipeLiquidMm":6.35,"pipeGasMm":15.88}
+  ]
+}

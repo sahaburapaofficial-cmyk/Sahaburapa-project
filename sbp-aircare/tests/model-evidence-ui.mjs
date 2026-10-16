@@ -50,7 +50,9 @@ const verifiedExamples = [
   { model: evidence.models.find(model => model.indoorModel === 'FCFC42EV2S' && model.outdoorModel === 'RZFC42EY2S'), family: 'Daikin' },
   { model: evidence.models.find(model => model.indoorModel === 'FCF24DV2S' && model.outdoorModel === 'RZF24DV2S'), family: 'Daikin' },
   { model: evidence.models.find(model => model.indoorModel === 'PLY-SM13EA4'), family: 'Mitsubishi Electric' },
+  { model: evidence.models.find(model => model.indoorModel === 'CFW-MFE09'), family: 'Central Air' },
   { model: evidence.models.find(model => model.indoorModel === 'PLY-SM36EA4'), family: 'Mitsubishi Electric' },
+  { model: evidence.models.find(model => model.sku === 'PLY-SM36EA4/PUY-SM36VKA4'), family: 'Mitsubishi Electric' },
   { model: evidence.models.find(model => model.indoorModel === 'PLY-M36EA2'), family: 'Mitsubishi Electric' },
   { model: evidence.models.find(model => model.sku === 'PLY-M24EA/TH-SUY-M24VA-TH'), family: 'Mitsubishi Electric' },
   { model: evidence.models.find(model => model.sku === 'PLY-M36EA/TH-SUY-M36VA-TH'), family: 'Mitsubishi Electric' },
@@ -380,7 +382,7 @@ try {
         assert.match(panelText, /320\s[x×]\s1050\s[x×]\s250/);
         assert.match(panelText, /12\.7 mm/);
       } else if (['FHA13BV2S', 'FHA18BV2S', 'FHA24BV2S'].includes(verifiedExample.indoorModel)) {
-        assert.match(panelText, /ข้อมูลจากทะเบียน มอก\.ที่ตรวจตรงรุ่น/);
+        assert.match(panelText, /ข้อมูลจากเอกสารผู้ผลิตและทะเบียน มอก\.ที่ตรวจตรงรุ่น/);
         assert.match(panelText, new RegExp(verifiedExample.outdoorModel));
         assert.match(panelText, /ความสามารถทำความเย็นรวมสุทธิตามทะเบียน มอก\./);
         assert.match(panelText, /220 V \/ 1 Phase \/ 50 Hz/);
@@ -441,6 +443,13 @@ try {
         assert.match(panelText, /3 เส้น × 1\.5 mm²/);
         assert.match(panelText, /สายดินแยก 1 เส้น/);
         assert.match(panelText, /45 m/);
+        assert.match(panelText, /Pricebook/);
+      } else if (verifiedExample.sku === 'PLY-SM36EA4/PUY-SM36VKA4') {
+        assert.ok(panelText.includes('PLY-SM36EA4') && panelText.includes('PUY-SM36VKA4'), 'the exact licensed indoor/outdoor model pair should be shown');
+        assert.match(panelText, /220 V \/ 1 Phase \/ 50 Hz/);
+        assert.match(panelText, /ข้อมูลจากเอกสารผู้ผลิตและทะเบียน มอก\.ที่ตรวจตรงรุ่น/);
+        assert.match(panelText, /10,600 W/);
+        assert.match(panelText, /TISI.*T 7931-2119\/2134/);
         assert.match(panelText, /Pricebook/);
       } else if (verifiedExample.indoorModel === 'PLY-SM36EA4') {
         assert.match(panelText, /36,167/);
@@ -558,6 +567,14 @@ try {
           assert.match(panelText, /ท่อ Gas/);
           assert.match(panelText, /คอยล์เย็น/);
         }
+      } else if (family === 'Central Air') {
+        assert.ok(panelText.includes('CFW-MFE09') && panelText.includes('CCS-MFE09'), 'the exact Central Air indoor/outdoor pair should be shown');
+        assert.ok(panelText.includes('9,300 BTU/h') && panelText.includes('2,700 W'), 'manufacturer capacity and rated watts should be visible with their original units');
+        assert.ok(panelText.includes('220 V / 1Ph / 50 Hz') && panelText.includes('3.3 A') && panelText.includes('720 W'), 'source-backed power, rated current, and input should be visible');
+        assert.ok(panelText.includes('835 mm') && panelText.includes('295 mm') && panelText.includes('208 mm'), 'the exact indoor W/H/D dimensions should be visible');
+        assert.match(panelText, /Central Air MFE Series.*2024 OEM brochure copy/);
+        assert.match(panelText, /TISI.*T 7486-2117\/2134/);
+        assert.match(panelText, /structured text transcription checked/);
       } else {
         assert.match(panelText, /2\.7 kW/);
         assert.match(panelText, /2,320 kcal\/h/);

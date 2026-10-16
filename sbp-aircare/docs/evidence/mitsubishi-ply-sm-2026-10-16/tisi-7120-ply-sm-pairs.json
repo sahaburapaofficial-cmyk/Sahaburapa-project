@@ -1,0 +1,63 @@
+{
+  "captureType": "structured-transcription-of-official-tisi-license",
+  "license": "T 7120-2108/2134",
+  "licensee": "Mitsubishi Electric Consumer Products (Thailand) Co., Ltd.",
+  "issuedOrRevised": "2024-09-02",
+  "pdfUrl": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977120_2108_2134.pdf",
+  "reviewedAt": "2026-10-16",
+  "sourcePdfSha256": "62f7e22ca63b17bbbceb12943fb69feFD68b8e3fc209bf58bbb0e920000ca0e5",
+  "models": [
+    {
+      "entry": 278,
+      "pdfPage": 59,
+      "indoorModel": "PLY-SM13EA4",
+      "indoorModelAsLicensed": "PLY-SM13EA4-TH.TH",
+      "outdoorModel": "SUY-SM13VA4",
+      "outdoorModelAsLicensed": "SUY-SM13VA4-TH.TH",
+      "companySkuBeforeCorrection": "PLY-SM13EA/TH-SUY-SM13VA-TH",
+      "catalogSkuAfterCorrection": "PLY-SM13EA4/SUY-SM13VA4",
+      "phase": 1,
+      "ratedCoolingCapacityW": 4100,
+      "tisiEnergyRatio": 5.00
+    },
+    {
+      "entry": 282,
+      "pdfPage": 59,
+      "indoorModel": "PLY-SM18EA4",
+      "indoorModelAsLicensed": "PLY-SM18EA4-TH.TH",
+      "outdoorModel": "SUY-SM18VA4",
+      "outdoorModelAsLicensed": "SUY-SM18VA4-TH.TH",
+      "companySkuBeforeCorrection": "PLY-SM18EA/TH-SUY-SM18VA-TH",
+      "catalogSkuAfterCorrection": "PLY-SM18EA4/SUY-SM18VA4",
+      "phase": 1,
+      "ratedCoolingCapacityW": 5300,
+      "tisiEnergyRatio": 4.86
+    },
+    {
+      "entry": 286,
+      "pdfPage": 60,
+      "indoorModel": "PLY-SM24EA4",
+      "indoorModelAsLicensed": "PLY-SM24EA4-TH.TH",
+      "outdoorModel": "SUY-SM24VA4",
+      "outdoorModelAsLicensed": "SUY-SM24VA4-TH.TH",
+      "companySkuBeforeCorrection": "PLY-SM24EA/TH-SUY-SM24VA-TH",
+      "catalogSkuAfterCorrection": "PLY-SM24EA4/SUY-SM24VA4",
+      "phase": 1,
+      "ratedCoolingCapacityW": 7100,
+      "tisiEnergyRatio": 3.92
+    },
+    {
+      "entry": 290,
+      "pdfPage": 61,
+      "indoorModel": "PLY-SM30EA4",
+      "indoorModelAsLicensed": "PLY-SM30EA4-TH.TH",
+      "outdoorModel": "SUY-SM30VA4",
+      "outdoorModelAsLicensed": "SUY-SM30VA4-TH.TH",
+      "companySkuBeforeCorrection": "PLY-SM30EA/TH-SUY-SM30VA-TH",
+      "catalogSkuAfterCorrection": "PLY-SM30EA4/SUY-SM30VA4",
+      "phase": 1,
+      "ratedCoolingCapacityW": 8800,
+      "tisiEnergyRatio": 3.81
+    }
+  ]
+}

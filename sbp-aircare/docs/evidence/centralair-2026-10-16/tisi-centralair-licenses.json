@@ -1,0 +1,32 @@
+{
+  "captureType": "WEB_RENDERED_TISI_LICENSE_TEXT_TRANSCRIPTION",
+  "capturedAt": "2026-10-16",
+  "sourceUrls": {
+    "mfe": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977486_2117_2134.pdf",
+    "wall": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977020_4_1529.pdf"
+  },
+  "hostNote": "Structured transcription of the official TISI license pages as rendered for review. SHA-256 in the evidence index covers this transcription, not the remote PDF bytes.",
+  "mfeLicense": {
+    "license": "T 7486-2117/2134",
+    "licensee": "บริษัท ไมเดีย รีฟริจเจอเรชั่น อีควิปเมนท์ (ไทยแลนด์) จำกัด",
+    "models": [
+      {"indoorModel":"CFW-MFE09","outdoorModel":"CCS-MFE09","phase":1,"ratedCapacityW":2700,"tisiEnergyRatio":3.8,"locator":"PDF pages 2–3, entries 3 and 5"},
+      {"indoorModel":"CFW-MFE13","outdoorModel":"CCS-MFE13","phase":1,"ratedCapacityW":3600,"tisiEnergyRatio":3.8,"locator":"PDF page 3, entry 7"},
+      {"indoorModel":"CFW-MFE18","outdoorModel":"CCS-MFE18","phase":1,"ratedCapacityW":5300,"tisiEnergyRatio":3.8,"locator":"PDF page 3, entry 9"},
+      {"indoorModel":"CFW-MFE25","outdoorModel":"CCS-MFE25","phase":1,"ratedCapacityW":7300,"tisiEnergyRatio":3.7,"locator":"PDF page 4, entry 11"}
+    ]
+  },
+  "wallLicense": {
+    "license": "T 7020-4/1529",
+    "licensee": "บริษัท เอ็กซ์ตรอน แอร์-คอนดิชั่นนิ่ง แมนูแฟคเจอ (ไทยแลนด์) จำกัด",
+    "models": [
+      {"indoorModel":"CFW-IVJS09-1","outdoorModel":"CCS-IVJS09-1","phase":1,"voltage":"220–240 V","frequencyHz":50,"ratedCapacityW":2700,"ratedInputW":820,"locator":"PDF page 33, entry 129"},
+      {"indoorModel":"CFW-IVJS13-1","outdoorModel":"CCS-IVJS13-1","phase":1,"voltage":"220–240 V","frequencyHz":50,"ratedCapacityW":3500,"ratedInputW":1150,"locator":"PDF page 33, entry 130"},
+      {"indoorModel":"CFW-IVJS18-1","outdoorModel":"CCS-IVJS18-1","phase":1,"voltage":"220–240 V","frequencyHz":50,"ratedCapacityW":5300,"ratedInputW":1700,"locator":"PDF page 33, entry 131"},
+      {"indoorModel":"CFW-IVJS25-1","outdoorModel":"CCS-IVJS25-1","phase":1,"voltage":"220–240 V","frequencyHz":50,"ratedCapacityW":7000,"ratedInputW":2200,"locator":"PDF page 33, entry 132"},
+      {"indoorModel":"CFW-2JSFE13","outdoorModel":"CCS-2JSFE13","phase":1,"voltage":"220–240 V","frequencyHz":50,"ratedCapacityW":3500,"ratedInputW":1600,"locator":"PDF page 47, entry 178"},
+      {"indoorModel":"CFW-2JSFE18","outdoorModel":"CCS-2JSFE18","phase":1,"voltage":"220–240 V","frequencyHz":50,"ratedCapacityW":5200,"ratedInputW":2100,"locator":"PDF page 47, entry 179"},
+      {"indoorModel":"CFW-2JSFE25","outdoorModel":"CCS-2JSFE25","phase":1,"voltage":"220–240 V","frequencyHz":50,"ratedCapacityW":7000,"ratedInputW":2700,"locator":"PDF page 47, entry 180"}
+    ]
+  }
+}

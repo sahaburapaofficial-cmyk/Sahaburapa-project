@@ -1,0 +1,24 @@
+{
+  "captureType": "structured-transcription-of-official-tisi-license",
+  "license": "T 7931-2119/2134",
+  "licensee": "Mitsubishi Electric Consumer Products (Thailand) Co., Ltd.",
+  "issuedOrRevised": "2024-09-10",
+  "pdfUrl": "https://appdb.tisi.go.th/tis_dev/p4_license_report/file/%E0%B8%977931_2119_2134.pdf",
+  "reviewedAt": "2026-10-16",
+  "sourcePdfSha256": "81414bc8667724f07531c98e1ea9546cac83e5115c3b04438c0a25730ed6b440",
+  "models": [
+    {
+      "entry": 364,
+      "pdfPage": 80,
+      "indoorModel": "PLY-SM36EA4",
+      "indoorModelAsLicensed": "PLY-SM36EA4-TH.TH",
+      "outdoorModel": "PUY-SM36VKA4",
+      "outdoorModelAsLicensed": "PUY-SM36VKA4-TH.TH",
+      "companySkuBeforeCorrection": "PLY-SM36EA/TH-SUY-SM36VA-TH",
+      "catalogSkuAfterCorrection": "PLY-SM36EA4/PUY-SM36VKA4",
+      "phase": 1,
+      "ratedCoolingCapacityW": 10600,
+      "tisiEnergyRatio": 3.90
+    }
+  ]
+}
