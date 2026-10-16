@@ -197,7 +197,17 @@ export function queryCatalog(f) {
   else if (f.sort === 'btu') list.sort((a, b) => catalogBtu(a.skus[0]) - catalogBtu(b.skus[0]));
   else list.sort((a, b) => TYPES.findIndex(t => t.id === a.type) - TYPES.findIndex(t => t.id === b.type) || BRAND_BY_ID[b.brand].n - BRAND_BY_ID[a.brand].n || catalogBtu(a.skus[0]) - catalogBtu(b.skus[0]));
   const skuTotal = list.reduce((n, m) => n + m.skus.filter(s => skuMatches(s, f)).length, 0);
-  return { list, skuTotal, visibleSkus: m => m.skus.filter(s => skuMatches(s, f)) };
+  return {
+    list,
+    skuTotal,
+    visibleSkus: m => {
+      const matches = m.skus.filter(s => skuMatches(s, f));
+      if (!f.q) return matches;
+      const query = f.q.toLowerCase().replace(/[ ,\s\-\/]/g, '');
+      const exactSkuMatches = matches.filter(s => String(s.sku || '').toLowerCase().replace(/[ ,\s\-\/]/g, '').includes(query));
+      return exactSkuMatches.length ? exactSkuMatches : matches;
+    },
+  };
 }
 export function facetCounts(f) {
   const out = { type: {}, brand: {}, btu: {}, price: {}, inverter: {} };

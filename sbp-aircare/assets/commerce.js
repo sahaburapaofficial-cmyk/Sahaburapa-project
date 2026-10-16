@@ -312,18 +312,26 @@ export function mountCart({ buttons = '[data-cart-btn]' } = {}) {
 /* =========================================================
    Product detail: specs + install package + add-ons + live total
    ========================================================= */
-const OEM_FIELD_ORDER = ['indoorModel', 'outdoorModel', 'btu', 'capacityRangeBtu', 'series', 'system', 'inverter', 'refrigerant', 'seer', 'power', 'ratedCurrentA', 'ratedInputW', 'maxInputW', 'pipePair', 'pipeLiquid', 'pipeGas', 'minPipe', 'maxPipe', 'maxLift', 'indoorDimReported', 'outdoorDimReported', 'indoorWidth', 'indoorHeight', 'indoorDepth', 'panelWidth', 'panelHeight', 'panelDepth', 'indoorWeight', 'outdoorWeight', 'compressor', 'indoorAirflowCfm', 'airflow', 'indoorNoiseLevels', 'outdoorNoise', 'refrigerantCharge', 'drainConnection', 'features', 'wifi'];
+const OEM_FIELD_ORDER = ['indoorModel', 'outdoorModel', 'btu', 'ratedCapacityW', 'capacityRangeBtu', 'ratedCapacityKw', 'capacityRangeKw', 'series', 'color', 'system', 'inverter', 'refrigerant', 'seer', 'tisiEnergyRatio', 'energyLabelStars', 'power', 'ratedCurrentA', 'maxCurrentA', 'ratedInputW', 'maxInputW', 'interconnectCable', 'powerCord', 'powerNote', 'pipePair', 'pipeLiquid', 'pipeGas', 'minPipe', 'maxPipe', 'maxPipeEquivalentLength', 'maxLift', 'indoorDimReported', 'outdoorDimReported', 'indoorWidth', 'indoorHeight', 'indoorDepth', 'panelWidth', 'panelHeight', 'panelDepth', 'indoorWeight', 'outdoorWeight', 'compressor', 'indoorAirflowCfm', 'outdoorAirflowCfm', 'airflow', 'indoorNoiseLevels', 'outdoorNoise', 'refrigerantCharge', 'chargeFreePipeLengthM', 'additionalRefrigerantChargeRate', 'drainConnection', 'suitableArea', 'features', 'wifi'];
 function manufacturerEvidencePanel(s) {
   const evidence = s.manufacturerEvidence, fields = evidence?.fields || {}, refs = s.retailerReferences || [];
   if (!Object.keys(fields).length && !refs.length) return null;
+  const sources = s.manufacturerSources || [];
+  const authorities = new Set(Object.values(fields).map(field => sources[field.sourceIndex]?.authorityType || 'MANUFACTURER'));
+  const sourceDescription = authorities.has('THAI_REGULATORY_BODY')
+    ? (authorities.has('MANUFACTURER') ? 'เอกสารผู้ผลิตและทะเบียน มอก.' : 'ทะเบียน มอก.')
+    : 'เอกสารผู้ผลิต';
   const entries = Object.entries(fields).sort(([a], [b]) => {
     const ia = OEM_FIELD_ORDER.indexOf(a), ib = OEM_FIELD_ORDER.indexOf(b);
     return (ia < 0 ? OEM_FIELD_ORDER.length : ia) - (ib < 0 ? OEM_FIELD_ORDER.length : ib);
   });
   const details = h('details', { class: 's-det s-oem' });
-  details.append(h('summary', {}, Object.keys(fields).length ? `ข้อมูลจากเอกสารผู้ผลิตที่ตรวจตรงรุ่น · ${Object.keys(fields).length} รายการ` : 'แหล่งอ้างอิงรายการสินค้ารหัสตรงรุ่น'));
+  details.append(h('summary', {}, Object.keys(fields).length ? `ข้อมูลจาก${sourceDescription}ที่ตรวจตรงรุ่น · ${Object.keys(fields).length} รายการ` : 'แหล่งอ้างอิงรายการสินค้ารหัสตรงรุ่น'));
   if (entries.length) {
-    details.append(h('p', { class: 's-note' }, 'แสดงเฉพาะช่องที่ตรวจรหัสรุ่นและแหล่งข้อมูลได้ · ราคาเครื่องและอัตราติดตั้งยังยึดข้อมูลบริษัท'));
+    details.append(h('p', { class: 's-note' }, 'แสดงตำแหน่งและแหล่งข้อมูลที่ตรวจได้ด้านล่าง · ราคาเครื่องและอัตราติดตั้งยังยึดข้อมูลบริษัท (Pricebook)'));
+    for (const warning of evidence.dataWarnings || []) {
+      details.append(h('p', { class: 's-oem-notice' }, `${warning.label}: ${warning.text}`));
+    }
     const value = (key, field) => {
       if (typeof field.value === 'boolean') return key === 'inverter' ? (field.value ? 'Inverter' : 'Fixed speed') : field.value ? 'มี' : 'ไม่มี';
       let result = typeof field.value === 'number' ? field.value.toLocaleString('th-TH') : String(field.value);
